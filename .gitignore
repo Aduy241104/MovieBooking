@@ -61,4 +61,8 @@ spring.log
 *.sqlite
 *.mv.db
 
+# Spring Boot configuration
+src/main/resources/application.properties
+src/main/resources/application.yml
+
 
