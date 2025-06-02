@@ -1,19 +1,30 @@
 .wrapper {
     height: 350px;
     width: 100%;
+    overflow: hidden;
 }
 
 .poster {
     height: 80%;
-    overflow: hidden;
+    width: 100%;
+    overflow: hidden  !important;
+    box-sizing: border-box;
     img{
         height: 100%;
-        object-fit: cover !important;
-        transition: transform 0.5s ease-in-out;
+        object-fit: cover;
+        transition: transform 0.3s ease-in-out;
+        width: 100%;
         cursor: pointer;
+        overflow: hidden;
+        
 
         &:hover {
-            transform: scale(1.2);
+            transform: scale(1.15);
         }
     }
+}
+
+.genre,
+.rating{
+    font-size: 14px;
 }

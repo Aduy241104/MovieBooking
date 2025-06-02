@@ -46,7 +46,7 @@ function VerifyOtpForm({ registerRequest }) {
     };
 
     return (
-        <form className="text-dark p-4 rounded shadow-sm" onSubmit={ handleSubmitOtp }>
+        <form className="text-light p-4 rounded shadow-sm" onSubmit={ handleSubmitOtp }>
             <ErrorNotification>{ errorMessage }</ErrorNotification>
             <h4 className="text-center mb-3">Nhập mã OTP</h4>
             <p className="text-center text-muted">
