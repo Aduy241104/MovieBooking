@@ -1,0 +1,19 @@
+.wrapper {
+    height: 350px;
+    width: 100%;
+}
+
+.poster {
+    height: 80%;
+    overflow: hidden;
+    img{
+        height: 100%;
+        object-fit: cover !important;
+        transition: transform 0.5s ease-in-out;
+        cursor: pointer;
+
+        &:hover {
+            transform: scale(1.2);
+        }
+    }
+}
