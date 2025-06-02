@@ -1,0 +1,80 @@
+import { useState } from "react";
+import { veiryfyOtpAPI } from "../service/AuthService";
+import ErrorNotification from "../components/ErrorNotification/ErrorNotification";
+
+// {
+//     "status": 401,
+//         "error": "Unauthorized",
+//             "message": "OTP không hợp lệ hoặc đã hết hạn.",
+//                 "path": "/api/auth/verify-otp"
+// }
+
+function VerifyOtpForm({ registerRequest }) {
+    const [otp, setOtp] = useState("");
+    const [errorMessage, setErrorMesage] = useState("");
+    const [isLoading, setLoading] = useState(false);
+
+    const handleChangeOtp = (e) => {
+        setErrorMesage("");
+        const { value } = e.target;
+        if (/^\d{0,6}$/.test(value)) {
+            setOtp(value);
+        }
+    };
+
+
+    const handleSubmitOtp = async (e) => {
+        e.preventDefault();
+        if (otp.length === 6) {
+            setLoading(true);
+            const payload = {
+                verifyOtp: otp,
+                registerRequest: registerRequest
+            };
+            console.log("🚀 Xác thực OTP với:", payload);
+
+            const response = await veiryfyOtpAPI(payload);
+            if (!response.success) {
+                setErrorMesage(response.message);
+            } else {
+                alert("create success")
+            }
+            setLoading(false);
+        } else {
+            alert("Vui lòng nhập đủ 6 số OTP");
+        }
+    };
+
+    return (
+        <form className="text-dark p-4 rounded shadow-sm" onSubmit={ handleSubmitOtp }>
+            <ErrorNotification>{ errorMessage }</ErrorNotification>
+            <h4 className="text-center mb-3">Nhập mã OTP</h4>
+            <p className="text-center text-muted">
+                Mã xác thực đã gửi đến email <strong>{ registerRequest.email }</strong>
+            </p>
+
+            <div className="d-flex justify-content-center mb-3">
+                <input
+                    type="text"
+                    className="form-control text-center fs-4"
+                    maxLength={ 6 }
+                    value={ otp }
+                    onChange={ handleChangeOtp }
+                    placeholder="______"
+                    style={ { letterSpacing: "10px", maxWidth: "200px" } }
+                    required
+                />
+            </div>
+
+            <button type="submit" className="btn btn-gardient w-100 mt-4 rounded-4 text-light">
+                { (isLoading) ? (
+                    <div className="spinner-border text-light" role="status" style={ { height: '25px', width: '25px' } }>
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                ) : "Xac minh" }
+            </button>
+        </form>
+    );
+}
+
+export default VerifyOtpForm;

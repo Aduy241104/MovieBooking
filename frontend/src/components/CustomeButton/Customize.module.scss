@@ -1,0 +1,45 @@
+.wrapper {
+    padding: 4px 16px;
+    box-sizing: border-box;
+    border: none;
+
+    +.wrapper {
+        margin-left: 12px;
+    }
+}
+
+.primary {
+    background-color: var(--red);
+    color: white;
+    font-weight: 600;
+
+    &:hover {
+        background-color: rgb(243, 20, 20);
+    }
+}
+
+
+.outLine {
+    border: 1px solid white;
+    color: white;
+    background-color: transparent;
+    font-weight: 600;
+
+    &:hover {
+        background-color: rgb(255, 255, 255);
+        color: black;
+    }
+}
+
+.small {
+    height: 36px;
+    text-align: center;
+}
+
+.large {
+    height: 46px;
+}
+
+.rounded {
+    border-radius: 8px;
+}

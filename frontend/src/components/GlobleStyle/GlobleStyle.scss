@@ -1,0 +1,87 @@
+:root {
+    --default-layout-header-height: 60px;
+    --default-layout-width: 1150px;
+    --white: #fff;
+    --primary: rgba(255, 59, 92, 1);
+    --red: #E30813;
+    --black: #000;
+    --smoke-gray: rgb(175, 171, 171);
+
+
+    --font: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
+    --fontSecond: 'SofiaPro', sans-serif;
+    --default-layout-horizontal-spacer: 24px;
+}
+
+body {
+    font-family: var(--font);
+}
+
+
+h1,
+h2,
+h3,
+h4,
+p {
+    padding: 0;
+    margin: 0;
+}
+
+
+@font-face {
+    font-family: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
+    src: url("/assets/fonts/nf-icon-v1-93.woff");
+}
+
+.text-red {
+    color: var(--red);
+}
+
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.mySwiper {
+    position: relative;
+    /* cần để mũi tên định vị đúng */
+    z-index: 100;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+    color: var(--red);
+    // background-color: rgb(249, 249, 249);
+    // padding: 3px 23px;
+    // border-radius: 100%;
+    
+  
+}
+
+.swiper-slide {
+    font-size: 18px;
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.swiper-slide img {
+    display: block;
+    width: 100%;
+    object-fit: cover;
+}
+
+.line-clamp {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
