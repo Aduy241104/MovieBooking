@@ -1,68 +1,51 @@
-# ========================
-# Node.js / React
-# ========================
-node_modules/
-build/
-dist/
-.env
-.env.*.local
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-.pnp/
-.pnp.js
+# =========================
+# FRONTEND (React - VS Code)
+# =========================
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+frontend/.env
+frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnp/
+frontend/.pnp.js
+frontend/coverage/
+frontend/.vscode/
 
-# Testing
-coverage/
+# =========================
+# BACKEND (Spring Boot - IntelliJ)
+# =========================
+backend/target/
+backend/out/
+backend/.idea/
+backend/*.iml
 
-# ========================
-# VS Code
-# ========================
+# Ignore sensitive config
+backend/src/main/resources/application.properties
+backend/src/main/resources/application.yml
+backend/src/main/resources/application-*.properties
+backend/src/main/resources/application-*.yml
+
+# Logs & compiled files
+backend/*.log
+backend/logs/
+backend/**/*.class
+backend/**/*.jar
+backend/**/*.war
+backend/**/*.ear
+backend/coverage/      # nếu có test sinh ra coverage
+backend/*.db
+backend/*.mv.db
+backend/*.sqlite
+
+# =========================
+# Global (IDE/OS/Logs)
+# =========================
 .vscode/
-
-# ========================
-# IntelliJ / IDEA
-# ========================
 .idea/
-*.iml
-*.iws
-*.ipr
-out/
-target/       # Maven hoặc Gradle build output
-!.mvn/wrapper/maven-wrapper.jar
-
-# ========================
-# OS-specific files
-# ========================
 .DS_Store
 Thumbs.db
-
-# ========================
-# Logs
-# ========================
 *.log
 logs/
-spring.log
-
-# ========================
-# Misc
-# ========================
-*.class
-*.jar
-*.war
-*.ear
-
-# ========================
-# Java / Spring Boot
-# ========================
-*.db
-*.h2.db
-*.sqlite
-*.mv.db
-
-# Spring Boot configuration
-src/main/resources/application.properties
-src/main/resources/application.yml
-
-
