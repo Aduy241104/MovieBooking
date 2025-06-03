@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { veiryfyOtpAPI } from "../service/AuthService";
-import ErrorNotification from "../components/ErrorNotification/ErrorNotification";
+import { veiryfyOtpAPI } from "../../service/AuthService";
+import ErrorNotification from "../../components/ErrorNotification/ErrorNotification";
 
 // {
 //     "status": 401,

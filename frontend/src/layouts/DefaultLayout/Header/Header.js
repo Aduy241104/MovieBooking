@@ -7,7 +7,7 @@ import Search from "../Search";
 
 const cx = classNames.bind(styles);
 
-function Header() {
+function Header({ isLogin }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -43,7 +43,7 @@ function Header() {
                                     <i className="fa-solid fa-magnifying-glass text-light"></i>
                                 </button>
                             </Search>
-                            <CustomizeButton primary small>Đăng nhập</CustomizeButton>
+                            { (isLogin) ? ("") : (<CustomizeButton primary small>Đăng nhập</CustomizeButton>) }
                         </div>
                     </div>
                 </div>

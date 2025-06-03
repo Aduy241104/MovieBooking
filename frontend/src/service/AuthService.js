@@ -1,3 +1,14 @@
+import axios from "axios";
+
+const API_URL = "http://localhost:8081/api";
+
+const axiosInstance = axios.create({
+    baseURL: API_URL, // Base URL chung cho API
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
 export const getOtpAPI = async (registerData) => {
     try {
         const response = await fetch("http://localhost:8081/api/auth/register-2", {
@@ -49,3 +60,32 @@ export const veiryfyOtpAPI = async (data) => {
         }
     }
 }
+
+// {
+//     "status": 401,
+//         "error": "Unauthorized",
+//             "message": "Invalid Password",
+//                 "path": "/api/auth/login-oauth"
+// }
+
+
+export const loginOAuth = async (loginData) => {
+    try {
+        const response = await axiosInstance.post("/auth/login-oauth", loginData);
+        return response.data; // Thành công: trả dữ liệu
+    } catch (error) {
+        // Trường hợp server trả về lỗi HTTP như 401, 400...
+        if (error.response) {
+            console.log(error.response);
+            throw new Error("Tài khoản hoặc mật khẩu không đúng");
+        }
+
+        // Trường hợp lỗi mạng, không phản hồi từ server
+        if (error.request) {
+            throw new Error("Không thể kết nối đến máy chủ.");
+        }
+
+        // Trường hợp lỗi khác
+        throw new Error("Đã xảy ra lỗi không xác định.");
+    }
+};

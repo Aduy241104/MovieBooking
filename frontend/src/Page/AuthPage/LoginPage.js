@@ -1,18 +1,22 @@
 import { Link, useNavigate } from "react-router-dom";
-import AuhenticationLayout from "../layouts/AuthenticationLayout";
-import { useState } from "react";
-import ErrorNotification from "../components/ErrorNotification/ErrorNotification";
+import AuhenticationLayout from "../../layouts/AuthenticationLayout";
+import { useContext, useState } from "react";
+import ErrorNotification from "../../components/ErrorNotification/ErrorNotification";
+import { AuthContext } from "../../context/AuthContext";
+import { loginOAuth } from "../../service/AuthService";
 
 function LoginPage() {
+    const { login } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const [showLoginFail, setShowLoginFail] = useState("");
+    const [isLoading, setLoading] = useState(false);
+
     const [loginData, setLoginData] = useState({
         username: "",
         password: ""
     });
 
-    const [showLoginFail, setShowLoginFail] = useState("");
-    const [isLoading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
 
     const handleChangeLoginData = (e) => {
         const { name, value } = e.target;
@@ -29,22 +33,17 @@ function LoginPage() {
     const handleFetch = async () => {
         setLoading(true);
         try {
-            const response = await fetch("http://localhost:8081/api/auth/login-oauth", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginData)
-            })
-
-            const res = await response.json();
-
-            if (!res.result.authenticated) {
-                setShowLoginFail("Tài khoản hoặc mật khẩu không đúng.");
-            } else {
-                console.log(res);
+            const res = await loginOAuth(loginData);
+            console.log(res);
+            if (res.result.account && res.result.token) {
+                login(res.result.account, res.result.token);
                 navigate('/home');
+            } else {
+                setShowLoginFail("Đăng nhập không thành công, vui lòng thử lại.");
             }
+
         } catch (error) {
-            setShowLoginFail("Không thế kết nối đến máy chủ. Vui lòng thử lại sau.");
+            setShowLoginFail(error.message);
         } finally {
             setLoading(false);
         }
@@ -94,7 +93,11 @@ function LoginPage() {
                     <div className="invalid-feedback">Vui lòng nhập password</div>
                 </div>
                 <div className="d-flex justify-content-between register">
-                    <p>Bạn chưa có tài khoản? <strong className="text-danger">Đăng ký</strong></p>
+                    <p>Bạn chưa có tài khoản?
+                        <strong className="text-danger cursor-pointer" onClick={ () => navigate('/register') }>
+                            Đăng ký
+                        </strong>
+                    </p>
                     <Link className="mb-1 d-block">Quên mật khẩu</Link>
                 </div>
                 <button type="submit" className="btn btn-gardient w-100 mt-4 rounded-4 text-light">
