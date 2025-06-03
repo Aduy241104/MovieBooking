@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "PAYMENT_METHOD")
+@Table(name = "payment_method")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,15 +14,15 @@ import lombok.*;
 public class PaymentMethod {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PAYMENT_METHOD_ID")
+    @Column(name = "payment_method_id")
     private Long id;
 
-    @Column(name = "METHOD_NAME")
+    @Column(name = "method_name")
     private String name;
 
-    @Column(name = "DESCRIPTION")
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "IS_ACTIVE")
+    @Column(name = "is_active")
     private Boolean active;
 }

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "TYPE")
+@Table(name = "type")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,9 +14,9 @@ import lombok.*;
 public class Type {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TYPE_ID")
+    @Column(name = "type_id")
     private Integer id;
 
-    @Column(name = "TYPE_NAME", unique = true, nullable = false)
+    @Column(name = "type_name", unique = true, nullable = false)
     private String name;
 }
