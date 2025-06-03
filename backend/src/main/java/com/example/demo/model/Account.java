@@ -41,9 +41,6 @@ public class Account {
     @Column(name = "identity_card")
     private String identityCard;
 
-    @Column(name = "avatar")
-    private String avatar;
-
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
