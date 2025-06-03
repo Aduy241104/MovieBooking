@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.response.ApiResponse;
-import com.example.demo.Service.AccountService;
+import com.example.demo.service.AccountService;
 import com.example.demo.model.Account;
 
 import org.springframework.web.bind.annotation.GetMapping;
