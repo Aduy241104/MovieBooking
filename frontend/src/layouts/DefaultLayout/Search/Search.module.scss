@@ -1,0 +1,26 @@
+.overlay {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 100vw;
+    height: 92vh;
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.3); // làm tối nhẹ
+    z-index: 998; // dưới Tippy nhưng trên giao diện
+}
+
+.search-result-layout {
+    max-width: 310px;
+
+    img {
+        width: 70px;
+    }
+}
+.search-input:focus-visible {
+    outline-width: 0;
+    width: 100%;
+
+}
+.genre {
+    font-size: 14px;
+}

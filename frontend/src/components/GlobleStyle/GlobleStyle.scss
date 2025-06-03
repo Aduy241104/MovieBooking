@@ -27,6 +27,10 @@ p {
     margin: 0;
 }
 
+a {
+    text-decoration: none;
+}
+
 
 @font-face {
     font-family: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
@@ -39,6 +43,11 @@ p {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.red-hover:hover {
+    color: var(--red);
+
 }
 
 .swiper {

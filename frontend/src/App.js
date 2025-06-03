@@ -18,10 +18,10 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/' element={ <LoginPage /> } />
+        <Route path='/login' element={ <LoginPage /> } />
 
         <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/home' element={ <DefaultLayout /> } />
+        <Route path='/' element={ <DefaultLayout /> } />
       </Routes>
     </>
 

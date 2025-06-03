@@ -4,11 +4,14 @@ import CustomizeText from "../../../components/CustomizeText";
 import CustomizeButton from "../../../components/CustomeButton";
 import { useState } from "react";
 import Search from "../Search";
+import Avatar from "../../../components/Avatar/Avatar";
 
 const cx = classNames.bind(styles);
 
-function Header({ isLogin }) {
+function Header({ user }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    console.log("i header", user);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
@@ -43,7 +46,16 @@ function Header({ isLogin }) {
                                     <i className="fa-solid fa-magnifying-glass text-light"></i>
                                 </button>
                             </Search>
-                            { (isLogin) ? ("") : (<CustomizeButton primary small>Đăng nhập</CustomizeButton>) }
+
+                            { (user) ? (
+                                <Avatar
+                                    src={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
+                                    fallBack={ "https://pbs.twimg.com/media/FIw0iNhXwAQkxKh?format=jpg&name=small" }
+                                    className="cursor-pointer"
+                                />
+                            ) : (
+                                <CustomizeButton to={"/login"} primary small>Đăng nhập</CustomizeButton>
+                            ) }
                         </div>
                     </div>
                 </div>
