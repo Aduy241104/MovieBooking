@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "REVIEW", uniqueConstraints = @UniqueConstraint(columnNames = {"MOVIE_ID", "ACCOUNT_ID"}))
+@Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"movie_id", "account_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,29 +16,29 @@ import java.time.LocalDateTime;
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "REVIEW_ID")
+    @Column(name = "review_id")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "MOVIE_ID", nullable = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
     @ManyToOne
-    @JoinColumn(name = "ACCOUNT_ID", nullable = false)
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @Column(name = "RATING")
+    @Column(name = "rating")
     private Integer rating;
 
-    @Column(name = "COMMENT")
+    @Column(name = "comment")
     private String comment;
 
-    @Column(name = "REVIEW_DATE")
+    @Column(name = "review_date")
     private LocalDateTime reviewDate;
 
-    @Column(name = "IS_APPROVED")
+    @Column(name = "is_approved")
     private Boolean approved;
 
-    @Column(name = "SPOILER_ALERT")
+    @Column(name = "spoiler_alert")
     private Boolean spoilerAlert;
 }

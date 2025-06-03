@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "MOVIE_TYPE", uniqueConstraints = @UniqueConstraint(columnNames = {"MOVIE_ID", "TYPE_ID"}))
+@Table(name = "movie_type", uniqueConstraints = @UniqueConstraint(columnNames = {"movie_id", "type_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,14 +14,14 @@ import lombok.*;
 public class MovieType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MOVIE_TYPE_ID")
+    @Column(name = "movie_type_id")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "MOVIE_ID", nullable = false)
+    @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
     @ManyToOne
-    @JoinColumn(name = "TYPE_ID", nullable = false)
+    @JoinColumn(name = "type_id", nullable = false)
     private Type type;
 }

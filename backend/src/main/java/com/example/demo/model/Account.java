@@ -50,6 +50,9 @@ public class Account {
     @Column(name = "score")
     private Integer score;
 
+    @Column(name = "avartar")
+    private String avartar;
+
     @Column(name = "account_status")
     private Integer status;
 

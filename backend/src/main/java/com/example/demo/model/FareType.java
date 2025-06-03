@@ -9,17 +9,17 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@Table(name = "FARE_TYPE")
+@Table(name = "fare_type")
 public class FareType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "FARE_TYPE_ID")
+    @Column(name = "fare_type_id")
     private Long id;
 
-    @Column(name = "FARE_TYPE_NAME")
+    @Column(name = "fare_type_name")
     private String name;
 
-    @Column(name = "PRICE")
+    @Column(name = "price")
     private BigDecimal price;
 
 

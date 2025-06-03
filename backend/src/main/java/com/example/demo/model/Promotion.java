@@ -10,35 +10,35 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "PROMOTION")
+@Table(name = "promotion")
 public class Promotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PROMOTION_ID")
+    @Column(name = "promotion_id")
     private Long id;
 
-    @Column(name = "DISCOUNT_TYPE")
+    @Column(name = "discount_type")
     private String discountType;
 
-    @Column(name = "DISCOUNT_LEVEL")
+    @Column(name = "discount_level")
     private BigDecimal discountLevel;
 
-    @Column(name = "CODE")
+    @Column(name = "code")
     private String code;
 
-    @Column(name = "MAX_DISCOUNT")
+    @Column(name = "max_discount")
     private BigDecimal maxDiscount;
 
-    @Column(name = "MIN_ORDER")
+    @Column(name = "min_order")
     private BigDecimal minOrder;
 
-    @Column(name = "START_TIME")
+    @Column(name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(name = "END_TIME")
+    @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "PROMOTION_ACTIVE")
+    @Column(name = "promotion_active")
     private Boolean active;
 
 
