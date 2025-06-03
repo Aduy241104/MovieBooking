@@ -7,17 +7,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "CINEMA_ROOM")
+@Table(name = "cinema_room")
 public class CinemaRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CINEMA_ROOM_ID")
+    @Column(name = "cinema_room_id")
     private Long id;
 
-    @Column(name = "CINEMA_ROOM_NAME")
+    @Column(name = "cinema_room_name")
     private String name;
 
-    @Column(name = "SEAT_QUANTITY")
+    @Column(name = "seat_quantity")
     private Integer seatQuantity;
 
 

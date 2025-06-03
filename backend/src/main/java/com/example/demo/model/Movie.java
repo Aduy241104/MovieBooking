@@ -8,38 +8,38 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
-@Table(name = "MOVIE")
+@Table(name = "movie")
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MOVIE_ID")
+    @Column(name = "movie_id")
     private Long id;
 
-    @Column(name = "MOVIE_NAME_VN")
+    @Column(name = "movie_name_vn")
     private String nameVN;
 
-    @Column(name = "MOVIE_NAME_EN")
+    @Column(name = "movie_name_en")
     private String nameEN;
 
-    @Column(name = "DURATION")
+    @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "CONTENT")
+    @Column(name = "content")
     private String content;
 
-    @Column(name = "FROM_DATE")
+    @Column(name = "from_date")
     private LocalDate fromDate;
 
-    @Column(name = "TO_DATE")
+    @Column(name = "to_date")
     private LocalDate toDate;
 
-    @Column(name = "SMALL_IMAGE")
+    @Column(name = "small_image")
     private String smallImage;
 
-    @Column(name = "LARGE_IMAGE")
+    @Column(name = "large_image")
     private String largeImage;
 
-    @Column(name = "TRAILER")
+    @Column(name = "trailer")
     private String trailer;
 
 

@@ -7,27 +7,27 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "SEAT")
+@Table(name = "seat")
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "SEAT_ID")
+    @Column(name = "seat_id")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "CINEMA_ROOM_ID")
+    @JoinColumn(name = "cinema_room_id")
     private CinemaRoom cinemaRoom;
 
-    @Column(name = "SEAT_ROW")
+    @Column(name = "seat_row")
     private String seatRow;
 
-    @Column(name = "SEAT_COL")
+    @Column(name = "seat_col")
     private String seatCol;
 
-    @Column(name = "SEAT_STATUS")
+    @Column(name = "seat_status")
     private String seatStatus;
 
-    @Column(name = "SEAT_TYPE")
+    @Column(name = "seat_type")
     private String seatType;
 
 
