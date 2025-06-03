@@ -1,5 +1,6 @@
 package com.example.demo.exception;
 
+import com.example.demo.DTO.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> hanleEmailExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleEmailExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.CONFLICT.value())
                 .error("Email already exists")
@@ -45,4 +46,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(value = {
+            RuntimeException.class,
+            IllegalArgumentException.class,
+    })
+    public ResponseEntity<ApiResponse<Object>> handleApiResponseException(Exception ex) {
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+    }
 }
