@@ -27,6 +27,11 @@ function Search({ children }) {
         setSearchValue(value);
     }
 
+    const handleClearSearchValue = () => {
+        setSearchValue("");
+        setSearchResult([]);
+    }
+
     const fetchData = async () => {
         setLoading(true);
         try {
@@ -48,7 +53,6 @@ function Search({ children }) {
         }
 
     }, [debounceValue])
-
 
     return (
         <>
@@ -76,7 +80,9 @@ function Search({ children }) {
                                     value={ searchValue }
                                     onChange={ (e) => handleChangeSearchValue(e) }
                                 />
-                                { (searchValue !== "") ? (<i className="fa-solid fa-circle-xmark text-secondary"></i>) : ("") }
+                                { (searchValue !== "") ? (
+                                    <i className="fa-solid fa-circle-xmark text-secondary" onClick={ () => handleClearSearchValue() }></i>
+                                ) : ("") }
                             </div>
 
                             { (!isLoading) ? (
@@ -103,7 +109,7 @@ function Search({ children }) {
                         </div>
                     ) }
                 >
-                    <button onClick={ () => setShow(true) } className="bg-transparent me-3 border-0">
+                    <button onClick={ () => setShow(true) } className="bg-transparent me-4 border-0">
                         <i className="fa-solid fa-magnifying-glass text-light"></i>
                     </button>
                 </Tippy>

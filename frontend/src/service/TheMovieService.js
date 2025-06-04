@@ -16,8 +16,10 @@ export const searchMovieByName = async (keyWord, page, size) => {
     if (size) {
         size = 4;
     }
+    console.log("key: ", keyWord);
+
     try {
-        const response = await axiosInstance.get(`/movie/search?q=a&page=2&size=4`);
+        const response = await axiosInstance.get(`/findMovie/search?q=${keyWord}&page=${page}&size=${size}`);
         console.log(response);
         return response.data
 
