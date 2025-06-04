@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "BOOKING")
+@Table(name = "booking")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,37 +19,37 @@ import java.util.List;
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BOOKING_ID")
+    @Column(name = "booking_id")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "ACCOUNT_ID")
+    @JoinColumn(name = "account_id")
     private Account account;
 
     @ManyToOne
-    @JoinColumn(name = "SCREENING_ID", nullable = false)
+    @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
 
     @ManyToOne
-    @JoinColumn(name = "PROMOTION_ID")
+    @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
-    @Column(name = "PROMOTION_CODE_APPLIED")
+    @Column(name = "promotion_code_applied")
     private String promotionCodeApplied;
 
-    @Column(name = "DISCOUNT_TYPE_APPLIED")
+    @Column(name = "discount_type_applied")
     private String discountTypeApplied;
 
-    @Column(name = "DISCOUNT_APPLIED")
+    @Column(name = "discount_applied")
     private BigDecimal discountApplied;
 
-    @Column(name = "BOOKING_TIME")
+    @Column(name = "booking_time")
     private LocalDateTime bookingTime;
 
-    @Column(name = "TOTAL_AMOUNT")
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
-    @Column(name = "BOOKING_STATUS")
+    @Column(name = "booking_status")
     private String bookingStatus;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)

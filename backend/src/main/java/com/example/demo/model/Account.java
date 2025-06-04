@@ -50,6 +50,9 @@ public class Account {
     @Column(name = "score")
     private Integer score;
 
+    @Column(name = "avatar")
+    private String avatar;
+
     @Builder.Default
     @Column(name = "account_status")
     private Integer status = 1;

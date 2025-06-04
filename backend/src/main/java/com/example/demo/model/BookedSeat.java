@@ -8,22 +8,22 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@Table(name = "BOOKED_SEAT")
+@Table(name = "booked_seat")
 public class BookedSeat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "BOOKED_SEAT_ID")
+    @Column(name = "booked_seat_id")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "BOOKING_ID")
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
     @ManyToOne
-    @JoinColumn(name = "SEAT_ID")
+    @JoinColumn(name = "seat_id")
     private Seat seat;
 
-    @Column(name = "PRICE_PAID")
+    @Column(name = "price_paid")
     private BigDecimal pricePaid;
 
 

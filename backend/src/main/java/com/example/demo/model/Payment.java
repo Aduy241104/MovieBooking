@@ -11,27 +11,27 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "PAYMENT")
+@Table(name = "payment")
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PAYMENT_ID")
+    @Column(name = "payment_id")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "BOOKING_ID")
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
-    @Column(name = "PAYMENT_METHOD_ID")
+    @Column(name = "payment_method_id")
     private Long paymentMethodId;
 
-    @Column(name = "AMOUNT_PAID")
+    @Column(name = "amount_paid")
     private BigDecimal amountPaid;
 
-    @Column(name = "TRANSACTION_DATE")
+    @Column(name = "transaction_date")
     private LocalDateTime transactionDate;
 
-    @Column(name = "PAYMENT_STATUS")
+    @Column(name = "payment_status")
     private String paymentStatus;
 
 
