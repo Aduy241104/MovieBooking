@@ -10,9 +10,6 @@ const cx = classNames.bind(styles);
 
 function Header({ user }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    console.log("i header", user);
-
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
 
@@ -29,12 +26,13 @@ function Header({ user }) {
                     <button className="d-lg-none bg-transparent border-0 text-white" onClick={ toggleMenu }>
                         <i className="fa-solid fa-bars fa-xl"></i>
                     </button>
+                    
 
                     {/* Navigation & Actions - Desktop */ }
                     <div className="d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
-                                <li className="border-bottom border-3 border-danger">Lịch chiếu</li>
+                                <li className="border-bottom border-danger">Lịch chiếu</li>
                                 <li className="border-bottom border-dark">Phim Chiếu</li>
                                 <li>Sắp Chiếu</li>
                                 <li>Top Phim</li>

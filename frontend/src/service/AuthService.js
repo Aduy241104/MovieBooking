@@ -61,13 +61,6 @@ export const veiryfyOtpAPI = async (data) => {
     }
 }
 
-// {
-//     "status": 401,
-//         "error": "Unauthorized",
-//             "message": "Invalid Password",
-//                 "path": "/api/auth/login-oauth"
-// }
-
 
 export const loginOAuth = async (loginData) => {
     try {

@@ -14,8 +14,15 @@
 
 }
 
+.search-layout {
+    max-height: 440px;
+    overflow: auto;
+}
+
 .search-result-layout {
     max-width: 310px;
+    
+    overflow: auto;
 
     img {
         width: 70px;
@@ -32,20 +39,23 @@
     font-size: 14px;
 }
 
-.arr{
+.arr {
+    // max-height: 516px;
+    // box-sizing: border-box;
+    // overflow-y: auto;
     position: relative;
 }
 
+
 .arr::after {
     content: "";
-        position: absolute;
-        top: -10px;
-        right: 5%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 10px solid transparent;
-        border-right: 10px solid transparent;
-        border-bottom: 10px solid white;
-
+    position: absolute;
+    top: -10px;
+    right: 5%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid white;
 }
