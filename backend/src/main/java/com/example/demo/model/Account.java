@@ -50,13 +50,19 @@ public class Account {
     @Column(name = "score")
     private Integer score;
 
-    @Column(name = "avartar")
-    private String avartar;
+    @Column(name = "avatar")
+    private String avatar;
 
+    @Builder.Default
     @Column(name = "account_status")
-    private Integer status;
+    private Integer status = 1;
 
     @Column(name = "social_account_type")
     private String socialAccountType;
+
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.registerDate = LocalDate.now();
+    }
 
 }
