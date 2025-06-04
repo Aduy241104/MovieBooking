@@ -5,6 +5,7 @@ import { AdminSidebar } from "../../components/admin/AdminSidebar";
 import { AdminHeader } from "../../components/admin/AdminHeader";
 import { AdminFooter } from "../../components/admin/AdminFooter";
 import { fetchAllAccountAPI } from "../../service/AccountService";
+// import '../../output.css'
 
 
 export const AdminLayout = () => {

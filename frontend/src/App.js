@@ -22,23 +22,15 @@ function App() {
   return (
     <>
       <Routes>
-<<<<<<< HEAD
         <Route path='/login' element={ <LoginPage /> } />
-
         <Route path='/register' element={ <SignUpPage /> } />
         <Route path='/' element={ <DefaultLayout /> } />
-=======
-        <Route path='/' element={<LoginPage />} />
 
-        <Route path='/register' element={<SignUpPage />} />
-        <Route path='/home' element={<DefaultLayout />} />
-
-        <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path='users-members' element={<MemberPage />} />
-          <Route path='users-employees' element={<EmployeePage />} />
+        <Route path='/admin' element={ <AdminLayout /> }>
+          <Route index element={ <Dashboard /> } />
+          <Route path='users-members' element={ <MemberPage /> } />
+          <Route path='users-employees' element={ <EmployeePage /> } />
         </Route>
->>>>>>> origin/main
       </Routes>
     </>
 
