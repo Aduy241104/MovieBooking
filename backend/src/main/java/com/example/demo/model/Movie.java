@@ -42,5 +42,14 @@ public class Movie {
     @Column(name = "trailer")
     private String trailer;
 
+    @Column(name = "director")
+    private String director;
+
+    @Column(name = "movie_production_company")
+    private String movieProductionCompany;
+
+    @Column(name = "actor")
+    private String actor;
+
 
 }

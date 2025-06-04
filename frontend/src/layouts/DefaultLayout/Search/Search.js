@@ -17,16 +17,16 @@ function Search({ children }) {
                 interactive={ true }
                 visible={ isShow }
                 placement="top-end"
-                offset={ [0, 15] }
+                offset={ [24, 20] }
                 onClickOutside={ () => setShow(false) }
                 render={ attrs => (
                     <div
-                        className="bg-light p-4 shadow border border-secondary rounded-1 cursor-pointer"
+                        className={ cx("bg-light p-4 rounded-2 cursor-pointer", 'arr') }
                         tabIndex="-1"
                         { ...attrs }
                     >
 
-                        <div className='d-flex align-items-center p-2 border border-1 border-secondary rounded-1'>
+                        <div className={ cx('d-flex align-items-center p-2 border border-2 border-secondary rounded-2', 'search-place') }>
                             <i className="fa-solid fa-magnifying-glass text-dark"></i>
                             <input type="text" placeholder='Kiếm gì đê' className={ cx('search-input', 'pe-2 ps-2 border-0') } />
                         </div>
