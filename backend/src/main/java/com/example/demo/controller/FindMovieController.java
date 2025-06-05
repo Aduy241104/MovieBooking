@@ -56,6 +56,7 @@ public class FindMovieController {
                 .count(result.getNumberOfElements())
                 .current_page(result.getNumber() + 1)
                 .per_page(result.getSize())
+                .total_page(result.getTotalPages() - 1)
                 .build();
 
         Map<String, Object> response = new HashMap<>();

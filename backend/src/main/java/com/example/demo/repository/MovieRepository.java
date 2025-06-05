@@ -12,7 +12,6 @@ import com.example.demo.model.Movie;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
@@ -34,5 +33,5 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 ORDER BY m.id
             """)
     Page<SingleMovieDTO> searchMoviesWithRating(@Param("keyword") String keyword, Pageable pageable);
-    
+
 }

@@ -15,5 +15,6 @@ public class MetaDTO {
     private int per_page;
     private int count;
     private int current_page;
+    private int total_page;
 
 }
