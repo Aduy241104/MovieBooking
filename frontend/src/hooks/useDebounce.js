@@ -5,6 +5,7 @@ function useDebounce(value, delay) {
 
     useEffect(() => {
         const handler = setTimeout(() => {
+            
             setDebounceValue(value);
         }, delay);
         return () => {
@@ -14,5 +15,4 @@ function useDebounce(value, delay) {
 
     return debounceValue;
 }
-
 export default useDebounce

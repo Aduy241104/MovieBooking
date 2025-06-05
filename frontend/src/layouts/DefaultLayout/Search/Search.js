@@ -1,15 +1,14 @@
 import Tippy from '@tippyjs/react/headless'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import 'tippy.js/dist/tippy.css'
 import styles from './Search.module.scss'
 import classNames from 'classnames/bind'
 import useDebounce from '../../../hooks/useDebounce'
 import { searchMovieByName } from '../../../service/TheMovieService'
-import { set } from 'lodash'
 
 const cx = classNames.bind(styles);
 
-function Search({ children }) {
+function Search() {
     const [isShow, setShow] = useState(false);
     const [isLoading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
@@ -19,51 +18,41 @@ function Search({ children }) {
         totalPage: 0
     });
 
+    // debounce hook to delay API
     const debounceValue = useDebounce(searchValue, 1000);
 
+    //update stata for search value
     const handleChangeSearchValue = (e) => {
         const value = e.target.value;
         if (value.length > 0 && value.trim() === "") {
             return;
         }
-        console.log(value);
         setSearchValue(value);
     }
 
+    // clear keyword on seacrh bar and clear search result
     const handleClearSearchValue = () => {
         setSearchValue("");
         setSearchResult([]);
     }
 
+    // use to load more search result
     const handleShowMore = () => {
         if (page.currentPage + 1 < page.totalPage) {
-            setPage(prev => {
-                return {
-                    ...prev,
-                    currentPage: prev.currentPage + 1
-                }
-            })
+            setPage(prev => ({ ...prev, currentPage: prev.currentPage + 1 }));
         }
     }
 
+    // fetch data from server using axios 
     const fetchData = async () => {
         setLoading(true);
         try {
             const response = await searchMovieByName(searchValue, page.currentPage, 4);
-    
-            setSearchResult(prev => {
-                return [
-                    ...prev,
-                    ...response.result.Movie
-                ]
-            })
+            const { Movie } = response.result;
+            const { total_page } = response.result.Meta;
 
-            setPage(prev => {
-                return {
-                    ...prev,
-                    totalPage: response.result.Meta.total_page
-                }
-            })
+            setSearchResult(prev => [...prev, ...Movie]);
+            setPage(prev => ({ ...prev, totalPage: total_page }));
 
         } catch (error) {
             console.log(error);
@@ -75,21 +64,19 @@ function Search({ children }) {
     useEffect(() => {
         if (!!debounceValue.trim()) {
             setSearchResult([]);
-            setPage(prev => {
-                return {
-                    currentPage: 0,
-                    totalPage: 0
-                }
-            })
-            fetchData()
+            setPage({ currentPage: 0, totalPage: 0 })
+            fetchData();
         }
     }, [debounceValue])
+
 
     useEffect(() => {
         if (!!debounceValue.trim()) {
             fetchData();
         }
     }, [page.currentPage])
+
+    console.log("search result: ", searchResult);
 
     return (
         <>
@@ -163,4 +150,4 @@ function Search({ children }) {
     )
 }
 
-export default Search
+export default memo(Search)

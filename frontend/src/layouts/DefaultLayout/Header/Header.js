@@ -26,7 +26,7 @@ function Header({ user }) {
                     <button className="d-lg-none bg-transparent border-0 text-white" onClick={ toggleMenu }>
                         <i className="fa-solid fa-bars fa-xl"></i>
                     </button>
-                    
+
 
                     {/* Navigation & Actions - Desktop */ }
                     <div className="d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
@@ -39,12 +39,7 @@ function Header({ user }) {
                             </ul>
                         </nav>
                         <div className="d-flex align-items-center h-100">
-                            <Search>
-                                <button className="bg-transparent me-3 border-0">
-                                    <i className="fa-solid fa-magnifying-glass text-light"></i>
-                                </button>
-                            </Search>
-
+                            <Search />
                             { (user) ? (
                                 <Avatar
                                     src={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
@@ -52,7 +47,7 @@ function Header({ user }) {
                                     className="cursor-pointer"
                                 />
                             ) : (
-                                <CustomizeButton to={"/login"} primary small>Đăng nhập</CustomizeButton>
+                                <CustomizeButton to={ "/login" } primary small>Đăng nhập</CustomizeButton>
                             ) }
                         </div>
                     </div>
