@@ -1,17 +1,17 @@
 import axios from "../config/axios";
 
 const fetchAllAccountAPI = (page, size, filter) => {
-    const URL_BACKEND = `/public/accounts?page=${page}&size=${size}&filter=${filter}`;
+    const URL_BACKEND = `/public/accounts?page=${page}&size=${size}&filter=${filter}&sort=accountId,asc`;
     return axios.get(URL_BACKEND);
 }
 
-const fetchAccountByIdAPI = (id) => {
-    const URL_BACKEND = `/accounts/${id}`;
+const fetchAccountByIdAPI = (accountId) => {
+    const URL_BACKEND = `public/accounts/${accountId}`;
     return axios.get(URL_BACKEND);
 }
 
-const updateAccountAPI = (accountId, dataToUpdate) => {
-    const URL_BACKEND = `/accounts`;
+const updateAccountQuickAPI = (accountId, dataToUpdate) => {
+    const URL_BACKEND = `/public/accounts`;
     const data = {
         accountId,
         ...dataToUpdate
@@ -19,8 +19,8 @@ const updateAccountAPI = (accountId, dataToUpdate) => {
     return axios.put(URL_BACKEND, data);
 }
 
-const updateAccountDetailAPI = (accountId, dataToUpdate) => {
-    const URL_BACKEND = `/accounts/details`;
+const updateAccountInfoAPI = (accountId, dataToUpdate) => {
+    const URL_BACKEND = `/public/accounts/${accountId}`;
     const data = {
         accountId,
         ...dataToUpdate
@@ -28,17 +28,17 @@ const updateAccountDetailAPI = (accountId, dataToUpdate) => {
     return axios.put(URL_BACKEND, data);
 }
 
-const updateStatusAccountAPI = (accountId, active) => {
-    const URL_BACKEND = `/accounts/is-active`;
+const updateAccountStatusAPI = (accountId, status) => {
+    const URL_BACKEND = `/public/accounts/status`;
     const data = {
         accountId,
-        active
+        status
     }
     return axios.put(URL_BACKEND, data);
 }
 
-const createAccountAPI = (roleId, email, fullName, gender, password, phone, birthday) => {
-    const URL_BACKEND = `/accounts`;
+const createAccountAPI = (roleId, email, fullName, gender, password, phoneNumber, dateOfBirth) => {
+    const URL_BACKEND = `/public/accounts`;
     const data = {
         role: {
             roleId
@@ -47,8 +47,8 @@ const createAccountAPI = (roleId, email, fullName, gender, password, phone, birt
         fullName,
         gender,
         password,
-        phone,
-        birthday
+        phoneNumber,
+        dateOfBirth
     }
     return axios.post(URL_BACKEND, data);
 }
@@ -56,9 +56,9 @@ const createAccountAPI = (roleId, email, fullName, gender, password, phone, birt
 export {
     fetchAllAccountAPI,
     fetchAccountByIdAPI,
-    updateAccountAPI,
-    updateAccountDetailAPI,
-    updateStatusAccountAPI,
+    updateAccountQuickAPI,
+    updateAccountInfoAPI,
+    updateAccountStatusAPI,
     createAccountAPI,
 
 }

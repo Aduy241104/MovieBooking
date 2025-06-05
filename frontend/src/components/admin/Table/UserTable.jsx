@@ -3,12 +3,16 @@ import dayjs from "dayjs";
 import { Lock, LockOpen, SquarePen } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { updateStatusAccountAPI } from "../../../service/AccountService";
+import { updateAccountStatusAPI } from "../../../service/AccountService";
+import { UpdateUserModal } from "../Modal/UpdateUserModal";
 
 
 
-export const UserTable = () => {
-    const { dataAccount, page, setPage, size, total, setRefreshFlag } = useOutletContext();
+export const UserTable = (props) => {
+    const { dataUsers, page, setPage, size, total, setRefreshFlag } = useOutletContext();
+
+    const { userText, userRole } = props;
+
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -20,12 +24,12 @@ export const UserTable = () => {
             setPage(pagination)
     }
 
-    const handleUpdateIsActiveAccount = async (record) => {
-        const res = await updateStatusAccountAPI(record.accountId, !record.active)
-        if (res.data) {
+    const handleUpdateStatusAccount = async (record) => {
+        const res = await updateAccountStatusAPI(record.accountId, record.status === 0 ? 1 : 0)
+        if (res.result) {
             message.success(
                 <span>
-                    {record.active ? 'Mở khoá tài khoản ' : 'Khoá tài khoản '}
+                    {record.status === 0 ? 'Mở khoá tài khoản ' : 'Khoá tài khoản '}
                     <span className='font-medium'>{record.email}</span>
                     {' thành công'}
                 </span>
@@ -33,11 +37,11 @@ export const UserTable = () => {
             setRefreshFlag(prev => !prev);
             return;
         }
-        message.error(`Error: ${res.error}`)
+        message.error(`Error: ${res.message}`)
     };
 
-    const handleViewUserDetail = async (id) => {
-        navigate(`${location.pathname}/${id}`)
+    const handleViewUserDetail = async (accountId) => {
+        navigate(`${location.pathname}/${accountId}`);
 
     }
 
@@ -68,7 +72,7 @@ export const UserTable = () => {
         },
         {
             title: 'Ngày sinh',
-            dataIndex: 'birthday',
+            dataIndex: 'dateOfBirth',
             render: (text) => (
                 <>
                     {text ? dayjs(text).format('DD/MM/YYYY') : "Không có dữ liệu"}
@@ -80,50 +84,50 @@ export const UserTable = () => {
             dataIndex: 'gender',
             render: (text) => (
                 <>
-                    <Tag color={text === "Female" ? "#1677ff" : text === "Male" ? "#f759ab" : "#9254de"}>
-                        {text === "Female" ? "Nam" : text === "Male" ? "Nữ" : "Khác"}
+                    <Tag color={text === "Nam" ? "#1677ff" : text === "Nữ" ? "#f759ab" : "#9254de"}>
+                        {text}
                     </Tag>
                 </>
             ),
         },
         {
             title: 'Điện thoại',
-            dataIndex: 'phone',
+            dataIndex: 'phoneNumber',
         },
         {
             title: 'Trạng thái',
             render: (_, record) => (
                 <>
-                    <Tag color={record.active ? "volcano" : "green"}>
-                        {record.active ? "Đã khoá" : "Hoạt động"}
+                    <Tag color={record.status === 0 ? "volcano" : "green"}>
+                        {record.status === 0 ? "Đã khoá" : "Hoạt động"}
                     </Tag>
                 </>
             ),
         },
         {
-            title: 'Action',
+            title: 'Hành động',
             render: (_, record) => (
                 <>
                     <Space size="large">
-                        <a onClick={() => {
+                        <button className="text-blue-600 hover:text-fuchsia-500" onClick={() => {
                             setIsUpdateModalOpen(true);
                             setDataUser(record);
                         }}>
                             <SquarePen size={16} strokeWidth={1.7} />
-                        </a>
-                        {record.active ? (
+                        </button>
+                        {record.status === 0 ? (
                             <>
                                 <Popconfirm
                                     placement="left"
                                     title="Mở khoá tài khoản"
                                     description="Xác nhận mở khoá?"
-                                    onConfirm={() => handleUpdateIsActiveAccount(record)}
+                                    onConfirm={() => handleUpdateStatusAccount(record)}
                                     okText="Xác nhận"
                                     cancelText="Huỷ"
                                 >
-                                    <a style={{ color: "green" }}>
+                                    <button style={{ color: "green" }}>
                                         <LockOpen size={16} strokeWidth={1.7} />
-                                    </a>
+                                    </button>
                                 </Popconfirm>
                             </>
                         ) : (
@@ -132,13 +136,13 @@ export const UserTable = () => {
                                     placement="left"
                                     title="Khoá tài khoản"
                                     description="Xác nhận khoá?"
-                                    onConfirm={() => handleUpdateIsActiveAccount(record)}
+                                    onConfirm={() => handleUpdateStatusAccount(record)}
                                     okText="Xác nhận"
                                     cancelText="Huỷ"
                                 >
-                                    <a style={{ color: "red" }}>
+                                    <button style={{ color: "red" }}>
                                         <Lock size={16} strokeWidth={1.7} />
-                                    </a>
+                                    </button>
                                 </Popconfirm>
                             </>
                         )}
@@ -154,12 +158,12 @@ export const UserTable = () => {
         <>
             <Table
                 columns={columns}
-                dataSource={dataAccount}
+                dataSource={dataUsers}
                 rowKey={"accountId"}
                 pagination={false}
             />
 
-            <div className='flex justify-center mt-8'>
+            <div className="flex justify-center mt-4">
                 <Pagination
                     current={page}
                     pageSize={size}
@@ -168,6 +172,15 @@ export const UserTable = () => {
                     onChange={handleTableChange}
                 />
             </div>
+
+            <UpdateUserModal
+                isUpdateModalOpen={isUpdateModalOpen}
+                setIsUpdateModalOpen={setIsUpdateModalOpen}
+                dataUser={dataUser}
+                setDataUser={setDataUser}
+                userText={userText}
+                userRole={userRole}
+            />
         </>
     );
 }

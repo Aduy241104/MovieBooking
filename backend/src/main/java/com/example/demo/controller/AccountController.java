@@ -58,6 +58,15 @@ public class AccountController {
                 .build();
     }
 
+    @GetMapping("/public/accounts/{id}")
+    public ApiResponse<Account> getAccount(@PathVariable Long id) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Fetch a account")
+                .result(this.accountService.fetchAccountById(id))
+                .build();
+    }
+
     @PostMapping("/public/accounts")
     public ApiResponse<Account> createAccount(@RequestBody Account account) {
         if (this.roleService.findRoleById(account.getRole().getRoleId()) == null) {
@@ -78,11 +87,29 @@ public class AccountController {
     }
 
     @PutMapping("/public/accounts")
-    public ApiResponse<Account> updateAccount(@RequestBody Account account) {
+    public ApiResponse<Account> updateAccountQuick(@RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Update a account")
-                .result(this.accountService.handleUpdateAccount(account))
+                .message("Update a account in list user")
+                .result(this.accountService.handleUpdateAccountQuick(account))
+                .build();
+    }
+
+    @PutMapping("/public/accounts/{id}")
+    public ApiResponse<Account> updateAccountInfo(@PathVariable Long id, @RequestBody Account account) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Update a account in list user")
+                .result(this.accountService.handleUpdateAccountInfo(id, account))
+                .build();
+    }
+
+    @PutMapping("/public/accounts/status")
+    public ApiResponse<Account> updateStatusAccount(@RequestBody Account account) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Update status account")
+                .result(this.accountService.handleUpdateStatusAccount(account))
                 .build();
     }
 
