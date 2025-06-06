@@ -1,7 +1,7 @@
 import { Col, DatePicker, Form, Input, Modal, notification, Row, Select } from "antd";
 import dayjs from 'dayjs';
 import { useEffect } from "react";
-import { updateAccountQuickAPI } from "../../../service/AccountService";
+import { updateAccountQuickAPI } from "../../../../service/AccountService";
 import { useOutletContext } from "react-router-dom";
 
 
@@ -59,7 +59,7 @@ export const UpdateUserModal = (props) => {
                     form.resetFields();
                     setDataUser("");
                 }}
-                okText={"Lưu thay đổi"}
+                okText={"Cập nhật"}
                 cancelText={"Huỷ"}
                 maskClosable={false}
             >

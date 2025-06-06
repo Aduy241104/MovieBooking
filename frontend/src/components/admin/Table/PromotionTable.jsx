@@ -2,35 +2,29 @@ import { message, Pagination, Popconfirm, Space, Table, Tag } from "antd";
 import dayjs from "dayjs";
 import { Lock, LockOpen, SquarePen } from "lucide-react";
 import { useState } from "react";
-import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { updateAccountStatusAPI } from "../../../service/AccountService";
-import { UpdateUserModal } from "../Modal/users/UpdateUserModal";
+import { UpdatePromotionModal } from "../Modal/promotions/UpdatePromotionModal";
+import { updatePromotionActiveAPI } from "../../../service/PromotionService";
 
 
 
-export const UserTable = (props) => {
-    const { dataUsers, page, setPage, size, total, setRefreshFlag } = useOutletContext();
+export const PromotionTable = (props) => {
 
-    const { userText, userRole } = props;
-
-    const navigate = useNavigate();
-    const location = useLocation();
-
+    const { page, size, setPage, total, dataPromotions, promotionText, setRefreshFlag } = props;
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [dataUser, setDataUser] = useState("");
+    const [dataPromotion, setDataPromotions] = useState("");
 
     const handleTableChange = (pagination) => {
         if (pagination)
             setPage(pagination)
     }
 
-    const handleUpdateStatusAccount = async (record) => {
-        const res = await updateAccountStatusAPI(record.accountId, record.status === 0 ? 1 : 0)
+    const handleUpdatePromotionActive = async (record) => {
+        const res = await updatePromotionActiveAPI(record.id, record.active === false ? true : false)
         if (res.result) {
             message.success(
                 <span>
-                    {record.status === 0 ? 'Mở khoá tài khoản ' : 'Khoá tài khoản '}
-                    <span className='font-medium'>{record.email}</span>
+                    {record.active === false ? 'Khôi phục mã khuyến mãi ' : 'Vô hiệu mã khuyến mãi '}
+                    <span className='font-medium'>{record.code}</span>
                     {' thành công'}
                 </span>
             );
@@ -39,11 +33,6 @@ export const UserTable = (props) => {
         }
         message.error(`Error: ${res.message}`)
     };
-
-    const handleViewUserDetail = async (accountId) => {
-        navigate(`${location.pathname}/${accountId}`);
-
-    }
 
     const columns = [
         {
@@ -55,51 +44,44 @@ export const UserTable = (props) => {
             ),
         },
         {
-            title: 'Tài khoản',
-            dataIndex: 'fullName',
-            render: (text, render) => (
+            title: 'Mã khuyến mãi',
+            dataIndex: 'code',
+        },
+        {
+            title: 'Giá trị giảm',
+            dataIndex: 'discountLevel',
+            render: (text, record) => (
                 <>
-                    <div className='flex flex-col'>
-                        <p className='font-medium text-gray-500 hover:text-blue-600 cursor-pointer hover:underline transition duration-200'
-                            onClick={() => handleViewUserDetail(render.accountId)}
-                        >
-                            {text}
-                        </p>
-                        <p className='text-gray-600'>{render.email}</p>
-                    </div>
+                    {text ? (record.discountType === 'percent' ? `${text}%` : Number(text).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }))
+                        : "Không có dữ liệu"}
                 </>
             ),
         },
         {
-            title: 'Ngày sinh',
-            dataIndex: 'dateOfBirth',
+            title: 'Bắt đầu',
+            dataIndex: 'startTime',
             render: (text) => (
                 <>
-                    {text ? dayjs(text).format('DD/MM/YYYY') : "Không có dữ liệu"}
+                    {text ? dayjs(text).format("DD/MM/YYYY HH:mm A") : "Không có dữ liệu"}
                 </>
             ),
         },
         {
-            title: 'Giới tính',
-            dataIndex: 'gender',
+            title: 'Hết hạn',
+            dataIndex: 'endTime',
             render: (text) => (
                 <>
-                    <Tag color={text === "Nam" ? "#1677ff" : text === "Nữ" ? "#f759ab" : "#9254de"}>
-                        {text}
-                    </Tag>
+                    {text ? dayjs(text).format("DD/MM/YYYY HH:mm A") : "Không có dữ liệu"}
                 </>
             ),
-        },
-        {
-            title: 'Điện thoại',
-            dataIndex: 'phoneNumber',
         },
         {
             title: 'Trạng thái',
-            render: (_, record) => (
+            dataIndex: 'active',
+            render: (text) => (
                 <>
-                    <Tag color={record.status === 0 ? "volcano" : "green"}>
-                        {record.status === 0 ? "Đã khoá" : "Hoạt động"}
+                    <Tag color={text === false ? "volcano" : "green"}>
+                        {text === false ? "Vô hiệu" : "Hiệu lực"}
                     </Tag>
                 </>
             ),
@@ -111,17 +93,19 @@ export const UserTable = (props) => {
                     <Space size="large">
                         <button className="text-blue-600 hover:text-fuchsia-500" onClick={() => {
                             setIsUpdateModalOpen(true);
-                            setDataUser(record);
+                            setDataPromotions(record);
+
                         }}>
                             <SquarePen size={16} strokeWidth={1.7} />
                         </button>
-                        {record.status === 0 ? (
+
+                        {record.active === false ? (
                             <>
                                 <Popconfirm
                                     placement="left"
-                                    title="Mở khoá tài khoản"
-                                    description="Xác nhận mở khoá?"
-                                    onConfirm={() => handleUpdateStatusAccount(record)}
+                                    title="Khôi phục mã khuyến mãi"
+                                    description="Xác nhận khôi phục?"
+                                    onConfirm={() => handleUpdatePromotionActive(record)}
                                     okText="Xác nhận"
                                     cancelText="Huỷ"
                                 >
@@ -134,9 +118,9 @@ export const UserTable = (props) => {
                             <>
                                 <Popconfirm
                                     placement="left"
-                                    title="Khoá tài khoản"
-                                    description="Xác nhận khoá?"
-                                    onConfirm={() => handleUpdateStatusAccount(record)}
+                                    title="Vô hiệu mã khuyến mãi"
+                                    description="Xác nhận vô hiệu?"
+                                    onConfirm={() => handleUpdatePromotionActive(record)}
                                     okText="Xác nhận"
                                     cancelText="Huỷ"
                                 >
@@ -146,7 +130,6 @@ export const UserTable = (props) => {
                                 </Popconfirm>
                             </>
                         )}
-
                     </Space>
                 </>
 
@@ -158,8 +141,8 @@ export const UserTable = (props) => {
         <>
             <Table
                 columns={columns}
-                dataSource={dataUsers}
-                rowKey={"accountId"}
+                dataSource={dataPromotions}
+                rowKey={"id"}
                 pagination={false}
             />
 
@@ -173,13 +156,13 @@ export const UserTable = (props) => {
                 />
             </div>
 
-            <UpdateUserModal
+            <UpdatePromotionModal
                 isUpdateModalOpen={isUpdateModalOpen}
                 setIsUpdateModalOpen={setIsUpdateModalOpen}
-                dataUser={dataUser}
-                setDataUser={setDataUser}
-                userText={userText}
-                userRole={userRole}
+                dataPromotion={dataPromotion}
+                setDataPromotion={setDataPromotions}
+                setRefreshFlag={setRefreshFlag}
+                promotionText={promotionText}
             />
         </>
     );

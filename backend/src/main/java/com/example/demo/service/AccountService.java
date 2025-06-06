@@ -25,12 +25,12 @@ public class AccountService {
     }
 
     public List<Account> getAllAccount() {
-        List<Account> accounts = this.accountRepository.findAll();
+        List<Account> accounts = accountRepository.findAll();
         return accounts;
     }
 
     public ResPagination fetchAllAccountPagination(Specification<Account> spec, Pageable pageable) {
-        Page<Account> accountPage = this.accountRepository.findAll(spec, pageable);
+        Page<Account> accountPage = accountRepository.findAll(spec, pageable);
 
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
                 .page(pageable.getPageNumber() + 1)
@@ -46,7 +46,7 @@ public class AccountService {
     }
 
     public Account fetchAccountById(Long id) {
-        Account currentAccount = this.accountRepository.findById(id).orElse(null);
+        Account currentAccount = accountRepository.findById(id).orElse(null);
         if(currentAccount == null) {
             throw new RuntimeException("Account not found");
         }
@@ -54,24 +54,24 @@ public class AccountService {
     }
 
     public Account handleCreateAccount(Account account) {
-        Role role = this.roleRepository.findById(account.getRole().getRoleId()).orElse(null);
+        Role role = roleRepository.findById(account.getRole().getRoleId()).orElse(null);
         if (role == null) {
             throw new RuntimeException("Role not found");
         }
-        Account currentPhoneAccount = this.accountRepository.findByPhoneNumber(account.getPhoneNumber());
+        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
         if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
             throw new RuntimeException("Phone already in use");
         }
         account.setRole(role);
-        return this.accountRepository.save(account);
+        return accountRepository.save(account);
     }
 
     public Account handleUpdateAccountQuick(Account account) {
-        Account currentAccount = this.accountRepository.findById(account.getAccountId()).orElse(null);
+        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
         if (currentAccount == null) {
             throw new RuntimeException("Account not found");
         }
-        Account currentPhoneAccount = this.accountRepository.findByPhoneNumber(account.getPhoneNumber());
+        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
         if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
             throw new RuntimeException("Phone already in use");
         }
@@ -80,15 +80,15 @@ public class AccountService {
         currentAccount.setDateOfBirth(account.getDateOfBirth());
         currentAccount.setPhoneNumber(account.getPhoneNumber());
 
-        return this.accountRepository.save(currentAccount);
+        return accountRepository.save(currentAccount);
     }
 
     public Account handleUpdateAccountInfo(Long id, Account account) {
-        Account currentAccount = this.accountRepository.findById(id).orElse(null);
+        Account currentAccount = accountRepository.findById(id).orElse(null);
         if (currentAccount == null) {
             throw new RuntimeException("Account not found");
         }
-        Account currentPhoneAccount = this.accountRepository.findByPhoneNumber(account.getPhoneNumber());
+        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
         if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
             throw new RuntimeException("Phone already in use");
         }
@@ -99,21 +99,21 @@ public class AccountService {
         currentAccount.setIdentityCard(account.getIdentityCard());
         currentAccount.setScore(account.getScore());
 
-        return this.accountRepository.save(currentAccount);
+        return accountRepository.save(currentAccount);
     }
 
     public Account handleUpdateStatusAccount(Account account) {
-        Account currentAccount = this.accountRepository.findById(account.getAccountId()).orElse(null);
+        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
         if (currentAccount == null) {
             throw new RuntimeException("Account not found");
         }
         currentAccount.setStatus(account.getStatus());
 
-        return this.accountRepository.save(currentAccount);
+        return accountRepository.save(currentAccount);
     }
 
     public Account findAccountByEmail(String email) {
-        return this.accountRepository.findByEmail(email).orElse(null);
+        return accountRepository.findByEmail(email).orElse(null);
     }
 
 }

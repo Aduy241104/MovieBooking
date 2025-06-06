@@ -1,11 +1,11 @@
 import { LoadingOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons';
 import { Button, Input, Select, Spin } from "antd";
-import { debounce, set } from 'lodash';
+import { debounce } from 'lodash';
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { sfAnd, sfEqual, sfLike, sfLower, sfOr } from 'spring-filter-query-builder';
 import { UserTable } from '../../components/admin/Table/UserTable';
-import { CreateUserModal } from '../../components/admin/Modal/CreateUserModal';
+import { CreateUserModal } from '../../components/admin/Modal/users/CreateUserModal';
 
 export const UserPage = (props) => {
     const { setFilter, setBreadcrumbItems, isLoading, setIsLoading } = useOutletContext();
@@ -64,47 +64,57 @@ export const UserPage = (props) => {
 
     return (
         <>
-            <div className='flex justify-between mb-4'>
-                <div style={{ display: "flex", gap: "2rem" }}>
-                    <Input style={{ width: "30vw" }}
+            <div style={{
+                padding: 24,
+                // minHeight: 360,
+                background: '#fff',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            }}>
+                <div className='flex justify-between mb-4'>
+                    <div style={{ display: "flex", gap: "2rem" }}>
+                        <Input style={{ width: "30vw" }}
+                            size='large'
+                            addonBefore={<SearchOutlined />}
+                            placeholder="Tìm kiếm tài khoản..."
+                            allowClear
+                            onChange={(value) => setSearchUser(value.target.value)}
+                        />
+                        <Select
+                            size='large'
+                            style={{ width: "10vw" }}
+                            options={[
+                                { value: 1, label: 'Hoạt động' },
+                                { value: 0, label: 'Đã khoá' }
+                            ]}
+                            placeholder="Trạng thái"
+                            allowClear
+                            onChange={(value) => setFilterStatus(value)}
+                        />
+                    </div>
+                    <Button onClick={() => setIsCreateModalOpen(true)}
                         size='large'
-                        addonBefore={<SearchOutlined />}
-                        placeholder="Tìm kiếm tài khoản..."
-                        allowClear
-                        onChange={(value) => setSearchUser(value.target.value)}
-                    />
-                    <Select
-                        size='large'
-                        style={{ width: "10vw" }}
-                        options={[
-                            { value: 1, label: 'Hoạt động' },
-                            { value: 0, label: 'Đã khoá' }
-                        ]}
-                        placeholder="Trạng thái"
-                        allowClear
-                        onChange={(value) => setFilterStatus(value)}
-                    />
+                        type="primary"
+                    >
+                        <UserAddOutlined />
+                        <span>Thêm {userText}</span>
+                    </Button>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)}
-                    size='large'
-                    type="primary"
-                >
-                    <UserAddOutlined />
-                    <span>Thêm {userText}</span>
-                </Button>
+
+                {isLoading ? (
+                    <div className='flex flex-col justify-center items-center gap-3 h-screen'>
+                        <Spin indicator={<LoadingOutlined spin />} size="large" />
+                        <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
+                    </div>
+                ) : (
+                    <UserTable
+                        userText={userText}
+                        userRole={userRole}
+                    />
+                )}
+
             </div>
 
-            {isLoading ? (
-                <div className='flex flex-col justify-center items-center gap-3 h-screen'>
-                    <Spin indicator={<LoadingOutlined spin />} size="large" />
-                    <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
-                </div>
-            ) : (
-                <UserTable
-                    userText={userText}
-                    userRole={userRole}
-                />
-            )}
 
             <CreateUserModal
                 isCreateModalOpen={isCreateModalOpen}

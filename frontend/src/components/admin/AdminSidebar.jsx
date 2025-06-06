@@ -1,5 +1,5 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Users } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users } from 'lucide-react'
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -33,6 +33,11 @@ export const AdminSidebar = (props) => {
                 },
             ]
         },
+        {
+            key: 'promotions',
+            icon: <Ticket size={20} strokeWidth={1.5} />,
+            label: <Link to={"promotions"}>Mã khuyến mãi</Link>
+        },
     ];
 
 
@@ -45,6 +50,8 @@ export const AdminSidebar = (props) => {
             return ['members'];
         } else if (pathname.includes('users-employees')) {
             return ['employees'];
+        } else if (pathname.includes('promotions')) {
+            return ['promotions'];
         }
         return [];
     };
@@ -130,7 +137,6 @@ export const AdminSidebar = (props) => {
                     theme="light"
                     inlineCollapsed={collapsed}
                     items={items}
-                    style={{ borderRight: 0 }} // Loại bỏ border nếu Sider đã có hoặc theme="light"
                 />
 
             </Sider>

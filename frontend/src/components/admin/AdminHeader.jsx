@@ -14,9 +14,11 @@ export const AdminHeader = (props) => {
         if (location.pathname === '/admin') {
             setTitle("BẢNG ĐIỀU KHIỂN");
         } else if (location.pathname.includes('users-members')) {
-            setTitle("DANH SÁCH THÀNH VIÊN");
+            setTitle("QUẢN LÝ THÀNH VIÊN");
         } else if (location.pathname.includes('users-employees')) {
-            setTitle("DANH SÁCH NHÂN VIÊN");
+            setTitle("QUẢN LÝ NHÂN VIÊN");
+        } else if (location.pathname.includes('promotions')) {
+            setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
         }
     }, [location.pathname]);
 

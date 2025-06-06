@@ -9,6 +9,7 @@ import { Dashboard } from './Page/admin/Dashboard';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
+import { PromotionPage } from './Page/admin/PromotionPage';
 
 
 
@@ -34,6 +35,9 @@ function App() {
             element={<UserPage key="employees" userText="Nhân viên" userFilter="Employee" />} />
           <Route path='users-employees/:accountId'
             element={<UserDetailPage key="employees-detail" userText="Nhân viên" />} />
+
+          <Route path='promotions'
+            element={<PromotionPage promotionText="Mã khuyến mãi" />} />
         </Route>
       </Routes>
     </>

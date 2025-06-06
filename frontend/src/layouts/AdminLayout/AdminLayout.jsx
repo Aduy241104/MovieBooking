@@ -77,23 +77,13 @@ export const AdminLayout = () => {
                     </div>
 
                     <Content style={{ margin: '24px 16px' }}>
-                        {/* While color background for content */}
-                        <div style={{
-                            padding: 24,
-                            // minHeight: 360,
-                            background: '#fff',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        }}
-                        >
-                            <Outlet
-                                context={{
-                                    dataUsers, isLoading, setIsLoading,
-                                    page, setPage, size, setSize, total,
-                                    setFilter, setBreadcrumbItems, setRefreshFlag
-                                }}
-                            />
-                        </div>
+                        <Outlet
+                            context={{
+                                dataUsers, isLoading, setIsLoading,
+                                page, setPage, size, setSize, total,
+                                setFilter, setBreadcrumbItems, setRefreshFlag
+                            }}
+                        />
                     </Content>
 
                     <AdminFooter />
