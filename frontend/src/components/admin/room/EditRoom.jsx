@@ -1,0 +1,34 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import RoomForm from "./RoomForm";
+import axios from "axios";
+
+export default function EditRoom() {
+  const { id } = useParams();
+  const [room, setRoom] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`/api/rooms/${id}`)
+      .then(res => setRoom(res.data))
+      .catch(err => {
+        console.error("Không thể tải phòng:", err);
+        alert("Không thể tải phòng.");
+        navigate("/admin/room-list");
+      });
+  }, [id, navigate]);
+
+  const handleBack = () => {
+    navigate(`/admin/room-list/room/${id}`);
+  };
+
+  return (
+    <div className="">
+      {room ? (
+        <RoomForm room={room} onBack={handleBack} isEdit />
+      ) : (
+        <p>Đang tải...</p>
+      )}
+    </div>
+  );
+}
