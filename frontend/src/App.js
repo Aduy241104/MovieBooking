@@ -9,6 +9,7 @@ import { Dashboard } from './Page/admin/Dashboard';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 import { MemberPage } from './Page/admin/MemberPage';
 import { EmployeePage } from './Page/admin/EmployeePage';
+import HomePage from './Page/Home/HomePage';
 
 
 
@@ -24,7 +25,7 @@ function App() {
       <Routes>
         <Route path='/login' element={ <LoginPage /> } />
         <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <DefaultLayout /> } />
+        <Route path='/' element={ <HomePage /> } />
 
         <Route path='/admin' element={ <AdminLayout /> }>
           <Route index element={ <Dashboard /> } />

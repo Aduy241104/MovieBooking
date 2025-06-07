@@ -37,8 +37,16 @@ a {
     src: url("/assets/fonts/nf-icon-v1-93.woff");
 }
 
+.over-hidden {
+    overflow: hidden;
+}
+
 .text-red {
     color: var(--red);
+}
+
+.bg-red {
+    background-color: var(--red);
 }
 
 .cursor-pointer {
@@ -47,7 +55,14 @@ a {
 
 .red-hover:hover {
     color: var(--red);
+}
 
+.fs-7 {
+    font-size: 14px;
+}
+
+.bg-midnight {
+    background-color: rgb(25, 27, 36);
 }
 
 .swiper {
@@ -64,11 +79,6 @@ a {
 .swiper-button-prev,
 .swiper-button-next {
     color: var(--red);
-    // background-color: rgb(249, 249, 249);
-    // padding: 3px 23px;
-    // border-radius: 100%;
-
-
 }
 
 .swiper-slide {
