@@ -12,9 +12,9 @@ function DefaultLayout({ children }) {
   }, [user]);
 
   return (
-    <div className='bg-dark'>
+    <div className='bg-midnight'>
       <Header user={ isLogin } />
-      <HomePage />
+      { children }
     </div>
   )
 }
