@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.MovieScheduleDTO;
+import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.model.Screening;
 import com.example.demo.repository.ScreeningRepository;
+import com.example.demo.service.MovieScheduleService;
 import com.example.demo.service.ScreeningService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +32,9 @@ public class MovieScheduleController {
     @Autowired
     ScreeningService screeningService;
 
+    @Autowired
+    MovieScheduleService movieScheduleService;
+
     @GetMapping("/getAll")
     public ApiResponse<List<Screening>> getMethodName() {
         List<Screening> response = repository.findAll();
@@ -43,6 +48,26 @@ public class MovieScheduleController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<MovieScheduleDTO> result = screeningService.getAllMovieScheduleByDate(date);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/now-showing")
+    public ApiResponse<List<SingleMovieDTO>> getNowShowing() {
+        List<SingleMovieDTO> response = movieScheduleService.getNowShowingMovie(LocalDate.now());
+        return ApiResponse.<List<SingleMovieDTO>>builder()
+                .message("success")
+                .result(response)
+                .build();
+
+    }
+
+    @GetMapping("/up-coming")
+    public ApiResponse<List<SingleMovieDTO>> getUpComing() {
+        List<SingleMovieDTO> response = movieScheduleService.getCommingSoonMovie(LocalDate.now());
+        return ApiResponse.<List<SingleMovieDTO>>builder()
+                .message("success")
+                .result(response)
+                .build();
+
     }
 
 }

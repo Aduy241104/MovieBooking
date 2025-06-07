@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,5 +34,35 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 ORDER BY m.id
             """)
     Page<SingleMovieDTO> searchMoviesWithRating(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("""
+                SELECT new com.example.demo.DTO.response.SingleMovieDTO(
+                    m.id, m.nameVN, m.nameEN, m.duration, m.content,
+                    m.fromDate, m.toDate, m.smallImage, m.largeImage,
+                    m.trailer, COALESCE(AVG(r.rating), 0), null
+                )
+                FROM Movie m
+                LEFT JOIN Review r ON r.movie.id = m.id
+                WHERE m.fromDate <= :currentDate AND m.toDate >= :currentDate
+                GROUP BY m.id,m.nameVN, m.nameEN, m.duration, m.content,
+                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer
+                ORDER BY m.id
+            """)
+    List<SingleMovieDTO> findNowShowingMovies(@Param("currentDate") LocalDate currentDate);
+
+    @Query("""
+                SELECT new com.example.demo.DTO.response.SingleMovieDTO(
+                    m.id,m.nameVN, m.nameEN, m.duration, m.content,
+                    m.fromDate, m.toDate, m.smallImage, m.largeImage,
+                    m.trailer, COALESCE(AVG(r.rating), 0), null
+                )
+                FROM Movie m
+                LEFT JOIN Review r ON r.movie.id = m.id
+                WHERE m.fromDate > :currentDate
+                GROUP BY m.id, m.nameVN, m.nameEN, m.duration, m.content,
+                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer
+                ORDER BY m.fromDate
+            """)
+    List<SingleMovieDTO> findUpcomingMovies(@Param("currentDate") LocalDate currentDate);
 
 }
