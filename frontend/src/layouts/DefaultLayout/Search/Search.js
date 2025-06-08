@@ -100,7 +100,7 @@ function Search() {
                                 <input
                                     type="text"
                                     placeholder='Kiếm gì đê'
-                                    className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill    ') }
+                                    className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill') }
                                     value={ searchValue }
                                     onChange={ (e) => handleChangeSearchValue(e) }
                                 />
@@ -113,17 +113,25 @@ function Search() {
                             {/* result search */ }
                             { (!isLoading) ? (
                                 <div className={ cx('search-layout', 'custome-scroll-bar', 'mt-3 d-flex flex-column align-items-center') }>
-                                    <div className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-secondary pb-2') }>
-                                        <img
-                                            src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg"
-                                            alt=""
-                                        />
-                                        <div className='ms-2'>
-                                            <strong className={ cx("movie-name") }>Nhiệm Vụ Bất Khả Thi - Nghiệp Báo Cuổi Cùng</strong>
-                                            <p className={ cx('genre', 'text-secondary') }>Phiêu Lưu, Hành Động</p>
-                                            <p><i className="fa-solid fa-star text-warning"></i> 9.3</p>
-                                        </div>
-                                    </div>
+                                    { searchResult.map((item) => {
+                                        return (
+                                            <div className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') } key={ item.id }>
+                                                <div className='w-25'>
+                                                    <img
+                                                        src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg"
+                                                        alt=""
+                                                    />
+                                                </div>
+                                                <div className='ms-2 w-75'>
+                                                    <strong className={ cx("movie-name") }>{ item.nameVN }</strong>
+                                                    <p className={ cx('genre', 'text-secondary') }>{ item.types.join(', ') }</p>
+                                                    <p className='fs-7'><i className="fa-solid fa-star text-warning"></i> { item.avgRating }</p>
+                                                </div>
+                                            </div>
+                                        )
+                                    }) }
+
+
                                     { !!searchResult.length &&
                                         <button className='mt-3 text-red fw-bold' onClick={ () => handleShowMore() }>
                                             <i className="fa-solid fa-chevron-down me-1"></i>

@@ -8,7 +8,7 @@ import Avatar from "../../../components/Avatar/Avatar";
 
 const cx = classNames.bind(styles);
 
-function Header({ user }) {
+function Header({ user, logout }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
@@ -41,11 +41,14 @@ function Header({ user }) {
                         <div className="d-flex align-items-center h-100">
                             <Search />
                             { (user) ? (
-                                <Avatar
-                                    src={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
-                                    fallBack={ "https://pbs.twimg.com/media/FIw0iNhXwAQkxKh?format=jpg&name=small" }
-                                    className="cursor-pointer"
-                                />
+                                <>
+                                    <Avatar
+                                        src={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
+                                        fallBack={ "https://pbs.twimg.com/media/FIw0iNhXwAQkxKh?format=jpg&name=small" }
+                                        className="cursor-pointer"
+                                    />
+                                    <button onClick={ () => logout() }>Logout</button>
+                                </>
                             ) : (
                                 <CustomizeButton to={ "/login" } primary small>Đăng nhập</CustomizeButton>
                             ) }

@@ -29,7 +29,7 @@ function MovieSchedule() {
                                 className={ `btn d-flex flex-column align-items-center justify-content-center p-0 
                 ${isSelected ? 'bg-red btn-danger text-black' : 'btn-light'} 
                 border rounded over-hidden`}
-                                style={ { width: '66px', height: '60px' } }
+                                style={ { width: '60px', height: '60px' } }
                                 onClick={ () => setSelectedDate(day.format('YYYY-MM-DD')) }
                             >
                                 <strong className='w-100 h-50 bg-light d-flex align-items-center justify-content-center' style={ { fontSize: '22px' } }>{ day.date() }</strong>
@@ -39,8 +39,7 @@ function MovieSchedule() {
                     }) }
                 </div>
 
-
-                <div className='w-100 mt-4'>
+                <div className='w-100 mt-4 custome-scroll-bar custome-scroll-bar-light' style={ { maxHeight: '400px', overflowY: 'auto' } }>
                     <MovieItem />
                     <MovieItem />
                     <MovieItem />
