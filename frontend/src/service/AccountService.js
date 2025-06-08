@@ -53,6 +53,26 @@ const createAccountAPI = (roleId, email, fullName, gender, password, phoneNumber
     return axios.post(URL_BACKEND, data);
 }
 
+const deleteAccountAPI = (accountId) => {
+    const URL_BACKEND = `/public/accounts/is-deleted`;
+    const data = {
+        accountId,
+        isDelete: true
+    }
+    return axios.put(URL_BACKEND, data);
+}
+
+const updateAccountAvatarAPI = (accountId, file) => {
+    const URL_BACKEND = `/public/accounts/${accountId}/avatar`;
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return axios.put(URL_BACKEND, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
+}
+
 export {
     fetchAllAccountAPI,
     fetchAccountByIdAPI,
@@ -60,5 +80,6 @@ export {
     updateAccountInfoAPI,
     updateAccountStatusAPI,
     createAccountAPI,
-
+    deleteAccountAPI,
+    updateAccountAvatarAPI
 }

@@ -1,9 +1,9 @@
 import { message, Pagination, Popconfirm, Space, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { Lock, LockOpen, SquarePen } from "lucide-react";
+import { Lock, LockOpen, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { UpdatePromotionModal } from "../Modal/promotions/UpdatePromotionModal";
-import { updatePromotionActiveAPI } from "../../../service/PromotionService";
+import { deletePromotionAPI, updatePromotionActiveAPI } from "../../../service/PromotionService";
 
 
 
@@ -28,6 +28,16 @@ export const PromotionTable = (props) => {
                     {' thành công'}
                 </span>
             );
+            setRefreshFlag(prev => !prev);
+            return;
+        }
+        message.error(`Error: ${res.message}`)
+    };
+
+    const handleDeletePromotion = async (record) => {
+        const res = await deletePromotionAPI(record.id);
+        if (res.result) {
+            message.success(`Mã ${record.code} đã được xoá thành công`);
             setRefreshFlag(prev => !prev);
             return;
         }
@@ -130,6 +140,20 @@ export const PromotionTable = (props) => {
                                 </Popconfirm>
                             </>
                         )}
+
+                        <Popconfirm
+                            placement="left"
+                            title="Xoá mã khuyến mãi"
+                            description="Xác nhận xoá?"
+                            onConfirm={() => handleDeletePromotion(record)}
+                            okText="Xoá"
+                            cancelText="Huỷ"
+                        >
+                            <button className="text-amber-600 hover:text-amber-700">
+                                <Trash2 size={16} strokeWidth={1.7} />
+                            </button>
+                        </Popconfirm>
+
                     </Space>
                 </>
 

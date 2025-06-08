@@ -5,11 +5,11 @@ import './login.css'
 import LoginPage from './Page/LoginPage';
 import SignUpPage from './Page/SignUpPage';
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
-import { Dashboard } from './Page/admin/Dashboard';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
+import { DashboardPage } from './Page/admin/DashboardPage';
 
 
 
@@ -24,7 +24,7 @@ function App() {
         <Route path='/home' element={<DefaultLayout />} />
 
         <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
+          <Route index element={<DashboardPage />} />
 
           <Route path='users-members'
             element={<UserPage key="members" userText="Thành viên" userFilter="Member" />} />

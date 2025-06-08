@@ -1,9 +1,9 @@
 import { message, Pagination, Popconfirm, Space, Table, Tag } from "antd";
 import dayjs from "dayjs";
-import { Lock, LockOpen, SquarePen } from "lucide-react";
+import { Lock, LockOpen, SquarePen, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
-import { updateAccountStatusAPI } from "../../../service/AccountService";
+import { deleteAccountAPI, updateAccountStatusAPI } from "../../../service/AccountService";
 import { UpdateUserModal } from "../Modal/users/UpdateUserModal";
 
 
@@ -44,6 +44,17 @@ export const UserTable = (props) => {
         navigate(`${location.pathname}/${accountId}`);
 
     }
+
+    const handleDeleteAccount = async (record) => {
+        const res = await deleteAccountAPI(record.accountId);
+        if (res.result) {
+            message.success(`Tài khoản ${record.email} đã được xoá thành công`);
+            setRefreshFlag(prev => !prev);
+            return;
+        }
+        message.error(`Error: ${res.message}`)
+    };
+
 
     const columns = [
         {
@@ -146,6 +157,19 @@ export const UserTable = (props) => {
                                 </Popconfirm>
                             </>
                         )}
+
+                        <Popconfirm
+                            placement="left"
+                            title="Xoá tài khoản"
+                            description="Xác nhận xoá?"
+                            onConfirm={() => handleDeleteAccount(record)}
+                            okText="Xoá"
+                            cancelText="Huỷ"
+                        >
+                            <button className="text-amber-600 hover:text-amber-700">
+                                <Trash2 size={16} strokeWidth={1.7} />
+                            </button>
+                        </Popconfirm>
 
                     </Space>
                 </>

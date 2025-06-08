@@ -35,10 +35,20 @@ const updatePromotionActiveAPI = (id, active) => {
     return axios.put(URL_BACKEND, data);
 }
 
+const deletePromotionAPI = (id) => {
+    const URL_BACKEND = `/public/promotions/is-deleted`;
+    const data = {
+        id,
+        isDelete: true
+    }
+    return axios.put(URL_BACKEND, data);
+}
+
 
 export {
     fetchAllPromotionAPI,
     createPromotionAPI,
     updatePromotionAPI,
-    updatePromotionActiveAPI
+    updatePromotionActiveAPI,
+    deletePromotionAPI
 };

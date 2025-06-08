@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import { useLocation, useOutletContext } from "react-router-dom";
 import { CreatePromotionModal } from '../../components/admin/Modal/promotions/CreatePromotionModal';
 import { PromotionTable } from '../../components/admin/Table/PromotionTable';
-import { fetchAllPromotionAPI } from '../../service/PromotionService';
+import { fetchAllPromotionAPI, updatePromotionActiveAPI } from '../../service/PromotionService';
 import { TicketPlus } from 'lucide-react';
 import { debounce } from 'lodash';
 import { sfAnd, sfEqual, sfLike, sfOr } from 'spring-filter-query-builder';
+import dayjs from 'dayjs';
 
 
 
 export const PromotionPage = (props) => {
     const { setBreadcrumbItems } = useOutletContext();
     const { promotionText } = props;
-    const location = useLocation();
+    // const location = useLocation();
 
     const [dataPromotions, setDataPromotions] = useState(null);
     const [searchPromotion, setSearchPromotion] = useState("");
@@ -33,12 +34,56 @@ export const PromotionPage = (props) => {
         ]);
     }, []);
 
+    // Hàm kiểm tra và cập nhật các promotion đã hết hạn
+    const checkAndUpdateExpiredPromotions = async (promotions) => {
+        const now = dayjs();
+        const updatedPromotions = [...promotions];
+        let hasUpdates = false;
+
+        for (let i = 0; i < updatedPromotions.length; i++) {
+            const promotion = updatedPromotions[i];
+
+            // Kiểm tra promotion hết hạn
+            if (promotion.active && promotion.endTime) {
+                const endTime = dayjs(promotion.endTime);
+                if (now.isAfter(endTime)) {
+                    try {
+                        // Update trong database
+                        await updatePromotionActiveAPI(promotion.id, false);
+
+                        // Update local state
+                        updatedPromotions[i] = { ...promotion, active: false };
+                        hasUpdates = true;
+
+                        console.log(`Auto disabled expired promotion: ${promotion.code}`);
+                    } catch (error) {
+                        console.error(`Error updating promotion ${promotion.code}:`, error);
+                    }
+                }
+            }
+        }
+
+        return { updatedPromotions, hasUpdates };
+    };
+
     useEffect(() => {
         const loadPromotions = async () => {
-            const res = await fetchAllPromotionAPI(page, size, filter);
-            if (res && res.result) {
-                setTotal(res.result.meta.total);
-                setDataPromotions(res.result.data);
+            try {
+                const res = await fetchAllPromotionAPI(page, size, filter);
+                if (res && res.result) {
+                    setTotal(res.result.meta.total);
+
+                    // Check và update expired promotions
+                    const { updatedPromotions, hasUpdates } = await checkAndUpdateExpiredPromotions(res.result.data);
+                    setDataPromotions(updatedPromotions);
+
+                    if (hasUpdates) {
+                        // Có thể show notification
+                        console.log('Some expired promotions have been automatically disabled');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading promotions:', error);
             }
         }
 
@@ -46,7 +91,6 @@ export const PromotionPage = (props) => {
     }, [page, size, filter, refreshFlag]);
 
     useEffect(() => {
-
         const handleFilterPromotion = debounce(() => {
             const filters = [];
             const searchTerm = searchPromotion ? searchPromotion.toUpperCase() : "";

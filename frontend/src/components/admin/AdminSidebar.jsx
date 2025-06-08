@@ -67,9 +67,9 @@ export const AdminSidebar = (props) => {
         // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được
     }, [location.pathname]);
 
-    // Handle menu open/close
+    // Đóng mở menu (Người dùng) 
     const handleOpenChange = (keys) => {
-        console.log('Open keys changed:', keys);
+        // console.log('Open keys changed:', keys);
         setOpenKeys(keys);
     };
 
@@ -132,7 +132,7 @@ export const AdminSidebar = (props) => {
                 <Menu
                     selectedKeys={getSelectedKeys()}
                     openKeys={collapsed ? [] : openKeys} // Sử dụng state openKeys
-                    onOpenChange={handleOpenChange} // Handle menu open/close
+                    onOpenChange={handleOpenChange} // Đóng mở menu và cập nhật openKeys
                     mode="inline"
                     theme="light"
                     inlineCollapsed={collapsed}

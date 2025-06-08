@@ -12,7 +12,7 @@ export const AdminHeader = (props) => {
 
     useEffect(() => {
         if (location.pathname === '/admin') {
-            setTitle("BẢNG ĐIỀU KHIỂN");
+            setTitle("BẢNG ĐIỀU KHIỂN (CHỨC NĂNG ĐANG PHÁT TRIỂN)");
         } else if (location.pathname.includes('users-members')) {
             setTitle("QUẢN LÝ THÀNH VIÊN");
         } else if (location.pathname.includes('users-employees')) {

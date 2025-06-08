@@ -1,5 +1,8 @@
 package com.example.demo.service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import com.example.demo.DTO.response.ResPagination;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AccountService {
@@ -30,7 +35,12 @@ public class AccountService {
     }
 
     public ResPagination fetchAllAccountPagination(Specification<Account> spec, Pageable pageable) {
-        Page<Account> accountPage = accountRepository.findAll(spec, pageable);
+
+        Specification<Account> finalSpec = Specification.where(spec)
+                .and((root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("isDeleted"), false));
+
+        Page<Account> accountPage = accountRepository.findAll(finalSpec, pageable);
 
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
                 .page(pageable.getPageNumber() + 1)
@@ -112,8 +122,44 @@ public class AccountService {
         return accountRepository.save(currentAccount);
     }
 
+    public Account handleDeleteAccount(@RequestBody Account account) {
+        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
+        if (currentAccount == null) {
+            throw new RuntimeException("Account not found");
+        }
+        currentAccount.setIsDeleted(true);
+        return accountRepository.save(currentAccount);
+    }
+
     public Account findAccountByEmail(String email) {
         return accountRepository.findByEmail(email).orElse(null);
+    }
+
+    public Account handleUploadAvatar(Long id, MultipartFile avatarFile) {
+        Account currentAccount = accountRepository.findById(id).orElse(null);
+        if (currentAccount == null) {
+            throw new RuntimeException("Account not found");
+        }
+        if (avatarFile == null || avatarFile.isEmpty()) {
+            throw new RuntimeException("No file uploaded");
+        }
+
+        try {
+            // Đường dẫn lưu file, ex: src/main/resources/static/avatars/
+            String uploadDir = "uploads/avatars/";
+            // Tạo thư mục nếu chưa tồn tại
+            Files.createDirectories(Paths.get(uploadDir));
+
+            String fileName = "avatar_" + id + "_" + System.currentTimeMillis() + "_" + avatarFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir + fileName);
+            Files.write(filePath, avatarFile.getBytes());
+
+            currentAccount.setAvatar(fileName);
+
+            return accountRepository.save(currentAccount);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload avatar: " + e.getMessage());
+        }
     }
 
 }

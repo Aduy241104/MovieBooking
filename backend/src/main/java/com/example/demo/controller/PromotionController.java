@@ -67,6 +67,19 @@ public class PromotionController {
                 .build();
     }
 
+    @PutMapping("public/promotions/is-deleted")
+    public ApiResponse<Promotion> deletePromotion(@RequestBody Promotion promotion) {
+        Promotion currentPromotion = promotionService.fetchPromotionById(promotion.getId());
+        if(currentPromotion == null) {
+            throw new RuntimeException("Promotion not found");
+        }
+        return ApiResponse.<Promotion>builder()
+                .status(HttpStatus.OK.value())
+                .message("Delete promotion")
+                .result(promotionService.handleDeletePromotion(promotion))
+                .build();
+    }
+
     @GetMapping("/public/promotions")
     public ApiResponse<ResPagination> getAllPromotions(
             @Filter Specification<Promotion> spec, Pageable pageable) {

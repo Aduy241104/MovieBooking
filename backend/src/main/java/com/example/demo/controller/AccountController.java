@@ -17,6 +17,7 @@ import com.example.demo.service.AccountService;
 import com.example.demo.model.Account;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -41,7 +42,7 @@ public class AccountController {
         log.info("User info: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        List<Account> accounts = this.accountService.getAllAccount();
+        List<Account> accounts = accountService.getAllAccount();
         return ApiResponse.<List<Account>>builder()
                 .result(accounts)
                 .build();
@@ -54,7 +55,7 @@ public class AccountController {
         return ApiResponse.<ResPagination>builder()
                 .status(HttpStatus.OK.value())
                 .message("Fetch all account")
-                .result(this.accountService.fetchAllAccountPagination(spec, pageable))
+                .result(accountService.fetchAllAccountPagination(spec, pageable))
                 .build();
     }
 
@@ -63,26 +64,26 @@ public class AccountController {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
                 .message("Fetch a account")
-                .result(this.accountService.fetchAccountById(id))
+                .result(accountService.fetchAccountById(id))
                 .build();
     }
 
     @PostMapping("/public/accounts")
     public ApiResponse<Account> createAccount(@RequestBody Account account) {
-        if (this.roleService.findRoleById(account.getRole().getRoleId()) == null) {
+        if (roleService.findRoleById(account.getRole().getRoleId()) == null) {
             throw new RuntimeException("Role not found");
         }
-        if (this.accountService.findAccountByEmail(account.getEmail()) != null) {
+        if (accountService.findAccountByEmail(account.getEmail()) != null) {
             throw new RuntimeException("Account already exists");
         }
 
-        String passwordEncoded = this.passwordEncoder.encode(account.getPassword());
+        String passwordEncoded = passwordEncoder.encode(account.getPassword());
         account.setPassword(passwordEncoded);
 
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.CREATED.value())
                 .message("Create account")
-                .result(this.accountService.handleCreateAccount(account))
+                .result(accountService.handleCreateAccount(account))
                 .build();
     }
 
@@ -91,7 +92,7 @@ public class AccountController {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
                 .message("Update a account in list user")
-                .result(this.accountService.handleUpdateAccountQuick(account))
+                .result(accountService.handleUpdateAccountQuick(account))
                 .build();
     }
 
@@ -100,16 +101,36 @@ public class AccountController {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
                 .message("Update a account in list user")
-                .result(this.accountService.handleUpdateAccountInfo(id, account))
+                .result(accountService.handleUpdateAccountInfo(id, account))
                 .build();
     }
 
     @PutMapping("/public/accounts/status")
-    public ApiResponse<Account> updateStatusAccount(@RequestBody Account account) {
+    public ApiResponse<Account> updateAccountStatus(@RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
                 .message("Update status account")
-                .result(this.accountService.handleUpdateStatusAccount(account))
+                .result(accountService.handleUpdateStatusAccount(account))
+                .build();
+    }
+
+    @PutMapping("/public/accounts/is-deleted")
+    public ApiResponse<Account> deleteAccount(@RequestBody Account account) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Delete account")
+                .result(accountService.handleDeleteAccount(account))
+                .build();
+    }
+
+    @PutMapping("/public/accounts/{id}/avatar")
+    public ApiResponse<Account> uploadAvatar(
+            @PathVariable Long id,
+            @RequestParam("avatar") MultipartFile avatarFile) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Upload avatar")
+                .result(accountService.handleUploadAvatar(id, avatarFile))
                 .build();
     }
 

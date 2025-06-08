@@ -40,13 +40,27 @@ public class PromotionService {
         return promotionRepository.save(currentPromotion);
     }
 
+    public Promotion handleDeletePromotion(Promotion promotion) {
+        Promotion currentPromotion = promotionRepository.findById(promotion.getId()).orElse(null);
+        if (currentPromotion == null) {
+            throw new RuntimeException("Promotion not found");
+        }
+        currentPromotion.setIsDeleted(true);
+        return promotionRepository.save(currentPromotion);
+    }
+
     public ResPagination fetchAllPromotions(Specification<Promotion> spec, Pageable pageable) {
-        Page<Promotion> promotions = promotionRepository.findAll(spec, pageable);
+        // Combine user specification with isDeleted = false condition
+        Specification<Promotion> finalSpec = Specification.where(spec)
+                .and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("isDeleted"), false));
+
+        Page<Promotion> promotions = promotionRepository.findAll(finalSpec, pageable);
 
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
                 .page(pageable.getPageNumber() + 1)
                 .pageSize(pageable.getPageSize())
-                .pages(promotions.getNumberOfElements())
+                .pages(promotions.getTotalPages())
                 .total(promotions.getTotalElements())
                 .build();
 

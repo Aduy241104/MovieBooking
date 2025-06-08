@@ -1,10 +1,11 @@
 import { LoadingOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button, Divider, Form, Input, message, Popconfirm, Tag, Spin, Row, Col, Select, DatePicker } from "antd";
+import { Avatar, Button, Divider, Form, Input, message, Popconfirm, Tag, Spin, Row, Col, Select, DatePicker, Upload, Modal } from "antd";
 import { Bolt, Cake, Calendar, IdCard, LetterText, Lock, LockOpen, Mail, Phone, UserPen, VenusAndMars } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { fetchAccountByIdAPI, updateAccountInfoAPI, updateAccountStatusAPI } from "../../service/AccountService";
+import { fetchAccountByIdAPI, updateAccountInfoAPI, updateAccountStatusAPI, updateAccountAvatarAPI } from "../../service/AccountService";
+import { UploadAvatarModal } from "../../components/admin/Modal/users/UploadAvatarModal";
 
 
 export const UserDetailPage = (props) => {
@@ -16,6 +17,10 @@ export const UserDetailPage = (props) => {
     const [isEditing, setIsEditing] = useState(false);
     const { accountId } = useParams();
     const [form] = Form.useForm();
+
+    // States cho upload avatar
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [uploading, setUploading] = useState(false);
 
     const menuItems = [
         { key: '1', label: <Link to={"/admin/users-members"}>Thành viên</Link> },
@@ -66,7 +71,7 @@ export const UserDetailPage = (props) => {
     };
 
     const handleFormUpdate = async (values) => {
-        console.log('>>> ', values)
+        // console.log('>>> ', values)
         const dataToUpdate = {
             ...values,
             dateOfBirth: values.dateOfBirth ? dayjs(values.dateOfBirth).format("YYYY-MM-DD") : null,
@@ -100,6 +105,28 @@ export const UserDetailPage = (props) => {
         score: dataUser.score == null ? 0 : dataUser.score,
     };
 
+    // Hàm xử lý upload avatar
+    const handleAvatarUpload = async (file, resetModal) => {
+        // console.log('File info: ', file);
+        setUploading(true);
+        try {
+            const res = await updateAccountAvatarAPI(accountId, file);
+            if (res && res.result) {
+                setDataUser(prev => ({ ...prev, avatar: res.result.avatar }));
+                message.success('Cập nhật ảnh đại diện thành công!');
+                setIsUploadModalOpen(false);
+                if (resetModal) resetModal();
+            } else {
+                message.error(res?.error?.message || 'Upload ảnh thất bại!');
+            }
+        } catch (error) {
+            console.error('Error upload file: ', error?.response?.data || error);
+            message.error('Có lỗi xảy ra khi upload ảnh!');
+        }
+        setUploading(false);
+    };
+
+
 
     return (
         <>
@@ -122,11 +149,17 @@ export const UserDetailPage = (props) => {
                     <>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-20 px-4">
                             <div className="flex items-center gap-3 w-full md:w-auto">
-                                <Avatar size={90} src={dataUser.avatar} icon={!dataUser.avatar && <UserOutlined />} />
+                                <Avatar size={90} src={`${process.env.REACT_APP_BACKEND_URL}/avatars/${dataUser.avatar}`} icon={!dataUser.avatar && <UserOutlined />} />
                                 <div className="flex flex-col gap-1">
                                     <p className="text-lg font-medium">{dataUser.fullName}</p>
                                     <p className="text-base text-cyan-600 font-medium">{userText}</p>
-                                    <Button icon={<UploadOutlined />} size={"small"}>Đổi ảnh</Button>
+                                    <Button
+                                        icon={<UploadOutlined />}
+                                        size={"small"}
+                                        onClick={() => setIsUploadModalOpen(true)}
+                                    >
+                                        Đổi ảnh
+                                    </Button>
                                 </div>
                             </div>
 
@@ -388,6 +421,15 @@ export const UserDetailPage = (props) => {
                                 </Form>
                             </div>
                         </div>
+
+                        {/* Modal Upload Avatar */}
+                        <UploadAvatarModal
+                            open={isUploadModalOpen}
+                            onCancel={() => setIsUploadModalOpen(false)}
+                            uploading={uploading}
+                            currentAvatar={dataUser.avatar}
+                            onUpload={handleAvatarUpload}
+                        />
                     </>
                 )}
 

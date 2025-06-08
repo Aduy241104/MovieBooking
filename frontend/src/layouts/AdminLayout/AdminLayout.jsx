@@ -80,7 +80,7 @@ export const AdminLayout = () => {
                         <Outlet
                             context={{
                                 dataUsers, isLoading, setIsLoading,
-                                page, setPage, size, setSize, total,
+                                page, setPage, size, total,
                                 setFilter, setBreadcrumbItems, setRefreshFlag
                             }}
                         />
