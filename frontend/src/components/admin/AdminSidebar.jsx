@@ -1,5 +1,5 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Film } from 'lucide-react'
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -37,6 +37,11 @@ export const AdminSidebar = (props) => {
             key: 'promotions',
             icon: <Ticket size={20} strokeWidth={1.5} />,
             label: <Link to={"promotions"}>Mã khuyến mãi</Link>
+        },
+        {
+            key: 'room-list',
+            icon: <Film size={20} strokeWidth={1.5}/>,
+            label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
         },
     ];
 
@@ -142,4 +147,4 @@ export const AdminSidebar = (props) => {
             </Sider>
         </>
     );
-}
+};
