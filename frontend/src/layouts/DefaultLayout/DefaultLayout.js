@@ -1,18 +1,19 @@
-import React from 'react'
+import { useContext, useState, useEffect } from 'react'
 import Header from './Header'
-import HomePage from '../../Page/Home/HomePage'
+import { AuthContext } from '../../context/AuthContext';
 
 function DefaultLayout({ children }) {
-  return (
-    <div className='bg-dark'>
-      <Header />
-      <HomePage/>
-      <h1>Hello</h1>
-      <h1>Hello</h1>
-      <h1>Hello</h1>
+  const { user, logout } = useContext(AuthContext);
+  const [isLogin, setLogin] = useState(user);
 
-      <h1>Hello</h1>
-      <h1>Hello</h1>
+  useEffect(() => {
+    setLogin(user);
+  }, [user]);
+
+  return (
+    <div className='bg-midnight'>
+      <Header user={ isLogin } logout={ logout } />
+      { children }
     </div>
   )
 }

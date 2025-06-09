@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
-@RequestMapping("/api")
+@RequestMapping("/api/public")
 public class AccountController {
 
     private final AccountService accountService;

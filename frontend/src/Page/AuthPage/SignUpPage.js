@@ -1,8 +1,8 @@
-import AuhenticationLayout from '../layouts/AuthenticationLayout'
+import AuhenticationLayout from '../../layouts/AuthenticationLayout'
 import { useState } from 'react'
 import VerifyOtpForm from './OtpInput';
-import { getOtpAPI } from '../service/AuthService';
-import ErrorNotification from '../components/ErrorNotification/ErrorNotification';
+import { getOtpAPI } from '../../service/AuthService';
+import ErrorNotification from '../../components/ErrorNotification/ErrorNotification';
 
 function SignUpPage() {
     const [validated, setValidated] = useState(false);
