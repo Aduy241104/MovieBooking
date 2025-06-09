@@ -8,7 +8,8 @@ export default function RoomDetail() {
     const [room, setRoom] = useState(null);
 
     const seatColors = {
-        regular: "#2c2c2c",     // xám sangs
+        regular: "#2c2c2c",
+        vip:"#c62828",     // xám sangs
         double: "#e91e63",   // tím đỏ sang
     };
 
