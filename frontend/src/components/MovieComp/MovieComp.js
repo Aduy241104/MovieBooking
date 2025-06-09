@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 function MovieComp({ imglink }) {
     return (
         <div className={ cx('wrapper', 'w-responsive') }>
-            <div className={ cx('poster', 'border border-2 border-secondary rounded-1') }>
+            <div className={ cx('poster', 'border border-1 border-dark rounded-1') }>
                 <img src={ imglink } alt="" />
             </div>
             <div className="text-light">

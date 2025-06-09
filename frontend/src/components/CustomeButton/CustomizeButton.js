@@ -9,7 +9,7 @@ function CustomizeButton({ to, href, onClick, className, children, primary = tru
 
     let Comp = 'button';
     let classes = cx('wrapper', {
-        [classNames]: classNames,
+        [className]: className,
         primary,
         outLine,
         small,

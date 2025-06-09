@@ -65,12 +65,12 @@ function BannerSlide() {
                                     <div className='name-slide'>{ item.Title }</div>
                                     <div className='d-flex align-items-center detail'>
                                         <p><i className="fa-solid fa-star text-warning"></i> 8.4</p>
-                                        <p className='btn btn-sm text-light border border-1 border-danger pe-3 ps-3'>2025</p>
+                                        <p className='btn btn-sm text-light border border-1 border-gold pe-3 ps-3'>2025</p>
                                         <p><i className="fa-regular fa-clock"></i>150 min</p>
                                     </div>
                                     <div className='des line-clamp'>{ item.Description }</div>
                                     <div className='d-flex align-items-center'>
-                                        <CustomizeButton primary={ true } large rounded leftIcon={ <i className="fa-solid fa-ticket"></i> }>
+                                        <CustomizeButton className="login-btn" large rounded leftIcon={ <i className="fa-solid fa-ticket"></i> }>
                                             Đặt vé
                                         </CustomizeButton>
                                         <CustomizeButton outLine rounded large>Xem chi tiết</CustomizeButton>

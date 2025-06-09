@@ -3,7 +3,8 @@
     --default-layout-width: 1150px;
     --white: #fff;
     --primary: rgba(255, 59, 92, 1);
-    --red: #E30813;
+    // --red: #E30813;
+    --red: #ffd875;
     --black: #000;
     --smoke-gray: rgb(175, 171, 171);
 
@@ -50,7 +51,7 @@ a {
 }
 
 .border-lightGray {
-  border-color: rgb(201, 198, 198);
+    border-color: rgb(201, 198, 198);
 }
 
 .cursor-pointer {
@@ -66,7 +67,26 @@ a {
 }
 
 .bg-midnight {
-    background-color: rgb(25, 27, 36);
+    // background-color: rgb(25, 27, 36);
+    background-color: #191b24;
+}
+
+.bg-night {
+    background-color: #272a39;
+}
+
+.border-gold {
+    border-color: #ffd875 !important;
+}
+
+.bg-text-2 {
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(103, 65, 150) 130%);
+    background-size: 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .swiper {
