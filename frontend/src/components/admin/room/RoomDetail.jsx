@@ -16,7 +16,7 @@ export default function RoomDetail() {
     useEffect(() => {
         const fetchRoom = async () => {
             try {
-                const res = await axios.get(`/api/rooms/${roomId}`);
+                const res = await axios.get(`/api/public/rooms/${roomId}`);
                 setRoom(res.data);
             } catch (err) {
                 console.error("Lỗi khi lấy chi tiết phòng:", err);
@@ -29,7 +29,7 @@ export default function RoomDetail() {
     const handleDelete = async () => {
         if (window.confirm("Bạn có chắc muốn xóa phòng này?")) {
             try {
-                await axios.delete(`/api/rooms/${roomId}`);
+                await axios.delete(`/api/public/rooms/${roomId}`);
                 navigate("/admin/room-list");
             } catch (err) {
                 console.error("Lỗi khi xóa phòng:", err);

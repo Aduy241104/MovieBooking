@@ -1,0 +1,61 @@
+.overlay {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    width: 100vw;
+    height: 93vh;
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.3); // làm tối nhẹ
+    z-index: 998; // dưới Tippy nhưng trên giao diện
+}
+
+.search-place:focus-within {
+    border: 2px solid var(--red) !important;
+
+}
+
+.search-layout {
+    max-height: 440px;
+    overflow: auto;
+}
+
+.search-result-layout {
+    min-width: 310px;
+    max-width: 310px;
+    
+
+    img {
+        width: 70px;
+    }
+}
+
+.search-input:focus-visible {
+    outline-width: 0;
+    width: 100%;
+
+}
+
+.genre {
+    font-size: 14px;
+}
+
+.arr {
+    // max-height: 516px;
+    // box-sizing: border-box;
+    // overflow-y: auto;
+    position: relative;
+}
+
+
+.arr::after {
+    content: "";
+    position: absolute;
+    top: -10px;
+    right: 5%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid white;
+}

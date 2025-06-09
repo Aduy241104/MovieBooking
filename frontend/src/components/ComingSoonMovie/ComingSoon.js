@@ -22,23 +22,32 @@ function ComingSoon() {
                             </SwiperSlide>
                             <SwiperSlide>
                                 <MovieComp
-                                    imglink={ "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/t/e/teaser_poster_bringherback_a24_sony_1_.jpg" } />
+                                    imglink={ "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg" } />
                             </SwiperSlide>
                             <SwiperSlide>
                                 <MovieComp
-                                    imglink={ "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/t/e/teaser_poster_bringherback_a24_sony_1_.jpg" } />
+                                    imglink={ "https://metiz.vn/media/poster_film/ba-mat.jpg" } />
                             </SwiperSlide>
                             <SwiperSlide>
                                 <MovieComp
-                                    imglink={ 'https://api-website.cinestar.com.vn/media/wysiwyg/NEWS/mission-impoossible-jpg-7332-1731381379.png' } />
+                                    imglink={ 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTITafLS1S1kDGOG8OvmjmYdhYsfPI69TZ9PQ&s' } />
                             </SwiperSlide>
                             <SwiperSlide>
                                 <MovieComp
-                                    imglink={ 'https://api-website.cinestar.com.vn/media/wysiwyg/NEWS/mission-impoossible-jpg-7332-1731381379.png' } />
+                                    imglink={ 'https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/z/o/zootopia_2_-_teaser_poster_up.jpg' } />
                             </SwiperSlide>
-                            <SwiperSlide>Slide 4</SwiperSlide>
-                            <SwiperSlide>Slide 3</SwiperSlide>
-                            <SwiperSlide>Slide 4</SwiperSlide>
+                            <SwiperSlide>
+                                <MovieComp
+                                    imglink={ "https://metiz.vn/media/poster_film/ba-mat.jpg" } />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <MovieComp
+                                    imglink={ 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTITafLS1S1kDGOG8OvmjmYdhYsfPI69TZ9PQ&s' } />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <MovieComp
+                                    imglink={ 'https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/z/o/zootopia_2_-_teaser_poster_up.jpg' } />
+                            </SwiperSlide>
                         </SwiperSlides>
                     </div>
                 </div>

@@ -12,7 +12,7 @@ export default function RoomForm({ room, onBack }) {
 
   useEffect(() => {
     if (room) {
-      axios.get(`/api/rooms/${room.id}`)
+      axios.get(`/api/public/rooms/${room.id}`)
         .then(res => {
           const data = res.data;
           const rowCount = data.rows;
@@ -83,7 +83,7 @@ export default function RoomForm({ room, onBack }) {
 
     if (!room) {
       try {
-        const res = await axios.get("/api/rooms");
+        const res = await axios.get("/api/public/rooms");
         const existing = res.data.map(r => r.cinemaRoomName.toLowerCase());
         if (existing.includes(name.trim().toLowerCase())) {
           setError("Tên phòng đã tồn tại.");
@@ -116,8 +116,8 @@ export default function RoomForm({ room, onBack }) {
 
     try {
       const res = room
-        ? await axios.put(`/api/rooms/${room.id}`, payload)
-        : await axios.post("/api/rooms", payload);
+        ? await axios.put(`/api/public/rooms/${room.id}`, payload)
+        : await axios.post("/api/public/rooms", payload);
 
       console.log("Lưu thành công:", res.data);
       onBack();

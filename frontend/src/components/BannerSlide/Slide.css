@@ -116,7 +116,7 @@
 }
 
 .content-slide button {
-    padding: 10px 25px;
+    padding: 10px 25px !important;
     font-weight: bold;
     animation: animate 0.6s ease-in-out 1 forwards;
 }
@@ -150,6 +150,7 @@
 .button-slide button {
     border: none;
     cursor: pointer;
+    padding: 5px;
     color: white;
     background-color: transparent !important;
 }

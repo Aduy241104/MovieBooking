@@ -9,7 +9,7 @@ export default function EditRoom() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`/api/rooms/${id}`)
+    axios.get(`/api/public/rooms/${id}`)
       .then(res => setRoom(res.data))
       .catch(err => {
         console.error("Không thể tải phòng:", err);

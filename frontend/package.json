@@ -15,12 +15,15 @@
     "jquery": "^3.7.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.511.0",
+    "moment": "^2.30.1",
     "react": "^18.0.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^18.0.0",
+    "react-is": "^19.1.0",
     "react-router-dom": "^6.29.0",
     "react-scripts": "5.0.1",
     "reactstrap": "^9.2.3",
+    "recharts": "^2.15.3",
     "spring-filter-query-builder": "^1.1.1",
     "swiper": "^11.2.6",
     "tailwindcss": "^4.1.8",
@@ -30,7 +33,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "tw:watch": "npx @tailwindcss/cli -i ./src/input.css -o ./src/output.css --watch"
   },
   "eslintConfig": {
     "extends": [

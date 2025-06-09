@@ -1,16 +1,81 @@
-import { Layout, Menu } from "antd";
-import { Users, Film } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { sfEqual } from 'spring-filter-query-builder';
-import './admin.scss';
+import { Layout } from "antd";
+import { LayoutDashboard, Ticket, Users, Film } from 'lucide-react'
+import { Menu } from 'antd'
+import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import './admin.scss'
+
 
 export const AdminSidebar = (props) => {
-    const { collapsed, width, theme, setFilter } = props;
+    const { collapsed, width, theme } = props;
     const { Sider } = Layout;
+    const location = useLocation();
+    const [openKeys, setOpenKeys] = useState([]);
 
-    const handleFilterMember = () => {
-        const filter = sfEqual('role.roleName', 'Member');
-        setFilter(filter.toString());
+    const items = [
+        {
+            key: 'dashboard',
+            icon: <LayoutDashboard size={20} strokeWidth={1.5} />,
+            label: <Link to={"/admin"}>Dashboard</Link>
+        },
+        {
+            key: 'users',
+            icon: <Users size={20} strokeWidth={1.5} />,
+            label: 'Người dùng',
+            children: [
+                {
+                    key: 'members',
+                    label: <Link to={"users-members"}>Thành viên</Link>
+                },
+                {
+                    key: 'employees',
+                    label: <Link to={"users-employees"}>Nhân viên</Link>
+                },
+            ]
+        },
+        {
+            key: 'promotions',
+            icon: <Ticket size={20} strokeWidth={1.5} />,
+            label: <Link to={"promotions"}>Mã khuyến mãi</Link>
+        },
+        {
+            key: 'room-list',
+            icon: <Film size={20} strokeWidth={1.5}/>,
+            label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
+        },
+    ];
+
+
+    // Xác định selectedKeys dựa trên pathname
+    const getSelectedKeys = () => {
+        const pathname = location.pathname;
+        if (pathname === '/admin') {
+            return ['dashboard'];
+        } else if (pathname.includes('users-members')) {
+            return ['members'];
+        } else if (pathname.includes('users-employees')) {
+            return ['employees'];
+        } else if (pathname.includes('promotions')) {
+            return ['promotions'];
+        }
+        return [];
+    };
+
+    // Cập nhật openKeys khi pathname thay đổi
+    useEffect(() => {
+        const pathname = location.pathname;
+        if (pathname.includes('users-members') || pathname.includes('users-employees')) {
+            setOpenKeys(['users']);
+        } else {
+            setOpenKeys([]);
+        }
+        // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được
+    }, [location.pathname]);
+
+    // Đóng mở menu (Người dùng) 
+    const handleOpenChange = (keys) => {
+        // console.log('Open keys changed:', keys);
+        setOpenKeys(keys);
     };
 
     return (
@@ -69,29 +134,16 @@ export const AdminSidebar = (props) => {
                     )}
                 </div>
 
-                <Menu mode="inline" theme="light" className="menu-link">
-                    <Menu.SubMenu
-                        key="users"
-                        icon={<Users size={20} strokeWidth={1.5} />}
-                        title="Người dùng"
-                    >
-                        <Menu.Item key="members">
-                            <Link to="users-members" onClick={handleFilterMember}>
-                                Thành viên
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="employees">
-                            <Link to="users-employees">Nhân viên</Link>
-                        </Menu.Item>
-                    </Menu.SubMenu>
+                <Menu
+                    selectedKeys={getSelectedKeys()}
+                    openKeys={collapsed ? [] : openKeys} // Sử dụng state openKeys
+                    onOpenChange={handleOpenChange} // Đóng mở menu và cập nhật openKeys
+                    mode="inline"
+                    theme="light"
+                    inlineCollapsed={collapsed}
+                    items={items}
+                />
 
-                    <Menu.Item
-                        key="room-list"
-                        icon={<Film size={20} strokeWidth={1.5} />}
-                    >
-                        <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
-                    </Menu.Item>
-                </Menu>
             </Sider>
         </>
     );

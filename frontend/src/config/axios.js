@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Set config defaults when creating the instance
 const instance = axios.create({
-    baseURL: "http://localhost:8081/api"
+    baseURL: `${process.env.REACT_APP_BACKEND_URL}/api`
 });
 
 // Add a request interceptor

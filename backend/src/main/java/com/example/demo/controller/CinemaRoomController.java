@@ -17,7 +17,7 @@ import com.example.demo.service.CinemaRoomService;
 import java.util.*;
 
 @RestController // Đánh dấu đây là REST controller
-@RequestMapping("/api/rooms") // Mọi endpoint trong controller này đều bắt đầu bằng /api/rooms
+@RequestMapping("/api/public/rooms") // Mọi endpoint trong controller này đều bắt đầu bằng /api/rooms
 @CrossOrigin // Cho phép gọi API từ các domain khác (dùng khi frontend và backend khác port)
 @RequiredArgsConstructor // Tự động tạo constructor cho các field final
 public class CinemaRoomController {

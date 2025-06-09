@@ -57,6 +57,10 @@ public class Account {
     @Column(name = "account_status")
     private Integer status = 1;
 
+    @Builder.Default
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     @Column(name = "social_account_type")
     private String socialAccountType;
 
