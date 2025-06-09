@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Breadcrumb, Layout } from "antd";
 import { Outlet, useLocation } from "react-router-dom";
@@ -5,7 +6,7 @@ import { AdminSidebar } from "../../components/admin/AdminSidebar";
 import { AdminHeader } from "../../components/admin/AdminHeader";
 import { AdminFooter } from "../../components/admin/AdminFooter";
 import { fetchAllAccountAPI } from "../../service/AccountService";
-// import '../../output.css'
+import "../../components/admin/admin.scss"
 
 
 export const AdminLayout = () => {
@@ -20,6 +21,7 @@ export const AdminLayout = () => {
     const [total, setTotal] = useState(0);
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
     const [refreshFlag, setRefreshFlag] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
 
     useEffect(() => {
@@ -32,14 +34,16 @@ export const AdminLayout = () => {
     }, [location.pathname]);
 
     useEffect(() => {
+        setIsLoading(true);
         const loadAccounts = async () => {
-            const res = await fetchAllAccountAPI(page, size, filter);
-            if (res && res.data) {
-                setPage(res.data.meta.page);
-                setSize(res.data.meta.pageSize);
-                setTotal(res.data.meta.total);
-                setDataUsers(res.data.result);
+            if (location.pathname.includes('users-')) {
+                const res = await fetchAllAccountAPI(page, size, filter);
+                if (res && res.result) {
+                    setTotal(res.result.meta.total);
+                    setDataUsers(res.result.data);
+                }
             }
+            setIsLoading(false);
         }
 
         loadAccounts();
@@ -57,7 +61,6 @@ export const AdminLayout = () => {
                     collapsed={collapsed}
                     width={256}
                     theme={"light"}
-                    setFilter={setFilter}
                 />
 
                 <Layout>
@@ -74,23 +77,13 @@ export const AdminLayout = () => {
                     </div>
 
                     <Content style={{ margin: '24px 16px' }}>
-                        {/* While color background for content */}
-                        <div style={{
-                            padding: 24,
-                            // minHeight: 360,
-                            background: '#fff',
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        }}
-                        >
-                            <Outlet
-                                context={{
-                                    dataUsers,
-                                    page, setPage, size, setSize, total,
-                                    setFilter, setBreadcrumbItems, setRefreshFlag
-                                }}
-                            />
-                        </div>
+                        <Outlet
+                            context={{
+                                dataUsers, isLoading, setIsLoading,
+                                page, setPage, size, total,
+                                setFilter, setBreadcrumbItems, setRefreshFlag
+                            }}
+                        />
                     </Content>
 
                     <AdminFooter />

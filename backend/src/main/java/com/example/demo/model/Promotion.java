@@ -2,13 +2,15 @@ package com.example.demo.model;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "promotion")
 public class Promotion {
@@ -40,6 +42,10 @@ public class Promotion {
 
     @Column(name = "promotion_active")
     private Boolean active;
+
+    @Builder.Default
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
 
 }

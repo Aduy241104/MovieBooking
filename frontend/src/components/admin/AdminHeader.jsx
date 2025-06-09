@@ -1,10 +1,26 @@
 import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Dropdown } from "antd";
 import { Header } from "antd/es/layout/layout";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 
 export const AdminHeader = (props) => {
     const { collapsed, toggleCollapsed } = props;
+    const location = useLocation();
+    const [title, setTitle] = useState("");
+
+    useEffect(() => {
+        if (location.pathname === '/admin') {
+            setTitle("BẢNG ĐIỀU KHIỂN (CHỨC NĂNG ĐANG PHÁT TRIỂN)");
+        } else if (location.pathname.includes('users-members')) {
+            setTitle("QUẢN LÝ THÀNH VIÊN");
+        } else if (location.pathname.includes('users-employees')) {
+            setTitle("QUẢN LÝ NHÂN VIÊN");
+        } else if (location.pathname.includes('promotions')) {
+            setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
+        }
+    }, [location.pathname]);
 
     const items = [
         {
@@ -25,9 +41,9 @@ export const AdminHeader = (props) => {
             key: '2',
             label:
                 <>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         <UserOutlined />
-                        <p>Profile</p>
+                        <p>Tài khoản</p>
                     </div>
                 </>,
         },
@@ -35,9 +51,9 @@ export const AdminHeader = (props) => {
             key: '3',
             label:
                 <>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                         <LogoutOutlined />
-                        <p>Logout</p>
+                        <p>Đăng xuất</p>
                     </div>
                 </>,
         }
@@ -70,7 +86,7 @@ export const AdminHeader = (props) => {
                         }}
                     />
                     <h6 style={{ margin: 0, color: '#333', fontWeight: '500' }}>
-                        Bảng Điều Khiển
+                        {title}
                     </h6>
                 </div>
 

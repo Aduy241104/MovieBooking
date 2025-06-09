@@ -1,5 +1,6 @@
 import './GlobleStyle.scss'
 
+
 function GlobleStyle({ children }) {
     return (
         <>
