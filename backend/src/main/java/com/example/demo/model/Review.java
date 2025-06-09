@@ -1,18 +1,18 @@
 package com.example.demo.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"movie_id", "account_id"}))
+@Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = { "movie_id", "account_id" }))
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

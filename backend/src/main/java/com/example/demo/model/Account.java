@@ -50,7 +50,7 @@ public class Account {
     @Column(name = "score")
     private Integer score;
 
-    @Column(name = "avartar")
+    @Column(name = "avatar")
     private String avartar;
 
     @Column(name = "account_status")
