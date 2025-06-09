@@ -114,8 +114,8 @@ CREATE TABLE SEAT (
     CINEMA_ROOM_ID INT REFERENCES CINEMA_ROOM(CINEMA_ROOM_ID) ON DELETE CASCADE, -- Liên kết đến phòng chiếu chứa ghế này.
     SEAT_COL VARCHAR(10),                   -- Vị trí cột của ghế (ví dụ: '1', '2').
     SEAT_ROW VARCHAR(10),                   -- Vị trí hàng của ghế (ví dụ: 'A', 'B').
-    SEAT_STATUS VARCHAR(50),                -- Trạng thái của ghế (ví dụ: 'available', 'booked').
-    SEAT_TYPE VARCHAR(50),                  -- Loại ghế (ví dụ: 'regular', 'vip').
+    SEAT_STATUS INTEGER,                -- Trạng thái của ghế (ví dụ: 'available 1', 'booked 0').
+    SEAT_TYPE INTEGER,                 -- Loại ghế (0 Regular, 1 VIP , 2 COUPLE)
     UNIQUE (CINEMA_ROOM_ID, SEAT_ROW, SEAT_COL) -- Đảm bảo vị trí mỗi ghế là duy nhất trong một phòng chiếu.
 );
 
