@@ -6,11 +6,18 @@ import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
+
+import RoomList from './components/admin/room/RoomList';
+import CreateRoom from './components/admin/room/CreateRoom';
+import EditRoom from './components/admin/room/EditRoom';
+import RoomDetail from './components/admin/room/RoomDetail';
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 
+import HomePage from './Page/Home/HomePage'
 
 
 function App() {
@@ -26,6 +33,13 @@ function App() {
         <Route path='/home' element={<DefaultLayout />} />
 
         <Route path='/admin' element={<AdminLayout />}>
+
+          {/* Tích hợp route danh sách phòng chiếu */}
+          <Route path="/admin/room-list" element={<RoomList />} />
+          <Route path="/admin/room-list/add-room" element={<CreateRoom />} />
+          <Route path="/admin/room-list/room/:id" element={<RoomDetail />} />
+          <Route path="/admin/room-list/:id/edit" element={<EditRoom />} />
+
           <Route index element={<DashboardPage />} />
 
           <Route path='users-members'
@@ -40,6 +54,7 @@ function App() {
 
           <Route path='promotions'
             element={<PromotionPage promotionText="Mã khuyến mãi" />} />
+
         </Route>
       </Routes>
     </>

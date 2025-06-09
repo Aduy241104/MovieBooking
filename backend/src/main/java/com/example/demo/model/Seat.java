@@ -1,34 +1,35 @@
 package com.example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "seat")
+@Table(name = "seat", uniqueConstraints = @UniqueConstraint(columnNames = {"cinema_room_id", "seat_row", "seat_col"}))
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Seat {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seat_id")
-    private Long id;
+    private Long seatId;
 
-    @ManyToOne
-    @JoinColumn(name = "cinema_room_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cinema_room_id", nullable = false)
     private CinemaRoom cinemaRoom;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_type_id", nullable = false)
+    private SeatType seatType;
+
+    @Column(name = "seat_col", length = 255)
+    private String seatCol;
 
     @Column(name = "seat_row")
     private String seatRow;
 
-    @Column(name = "seat_col")
-    private String seatCol;
-
     @Column(name = "seat_status")
     private String seatStatus;
-
-    @Column(name = "seat_type")
-    private String seatType;
-
-
 }
+

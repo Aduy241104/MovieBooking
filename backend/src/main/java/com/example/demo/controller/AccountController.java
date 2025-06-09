@@ -48,7 +48,7 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/public/accounts")
+    @GetMapping("/accounts")
     public ApiResponse<ResPagination> getAllAccount(
             @Filter Specification<Account> spec, Pageable pageable) {
 
@@ -59,7 +59,7 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/public/accounts/{id}")
+    @GetMapping("/accounts/{id}")
     public ApiResponse<Account> getAccount(@PathVariable Long id) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -68,7 +68,7 @@ public class AccountController {
                 .build();
     }
 
-    @PostMapping("/public/accounts")
+    @PostMapping("/accounts")
     public ApiResponse<Account> createAccount(@RequestBody Account account) {
         if (roleService.findRoleById(account.getRole().getRoleId()) == null) {
             throw new RuntimeException("Role not found");
@@ -87,7 +87,7 @@ public class AccountController {
                 .build();
     }
 
-    @PutMapping("/public/accounts")
+    @PutMapping("/accounts")
     public ApiResponse<Account> updateAccountQuick(@RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -96,7 +96,7 @@ public class AccountController {
                 .build();
     }
 
-    @PutMapping("/public/accounts/{id}")
+    @PutMapping("/accounts/{id}")
     public ApiResponse<Account> updateAccountInfo(@PathVariable Long id, @RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -105,7 +105,7 @@ public class AccountController {
                 .build();
     }
 
-    @PutMapping("/public/accounts/status")
+    @PutMapping("/accounts/status")
     public ApiResponse<Account> updateAccountStatus(@RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -114,7 +114,7 @@ public class AccountController {
                 .build();
     }
 
-    @PutMapping("/public/accounts/is-deleted")
+    @PutMapping("/accounts/is-deleted")
     public ApiResponse<Account> deleteAccount(@RequestBody Account account) {
         return ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -123,7 +123,7 @@ public class AccountController {
                 .build();
     }
 
-    @PutMapping("/public/accounts/{id}/avatar")
+    @PutMapping("/accounts/{id}/avatar")
     public ApiResponse<Account> uploadAvatar(
             @PathVariable Long id,
             @RequestParam("avatar") MultipartFile avatarFile) {
