@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
-@RequestMapping("/api")
+@RequestMapping("/api/public")
 public class AccountController {
 
     private final AccountService accountService;
