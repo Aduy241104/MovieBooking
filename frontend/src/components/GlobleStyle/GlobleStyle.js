@@ -1,9 +1,10 @@
 import './GlobleStyle.scss'
 
+
 function GlobleStyle({ children }) {
     return (
         <>
-            { children }
+            {children}
         </>
     )
 }

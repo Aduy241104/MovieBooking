@@ -1,0 +1,20 @@
+.w-responsive {
+    width: 100%;
+
+    @media (min-width: 425px) {
+        width: 100%;
+        overflow: hidden !important;
+    }
+
+    @media (min-width: 768px) {
+        width: 85%;
+    }
+
+    @media (min-width: 992px) {
+        width: 80%;
+    }
+}
+
+.coating {
+    background-color: rgba(0, 0, 0, 0.4);
+}
