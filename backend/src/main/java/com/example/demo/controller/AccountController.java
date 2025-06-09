@@ -2,17 +2,20 @@ package com.example.demo.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.service.RoleService;
+import com.turkraft.springfilter.boot.Filter;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.DTO.response.ApiResponse;
-import com.example.demo.Service.AccountService;
+import com.example.demo.service.AccountService;
 import com.example.demo.model.Account;
 
-import org.springframework.web.bind.annotation.GetMapping;
 import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "*")
@@ -21,8 +24,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api")
 public class AccountController {
 
-    @Autowired
-    private AccountService accountService;
+    private final AccountService accountService;
+    private final RoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+
+    public AccountController(AccountService accountService, RoleService roleService, PasswordEncoder passwordEncoder) {
+        this.accountService = accountService;
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @GetMapping("/acc")
     public ApiResponse<List<Account>> getMethodName() {
@@ -31,9 +41,48 @@ public class AccountController {
         log.info("User info: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        List<Account> accounts = accountService.getAllAccount();
+        List<Account> accounts = this.accountService.getAllAccount();
         return ApiResponse.<List<Account>>builder()
                 .result(accounts)
+                .build();
+    }
+
+    @GetMapping("/public/accounts")
+    public ApiResponse<ResPagination> getAllAccount(
+            @Filter Specification<Account> spec, Pageable pageable) {
+
+        return ApiResponse.<ResPagination>builder()
+                .status(HttpStatus.OK.value())
+                .message("Fetch all account")
+                .result(this.accountService.fetchAllAccountPagination(spec, pageable))
+                .build();
+    }
+
+    @PostMapping("/public/accounts")
+    public ApiResponse<Account> createAccount(@RequestBody Account account) {
+        if (this.roleService.findRoleById(account.getRole().getRoleId()) == null) {
+            throw new RuntimeException("Role not found");
+        }
+        if (this.accountService.findAccountByEmail(account.getEmail()) != null) {
+            throw new RuntimeException("Account already exists");
+        }
+
+        String passwordEncoded = this.passwordEncoder.encode(account.getPassword());
+        account.setPassword(passwordEncoded);
+
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.CREATED.value())
+                .message("Create account")
+                .result(this.accountService.handleCreateAccount(account))
+                .build();
+    }
+
+    @PutMapping("/public/accounts")
+    public ApiResponse<Account> updateAccount(@RequestBody Account account) {
+        return ApiResponse.<Account>builder()
+                .status(HttpStatus.OK.value())
+                .message("Update a account")
+                .result(this.accountService.handleUpdateAccount(account))
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.example.demo.Service;
+package com.example.demo.service;
 
 import java.time.LocalDateTime;
 import java.util.Random;
