@@ -10,6 +10,7 @@ import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
+import HomePage from './Page/Home/HomePage';
 
 
 
@@ -18,9 +19,9 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={ <LoginPage /> } />
-        <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <HomePage /> } />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<SignUpPage />} />
+        <Route path='/' element={<HomePage />} />
 
         <Route path='/register' element={<SignUpPage />} />
         <Route path='/home' element={<DefaultLayout />} />
