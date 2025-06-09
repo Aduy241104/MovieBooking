@@ -17,6 +17,7 @@ import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 
 import HomePage from './Page/Home'
+import MovieDetail from './Page/MovieDetail/MovieDetail';
 
 
 
@@ -25,11 +26,12 @@ function App() {
 
   return (
     <>
+
       <Routes>
         <Route path='/login' element={ <LoginPage /> } />
         <Route path='/register' element={ <SignUpPage /> } />
         <Route path='/' element={ <HomePage /> } />
-
+        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
         <Route path='/register' element={ <SignUpPage /> } />
 
 

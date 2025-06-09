@@ -17,8 +17,8 @@ function MovieSchedule() {
     return (
         <div className='container d-flex flex-column align-items-center text-light mt-5 pb-5 pt-3'>
             <h2 className='p-5 pt-1 text-center bg-text-2'>Lịch chiếu phim</h2>
-            <div className='border-1 border-gold rounded-3 w-75 p-3'>
-                <div className='d-flex justify-content-start gap-2 border-bottom border-secondary pb-3'>
+            <div className='border-1 border-gray rounded-3 w-75 p-3'>
+                <div className='d-flex justify-content-start gap-2 border-bottom border-gray pb-3'>
                     { days.map((day, idx) => {
                         const isToday = day.isSame(moment(), 'day');
                         const isSelected = selectedDate === day.format('YYYY-MM-DD');

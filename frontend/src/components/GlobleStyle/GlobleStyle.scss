@@ -7,8 +7,6 @@
     --red: #ffd875;
     --black: #000;
     --smoke-gray: rgb(175, 171, 171);
-
-
     --font: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
     --fontSecond: 'SofiaPro', sans-serif;
     --default-layout-horizontal-spacer: 24px;
@@ -17,7 +15,6 @@
 body {
     font-family: var(--font);
 }
-
 
 h1,
 h2,
@@ -72,11 +69,15 @@ a {
 }
 
 .bg-night {
-    background-color: #272a39;
+    background: linear-gradient(0deg, rgba(40, 43, 58, 0) 20%, rgba(40, 43, 58, 1));
 }
 
 .border-gold {
     border-color: #ffd875 !important;
+}
+
+.border-gray {
+    border-color: #fff2;
 }
 
 .bg-text-2 {
@@ -117,6 +118,27 @@ a {
     display: block;
     width: 100%;
     object-fit: cover;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border-radius: 50%;
+    color: rgb(0, 0, 0);
+    /* Màu mũi tên */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Xóa background mặc định từ Swiper */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .line-clamp {
