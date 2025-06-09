@@ -27,14 +27,46 @@ p {
     margin: 0;
 }
 
+a {
+    text-decoration: none;
+}
+
 
 @font-face {
     font-family: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
     src: url("/assets/fonts/nf-icon-v1-93.woff");
 }
 
+.over-hidden {
+    overflow: hidden;
+}
+
 .text-red {
     color: var(--red);
+}
+
+.bg-red {
+    background-color: var(--red);
+}
+
+.border-lightGray {
+  border-color: rgb(201, 198, 198);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.red-hover:hover {
+    color: var(--red);
+}
+
+.fs-7 {
+    font-size: 14px;
+}
+
+.bg-midnight {
+    background-color: rgb(25, 27, 36);
 }
 
 .swiper {
@@ -51,11 +83,6 @@ p {
 .swiper-button-prev,
 .swiper-button-next {
     color: var(--red);
-    // background-color: rgb(249, 249, 249);
-    // padding: 3px 23px;
-    // border-radius: 100%;
-    
-  
 }
 
 .swiper-slide {
@@ -84,4 +111,23 @@ p {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+.custome-scroll-bar::-webkit-scrollbar {
+    border-radius: 0;
+    width: 4px;
+}
+
+.custome-scroll-bar::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.custome-scroll-bar-light::-webkit-scrollbar-thumb {
+    background-color: rgba(233, 233, 233, 0.15);
+}
+
+.custome-scroll-bar::-webkit-scrollbar-track {
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
 }

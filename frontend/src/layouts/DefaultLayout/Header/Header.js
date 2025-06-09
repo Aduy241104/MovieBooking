@@ -4,12 +4,12 @@ import CustomizeText from "../../../components/CustomizeText";
 import CustomizeButton from "../../../components/CustomeButton";
 import { useState } from "react";
 import Search from "../Search";
+import Avatar from "../../../components/Avatar/Avatar";
 
 const cx = classNames.bind(styles);
 
-function Header() {
+function Header({ user, logout }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
 
@@ -27,23 +27,31 @@ function Header() {
                         <i className="fa-solid fa-bars fa-xl"></i>
                     </button>
 
+
                     {/* Navigation & Actions - Desktop */ }
                     <div className="d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
-                                <li className="border-bottom border-3 border-danger">Lịch chiếu</li>
+                                <li className="border-bottom border-danger">Lịch chiếu</li>
                                 <li className="border-bottom border-dark">Phim Chiếu</li>
                                 <li>Sắp Chiếu</li>
                                 <li>Top Phim</li>
                             </ul>
                         </nav>
                         <div className="d-flex align-items-center h-100">
-                            <Search>
-                                <button className="bg-transparent me-3 border-0">
-                                    <i className="fa-solid fa-magnifying-glass text-light"></i>
-                                </button>
-                            </Search>
-                            <CustomizeButton primary small>Đăng nhập</CustomizeButton>
+                            <Search />
+                            { (user) ? (
+                                <>
+                                    <Avatar
+                                        src={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
+                                        fallBack={ "https://pbs.twimg.com/media/FIw0iNhXwAQkxKh?format=jpg&name=small" }
+                                        className="cursor-pointer"
+                                    />
+                                    <button onClick={ () => logout() }>Logout</button>
+                                </>
+                            ) : (
+                                <CustomizeButton to={ "/login" } primary small>Đăng nhập</CustomizeButton>
+                            ) }
                         </div>
                     </div>
                 </div>

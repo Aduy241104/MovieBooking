@@ -1,5 +1,5 @@
 import classNames from "classnames/bind"
-import styles from './ComingSoon.module.scss'
+import styles from './PlayingMovie.module.scss'
 import SwiperSlides from "../SwiperSlide/SwiperSlides";
 import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
@@ -8,13 +8,21 @@ import CustomizeText from "../CustomizeText";
 
 const cx = classNames.bind(styles);
 
-function ComingSoon() {
+
+function PlayingMovie() {
     return (
-        <div className="p-5" >
-            <div className="container">
+        <div
+            className="p-5"
+            style={ {
+                backgroundImage: "url('/img/1379695-2560x1707-desktop-hd-movie-theater-background-image.jpg')",
+                backgroundPosition: 'center',
+                backgroundSize: 'contain'
+            } }
+      >
+            <div className={ cx("container", 'coating')}>
                 <div className="d-flex flex-column justify-content-center align-items-center text-light">
-                    <h2 className="pb-5">Phim đang chiếu</h2>
-                    <div className={ cx('w-responsive') }>
+                    <h2 className="pb-5 pt-5">Phim sắp chiếu</h2>
+                    <div className={ cx('w-responsive', 'pb-5') }>
                         <SwiperSlides>
                             <SwiperSlide>
                                 <MovieComp
@@ -38,6 +46,10 @@ function ComingSoon() {
                             </SwiperSlide>
                             <SwiperSlide>
                                 <MovieComp
+                                    imglink={ "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg" } />
+                            </SwiperSlide>
+                            <SwiperSlide>
+                                <MovieComp
                                     imglink={ "https://metiz.vn/media/poster_film/ba-mat.jpg" } />
                             </SwiperSlide>
                             <SwiperSlide>
@@ -56,4 +68,4 @@ function ComingSoon() {
     )
 }
 
-export default ComingSoon
+export default PlayingMovie
