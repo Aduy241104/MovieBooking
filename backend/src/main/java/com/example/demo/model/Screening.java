@@ -32,5 +32,4 @@ public class Screening {
     @Column(name = "show_date_time")
     private LocalDateTime showDateTime;
 
-
 }
