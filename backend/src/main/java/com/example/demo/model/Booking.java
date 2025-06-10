@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,10 @@ public class Booking {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
+    @ManyToOne
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
+
     @Column(name = "promotion_code_applied")
     private String promotionCodeApplied;
 
@@ -54,4 +59,9 @@ public class Booking {
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<BookedSeat> bookedSeats = new ArrayList<>();
+
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.bookingTime = LocalDateTime.now();
+    }
 }
