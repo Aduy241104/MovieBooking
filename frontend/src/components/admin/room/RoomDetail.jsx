@@ -10,7 +10,7 @@ export default function RoomDetail() {
     const seatColors = {
         regular: "#2c2c2c",     // xám sang
         vip: "#c62828",      // đỏ đô
-        double: "#e91e63",   // tím đỏ sang
+        couple: "#e91e63",   // tím đỏ sang
     };
 
     useEffect(() => {
@@ -41,8 +41,8 @@ export default function RoomDetail() {
     if (!room) return <div className="text-light p-5">Đang tải...</div>;
 
     return (
-        <div className="container vh-100 vw-100 text-light  d-flex flex-column ">
-            <div className="container-fluid bg-dark rounded-4 shadow-lg p-4 flex-grow-1">
+        <div className="container vh-100 vw-100  d-flex flex-column ">
+            <div className="container-fluid  rounded-4 shadow-lg p-4 flex-grow-1">
                 <div className="row h-100">
                     {/* Cột trái */}
                     <div className="col-md-5 d-flex flex-column justify-content-between pe-4">
@@ -58,13 +58,13 @@ export default function RoomDetail() {
                             <div className="mb-4">
                                 <span className="badge px-3 py-2 me-2" style={{ backgroundColor: seatColors.regular }}>Thường</span>
                                 <span className="badge px-3 py-2 me-2" style={{ backgroundColor: seatColors.vip }}>VIP</span>
-                                <span className="badge px-3 py-2" style={{ backgroundColor: seatColors.double }}>Đôi</span>
+                                <span className="badge px-3 py-2" style={{ backgroundColor: seatColors.couple }}>Đôi</span>
                             </div>
                         </div>
 
                         <div className="d-grid gap-2">
-                            <button className="btn btn-outline-light rounded-3 fw-bold" onClick={() => navigate(`/admin/room-list/${roomId}/edit`)}>
-                                ✏️ Sửa thông tin                                                                
+                            <button className="btn btn-dark rounded-3 fw-bold" onClick={() => navigate(`/admin/room-list/${roomId}/edit`)}>
+                                ✏️ Sửa thông tin
                             </button>
                             <button className="btn btn-danger rounded-3 fw-bold" onClick={handleDelete}>
                                 🗑️ Xóa phòng
@@ -78,7 +78,11 @@ export default function RoomDetail() {
 
                     {/* Cột phải */}
                     <div className="col-md-7 d-flex align-items-center justify-content-center">
+
                         <div className="d-flex flex-column align-items-center justify-content-center">
+                            <div className="text-center text-white fw-bold py-2 mb-3 rounded bg-danger w-100">
+                                Màn hình
+                            </div>
                             <div
                                 style={{
                                     display: "grid",

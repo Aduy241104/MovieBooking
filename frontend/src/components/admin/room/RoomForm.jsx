@@ -8,8 +8,7 @@ export default function RoomForm({ room, onBack }) {
   const [seatTypes, setSeatTypes] = useState({});
   const [error, setError] = useState("");
 
-  const seatColors = ["#2c2c2c", "#c62828", "#e91e63"]; // regular, vip, double
-
+  const seatColors = ["#2c2c2c", "#c62828", "#e91e63"]; // regular, vip, couple
   useEffect(() => {
     if (room) {
       axios.get(`/api/public/rooms/${room.id}`)
@@ -32,7 +31,7 @@ export default function RoomForm({ room, onBack }) {
             seatsFromAPI[code] =
               typeName === "regular" ? 0 :
                 typeName === "vip" ? 1 :
-                  typeName === "double" ? 2 : 0;
+                  typeName === "couple" ? 2 : 0;
           });
 
           setName(data.name);
@@ -109,7 +108,7 @@ export default function RoomForm({ room, onBack }) {
       seatCol: parseInt(code.slice(1)) - 1,
       seatType:
         seatTypes[code] === 0 ? "regular" :
-          seatTypes[code] === 1 ? "vip" : "double"
+          seatTypes[code] === 1 ? "vip" : "couple"
     }));
 
     const payload = { name, rows, cols, seats };
