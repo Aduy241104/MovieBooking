@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Card, Statistic, Spin } from 'antd';
-import { TrendingUp, Users, Calendar, DollarSign, Eye, Star } from 'lucide-react';
+import { TrendingUp, Users, Calendar, DollarSign, Eye, Star, UserCheck, Film } from 'lucide-react';
 import { RevenueChart } from '../../components/admin/Dashboard/RevenueChart';
 import { MovieChart } from '../../components/admin/Dashboard/MovieChart';
 import { UserChart } from '../../components/admin/Dashboard/UserChart';
@@ -9,15 +9,17 @@ import { RecentBookingsTable } from '../../components/admin/Dashboard/RecentBook
 
 export const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
-    const [revenueTimeRange, setRevenueTimeRange] = useState('month'); // 'day', 'week', 'month'
+    const [revenueTimeRange, setRevenueTimeRange] = useState('month');
     const [dashboardData, setDashboardData] = useState({
         stats: {
             totalRevenue: 0,
             totalBookings: 0,
             totalUsers: 0,
             activeMovies: 0,
-            totalViews: 0,
-            avgRating: 0
+            totalReviews: 0,
+            avgRating: 0,
+            activePromotions: 0,
+            totalCinemaRooms: 0
         },
         charts: {
             revenue: {
@@ -25,8 +27,9 @@ export const DashboardPage = () => {
                 week: [],
                 month: []
             },
-            movies: [],
-            users: []
+            moviesByType: [],
+            userRegistrations: [],
+            bookingsByPaymentMethod: []
         },
         tables: {
             topMovies: [],
@@ -41,15 +44,17 @@ export const DashboardPage = () => {
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            // Mock data - replace with actual API calls
+            // Mock data phù hợp với database của bạn
             const mockData = {
                 stats: {
                     totalRevenue: 125000000,
                     totalBookings: 1543,
                     totalUsers: 2847,
                     activeMovies: 12,
-                    totalViews: 45678,
-                    avgRating: 4.3
+                    totalReviews: 3456,
+                    avgRating: 4.3,
+                    activePromotions: 5,
+                    totalCinemaRooms: 8
                 },
                 charts: {
                     revenue: {
@@ -79,48 +84,60 @@ export const DashboardPage = () => {
                             { name: 'T6', revenue: 210000000, bookings: 2670 },
                         ]
                     },
-                    movies: [
-                        { name: 'Hành động', count: 35, revenue: 45000000 },
-                        { name: 'Hài', count: 28, revenue: 32000000 },
-                        { name: 'Kinh dị', count: 22, revenue: 28000000 },
-                        { name: 'Tình cảm', count: 18, revenue: 20000000 },
+                    moviesByType: [
+                        { name: 'Hành động', count: 8, revenue: 45000000 },
+                        { name: 'Hài', count: 6, revenue: 32000000 },
+                        { name: 'Kinh dị', count: 4, revenue: 28000000 },
+                        { name: 'Tình cảm', count: 3, revenue: 20000000 },
+                        { name: 'Khoa học viễn tưởng', count: 2, revenue: 15000000 },
                     ],
-                    users: [
-                        { name: 'T1', newUsers: 45, totalUsers: 120 },
-                        { name: 'T2', newUsers: 67, totalUsers: 187 },
-                        { name: 'T3', newUsers: 54, totalUsers: 241 },
-                        { name: 'T4', newUsers: 78, totalUsers: 319 },
-                        { name: 'T5', newUsers: 89, totalUsers: 408 },
-                        { name: 'T6', newUsers: 92, totalUsers: 500 },
+                    userRegistrations: [
+                        { name: 'T1', newUsers: 145, totalUsers: 1200 },
+                        { name: 'T2', newUsers: 267, totalUsers: 1467 },
+                        { name: 'T3', newUsers: 354, totalUsers: 1821 },
+                        { name: 'T4', newUsers: 278, totalUsers: 2099 },
+                        { name: 'T5', newUsers: 389, totalUsers: 2488 },
+                        { name: 'T6', newUsers: 359, totalUsers: 2847 },
+                    ],
+                    bookingsByPaymentMethod: [
+                        { name: 'VNPAY', count: 45, revenue: 55000000 },
+                        { name: 'Momo', count: 35, revenue: 42000000 },
+                        { name: 'ZaloPay', count: 20, revenue: 28000000 },
                     ]
                 },
                 tables: {
                     topMovies: [
-                        { id: 1, title: 'Avengers: Endgame', genre: 'Hành động', rating: 4.8, views: 15420, poster: 'https://via.placeholder.com/40' },
-                        { id: 2, title: 'Spider-Man: No Way Home', genre: 'Hành động', rating: 4.6, views: 12340, poster: 'https://via.placeholder.com/40' },
-                        { id: 3, title: 'The Batman', genre: 'Hành động', rating: 4.4, views: 10890, poster: 'https://via.placeholder.com/40' },
-                        { id: 4, title: 'Top Gun: Maverick', genre: 'Hành động', rating: 4.5, views: 9876, poster: 'https://via.placeholder.com/40' },
+                        { id: 1, title: 'Avengers: Endgame', genre: 'Hành động', rating: 4.8, totalBookings: 542, revenue: 15420000, poster: 'https://via.placeholder.com/40' },
+                        { id: 2, title: 'Spider-Man: No Way Home', genre: 'Hành động', rating: 4.6, totalBookings: 423, revenue: 12340000, poster: 'https://via.placeholder.com/40' },
+                        { id: 3, title: 'The Batman', genre: 'Hành động', rating: 4.4, totalBookings: 387, revenue: 10890000, poster: 'https://via.placeholder.com/40' },
+                        { id: 4, title: 'Top Gun: Maverick', genre: 'Hành động', rating: 4.5, totalBookings: 356, revenue: 9876000, poster: 'https://via.placeholder.com/40' },
                     ],
                     recentBookings: [
                         {
-                            id: 1,
+                            bookingId: 1,
                             bookingCode: 'BK001234',
                             customerName: 'Nguyễn Văn A',
+                            customerEmail: 'nguyenvana@email.com',
                             movieTitle: 'Avengers: Endgame',
-                            showtime: '2024-06-07T19:30:00',
+                            cinemaRoom: 'Phòng 1',
+                            bookingDate: '2024-06-07T19:30:00',
                             seatCount: 2,
                             totalAmount: 200000,
-                            status: 'paid'
+                            paymentMethod: 'VNPAY',
+                            status: 'PAID'
                         },
                         {
-                            id: 2,
+                            bookingId: 2,
                             bookingCode: 'BK001235',
                             customerName: 'Trần Thị B',
+                            customerEmail: 'tranthib@email.com',
                             movieTitle: 'Spider-Man: No Way Home',
-                            showtime: '2024-06-07T21:00:00',
+                            cinemaRoom: 'Phòng 2',
+                            bookingDate: '2024-06-07T21:00:00',
                             seatCount: 4,
                             totalAmount: 400000,
-                            status: 'pending'
+                            paymentMethod: 'Momo',
+                            status: 'PENDING'
                         }
                     ]
                 }
@@ -148,7 +165,7 @@ export const DashboardPage = () => {
         <div className="space-y-6">
             {/* Statistics Cards */}
             <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
                             title="Tổng Doanh Thu"
@@ -160,7 +177,7 @@ export const DashboardPage = () => {
                         />
                     </Card>
                 </Col>
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
                             title="Tổng Đặt Vé"
@@ -170,40 +187,43 @@ export const DashboardPage = () => {
                         />
                     </Card>
                 </Col>
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
-                            title="Tổng Người Dùng"
+                            title="Tổng Thành Viên"
                             value={dashboardData.stats.totalUsers}
                             valueStyle={{ color: '#1890ff' }}
                             prefix={<Users size={20} />}
                         />
                     </Card>
                 </Col>
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
                             title="Phim Đang Chiếu"
                             value={dashboardData.stats.activeMovies}
                             valueStyle={{ color: '#722ed1' }}
-                            prefix={<TrendingUp size={20} />}
+                            prefix={<Film size={20} />}
                         />
                     </Card>
                 </Col>
-                <Col xs={24} sm={12} lg={8}>
+            </Row>
+
+            <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
-                            title="Tổng Lượt Xem"
-                            value={dashboardData.stats.totalViews}
+                            title="Tổng Đánh Giá"
+                            value={dashboardData.stats.totalReviews}
                             valueStyle={{ color: '#fa8c16' }}
                             prefix={<Eye size={20} />}
                         />
                     </Card>
                 </Col>
-                <Col xs={24} sm={12} lg={8}>
+                <Col xs={24} sm={12} lg={6}>
                     <Card>
                         <Statistic
-                            title="Đánh Giá Trung Bình"
+                            title="Đánh Giá TB"
                             value={dashboardData.stats.avgRating}
                             precision={1}
                             valueStyle={{ color: '#faad14' }}
@@ -212,12 +232,32 @@ export const DashboardPage = () => {
                         />
                     </Card>
                 </Col>
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Khuyến Mãi Hiện Tại"
+                            value={dashboardData.stats.activePromotions}
+                            valueStyle={{ color: '#52c41a' }}
+                            prefix={<TrendingUp size={20} />}
+                        />
+                    </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                    <Card>
+                        <Statistic
+                            title="Tổng Phòng Chiếu"
+                            value={dashboardData.stats.totalCinemaRooms}
+                            valueStyle={{ color: '#13c2c2' }}
+                            prefix={<UserCheck size={20} />}
+                        />
+                    </Card>
+                </Col>
             </Row>
 
             {/* Charts */}
             <Row gutter={[16, 16]}>
                 <Col xs={24} lg={16}>
-                    <Card title="Biểu Đồ Doanh Thu">
+                    <Card title="Biểu Đồ Doanh Thu & Đặt Vé">
                         <RevenueChart
                             data={dashboardData.charts.revenue[revenueTimeRange]}
                             timeRange={revenueTimeRange}
@@ -226,20 +266,20 @@ export const DashboardPage = () => {
                     </Card>
                 </Col>
                 <Col xs={24} lg={8}>
-                    <Card title="Phân Loại Phim">
-                        <MovieChart data={dashboardData.charts.movies} />
+                    <Card title="Phân Loại Phim Theo Thể Loại">
+                        <MovieChart data={dashboardData.charts.moviesByType} />
                     </Card>
                 </Col>
             </Row>
 
             <Row gutter={[16, 16]}>
                 <Col xs={24} lg={12}>
-                    <Card title="Thống Kê Người Dùng">
-                        <UserChart data={dashboardData.charts.users} />
+                    <Card title="Thống Kê Đăng Ký Thành Viên">
+                        <UserChart data={dashboardData.charts.userRegistrations} />
                     </Card>
                 </Col>
                 <Col xs={24} lg={12}>
-                    <Card title="Top Phim Phổ Biến">
+                    <Card title="Top Phim Có Doanh Thu Cao">
                         <TopMoviesTable data={dashboardData.tables?.topMovies || []} />
                     </Card>
                 </Col>

@@ -43,7 +43,6 @@ public class Promotion {
     @Column(name = "promotion_active")
     private Boolean active;
 
-    @Builder.Default
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 

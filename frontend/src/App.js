@@ -18,7 +18,6 @@ import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 
-import HomePage from './Page/Home/HomePage'
 
 
 function App() {
