@@ -1,10 +1,15 @@
 .header {
-    height: 58px;
+    // position: fixed !important;
     position: sticky;
     top: 0;
-    z-index: 999;
-    box-shadow: 0 1px 3px rgba(88, 86, 86, 0.4);
-  
+    left: 0;
+    right: 0;
+    height: 58px;
+    z-index: 999 !important;
+    background-color: var(--footer-bg);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    // opacity: 0.5;
+    /* Đừng để là 0 nếu bạn muốn nhìn thấy */
 }
 
 .logo-header {

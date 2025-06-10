@@ -5,17 +5,17 @@ import './login.css';
 
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
-import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
+// import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 
-import RoomList from './components/admin/room/RoomList';
-import CreateRoom from './components/admin/room/CreateRoom';
-import EditRoom from './components/admin/room/EditRoom';
-import RoomDetail from './components/admin/room/RoomDetail';
+// import RoomList from './components/admin/room/RoomList';
+// import CreateRoom from './components/admin/room/CreateRoom';
+// import EditRoom from './components/admin/room/EditRoom';
+// import RoomDetail from './components/admin/room/RoomDetail';
 
-import { UserPage } from './Page/admin/UserPage';
-import { UserDetailPage } from './Page/admin/UserDetailPage';
-import { PromotionPage } from './Page/admin/PromotionPage';
-import { DashboardPage } from './Page/admin/DashboardPage';
+// import { UserPage } from './Page/admin/UserPage';
+// import { UserDetailPage } from './Page/admin/UserDetailPage';
+// import { PromotionPage } from './Page/admin/PromotionPage';
+// import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
 
@@ -28,7 +28,7 @@ function App() {
         <Route path='/' element={ <HomePage /> } />
         <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
 
-        <Route path='/admin' element={ <AdminLayout /> }>
+        {/* <Route path='/admin' element={ <AdminLayout /> }>
           <Route index element={ <DashboardPage /> } />
           <Route path='room-list' element={ <RoomList /> } />
           <Route path='room-list/add-room' element={ <CreateRoom /> } />
@@ -52,7 +52,7 @@ function App() {
           <Route path='promotions' element={
             <PromotionPage promotionText="Mã khuyến mãi" />
           } />
-        </Route>
+        </Route> */}
       </Routes>
     </>
   );

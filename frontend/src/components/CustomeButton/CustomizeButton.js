@@ -4,25 +4,25 @@ import { Link } from 'react-router-dom';
 
 const cx = classNames.bind(styles);
 
-function CustomizeButton({ to, href, onClick, className, children, primary = true,
-    outLine, leftIcon, rightIcon, small, large, rounded, ...passProps }) {
+function CustomizeButton({ to, href, onClick, className, children, gold, primary = true,
+    outLine, leftIcon, rightIcon, small, large, rounded, roundedBig, ...passProps }) {
 
     let Comp = 'button';
     let classes = cx('wrapper', {
         [className]: className,
         primary,
         outLine,
+        gold,
         small,
         large,
-        rounded
+        rounded,
+        roundedBig
     })
-
 
     const props = {
         onClick,
         ...passProps,
     };
-
 
     if (to) {
         props.to = to;

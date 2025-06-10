@@ -112,7 +112,7 @@ public class AuthenticationService {
         }
 
         RegisterRequest registerRequest = accountWithOtp.getRegisterRequest();
-        Role defaultRole = roleRepository.findByRoleName("User")
+        Role defaultRole = roleRepository.findByRoleName("CUSTOMER")
                 .orElseThrow(() -> new RuntimeException("Role Customer không tồn tại"));
 
         Account account = accountMapper.toAccount(registerRequest, defaultRole);

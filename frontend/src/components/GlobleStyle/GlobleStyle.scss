@@ -10,6 +10,7 @@
     --font: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
     --fontSecond: 'SofiaPro', sans-serif;
     --default-layout-horizontal-spacer: 24px;
+    --footer-bg: #0F111A;
 }
 
 body {
@@ -47,6 +48,14 @@ a {
     background-color: var(--red);
 }
 
+.gardient-midNight {
+    background-image: linear-gradient(90deg, #4158D0, #df72d8);
+}
+
+.gardient-sunshine {
+    background-image: linear-gradient(135deg, #eec459, #f1da9f, #e6e6e6);
+}
+
 .border-lightGray {
     border-color: rgb(201, 198, 198);
 }
@@ -62,13 +71,14 @@ a {
 .fs-7 {
     font-size: 14px;
 }
- .fs-8 {
+
+.fs-8 {
     font-size: 12px;
- }
+}
 
 .bg-midnight {
     // background-color: rgb(25, 27, 36);
-    background-color: #191b24;
+    background-color: rgb(25, 27, 36);
 }
 
 .bg-night {
@@ -79,7 +89,7 @@ a {
     border-color: #ffd875 !important;
 }
 
-.fw-300{
+.fw-300 {
     font-weight: 300;
 }
 

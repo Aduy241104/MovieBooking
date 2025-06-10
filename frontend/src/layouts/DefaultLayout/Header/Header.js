@@ -14,7 +14,7 @@ function Header({ user, logout }) {
     const closeMenu = () => setIsMenuOpen(false);
 
     return (
-        <header className={ `border-bottom border-dark bg-black ${cx("header")}` }>
+        <header className={ `border-bottom border-dark ${cx("header")}` }>
             <div className="container px-3 h-100">
                 <div className="d-flex justify-content-between align-items-center py-2 h-100">
                     {/* Logo */ }

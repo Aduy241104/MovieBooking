@@ -4,7 +4,7 @@
     border: none;
 
     +.wrapper {
-        margin-left: 12px;
+        margin-left: 18px;
     }
 }
 
@@ -16,6 +16,10 @@
     &:hover {
         background-color: #efc55a;
     }
+}
+
+.gold {
+    background-image: linear-gradient(135deg, #eec459, #f1da9f, #e6e6e6);
 }
 
 
@@ -42,4 +46,8 @@
 
 .rounded {
     border-radius: 8px;
+}
+
+.roundedBig {
+    border-radius: 28px;
 }
