@@ -53,11 +53,9 @@ public class Account {
     @Column(name = "avatar")
     private String avatar;
 
-    @Builder.Default
     @Column(name = "account_status")
     private Integer status = 1;
 
-    @Builder.Default
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 

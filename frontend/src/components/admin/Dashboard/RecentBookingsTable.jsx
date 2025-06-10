@@ -14,7 +14,13 @@ export const RecentBookingsTable = ({ data }) => {
         {
             title: 'Khách hàng',
             dataIndex: 'customerName',
-            key: 'customerName'
+            key: 'customerName',
+            render: (name, record) => (
+                <div>
+                    <div className="font-semibold">{name}</div>
+                    <div className="text-gray-500 text-sm">{record.customerEmail}</div>
+                </div>
+            )
         },
         {
             title: 'Phim',
@@ -22,10 +28,15 @@ export const RecentBookingsTable = ({ data }) => {
             key: 'movieTitle'
         },
         {
-            title: 'Suất chiếu',
-            dataIndex: 'showtime',
-            key: 'showtime',
-            render: (time) => dayjs(time).format('DD/MM/YYYY HH:mm')
+            title: 'Phòng chiếu',
+            dataIndex: 'cinemaRoom',
+            key: 'cinemaRoom'
+        },
+        {
+            title: 'Ngày đặt',
+            dataIndex: 'bookingDate',
+            key: 'bookingDate',
+            render: (date) => dayjs(date).format('DD/MM/YYYY HH:mm')
         },
         {
             title: 'Số ghế',
@@ -42,19 +53,25 @@ export const RecentBookingsTable = ({ data }) => {
             }).format(amount)
         },
         {
+            title: 'Thanh toán',
+            dataIndex: 'paymentMethod',
+            key: 'paymentMethod',
+            render: (method) => <Tag color="blue">{method}</Tag>
+        },
+        {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
             render: (status) => {
                 const colors = {
-                    'paid': 'green',
-                    'pending': 'orange',
-                    'cancelled': 'red'
+                    'PAID': 'green',
+                    'PENDING': 'orange',
+                    'CANCELLED': 'red'
                 };
                 const labels = {
-                    'paid': 'Đã thanh toán',
-                    'pending': 'Chờ thanh toán',
-                    'cancelled': 'Đã hủy'
+                    'PAID': 'Đã thanh toán',
+                    'PENDING': 'Chờ thanh toán',
+                    'CANCELLED': 'Đã hủy'
                 };
                 return <Tag color={colors[status]}>{labels[status]}</Tag>;
             }
@@ -66,7 +83,7 @@ export const RecentBookingsTable = ({ data }) => {
                 <Button 
                     type="link" 
                     icon={<Eye size={16} />}
-                    onClick={() => console.log('View booking:', record.id)}
+                    onClick={() => console.log('View booking:', record.bookingId)}
                 >
                     Xem
                 </Button>
@@ -77,34 +94,43 @@ export const RecentBookingsTable = ({ data }) => {
     // Mock data if empty
     const mockData = data.length > 0 ? data : [
         {
-            id: 1,
+            bookingId: 1,
             bookingCode: 'BK001234',
             customerName: 'Nguyễn Văn A',
+            customerEmail: 'nguyenvana@email.com',
             movieTitle: 'Avengers: Endgame',
-            showtime: '2024-06-07T19:30:00',
+            cinemaRoom: 'Phòng 1',
+            bookingDate: '2024-06-07T19:30:00',
             seatCount: 2,
             totalAmount: 200000,
-            status: 'paid'
+            paymentMethod: 'VNPAY',
+            status: 'PAID'
         },
         {
-            id: 2,
+            bookingId: 2,
             bookingCode: 'BK001235',
             customerName: 'Trần Thị B',
+            customerEmail: 'tranthib@email.com',
             movieTitle: 'Spider-Man: No Way Home',
-            showtime: '2024-06-07T21:00:00',
+            cinemaRoom: 'Phòng 2',
+            bookingDate: '2024-06-07T21:00:00',
             seatCount: 4,
             totalAmount: 400000,
-            status: 'pending'
+            paymentMethod: 'Momo',
+            status: 'PENDING'
         },
         {
-            id: 3,
+            bookingId: 3,
             bookingCode: 'BK001236',
             customerName: 'Lê Văn C',
+            customerEmail: 'levanc@email.com',
             movieTitle: 'The Batman',
-            showtime: '2024-06-07T16:30:00',
+            cinemaRoom: 'Phòng 3',
+            bookingDate: '2024-06-07T16:30:00',
             seatCount: 1,
             totalAmount: 100000,
-            status: 'paid'
+            paymentMethod: 'ZaloPay',
+            status: 'PAID'
         }
     ];
 
@@ -114,8 +140,8 @@ export const RecentBookingsTable = ({ data }) => {
             dataSource={mockData}
             pagination={{ pageSize: 5 }}
             size="small"
-            rowKey="id"
-            scroll={{ x: 800 }}
+            rowKey="bookingId"
+            scroll={{ x: 1000 }}
         />
     );
 };
