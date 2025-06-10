@@ -51,5 +51,7 @@ public class Movie {
     @Column(name = "actor")
     private String actor;
 
+    @Column(name = "age_limit")
+    private Integer ageLimit;
 
 }
