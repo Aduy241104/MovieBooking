@@ -3,20 +3,19 @@
     --default-layout-width: 1150px;
     --white: #fff;
     --primary: rgba(255, 59, 92, 1);
-    --red: #E30813;
+    // --red: #E30813;
+    --red: #ffd875;
     --black: #000;
     --smoke-gray: rgb(175, 171, 171);
-
-
     --font: Netflix Sans, Helvetica Neue, Segoe UI, Roboto, Ubuntu, sans-serif;
     --fontSecond: 'SofiaPro', sans-serif;
     --default-layout-horizontal-spacer: 24px;
+    --footer-bg: #0F111A;
 }
 
 body {
     font-family: var(--font);
 }
-
 
 h1,
 h2,
@@ -49,8 +48,16 @@ a {
     background-color: var(--red);
 }
 
+.gardient-midNight {
+    background-image: linear-gradient(90deg, #4158D0, #df72d8);
+}
+
+.gardient-sunshine {
+    background-image: linear-gradient(135deg, #eec459, #f1da9f, #e6e6e6);
+}
+
 .border-lightGray {
-  border-color: rgb(201, 198, 198);
+    border-color: rgb(201, 198, 198);
 }
 
 .cursor-pointer {
@@ -65,8 +72,40 @@ a {
     font-size: 14px;
 }
 
+.fs-8 {
+    font-size: 12px;
+}
+
 .bg-midnight {
+    // background-color: rgb(25, 27, 36);
     background-color: rgb(25, 27, 36);
+}
+
+.bg-night {
+    background: linear-gradient(0deg, rgba(40, 43, 58, 0) 20%, rgba(40, 43, 58, 1));
+}
+
+.border-gold {
+    border-color: #ffd875 !important;
+}
+
+.fw-300 {
+    font-weight: 300;
+}
+
+
+.border-gray {
+    border-color: #fff2;
+}
+
+.bg-text-2 {
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(103, 65, 150) 130%);
+    background-size: 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .swiper {
@@ -97,6 +136,27 @@ a {
     display: block;
     width: 100%;
     object-fit: cover;
+}
+
+.swiper-button-next,
+.swiper-button-prev {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border-radius: 50%;
+    color: rgb(0, 0, 0);
+    /* Màu mũi tên */
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Xóa background mặc định từ Swiper */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .line-clamp {

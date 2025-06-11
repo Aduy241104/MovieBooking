@@ -11,7 +11,7 @@ function DefaultLayout({ children }) {
   }, [user]);
 
   return (
-    <div className='bg-midnight'>
+    <div className='bg-midnight position-relative'>
       <Header user={ isLogin } logout={ logout } />
       { children }
     </div>
