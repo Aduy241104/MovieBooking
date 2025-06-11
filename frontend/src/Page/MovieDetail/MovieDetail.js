@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import DefaultLayout from '../../layouts/DefaultLayout'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from './MovieDetail.module.scss'
@@ -9,6 +9,7 @@ const cx = classNames.bind(styles);
 
 function MovieDetail() {
     const { id } = useParams();
+    const [isOpenTrailer, setOpenTrailer] = useState(false);
 
     // useLayoutEffect(() => {
     //     window.scrollTo({
@@ -85,6 +86,10 @@ function MovieDetail() {
                         </div>
                     </div>
                 </div>
+
+
+
+          
             </DefaultLayout>
         </>
     )
