@@ -5,11 +5,13 @@ import './login.css'
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
+import HomePage from './Page/Home'
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
+import ReviewUI from './components/ReviewComponents/reviewcomponents';
 
 
 
@@ -18,12 +20,13 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={ <LoginPage /> } />
-        <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <HomePage /> } />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<SignUpPage />} />
+        <Route path='/' element={<HomePage />} />
 
         <Route path='/register' element={<SignUpPage />} />
-        <Route path='/home' element={<DefaultLayout />} />
+
+        <Route path='/review/:movieId' element={<ReviewUI />} />
 
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />

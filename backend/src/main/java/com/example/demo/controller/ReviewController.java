@@ -24,7 +24,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getWrappedReviewsByMovieId(movieId));
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<ReviewResponseDTO> addReview(@RequestBody ReviewRequestDTO dto) {
         return ResponseEntity.ok(reviewService.addReview(dto));
     }

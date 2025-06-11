@@ -12,7 +12,8 @@ public class ReviewMapper {
     public ReviewResponseDTO toResponseDTO(Review review) {
         return new ReviewResponseDTO(
                 review.getId(),
-                review.getAccount().getAvartar(),
+                review.getAccount().getAccountId(),
+                review.getAccount().getAvatar(),
                 review.getAccount().getFullName(),
                 review.getRating(),
                 review.getComment(),

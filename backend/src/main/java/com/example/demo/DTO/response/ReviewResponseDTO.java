@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReviewResponseDTO {
     private Integer id;
+    private Long accountId;
     private String avartar;
     private String accountFullName;
     private Integer rating;
