@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "email_verification_tokens")
+@Table(name = "email_verification_token")
 @Getter
 @Setter
 @NoArgsConstructor

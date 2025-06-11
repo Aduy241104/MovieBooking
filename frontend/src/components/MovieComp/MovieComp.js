@@ -1,12 +1,15 @@
 import classNames from "classnames/bind"
 import styles from './Movie.module.scss'
+import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
 function MovieComp({ imglink }) {
+    const navigate = useNavigate();
+
     return (
-        <div className={ cx('wrapper', 'w-responsive') }>
-            <div className={ cx('poster', 'border border-2 border-secondary rounded-1') }>
+        <div className={ cx('wrapper', 'w-responsive') } onClick={() => navigate('/movie-detail/1')}>
+            <div className={ cx('poster', 'rounded-3') }>
                 <img src={ imglink } alt="" />
             </div>
             <div className="text-light">

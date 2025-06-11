@@ -3,25 +3,39 @@ import styles from './PlayingMovie.module.scss'
 import SwiperSlides from "../SwiperSlide/SwiperSlides";
 import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
-import CustomizeText from "../CustomizeText";
+import { useEffect, useState } from "react";
+import { getNowShowingMovieAPI, getUpComingMovieAPI } from "../../service/TheMovieService";
 
 
 const cx = classNames.bind(styles);
 
 
 function PlayingMovie() {
+    const [listMovie, setListMovie] = useState([]);
+
+
+
+    const fetchData = async () => {
+        try {
+            const response = await getNowShowingMovieAPI();
+            setListMovie(response);
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
+
+    useEffect(() => {
+        fetchData();
+    }, [])
     return (
         <div
             className="p-5"
-            style={ {
-                backgroundImage: "url('/img/1379695-2560x1707-desktop-hd-movie-theater-background-image.jpg')",
-                backgroundPosition: 'center',
-                backgroundSize: 'contain'
-            } }
-      >
-            <div className={ cx("container", 'coating')}>
+           
+        >
+            <div className={ cx("container") }>
                 <div className="d-flex flex-column justify-content-center align-items-center text-light">
-                    <h2 className="pb-5 pt-5">Phim sắp chiếu</h2>
+                    <h2 className={ cx('pb-5', 'bg-text')}>Phim sắp chiếu</h2>
                     <div className={ cx('w-responsive', 'pb-5') }>
                         <SwiperSlides>
                             <SwiperSlide>
