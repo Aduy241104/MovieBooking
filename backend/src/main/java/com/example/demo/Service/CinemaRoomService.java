@@ -23,8 +23,11 @@ public class CinemaRoomService {
     private final SeatTypeRepository seatTypeRepo;
 
     // Lấy danh sách tất cả các phòng chiếu
+//    public List<CinemaRoom> getAllRooms() {
+//        return roomRepo.findAll();
+//    }
     public List<CinemaRoom> getAllRooms() {
-        return roomRepo.findAll();
+        return roomRepo.findByIsDeletedFalse();
     }
 
     // Lấy danh sách ghế theo ID phòng chiếu
@@ -104,10 +107,18 @@ public class CinemaRoomService {
     }
 
     // Xoá phòng chiếu theo ID (bao gồm cả ghế)
+//    public void deleteRoom(Long id) {
+//        CinemaRoom room = roomRepo.findById(id).orElseThrow(); // tìm phòng
+//        seatRepo.deleteAll(seatRepo.findByCinemaRoom(room)); // xoá hết ghế thuộc phòng
+//        roomRepo.deleteById(id); // xoá phòng
+//    }
+
     public void deleteRoom(Long id) {
-        CinemaRoom room = roomRepo.findById(id).orElseThrow(); // tìm phòng
-        seatRepo.deleteAll(seatRepo.findByCinemaRoom(room)); // xoá hết ghế thuộc phòng
-        roomRepo.deleteById(id); // xoá phòng
+        CinemaRoom room = roomRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chiếu với ID: " + id));
+
+        room.setIsDeleted(true); // Đánh dấu là đã xóa
+        roomRepo.save(room);     // Lưu lại thay đổi
     }
 
     // Lấy phòng chiếu theo ID (dùng cho API /rooms/rooms/{id})

@@ -12,6 +12,9 @@ import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 
+import TypeList from './components/admin/Movie/TypeList'
+import AddType from './components/admin/Movie/AddType';
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
@@ -39,6 +42,10 @@ function App() {
           <Route path="/admin/room-list/add-room" element={<CreateRoom />} />
           <Route path="/admin/room-list/room/:id" element={<RoomDetail />} />
           <Route path="/admin/room-list/:id/edit" element={<EditRoom />} />
+
+          <Route path="/admin/movie-types" element={<TypeList />} />
+          <Route path="/admin/movie-types/add" element={<AddType />} />
+
 
           <Route index element={<DashboardPage />} />
 
