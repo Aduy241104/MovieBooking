@@ -19,8 +19,18 @@ public class FareType {
     @Column(name = "fare_type_name")
     private String name;
 
-    @Column(name = "price")
-    private BigDecimal price;
+    @Column(name = "base_price")
+    private BigDecimal basePrice;
 
+    @Column(name = "day_price")
+    private BigDecimal dayPrice;
 
+    @Column(name = "time_slot_type")
+    private String timeSlotType;
+
+    @Column(name = "movie_format")
+    private String movieFormat;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

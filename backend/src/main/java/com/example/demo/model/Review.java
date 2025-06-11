@@ -3,6 +3,7 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -37,8 +38,13 @@ public class Review {
     private LocalDateTime reviewDate;
 
     @Column(name = "is_approved")
-    private Boolean approved;
+    private Boolean approved = false;
 
     @Column(name = "spoiler_alert")
-    private Boolean spoilerAlert;
+    private Boolean spoilerAlert = false;
+
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.reviewDate = LocalDateTime.now();
+    }
 }

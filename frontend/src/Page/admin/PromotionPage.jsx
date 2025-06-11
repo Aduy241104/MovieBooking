@@ -1,7 +1,7 @@
 import { SearchOutlined } from '@ant-design/icons';
 import { Button, Input, Select } from "antd";
 import { useEffect, useState } from "react";
-import { useLocation, useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 import { CreatePromotionModal } from '../../components/admin/Modal/promotions/CreatePromotionModal';
 import { PromotionTable } from '../../components/admin/Table/PromotionTable';
 import { fetchAllPromotionAPI, updatePromotionActiveAPI } from '../../service/PromotionService';
@@ -15,7 +15,6 @@ import dayjs from 'dayjs';
 export const PromotionPage = (props) => {
     const { setBreadcrumbItems } = useOutletContext();
     const { promotionText } = props;
-    // const location = useLocation();
 
     const [dataPromotions, setDataPromotions] = useState(null);
     const [searchPromotion, setSearchPromotion] = useState("");
