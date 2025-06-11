@@ -7,16 +7,28 @@ import SignUpPage from './Page/AuthPage/SignUpPage';
 import DefaultLayout from './layouts/DefaultLayout/DefaultLayout';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 
+
+/*====================ADMIN PAGE====================*/
+
+/*cinema roomroom*/
 import RoomList from './components/admin/room/RoomList';
 import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
+
+/*Movie*/
+import MovieList from './components/admin/Movie/MovieList';
+
 
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
+
+
+
+
 
 
 function App() {
@@ -38,6 +50,10 @@ function App() {
           <Route path="/admin/room-list/add-room" element={<CreateRoom />} />
           <Route path="/admin/room-list/room/:id" element={<RoomDetail />} />
           <Route path="/admin/room-list/:id/edit" element={<EditRoom />} />
+
+           {/* Tích hợp route danh sách phim */}
+           <Route path="/admin/movie-list" element={<MovieList />} />
+
 
           <Route index element={<DashboardPage />} />
 
