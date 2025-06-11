@@ -9,21 +9,20 @@ const cx = classNames.bind(styles);
 
 function MovieDetail() {
     const { id } = useParams();
-    const [isOpenTrailer, setOpenTrailer] = useState(false);
-
-    // useLayoutEffect(() => {
-    //     window.scrollTo({
-    //         top: 0,
-    //         behavior: 'smooth' 
-    //     });
-    // }, [])
+    
+    useLayoutEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth' 
+        });
+    }, [])
     return (
         <>
             <DefaultLayout>
                 <div
                     className={ cx('background-img') }
                     style={ {
-                        backgroundImage: 'url("https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/y/d/yd-thumbnail.jpg")',
+                        backgroundImage: 'url("https://image.tmdb.org/t/p/original/xMgfvjhKwuFTyoXNpa8UVV74rek.jpg")',
                     } }
                 >
                     <div className={ cx('poster-large') }>
@@ -86,10 +85,6 @@ function MovieDetail() {
                         </div>
                     </div>
                 </div>
-
-
-
-          
             </DefaultLayout>
         </>
     )

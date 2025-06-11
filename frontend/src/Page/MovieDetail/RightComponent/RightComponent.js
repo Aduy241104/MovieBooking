@@ -15,7 +15,7 @@ function RightComponent() {
         <div>
             <div className='w-100 d-flex justify-content-between'>
                 <CustomizeButton
-                    className={ cx('fw-bold') }
+                    className={ cx('fw-bold shadow-hover-gold') }
                     gold rounded large leftIcon={ <i className="fa-regular fa-circle-play fs-5"></i> }
                     onClick={ () => setOpenTrailer(true) }
                 >
@@ -25,7 +25,7 @@ function RightComponent() {
                 <TrailerModal
                     open={ isOpenTrailer }
                     onClose={ () => setOpenTrailer(false) }
-                    trailerUrl={ 'https://www.youtube.com/embed/no2HdwAX8jI?si=gytCY554soIGW2mw' }
+                    trailerUrl={ 'https://www.youtube.com/embed/AhvXh0Rv0_c?si=sgrOwTQ2xcAnVso8' }
                 />
 
                 <CustomizeButton

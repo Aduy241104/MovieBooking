@@ -70,10 +70,20 @@ function BannerSlide() {
                                     </div>
                                     <div className='des line-clamp'>{ item.Description }</div>
                                     <div className='d-flex align-items-center'>
-                                        <CustomizeButton className="login-btn" large rounded leftIcon={ <i className="fa-solid fa-ticket"></i> }>
+                                        <CustomizeButton
+                                            className="login-btn shadow-hover-gold"
+                                            large rounded
+                                            leftIcon={ <i className="fa-solid fa-ticket"></i> }
+                                        >
                                             Đặt vé
                                         </CustomizeButton>
-                                        <CustomizeButton outLine rounded large>Xem chi tiết</CustomizeButton>
+                                        <CustomizeButton
+                                            outLine
+                                            rounded
+                                            large
+                                        >
+                                            Xem chi tiết
+                                        </CustomizeButton>
                                     </div>
                                 </div>
                             </div>

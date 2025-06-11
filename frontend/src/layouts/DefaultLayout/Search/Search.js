@@ -5,6 +5,7 @@ import styles from './Search.module.scss'
 import classNames from 'classnames/bind'
 import useDebounce from '../../../hooks/useDebounce'
 import { searchMovieByName } from '../../../service/TheMovieService'
+import { useNavigate } from 'react-router-dom'
 
 const cx = classNames.bind(styles);
 
@@ -17,6 +18,7 @@ function Search() {
         currentPage: 0,
         totalPage: 0
     });
+    const naviagate = useNavigate();
 
     // debounce hook to delay API
     const debounceValue = useDebounce(searchValue, 1000);
@@ -109,17 +111,21 @@ function Search() {
                                 ) : ("") }
                             </div>
 
-
                             {/* result search */ }
                             { (!isLoading) ? (
                                 <div className={ cx('search-layout', 'custome-scroll-bar', 'mt-3 d-flex flex-column align-items-center') }>
                                     { searchResult.map((item) => {
                                         return (
-                                            <div className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') } key={ item.id }>
+                                            <div
+                                                className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') }
+                                                key={ item.id }
+                                                onClick={ () => naviagate(`/movie-detail/1`) }
+                                            >
                                                 <div className='w-25'>
                                                     <img
                                                         src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg"
                                                         alt=""
+
                                                     />
                                                 </div>
                                                 <div className='ms-2 w-75'>
@@ -130,7 +136,6 @@ function Search() {
                                             </div>
                                         )
                                     }) }
-
 
                                     { !!searchResult.length &&
                                         <button className='mt-3 text-red fw-bold' onClick={ () => handleShowMore() }>
