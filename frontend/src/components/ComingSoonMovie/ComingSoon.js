@@ -32,13 +32,14 @@ function ComingSoon() {
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim sắp chiếu</h2>
                     <div className={ cx('w-responsive') }>
                         <SwiperSlides>
-                            { listMovie.map((item) => {
+                            { listMovie.map((item, index) => {
                                 return (
-                                    <SwiperSlide>
+                                    <SwiperSlide key={ index }>
                                         <MovieComp
                                             imglink={ item.smallImage }
                                             nameVN={ item.nameVN }
                                             types={ item.types }
+                                            id={ item.id }
                                         />
                                     </SwiperSlide>
                                 )

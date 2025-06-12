@@ -1,28 +1,61 @@
-import React, { useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import DefaultLayout from '../../layouts/DefaultLayout'
 import { useNavigate, useParams } from 'react-router-dom'
 import styles from './MovieDetail.module.scss'
 import classNames from 'classnames/bind'
 import RightComponent from './RightComponent'
+import { getMovieDetailAPI } from '../../service/TheMovieService'
 
 const cx = classNames.bind(styles);
+const DEFAULT_BG =
+    'https://image.tmdb.org/t/p/original/xMgfvjhKwuFTyoXNpa8UVV74rek.jpg';
 
 function MovieDetail() {
     const { id } = useParams();
-    
+    const [movie, setMovie] = useState({});
+    const [errorMessage, setError] = useState("");
+    const [bgUrl, setBgUrl] = useState(DEFAULT_BG);
+
     useLayoutEffect(() => {
         window.scrollTo({
             top: 0,
-            behavior: 'smooth' 
+            behavior: 'smooth'
         });
-    }, [])
+    }, []);
+
+
+    useEffect(() => {
+        const fetchMovieData = async (id) => {
+            try {
+                const response = await getMovieDetailAPI(id);
+                setMovie(response.result);
+
+                const path = response.result?.largeImage;
+                if (path?.trim()) {
+                    const fullUrl = path;
+                    const img = new Image();
+                    img.src = fullUrl;
+
+                    img.onload = () => setBgUrl(fullUrl);
+                    img.onerror = () => setBgUrl(DEFAULT_BG);
+                } else {
+                    setBgUrl(DEFAULT_BG);
+                }
+            } catch (error) {
+                console.error(error);
+                setBgUrl(DEFAULT_BG);
+            }
+        };
+        fetchMovieData(id);
+    }, [id])
+
     return (
         <>
             <DefaultLayout>
                 <div
                     className={ cx('background-img') }
                     style={ {
-                        backgroundImage: 'url("https://image.tmdb.org/t/p/original/xMgfvjhKwuFTyoXNpa8UVV74rek.jpg")',
+                        backgroundImage: `url("${bgUrl}")`,
                     } }
                 >
                     <div className={ cx('poster-large') }>
@@ -34,29 +67,28 @@ function MovieDetail() {
                             <div className='row'>
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
-                                        <img src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/t/e/teaser_poster_1_3.jpg"
+                                        <img src={ movie.smallImage }
                                             alt=""
                                             className={ cx('poster-small') }
                                         />
                                     </div>
                                     <div className='mt-4 w-75'>
-                                        <h3>Yadang: Ba Mặt Lật Kèo</h3>
+                                        <h3>{ movie.nameVN }</h3>
                                         <p className='text-red fs-7 mt-3'>Yadang: The Snitch</p>
                                         <div className='d-flex flex-wrap gap-2 mt-4 mb-3'>
                                             <div className='w-100 pb-2'>
                                                 <span className='p-1 pe-3 ps-3 border-1 border-gold fs-8 rounded-1'>2025</span>
                                             </div>
-                                            <button className={ cx('movie-genre') }>Hành Động</button>
-                                            <button className={ cx('movie-genre') }>Trinh Thám</button>
+                                            { movie.types && movie.types.map((item, index) => {
+                                                return (
+                                                    <button key={ index } className={ cx('movie-genre') }>{ item }</button>
+                                                )
+                                            }) }
                                         </div>
                                         <div className='mt-3'>
                                             <strong>Giới thiệu: </strong>
-                                            <p className={ cx('fs-7 mt-2', 'text-gray') }>"Từ giờ trở đi, bạn là kẻ chỉ điểm của tôi."
-                                                Là “cầu nối” giữa thế giới ngầm và các cơ quan thực thi pháp luật, những kẻ chỉ điểm
-                                                chuyên nghiệp được gọi là "yadang" - người cung cấp thông tin bí mật về thế giới ma túy
-                                                cho các công tố viên và cảnh sát. Khi một kẻ chỉ điểm ma túy “báo tin” về một bữa tiệc có sự tham dự
-                                                của các VIP nổi tiếng và vô tình vướng vào một âm mưu nguy hiểm, hắn phải làm mọi thứ trong khả năng
-                                                của mình không chỉ để sống sót,mà còn để phục thù
+                                            <p className={ cx('fs-7 mt-2', 'text-gray') }>
+                                                { movie.content }
                                             </p>
                                         </div>
                                         <div className='mt-4'>
@@ -66,18 +98,22 @@ function MovieDetail() {
                                                     <span className={ cx('text-gray') }>1h 39m</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
+                                                    <strong>Đạo diễn: </strong>
+                                                    <span className='fw-300'>Warner Bros</span>
+                                                </li>
+                                                <li className='fs-7 pb-3' >
                                                     <strong>Sản xuất: </strong>
                                                     <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
-                                                    <strong>Đạo diễn: </strong>
-                                                    <span className='fw-300'>Jeff Wamester</span>
+                                                    <strong>Sản xuất: </strong>
+                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
                                                 </li>
+
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>
                                     <RightComponent />
                                 </div>

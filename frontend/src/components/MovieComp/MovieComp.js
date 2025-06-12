@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-function MovieComp({ imglink, types = [], nameVN, index }) {
+function MovieComp({ imglink, types = [], nameVN, index, id }) {
     const navigate = useNavigate();
 
     return (
-        <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate('/movie-detail/1') }>
+        <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate(`/movie-detail/${id}`) }>
             <div className={ cx('poster', 'rounded-3') }>
                 <img
                     src={ imglink }

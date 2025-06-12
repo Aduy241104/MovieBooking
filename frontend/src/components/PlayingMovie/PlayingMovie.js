@@ -39,12 +39,13 @@ function PlayingMovie() {
                         <SwiperSlides>
                             { listMovie.map((item, index) => {
                                 return (
-                                    <SwiperSlide>
+                                    <SwiperSlide key={ index }>
                                         <MovieComp
                                             index={ index + 1 }
                                             imglink={ item.smallImage }
                                             nameVN={ item.nameVN }
                                             types={ item.types }
+                                            id={ item.id }
                                         />
                                     </SwiperSlide>
                                 )
