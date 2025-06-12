@@ -14,7 +14,7 @@ export const AdminLayout = () => {
     const location = useLocation();
 
     const [collapsed, setCollapsed] = useState(false);
-    const [dataUsers, setDataUsers] = useState(null);
+    const [dataUsers, setDataUsers] = useState([]);
     const [filter, setFilter] = useState("");
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(10);

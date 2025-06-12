@@ -70,6 +70,10 @@ public class PromotionService {
                 .build();
     }
 
+    public Long getTotalActivePromotions() {
+        return promotionRepository.countByActive(true);
+    }
+
     public Promotion fetchPromotionById(Long id) {
         return promotionRepository.findById(id).orElse(null);
     }

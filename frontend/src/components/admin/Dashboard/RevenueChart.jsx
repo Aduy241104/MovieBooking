@@ -11,6 +11,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import dayjs from 'dayjs';
 
 export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
     const formatCurrency = (value) => {
@@ -72,6 +73,18 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                         <XAxis
                             dataKey="name"
                             fontSize={12}
+                            tickFormatter={value => {
+                                if (timeRange === 'day') {
+                                    return dayjs(value).format('DD/MM');
+                                }
+                                if (timeRange === 'week') {
+                                    const startOfWeek = dayjs(value);
+                                    return `${startOfWeek.format('DD/MM')} - ${startOfWeek.add(6, 'day').format('DD/MM')}`;
+                                }
+                                if (timeRange === 'month') {
+                                    return dayjs(value).format('MM/YYYY');
+                                }
+                            }}
                         />
                         <YAxis
                             yAxisId="left"
@@ -90,6 +103,19 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                                     return [formatCurrency(value), 'Doanh thu'];
                                 }
                                 return [value, 'Số vé'];
+                            }}
+                            labelFormatter={label => {
+                                if (timeRange === 'day') {
+                                    return `${dayjs(label).format('DD/MM/YYYY')}`;
+                                }
+                                if (timeRange === 'week') {
+                                    const startOfWeek = dayjs(label);
+                                    const endOfWeek = startOfWeek.add(6, 'day');
+                                    return `${startOfWeek.format('DD/MM/YYYY')} - ${endOfWeek.format('DD/MM/YYYY')}`;
+                                }
+                                if (timeRange === 'month') {
+                                    return `${dayjs(label).format('MM/YYYY')}`;
+                                }
                             }}
                             labelStyle={{ color: '#000' }}
                             contentStyle={{

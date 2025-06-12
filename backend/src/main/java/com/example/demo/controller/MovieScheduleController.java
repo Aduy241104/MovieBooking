@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +66,17 @@ public class MovieScheduleController {
         List<SingleMovieDTO> response = movieScheduleService.getCommingSoonMovie(LocalDate.now());
         return ApiResponse.<List<SingleMovieDTO>>builder()
                 .message("success")
+                .result(response)
+                .build();
+
+    }
+
+    @GetMapping("/now-showing/total")
+    public ApiResponse<Long> totalNowShowingMovie() {
+        Long response = movieScheduleService.getTotalNowShowingMovie();
+        return ApiResponse.<Long>builder()
+                .status(HttpStatus.OK.value())
+                .message("Get total now showing movie")
                 .result(response)
                 .build();
 
