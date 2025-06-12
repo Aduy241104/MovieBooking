@@ -105,6 +105,9 @@
     animation: animate 1s ease-in-out 1 forwards;
 }
 
+.login-btn {
+    background-image: linear-gradient(135deg, #eec459,#f1da9f, #e6e6e6);
+}
 
 
 .content-slide .des {
@@ -165,4 +168,3 @@
     width: 100%;
     overflow: hidden;
 }
-

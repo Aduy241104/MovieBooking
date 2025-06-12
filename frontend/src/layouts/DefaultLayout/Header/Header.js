@@ -14,7 +14,7 @@ function Header({ user, logout }) {
     const closeMenu = () => setIsMenuOpen(false);
 
     return (
-        <header className={ `border-bottom border-dark bg-black ${cx("header")}` }>
+        <header className={ `border-bottom border-dark ${cx("header")}` }>
             <div className="container px-3 h-100">
                 <div className="d-flex justify-content-between align-items-center py-2 h-100">
                     {/* Logo */ }
@@ -32,10 +32,10 @@ function Header({ user, logout }) {
                     <div className="d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
-                                <li className="border-bottom border-danger">Lịch chiếu</li>
+                                <li className="border-bottom border-gold ">Lịch chiếu</li>
                                 <li className="border-bottom border-dark">Phim Chiếu</li>
-                                <li>Sắp Chiếu</li>
-                                <li>Top Phim</li>
+                                <li className="border-bottom border-dark">Sắp Chiếu</li>
+                                <li className="border-bottom border-dark">Top Phim</li>
                             </ul>
                         </nav>
                         <div className="d-flex align-items-center h-100">

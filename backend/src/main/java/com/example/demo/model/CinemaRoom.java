@@ -20,4 +20,7 @@ public class CinemaRoom {
 
     @Column(name = "seat_quantity")
     private int seatQuantity;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

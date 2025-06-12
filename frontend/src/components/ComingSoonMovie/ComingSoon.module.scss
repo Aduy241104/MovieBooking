@@ -14,3 +14,13 @@
         width: 80%;
     }
 }
+
+.bg-text {
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(255, 0, 153) 130%);
+    background-size: 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

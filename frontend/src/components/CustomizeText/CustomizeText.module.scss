@@ -13,7 +13,24 @@
 //     -webkit-background-clip: text;
 //     -webkit-text-fill-color: transparent;
 //     animation: animate-gradient 2.5s linear infinite;
-    
+
+// }
+
+// .customize {
+//     font-weight: 700;
+//     text-transform: uppercase;
+//     text-align: center;
+//     background: linear-gradient(to right,
+//             #d40707,
+//             #ba0303,
+//             #770c0c,
+//             #e6a12a,
+//             #7d4a03);
+//     background-size: 200%;
+//     background-clip: text;
+//     -webkit-background-clip: text;
+//     -webkit-text-fill-color: transparent;
+//     animation: animate-gradient 2.5s linear infinite;
 // }
 
 .customize {
@@ -21,20 +38,34 @@
     text-transform: uppercase;
     text-align: center;
     background: linear-gradient(to right,
-            #d40707,
-            #ba0303,
-            #770c0c,
-            #e6a12a,
-            #7d4a03);
+            #ffd875,
+            #e1b74c,
+            #41361c,
+            #e8ab13,
+            #ffd875, );
     background-size: 200%;
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: animate-gradient 2.5s linear infinite;
+}
 
+.pink {
+    font-weight: 700;
+    text-transform: uppercase;
+    text-align: center;
+    background: linear-gradient(to right,
+            #d153ed,
+            #cb69fc,
+            #e0ded9, );
+    background-size: 200%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 @keyframes animate-gradient {
     to {
         background-position: 200%;
-    } }
+    }
+}

@@ -3,17 +3,32 @@ import styles from './ComingSoon.module.scss'
 import SwiperSlides from "../SwiperSlide/SwiperSlides";
 import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
-import CustomizeText from "../CustomizeText";
-
+import { useEffect, useState } from "react";
+import { getUpComingMovieAPI } from "../../service/TheMovieService";
 
 const cx = classNames.bind(styles);
 
 function ComingSoon() {
+    const [listMovie, setListMovie] = useState([]);
+
+
+    const fetchData = async () => {
+        try {
+            const response = await getUpComingMovieAPI();
+            setListMovie(response);
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
     return (
         <div className="p-5" >
             <div className="container">
                 <div className="d-flex flex-column justify-content-center align-items-center text-light">
-                    <h2 className="pb-5">Phim đang chiếu</h2>
+                    <h2 className={ cx('pb-5', 'bg-text')}>Phim đang chiếu</h2>
                     <div className={ cx('w-responsive') }>
                         <SwiperSlides>
                             <SwiperSlide>

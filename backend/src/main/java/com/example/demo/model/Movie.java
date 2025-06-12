@@ -54,4 +54,6 @@ public class Movie {
     @Column(name = "age_limit")
     private Integer ageLimit;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

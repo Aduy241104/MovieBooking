@@ -12,8 +12,12 @@ function HomePage() {
   return (
     <DefaultLayout>
       <BannerSlide></BannerSlide>
-      <ComingSoon />
-      <PlayingMovie />
+      <div className='container-fluid mt-5 ps-5 pe-5'>
+        <div className='bg-night rounded-4'>
+          <ComingSoon />
+          <PlayingMovie />
+        </div>
+      </div>
       <MovieSchedule />
     </DefaultLayout>
 
