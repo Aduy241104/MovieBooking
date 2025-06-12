@@ -24,4 +24,9 @@ public class MovieScheduleService {
         List<SingleMovieDTO> result = movieRepository.findUpcomingMovies(currentDate);
         return result;
     }
+
+    public long getTotalNowShowingMovie() {
+        LocalDate now = LocalDate.now();
+        return movieRepository.fetchTotalNowShowingMovies(now);
+    }
 }

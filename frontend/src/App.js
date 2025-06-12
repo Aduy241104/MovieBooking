@@ -43,12 +43,12 @@ function App() {
           <Route index element={<DashboardPage />} />
 
           <Route path='users-members'
-            element={<UserPage key="members" userText="Thành viên" userFilter="Member" />} />
+            element={<UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />} />
           <Route path='users-members/:accountId'
             element={<UserDetailPage key="members-detail" userText="Thành viên" />} />
 
           <Route path='users-employees'
-            element={<UserPage key="employees" userText="Nhân viên" userFilter="Employee" />} />
+            element={<UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" />} />
           <Route path='users-employees/:accountId'
             element={<UserDetailPage key="employees-detail" userText="Nhân viên" />} />
 
