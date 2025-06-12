@@ -22,7 +22,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id, m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
@@ -30,7 +30,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                    OR LOWER(m.nameEN) LIKE LOWER(CONCAT('%', :keyword, '%'))
                 GROUP BY m.id, m.nameVN, m.nameEN, m.duration, m.content,
                          m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                         m.trailer
+                         m.trailer, m.ageLimit
                 ORDER BY m.id
             """)
     Page<SingleMovieDTO> searchMoviesWithRating(@Param("keyword") String keyword, Pageable pageable);
@@ -39,13 +39,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id, m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
                 WHERE m.fromDate <= :currentDate AND m.toDate >= :currentDate
                 GROUP BY m.id,m.nameVN, m.nameEN, m.duration, m.content,
-                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer
+                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer, m.ageLimit
                 ORDER BY m.id
             """)
     List<SingleMovieDTO> findNowShowingMovies(@Param("currentDate") LocalDate currentDate);
@@ -54,13 +54,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id,m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
                 WHERE m.fromDate > :currentDate
                 GROUP BY m.id, m.nameVN, m.nameEN, m.duration, m.content,
-                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer
+                         m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer, m.ageLimit
                 ORDER BY m.fromDate
             """)
     List<SingleMovieDTO> findUpcomingMovies(@Param("currentDate") LocalDate currentDate);

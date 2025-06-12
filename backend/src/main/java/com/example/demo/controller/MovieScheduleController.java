@@ -19,6 +19,7 @@ import com.example.demo.service.MovieScheduleService;
 import com.example.demo.service.ScreeningService;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin(origins = "*")
@@ -44,10 +45,13 @@ public class MovieScheduleController {
     }
 
     @GetMapping("/by-date")
-    public ResponseEntity<List<MovieScheduleDTO>> getScheduleByDate(
+    public ApiResponse<List<MovieScheduleDTO>> getScheduleByDate(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        List<MovieScheduleDTO> result = screeningService.getAllMovieScheduleByDate(date);
-        return ResponseEntity.ok(result);
+        List<MovieScheduleDTO> result = movieScheduleService.getSchedule(date);
+        return ApiResponse.<List<MovieScheduleDTO>>builder()
+                .message("success")
+                .result(result)
+                .build();
     }
 
     @GetMapping("/now-showing")
@@ -68,6 +72,15 @@ public class MovieScheduleController {
                 .result(response)
                 .build();
 
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<SingleMovieDTO> getMethodName(@PathVariable Long id) {
+        SingleMovieDTO singleMovieDTO = movieScheduleService.getMovieDetail(id);
+        return ApiResponse.<SingleMovieDTO>builder()
+                .message("success")
+                .result(singleMovieDTO)
+                .build();
     }
 
 }

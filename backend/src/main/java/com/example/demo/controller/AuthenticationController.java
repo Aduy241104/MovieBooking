@@ -74,38 +74,3 @@ public class AuthenticationController {
                 .build();
     }
 }
-
-// @PostMapping("/register")
-// public ApiResponse<Account> postMethodName(@RequestBody RegisterRequest
-// request) {
-// try {
-// Account account = authService.register(request);
-// return ApiResponse.<Account>builder()
-// .message("register successfull")
-// .result(account)
-// .build();
-// } catch (RuntimeException e) {
-// return ApiResponse.<Account>builder()
-// .message(e.getMessage())
-// .result(null)
-// .build();
-// }
-// }
-
-// @PostMapping("/login")
-// public ApiResponse<AuthenticationRespond> postMethodName(@RequestBody
-// AuthenticationRequest request) {
-// try {
-// AuthenticationRespond response = authService.authenticate(request);
-// return ApiResponse.<AuthenticationRespond>builder()
-// .message("Success")
-// .result(response)
-// .build();
-// } catch (RuntimeException e) {
-// return ApiResponse.<AuthenticationRespond>builder()
-// .result(null)
-// .build();
-// }
-// }
-
-// }
