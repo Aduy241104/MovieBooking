@@ -70,7 +70,7 @@ a {
 }
 
 .red-hover:hover {
-    color: var(--red);
+   background-color: rgba(143, 141, 141, 0.1);
 }
 
 .fs-7 {
@@ -82,7 +82,6 @@ a {
 }
 
 .bg-midnight {
-    // background-color: rgb(25, 27, 36);
     background-color: rgb(25, 27, 36);
 }
 
@@ -120,7 +119,6 @@ a {
 
 .mySwiper {
     position: relative;
-    /* cần để mũi tên định vị đúng */
     z-index: 100;
 }
 

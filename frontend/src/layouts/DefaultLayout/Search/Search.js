@@ -1,5 +1,5 @@
 import Tippy from '@tippyjs/react/headless'
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import 'tippy.js/dist/tippy.css'
 import styles from './Search.module.scss'
 import classNames from 'classnames/bind'
@@ -19,6 +19,7 @@ function Search() {
         totalPage: 0
     });
     const naviagate = useNavigate();
+    const inputRef = useRef(null);
 
     // debounce hook to delay API
     const debounceValue = useDebounce(searchValue, 1000);
@@ -78,7 +79,12 @@ function Search() {
         }
     }, [page.currentPage])
 
-    console.log("search result: ", searchResult);
+    //focus input when open
+    useEffect(() => {
+        if (isShow && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isShow]);
 
     return (
         <>
@@ -102,6 +108,7 @@ function Search() {
                                 <input
                                     type="text"
                                     placeholder='Kiếm gì đê'
+                                    ref={ inputRef }
                                     className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill') }
                                     value={ searchValue }
                                     onChange={ (e) => handleChangeSearchValue(e) }
@@ -123,15 +130,19 @@ function Search() {
                                             >
                                                 <div className='w-25'>
                                                     <img
-                                                        src="https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg"
+                                                        src={ item.smallImage }
                                                         alt=""
-
+                                                        loading="lazy"
+                                                        onError={ (e) => {
+                                                            e.target.onerror = null; // Ngăn lặp vô hạn nếu ảnh fallback cũng lỗi
+                                                            e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"; // Đường dẫn ảnh mặc định
+                                                        } }
                                                     />
                                                 </div>
                                                 <div className='ms-2 w-75'>
                                                     <strong className={ cx("movie-name") }>{ item.nameVN }</strong>
                                                     <p className={ cx('genre', 'text-secondary') }>{ item.types.join(', ') }</p>
-                                                    <p className='fs-7'><i className="fa-solid fa-star text-warning"></i> { item.avgRating }</p>
+                                                    <p className='fs-7'><i className="fa-regular fa-clock"></i> { item.duration }m</p>
                                                 </div>
                                             </div>
                                         )

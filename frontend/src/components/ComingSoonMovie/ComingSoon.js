@@ -15,7 +15,8 @@ function ComingSoon() {
     const fetchData = async () => {
         try {
             const response = await getUpComingMovieAPI();
-            setListMovie(response);
+            console.log("test: ", response.result);
+            setListMovie(response.result);
         } catch (error) {
             console.log(error.message);
         }
@@ -28,46 +29,20 @@ function ComingSoon() {
         <div className="p-5" >
             <div className="container">
                 <div className="d-flex flex-column justify-content-center align-items-center text-light">
-                    <h2 className={ cx('pb-5', 'bg-text') }>Phim đang chiếu</h2>
+                    <h2 className={ cx('pb-5', 'bg-text') }>Phim sắp chiếu</h2>
                     <div className={ cx('w-responsive') }>
                         <SwiperSlides>
-                            <SwiperSlide>
-                                <MovieComp
-                                    index={ 1 }
-                                    imglink={ 'https://api-website.cinestar.com.vn/media/wysiwyg/NEWS/mission-impoossible-jpg-7332-1731381379.png' } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    index={ 2 }
-                                    imglink={ "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/c5f0a1eff4c394a251036189ccddaacd/v/i/virus-main_poster-2.jpg" } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    index={ 3 }
-                                    imglink={ "https://metiz.vn/media/poster_film/ba-mat.jpg" } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    index={ 4 }
-                                    imglink={ 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTITafLS1S1kDGOG8OvmjmYdhYsfPI69TZ9PQ&s' } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    index={ 5 }
-                                    imglink={ 'https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/z/o/zootopia_2_-_teaser_poster_up.jpg' } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    imglink={ "https://metiz.vn/media/poster_film/ba-mat.jpg" } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    imglink={ 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTITafLS1S1kDGOG8OvmjmYdhYsfPI69TZ9PQ&s' } />
-                            </SwiperSlide>
-                            <SwiperSlide>
-                                <MovieComp
-                                    imglink={ 'https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/z/o/zootopia_2_-_teaser_poster_up.jpg' } />
-                            </SwiperSlide>
+                            { listMovie.map((item) => {
+                                return (
+                                    <SwiperSlide>
+                                        <MovieComp
+                                            imglink={ item.smallImage }
+                                            nameVN={ item.nameVN }
+                                            types={ item.types }
+                                        />
+                                    </SwiperSlide>
+                                )
+                            }) }
                         </SwiperSlides>
                     </div>
                 </div>

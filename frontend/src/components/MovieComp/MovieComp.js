@@ -4,19 +4,27 @@ import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-function MovieComp({ imglink, index }) {
+function MovieComp({ imglink, types = [], nameVN, index }) {
     const navigate = useNavigate();
 
     return (
         <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate('/movie-detail/1') }>
             <div className={ cx('poster', 'rounded-3') }>
-                <img src={ imglink } alt="" />
+                <img
+                    src={ imglink }
+                    alt=""
+                    loading="lazy"
+                    onError={ (e) => {
+                        e.target.onerror = null; // Ngăn lặp vô hạn nếu ảnh fallback cũng lỗi
+                        e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"; // Đường dẫn ảnh mặc định
+                    } }
+                />
             </div>
             <div className="text-light d-flex">
                 <div className={ cx("number-rank") }>{ index }</div>
                 <div>
-                    <p className="line-clamp-1 fw-medium fs-6">Nhiệm vụ Bất khả thi thi thi</p>
-                    <p className={ cx('genre', 'text-secondary fs-7') }>Hành động, trinh thám</p>
+                    <p className="line-clamp-1 fw-medium fs-6">{ nameVN }</p>
+                    <p className={ cx('genre', 'text-secondary fs-7') }>{ types.join(', ') }</p>
                 </div>
             </div>
         </div>
