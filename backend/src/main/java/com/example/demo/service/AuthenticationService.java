@@ -32,6 +32,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -58,21 +60,6 @@ public class AuthenticationService {
 
     @NonFinal
     protected static final String SIGNER_KEY = "tndQadt/oKJtCAnWMh2eq74jx2xdwHEbfKcOfeJaDDPLDayULMjWeoNGOfH9rfQA";
-
-    // check valid token
-    public IntrospectRespond introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        var token = request.getToken();
-
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean verified = signedJWT.verify(verifier);
-
-        return IntrospectRespond.builder()
-                .valid(verified && expiryTime.after(new Date()))
-                .build();
-    }
 
     // authentication cho table account
     public AuthRespond auth(AuthenticationRequest request) {
@@ -121,6 +108,27 @@ public class AuthenticationService {
         return account;
     }
 
+    public void handleForgotPassword(String email) {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Account does not exists"));
+        otpService.sendForgotPasswordLink(account);
+    }
+
+    @Transactional
+    public void handleResetPassword(String email, String otp, String newPass) {
+        boolean isOtpValid = otpService.verifyOtp(email, otp);
+
+        if (!isOtpValid) {
+            throw new UnauthorizedException("Invalid or incorrect OTP.");
+        }
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("account not found"));
+
+        account.setPassword(newPass);
+        accountRepository.save(account);
+        otpService.clearOtp(email);
+    }
+
     // method to generate token
     private String generateToken(Account account) {
 
@@ -145,5 +153,20 @@ public class AuthenticationService {
             log.error("cannot create token", e);
             throw new RuntimeException(e);
         }
+    }
+
+    // check valid token
+    public IntrospectRespond introspect(IntrospectRequest request) throws JOSEException, ParseException {
+        var token = request.getToken();
+
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        boolean verified = signedJWT.verify(verifier);
+
+        return IntrospectRespond.builder()
+                .valid(verified && expiryTime.after(new Date()))
+                .build();
     }
 }
