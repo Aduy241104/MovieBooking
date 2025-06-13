@@ -1,249 +1,326 @@
-CREATE TABLE ROLES (
-    ROLE_ID SERIAL PRIMARY KEY, -- Khóa chính tự tăng cho mỗi vai trò.
-    ROLE_NAME VARCHAR(255) UNIQUE -- Tên của vai trò, phải là duy nhất.
+
+-- Bảng này lưu thông tin vai trò người dùng (ví dụ: admin, user).
+CREATE TABLE ROLE (
+    ROLE_ID BIGSERIAL PRIMARY KEY,
+    ROLE_NAME VARCHAR(255) 
 );
 
--- Bảng ACCOUNT: Lưu trữ thông tin chi tiết về tài khoản của người dùng.
-CREATE TABLE ACCOUNT (
-    ACCOUNT_ID SERIAL PRIMARY KEY, -- Khóa chính tự tăng cho mỗi tài khoản.
-    ROLE_ID INT REFERENCES ROLES(ROLE_ID), -- Khóa ngoại, liên kết đến vai trò của người dùng trong bảng ROLES.
-    EMAIL VARCHAR(255) UNIQUE,             -- Email của người dùng, phải là duy nhất trong hệ thống.
-    PASSWORD VARCHAR(255),                 -- Mật khẩu của người dùng (nên được lưu dưới dạng băm).
-    FULL_NAME VARCHAR(255),                -- Họ và tên đầy đủ của người dùng.
-    GENDER VARCHAR(255),                   -- Giới tính của người dùng.
-    PHONE_NUMBER VARCHAR(50) UNIQUE,       -- Số điện thoại, phải là duy nhất.
-    IDENTITY_CARD VARCHAR(50) UNIQUE,      -- Số CMND/CCCD, phải là duy nhất.
-    DATE_OF_BIRTH DATE,                    -- Ngày sinh của người dùng.
-    REGISTER_DATE DATE,                    -- Ngày đăng ký tài khoản.
-    SCORE INT,                             -- Điểm tích lũy của người dùng.
-    AVATAR VARCHAR(255),                   -- Đường dẫn đến ảnh đại diện.
-    ACCOUNT_STATUS INT,            -- Trạng thái của tài khoản (ví dụ: 'active', 'inactive').
-    SOCIAL_ACCOUNT_TYPE VARCHAR(50)        -- Loại tài khoản mạng xã hội nếu đăng nhập qua Google, Facebook...
-);
-
--- Bảng EMAIL_VERIFICATION_TOKEN: Lưu trữ mã token dùng để xác thực email.
-CREATE TABLE EMAIL_VERIFICATION_TOKENS (
-    EMAIL_VERIFICATION_TOKEN_ID SERIAL PRIMARY KEY, -- Khóa chính tự tăng.
-    EMAIL VARCHAR(255),                     -- Email cần xác thực.
-    OTP_CODE VARCHAR(255),                  -- Mã OTP hoặc token được gửi đến email.
-    EXPIRATION_TIME TIMESTAMP WITHOUT TIME ZONE -- Thời gian hết hạn của token.
-);
-
--- Bảng PAYMENT_METHOD: Lưu trữ các phương thức thanh toán được chấp nhận.
-CREATE TABLE PAYMENT_METHOD (
-    PAYMENT_METHOD_ID SERIAL PRIMARY KEY, -- Khóa chính tự tăng.
-    METHOD_NAME VARCHAR(100) UNIQUE,       -- Tên phương thức (ví dụ: 'Credit Card', 'Momo'), phải là duy nhất.
-    DESCRIPTION VARCHAR(255),                -- Mô tả chi tiết về phương thức.
-    IS_ACTIVE BOOLEAN                        -- Trạng thái cho biết phương thức có đang được sử dụng hay không.
-);
-
--- Bảng PROMOTION: Chứa thông tin về các chương trình khuyến mãi, mã giảm giá.
-CREATE TABLE PROMOTION (
-    PROMOTION_ID SERIAL PRIMARY KEY,       -- Khóa chính tự tăng.
-    DISCOUNT_TYPE VARCHAR(50),             -- Loại giảm giá (ví dụ: 'percentage', 'fixed_amount').
-    DISCOUNT_LEVEL DECIMAL(10,2),          -- Mức độ giảm giá.
-    CODE VARCHAR(255) UNIQUE,              -- Mã khuyến mãi, phải là duy nhất.
-    DETAIL VARCHAR(255),                   -- Chi tiết về chương trình khuyến mãi.
-    MAX_DISCOUNT DECIMAL(12,2),            -- Mức giảm giá tối đa có thể áp dụng.
-    MIN_ORDER DECIMAL(12,2),               -- Giá trị đơn hàng tối thiểu để áp dụng.
-    START_TIME TIMESTAMP WITHOUT TIME ZONE,  -- Thời gian bắt đầu khuyến mãi.
-    END_TIME TIMESTAMP WITHOUT TIME ZONE,    -- Thời gian kết thúc khuyến mãi.
-    PROMOTION_ACTIVE BOOLEAN,              -- Trạng thái cho biết khuyến mãi có đang hoạt động hay không.
-    IMAGE VARCHAR(255)                     -- Đường dẫn đến hình ảnh quảng cáo cho khuyến mãi.
-);
-
--- Bảng TYPE: Lưu trữ các thể loại phim.
+-- Bảng này lưu thông tin các loại phim (ví dụ: hành động, hài, kinh dị).
 CREATE TABLE TYPE (
-    TYPE_ID SERIAL PRIMARY KEY,           -- Khóa chính tự tăng cho mỗi thể loại.
-    TYPE_NAME VARCHAR(255) UNIQUE          -- Tên thể loại (ví dụ: 'Hành động', 'Hài'), phải là duy nhất.
+    TYPE_ID BIGSERIAL PRIMARY KEY,
+    TYPE_NAME VARCHAR(255),
+	IS_DELETED BOOLEAN DEFAULT FALSE --mới thêm
 );
 
--- Bảng MOVIE: Chứa tất cả thông tin chi tiết về một bộ phim.
-CREATE TABLE MOVIE (
-    MOVIE_ID SERIAL PRIMARY KEY,           -- Khóa chính tự tăng cho mỗi phim.
-    MOVIE_NAME_VN VARCHAR(255),            -- Tên phim bằng tiếng Việt.
-    MOVIE_NAME_EN VARCHAR(255),            -- Tên phim bằng tiếng Anh.
-    DURATION INT,                          -- Thời lượng phim (tính bằng phút).
-    CONTENT TEXT,                          -- Tóm tắt nội dung phim.
-    DIRECTOR VARCHAR(255),                 -- Tên đạo diễn.
-    ACTOR VARCHAR(255),                    -- Danh sách diễn viên.
-    MOVIE_PRODUCTION_COMPANY VARCHAR(255), -- Công ty sản xuất phim.
-    FROM_DATE DATE,                        -- Ngày bắt đầu chiếu.
-    TO_DATE DATE,                          -- Ngày kết thúc chiếu.
-    SMALL_IMAGE VARCHAR(255),              -- Đường dẫn đến ảnh poster nhỏ.
-    LARGE_IMAGE VARCHAR(255),              -- Đường dẫn đến ảnh poster lớn.
-    TRAILER VARCHAR(255)                   -- Đường dẫn đến trailer phim.
+-- Bảng này lưu thông tin các loại ghế và giá cơ bản của chúng.
+CREATE TABLE SEAT_TYPE (
+    SEAT_TYPE_ID BIGSERIAL PRIMARY KEY,
+    SEAT_TYPE_NAME VARCHAR(255) ,
+    SEAT_TYPE_PRICE DECIMAL(10, 2) 
 );
 
--- Bảng MOVIE_TYPE: Bảng nối, tạo mối quan hệ nhiều-nhiều giữa MOVIE và TYPE.
--- Một phim có thể thuộc nhiều thể loại, và một thể loại có thể có nhiều phim.
-CREATE TABLE MOVIE_TYPE (
-    MOVIE_TYPE_ID SERIAL PRIMARY KEY,
-    MOVIE_ID INT REFERENCES MOVIE(MOVIE_ID) ON DELETE CASCADE, -- Liên kết đến phim.
-    TYPE_ID INT REFERENCES TYPE(TYPE_ID) ON DELETE CASCADE,    -- Liên kết đến thể loại.
-    UNIQUE (MOVIE_ID, TYPE_ID) -- Đảm bảo một phim không bị gán cùng một thể loại nhiều lần.
-);
-
--- Bảng CINEMA_ROOM: Lưu trữ thông tin về các phòng chiếu phim.
+-- Bảng này lưu thông tin phòng chiếu phim.
 CREATE TABLE CINEMA_ROOM (
-    CINEMA_ROOM_ID SERIAL PRIMARY KEY,   -- Khóa chính tự tăng cho mỗi phòng chiếu.
-    CINEMA_ROOM_NAME VARCHAR(255),         -- Tên phòng chiếu (ví dụ: 'Phòng 1', 'Phòng IMAX').
-    SEAT_QUANTITY INT CHECK (SEAT_QUANTITY > 0 OR SEAT_QUANTITY IS NULL) -- Tổng số ghế trong phòng, phải là số dương.
+    CINEMA_ROOM_ID BIGSERIAL PRIMARY KEY,
+    CINEMA_ROOM_NAME VARCHAR(255) ,
+    SEAT_QUANTITY INTEGER,
+	IS_DELETED BOOLEAN DEFAULT FALSE --mới thêm
 );
 
--- Bảng FARE_TYPE: Định nghĩa các loại giá vé khác nhau.
+-- Bảng này lưu các loại giá vé khác nhau (ví dụ: ngày thường, cuối tuần).
 CREATE TABLE FARE_TYPE (
-    FARE_TYPE_ID SERIAL PRIMARY KEY,     -- Khóa chính tự tăng.
-    FARE_TYPE_NAME VARCHAR(255) UNIQUE,    -- Tên loại giá vé (ví dụ: 'Người lớn', 'Trẻ em', 'VIP'), phải là duy nhất.
-    PRICE DECIMAL(10,2) CHECK (PRICE >= 0 OR PRICE IS NULL) -- Giá vé tương ứng, không được âm.
+    FARE_TYPE_ID BIGSERIAL PRIMARY KEY,
+    FARE_TYPE_NAME VARCHAR(255) ,
+    BASE_PRICE DECIMAL(12, 2) ,
+    DAY_PRICE DECIMAL(12, 2),
+    TIME_SLOT_TYPE VARCHAR(255),
+    MOVIE_FORMAT VARCHAR(255)
 );
 
--- Bảng SCREENING: Đại diện cho một suất chiếu cụ thể của một bộ phim.
-CREATE TABLE SCREENING (
-    SCREENING_ID SERIAL PRIMARY KEY,   -- Khóa chính tự tăng cho mỗi suất chiếu.
-    MOVIE_ID INT REFERENCES MOVIE(MOVIE_ID) ON DELETE RESTRICT, -- Liên kết đến phim được chiếu.
-    CINEMA_ROOM_ID INT REFERENCES CINEMA_ROOM(CINEMA_ROOM_ID) ON DELETE RESTRICT, -- Liên kết đến phòng chiếu.
-    FARE_TYPE_ID INT REFERENCES FARE_TYPE(FARE_TYPE_ID) ON DELETE RESTRICT,     -- Liên kết đến loại giá vé cơ bản cho suất chiếu này.
-    SHOW_DATE_TIME TIMESTAMP WITHOUT TIME ZONE,                                 -- Thời gian bắt đầu suất chiếu.
-    UNIQUE (CINEMA_ROOM_ID, SHOW_DATE_TIME) -- Đảm bảo tại một phòng chiếu, một thời điểm chỉ có một suất chiếu.
+-- Bảng này lưu các chương trình khuyến mãi.
+CREATE TABLE PROMOTION (
+    PROMOTION_ID BIGSERIAL PRIMARY KEY,
+    PROMOTION_CODE VARCHAR(255),
+    PROMOTION_TYPE VARCHAR(255),
+    PROMOTION_LEVEL DECIMAL,
+    DETAIL VARCHAR(255),
+    MAX_DISCOUNT DECIMAL,
+    MIN_ORDER DECIMAL,
+    START_TIME TIMESTAMPTZ,
+    END_TIME TIMESTAMPTZ,
+    PROMOTION_ACTIVE BOOLEAN DEFAULT TRUE,
+    IS_DELETED BOOLEAN DEFAULT FALSE
 );
 
--- Bảng SEAT: Định nghĩa thông tin của từng ghế trong một phòng chiếu.
-CREATE TABLE SEAT (
-    SEAT_ID SERIAL PRIMARY KEY,         -- Khóa chính tự tăng cho mỗi ghế.
-    CINEMA_ROOM_ID INT REFERENCES CINEMA_ROOM(CINEMA_ROOM_ID) ON DELETE CASCADE, -- Liên kết đến phòng chiếu chứa ghế này.
-    SEAT_COL VARCHAR(10),                   -- Vị trí cột của ghế (ví dụ: '1', '2').
-    SEAT_ROW VARCHAR(10),                   -- Vị trí hàng của ghế (ví dụ: 'A', 'B').
-    SEAT_STATUS INTEGER,                -- Trạng thái của ghế (ví dụ: 'available 1', 'booked 0').
-    SEAT_TYPE INTEGER,                 -- Loại ghế (0 Regular, 1 VIP , 2 COUPLE)
-    UNIQUE (CINEMA_ROOM_ID, SEAT_ROW, SEAT_COL) -- Đảm bảo vị trí mỗi ghế là duy nhất trong một phòng chiếu.
+-- Bảng này lưu các phương thức thanh toán.
+CREATE TABLE PAYMENT_METHOD (
+    PAYMENT_METHOD_ID BIGSERIAL PRIMARY KEY,
+    METHOD_NAME VARCHAR(255) ,
+    DESCRIPTION VARCHAR(255),
+    IS_ACTIVE BOOLEAN DEFAULT TRUE
 );
 
--- Bảng BOOKING: Lưu trữ thông tin về một đơn đặt vé của khách hàng.
-CREATE TABLE BOOKING (
-    BOOKING_ID SERIAL PRIMARY KEY,     -- Khóa chính tự tăng cho mỗi đơn đặt vé.
-    ACCOUNT_ID INT REFERENCES ACCOUNT(ACCOUNT_ID),       -- Liên kết đến tài khoản đã đặt vé. Có thể NULL cho khách vãng lai.
-    SCREENING_ID INT REFERENCES SCREENING(SCREENING_ID), -- Liên kết đến suất chiếu được đặt.
-    PROMOTION_ID INT REFERENCES PROMOTION(PROMOTION_ID), -- Liên kết đến khuyến mãi đã được áp dụng (nếu có).
-    PROMOTION_CODE_APPLIED VARCHAR(255),   -- Mã khuyến mãi thực tế đã được sử dụng.
-    DISCOUNT_TYPE_APPLIED VARCHAR(50),     -- Loại giảm giá đã áp dụng.
-    DISCOUNT_APPLIED DECIMAL(12,2),        -- Số tiền hoặc phần trăm được giảm.
-    BOOKING_TIME TIMESTAMP WITHOUT TIME ZONE, -- Thời gian thực hiện đặt vé.
-    TOTAL_AMOUNT DECIMAL(12,2), -- Tổng số tiền của đơn đặt vé.
-    BOOKING_STATUS VARCHAR(50)             -- Trạng thái của đơn đặt vé (ví dụ: 'pending', 'confirmed', 'cancelled').
+-- Bảng này lưu thông tin tài khoản người dùng.
+
+CREATE TABLE ACCOUNT (
+    ACCOUNT_ID BIGSERIAL PRIMARY KEY,
+    ROLE_ID BIGINT , 
+    EMAIL VARCHAR(255) ,
+    PASSWORD VARCHAR(255) ,
+    FULL_NAME VARCHAR(255),
+    GENDER VARCHAR(255),
+    PHONE_NUMBER VARCHAR(20) ,
+    IDENTITY_CARD VARCHAR(255) ,
+    DATE_OF_BIRTH DATE,
+    REGISTER_DATE DATE DEFAULT CURRENT_DATE,
+    SCORE INT DEFAULT 0,
+    AVATAR VARCHAR(255),
+    ACCOUNT_STATUS INT,
+    SOCIAL_ACCOUNT_TYPE VARCHAR(50),
+    IS_DELETED BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (ROLE_ID) REFERENCES ROLE(ROLE_ID)
 );
 
--- Bảng BOOKED_SEAT: Bảng nối, cho biết những ghế nào đã được đặt trong một đơn đặt vé cụ thể.
-CREATE TABLE BOOKED_SEAT (
-    BOOKED_SEAT_ID SERIAL PRIMARY KEY,
-    BOOKING_ID INT REFERENCES BOOKING(BOOKING_ID) ON DELETE CASCADE, -- Liên kết đến đơn đặt vé.
-    SEAT_ID INT REFERENCES SEAT(SEAT_ID) ON DELETE RESTRICT,         -- Liên kết đến ghế đã được chọn.
-    PRICE_PAID DECIMAL(12,2),                                        -- Giá thực trả cho chiếc ghế này.
-    UNIQUE (BOOKING_ID, SEAT_ID) -- Đảm bảo một ghế không thể xuất hiện hai lần trong cùng một đơn đặt vé.
+-- Bảng này lưu token xác thực email.
+CREATE TABLE EMAIL_VERIFICATION_TOKENS (
+    EMAIL_VERIFICATION_TOKEN_ID BIGSERIAL PRIMARY KEY,
+    EMAIL VARCHAR(255),
+    OTP_CODE VARCHAR(255),
+    EXPIRATION_TIME TIMESTAMP WITHOUT TIME ZONE
 );
 
--- Bảng PAYMENT: Ghi lại thông tin giao dịch thanh toán cho một đơn đặt vé.
-CREATE TABLE PAYMENT (
-    PAYMENT_ID SERIAL PRIMARY KEY,     -- Khóa chính tự tăng cho mỗi giao dịch.
-    BOOKING_ID INT REFERENCES BOOKING(BOOKING_ID) UNIQUE, -- Liên kết đến đơn đặt vé. UNIQUE đảm bảo một đơn đặt vé chỉ có một thanh toán.
-    PAYMENT_METHOD_ID INT REFERENCES PAYMENT_METHOD(PAYMENT_METHOD_ID), -- Liên kết đến phương thức thanh toán đã sử dụng.
-    AMOUNT_PAID DECIMAL(12,2),                                          -- Số tiền đã thanh toán.
-    TRANSACTION_DATE TIMESTAMP WITHOUT TIME ZONE,                       -- Thời gian giao dịch.
-    TRANSACTION_ID_PROVIDER VARCHAR(255),                               -- Mã giao dịch từ nhà cung cấp dịch vụ thanh toán (ví dụ: Momo, VNPay).
-    PAYMENT_STATUS VARCHAR(50),                                         -- Trạng thái thanh toán (ví dụ: 'successful', 'failed').
-    NOTES TEXT                                                          -- Ghi chú thêm về giao dịch.
+-- Bảng này lưu thông tin chi tiết về phim.
+CREATE TABLE MOVIE (
+    MOVIE_ID BIGSERIAL PRIMARY KEY,
+    MOVIE_NAME_VN VARCHAR(255),
+    MOVIE_NAME_EN VARCHAR(255),
+    DURATION INT,
+    AGE_LIMIT INT,
+    CONTENT VARCHAR,
+    DIRECTOR VARCHAR(255),
+    ACTOR VARCHAR,
+    MOVIE_PRODUCTION_COMPANY VARCHAR(255),
+    FROM_DATE DATE,
+    TO_DATE DATE,
+    SMALL_IMAGE VARCHAR(255),
+    LARGE_IMAGE VARCHAR(255),
+    TRAILER VARCHAR(255),
+	IS_DELETED BOOLEAN DEFAULT FALSE --mới thêm
 );
 
--- Bảng REVIEW: Lưu trữ các đánh giá của người dùng về phim.
+-- Bảng trung gian cho mối quan hệ nhiều-nhiều giữa MOVIE và TYPE.
+CREATE TABLE MOVIE_TYPE (
+    MOVIE_TYPE_ID BIGSERIAL PRIMARY KEY,
+    MOVIE_ID BIGINT , 
+    TYPE_ID BIGINT ,
+    FOREIGN KEY (MOVIE_ID) REFERENCES MOVIE(MOVIE_ID),
+    FOREIGN KEY (TYPE_ID) REFERENCES TYPE(TYPE_ID)
+
+);
+
+-- Bảng này lưu các bài đánh giá phim của người dùng.
+
 CREATE TABLE REVIEW (
-    REVIEW_ID SERIAL PRIMARY KEY,      -- Khóa chính tự tăng cho mỗi đánh giá.
-    MOVIE_ID INT REFERENCES MOVIE(MOVIE_ID) ON DELETE CASCADE,       -- Liên kết đến phim được đánh giá.
-    ACCOUNT_ID INT REFERENCES ACCOUNT(ACCOUNT_ID) ON DELETE CASCADE, -- Liên kết đến tài khoản đã viết đánh giá.
-    RATING INT, -- Điểm đánh giá (ví dụ: từ 1 đến 5 sao).
-    COMMENT TEXT,                                                    -- Nội dung bình luận.
-    REVIEW_DATE TIMESTAMP WITHOUT TIME ZONE,                         -- Ngày gửi đánh giá.
-    IS_APPROVED BOOLEAN,                                             -- Trạng thái cho biết đánh giá đã được duyệt hay chưa.
-    SPOILER_ALERT BOOLEAN,                                           -- Cảnh báo nếu đánh giá có tiết lộ nội dung phim.
-    UNIQUE (MOVIE_ID, ACCOUNT_ID) -- Đảm bảo một người dùng chỉ có thể đánh giá một bộ phim một lần.
+    REVIEW_ID BIGSERIAL PRIMARY KEY,
+    MOVIE_ID BIGINT,
+    ACCOUNT_ID BIGINT , 
+    RATING INT,
+    COMMENT VARCHAR,
+    REVIEW_DATE TIMESTAMP WITHOUT TIME ZONE,
+    IS_APPROVED BOOLEAN,
+    SPOILER_ALERT BOOLEAN ,
+    IS_DELETED BOOLEAN DEFAULT FALSE, 
+    FOREIGN KEY (MOVIE_ID) REFERENCES MOVIE(MOVIE_ID),
+    FOREIGN KEY (ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID)
+);
+
+-- Bảng này lưu thông tin từng ghế trong một phòng chiếu.
+CREATE TABLE SEAT (
+    SEAT_ID BIGSERIAL PRIMARY KEY,
+    SEAT_TYPE_ID BIGINT ,
+    CINEMA_ROOM_ID BIGINT , 
+    SEAT_COL VARCHAR(10) ,
+    SEAT_ROW VARCHAR(10) ,
+    SEAT_STATUS VARCHAR(50),
+    FOREIGN KEY (SEAT_TYPE_ID) REFERENCES SEAT_TYPE(SEAT_TYPE_ID),
+    FOREIGN KEY (CINEMA_ROOM_ID) REFERENCES CINEMA_ROOM(CINEMA_ROOM_ID)
+);
+
+-- Bảng này lưu thông tin các suất chiếu phim.
+CREATE TABLE SCREENING (
+    SCREENING_ID BIGSERIAL PRIMARY KEY,
+    MOVIE_ID BIGINT ,
+    CINEMA_ROOM_ID BIGINT , 
+    FARE_TYPE_ID BIGINT , 
+    SHOW_DATE_TIME TIMESTAMPTZ ,
+	IS_DELETED BOOLEAN DEFAULT FALSE, --mới thêm
+    FOREIGN KEY (MOVIE_ID) REFERENCES MOVIE(MOVIE_ID),
+    FOREIGN KEY (CINEMA_ROOM_ID) REFERENCES CINEMA_ROOM(CINEMA_ROOM_ID),
+    FOREIGN KEY (FARE_TYPE_ID) REFERENCES FARE_TYPE(FARE_TYPE_ID)
+);
+
+-- Bảng này lưu thông tin về một lần đặt vé.
+CREATE TABLE BOOKING (
+    BOOKING_ID BIGSERIAL PRIMARY KEY,
+    ACCOUNT_ID BIGINT , 
+    SCREENING_ID BIGINT , 
+    PROMOTION_ID BIGINT, 
+    PAYMENT_METHOD_ID BIGINT , 
+    PROMOTION_CODE_APPLIED VARCHAR(255),
+    PROMOTION_TYPE_APPLIED VARCHAR(255),
+    DISCOUNT_APPLIED DECIMAL(12, 2) DEFAULT 0,
+    BOOKING_TIME TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    TOTAL_AMOUNT DECIMAL(12, 2) ,
+    BOOKING_STATUS VARCHAR(20),
+    FOREIGN KEY (ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID),
+    FOREIGN KEY (SCREENING_ID) REFERENCES SCREENING(SCREENING_ID),
+    FOREIGN KEY (PROMOTION_ID) REFERENCES PROMOTION(PROMOTION_ID),
+    FOREIGN KEY (PAYMENT_METHOD_ID) REFERENCES PAYMENT_METHOD(PAYMENT_METHOD_ID)
+);
+
+-- Bảng này lưu chi tiết các ghế đã được đặt trong một lần booking.
+CREATE TABLE BOOKED_SEAT (
+    BOOKED_SEAT_ID BIGSERIAL PRIMARY KEY,
+    BOOKING_ID BIGINT , 
+    SEAT_ID BIGINT ,
+    PRICE_PAID DECIMAL(12, 2) ,
+    FOREIGN KEY (BOOKING_ID) REFERENCES BOOKING(BOOKING_ID),
+    FOREIGN KEY (SEAT_ID) REFERENCES SEAT(SEAT_ID)
 );
 
 
 
--- Dữ liệu cho bảng ROLES
-INSERT INTO ROLES (ROLE_NAME) VALUES
-('Admin'),       -- ROLE_ID sẽ là 1
-('User');        -- ROLE_ID sẽ là 2
-
--- Dữ liệu cho bảng ACCOUNT
--- Giả sử ROLE_ID 1 là Admin, 2 là User
--- ACCOUNT_STATUS: 1 = Active, 0 = Pending
-INSERT INTO ACCOUNT (ROLE_ID, EMAIL, PASSWORD, FULL_NAME, GENDER, PHONE_NUMBER, IDENTITY_CARD, DATE_OF_BIRTH, REGISTER_DATE, SCORE, AVATAR, ACCOUNT_STATUS, SOCIAL_ACCOUNT_TYPE) VALUES
-(1, 'admin@example.com', 'securepassword123', 'Quản Trị Viên', 'Khác', '0900000000', '001090000000', '1990-01-01', '2023-01-01', 1000, '/avatars/admin.png', 1, NULL),
-(2, 'user1@example.com', 'userpass1', 'Nguyễn Văn A', 'Nam', '0912345678', '001200000001', '1995-05-15', '2023-02-10', 150, '/avatars/user1.jpg', 1, NULL),
-(2, 'user2@example.com', 'userpass2', 'Trần Thị B', 'Nữ', '0987654321', '001200000002', '1998-11-20', '2023-03-05', 50, '/avatars/user2.png', 0, 'google');
 
 
--- Dữ liệu cho bảng PAYMENT_METHOD
-INSERT INTO PAYMENT_METHOD (METHOD_NAME, DESCRIPTION, IS_ACTIVE) VALUES
-('Thẻ tín dụng/Ghi nợ', 'Thanh toán qua thẻ Visa, Mastercard, JCB', TRUE), 
-('Tiền mặt tại quầy', 'Thanh toán trực tiếp tại rạp', TRUE);            
 
--- Dữ liệu cho bảng PROMOTION
-INSERT INTO PROMOTION (DISCOUNT_TYPE, DISCOUNT_LEVEL, CODE, DETAIL, MAX_DISCOUNT, MIN_ORDER, START_TIME, END_TIME, PROMOTION_ACTIVE, IMAGE) VALUES
-('percentage', 20.00, 'WELCOME20', 'Giảm 20% cho đơn hàng đầu tiên', 50000.00, 100000.00, '2024-01-01 00:00:00', '2024-12-31 23:59:59', TRUE, '/promo/welcome.png'), -- PROMO_ID = 1
-('fixed_amount', 30000.00, 'WEEKEND30K', 'Giảm 30k cho vé cuối tuần', 30000.00, 150000.00, '2024-05-17 00:00:00', '2024-07-31 23:59:59', TRUE, '/promo/weekend.jpg'); -- PROMO_ID = 2
+-- 1. ROLES (Vai trò)
+INSERT INTO ROLE (ROLE_NAME) VALUES
+('ADMIN'),
+('EMPLOYEE'),
+('CUSTOMER');
 
--- Dữ liệu cho bảng TYPE
+-- 2. TYPE (Thể loại phim)
 INSERT INTO TYPE (TYPE_NAME) VALUES
-('Hành động'),      -- TYPE_ID = 1
-('Phiêu lưu'),     -- TYPE_ID = 2
-('Hoạt hình'),     -- TYPE_ID = 3
-('Hài'),           -- TYPE_ID = 4
-('Kinh dị'),       -- TYPE_ID = 5
-('Khoa học viễn tưởng'); -- TYPE_ID = 6
+('Hành động'),
+('Hài'),
+('Kinh dị'),
+('Tình cảm - Lãng mạn'),
+('Khoa học viễn tưởng'),
+('Hoạt hình'),
+('Tâm lý'),
+('Phiêu lưu');
 
--- Dữ liệu cho bảng MOVIE
-INSERT INTO MOVIE (MOVIE_NAME_VN, MOVIE_NAME_EN, DURATION, CONTENT, DIRECTOR, ACTOR, MOVIE_PRODUCTION_COMPANY, FROM_DATE, TO_DATE, SMALL_IMAGE, LARGE_IMAGE, TRAILER) VALUES
-('Biệt Đội Siêu Anh Hùng: Hội Tụ', 'The Avengers', 143, 'Nick Fury tập hợp một đội gồm những siêu anh hùng mạnh nhất Trái Đất để thành lập Biệt đội Avengers, nhằm ngăn chặn em trai nuôi của Thor là Loki khuất phục loài người.', 'Joss Whedon', 'Robert Downey Jr., Chris Evans, Scarlett Johansson', 'Marvel Studios', '2012-04-27', '2012-07-27', '/movies/avengers_small.jpg', '/movies/avengers_large.jpg', 'https://youtube.com/avengers_trailer'), -- MOVIE_ID = 1
-('Vua Sư Tử', 'The Lion King', 88, 'Hành trình của chú sư tử con Simba để trở thành vị vua của Vùng đất Niềm tự hào.', 'Roger Allers, Rob Minkoff', 'Matthew Broderick, James Earl Jones, Jeremy Irons', 'Walt Disney Pictures', '1994-06-15', '1995-01-15', '/movies/lionking_small.jpg', '/movies/lionking_large.jpg', 'https://youtube.com/lionking_trailer'), -- MOVIE_ID = 2
-('Kẻ Cắp Mặt Trăng 3', 'Despicable Me 3', 90, 'Gru gặp lại người anh em song sinh thất lạc Dru và cùng nhau thực hiện một phi vụ trộm cắp.', 'Pierre Coffin, Kyle Balda', 'Steve Carell, Kristen Wiig, Trey Parker', 'Illumination Entertainment', '2017-06-30', '2017-09-30', '/movies/dm3_small.jpg', '/movies/dm3_large.jpg', 'https://youtube.com/dm3_trailer'); -- MOVIE_ID = 3
+-- 3. SEAT_TYPE (Loại ghế)
+-- GIẢ ĐỊNH: SEAT_TYPE_PRICE là giá phụ thu thêm cho loại ghế đó.
+-- Giá vé cuối cùng = Giá suất chiếu (FARE_TYPE) + Giá phụ thu (SEAT_TYPE).
+INSERT INTO SEAT_TYPE (SEAT_TYPE_NAME, SEAT_TYPE_PRICE) VALUES
+('Ghế Thường', 0.00),
+('Ghế VIP', 20000.00),
+('Ghế Đôi', 50000.00);
 
--- Dữ liệu cho bảng MOVIE_TYPE
--- Giả sử MOVIE_ID 1 là Avengers, 2 là Lion King, 3 là Despicable Me 3
--- TYPE_ID 1=Hành động, 2=Phiêu lưu, 3=Hoạt hình, 4=Hài
-INSERT INTO MOVIE_TYPE (MOVIE_ID, TYPE_ID) VALUES
-(1, 1), -- Avengers - Hành động
-(1, 2), -- Avengers - Phiêu lưu
-(1, 6), -- Avengers - Khoa học viễn tưởng
-(2, 2), -- Lion King - Phiêu lưu
-(2, 3), -- Lion King - Hoạt hình
-(3, 3), -- Despicable Me 3 - Hoạt hình
-(3, 4); -- Despicable Me 3 - Hài
-
--- Dữ liệu cho bảng CINEMA_ROOM
+-- 4. CINEMA_ROOM (Phòng chiếu)
 INSERT INTO CINEMA_ROOM (CINEMA_ROOM_NAME, SEAT_QUANTITY) VALUES
-('Phòng Chiếu 1', 120), -- ROOM_ID = 1
-('Phòng Chiếu 2 (VIP)', 80),  -- ROOM_ID = 2
-('Phòng Chiếu 3D', 100); -- ROOM_ID = 3
+('Phòng chiếu 1', 80),
+('Phòng chiếu 2', 100),
+('Phòng chiếu IMAX 3', 150),
+('Phòng chiếu GOLD CLASS 4', 40);
 
--- Dữ liệu cho bảng FARE_TYPE
-INSERT INTO FARE_TYPE (FARE_TYPE_NAME, PRICE) VALUES
-('Người lớn', 90000.00),      -- FARE_ID = 1
-('Trẻ em (dưới 1m3)', 60000.00), -- FARE_ID = 2
-('VIP', 150000.00);           -- FARE_ID = 3
+-- 5. FARE_TYPE (Loại giá vé)
+-- GIẢ ĐỊNH: BASE_PRICE là giá vé cơ bản cho ghế thường tại suất chiếu đó.
+-- DAY_PRICE có thể là phụ thu cuối tuần/ngày lễ (ở đây tôi không dùng đến, đặt là 0).
+INSERT INTO FARE_TYPE (FARE_TYPE_NAME, BASE_PRICE, DAY_PRICE, TIME_SLOT_TYPE, MOVIE_FORMAT) VALUES
+('Thuyết Minh', 70000.00, 0, 'Sáng', '2D'),
+('Lồng Tiếng', 70000.00, 0, 'Trưa', '2D'),
+('Lồng Tiếng', 70000.00, 0, 'Cả ngày', '2D'),
+('Lồng Tiếng', 70000.00, 0, 'Chiều', '3D'),
+('Thuyết Minh', 70000.00, 0, 'Tối', '3D'),
+('Thuyết Minh', 70000.00, 0, 'Cả ngày', 'IMAX');
+
+-- 6. PROMOTION (Khuyến mãi)
+INSERT INTO PROMOTION (PROMOTION_CODE, PROMOTION_TYPE, PROMOTION_LEVEL, DETAIL, MAX_DISCOUNT, MIN_ORDER, START_TIME, END_TIME, PROMOTION_ACTIVE, IS_DELETED) VALUES
+('GIAM10', 'PERCENT', 10, 'Giảm 10% cho đơn hàng từ 150k, giảm tối đa 30k', 30000, 150000, '2024-01-01T00:00:00Z', '2025-12-31T23:59:59Z', TRUE, FALSE),
+('GIAM20K', 'AMOUNT', 20000, 'Giảm thẳng 20k cho đơn hàng từ 200k', 20000, 200000, '2024-05-01T00:00:00Z', '2025-06-30T23:59:59Z', TRUE, FALSE),
+('WELCOME', 'AMOUNT', 50000, 'Giảm 50k cho thành viên mới (đơn từ 100k)', 50000, 100000, '2024-01-01T00:00:00Z', '2025-12-31T23:59:59Z', TRUE, FALSE);
+
+-- 7. PAYMENT_METHOD (Phương thức thanh toán)
+INSERT INTO PAYMENT_METHOD (METHOD_NAME, DESCRIPTION, IS_ACTIVE) VALUES
+('Ví MoMo', 'Thanh toán qua ví điện tử MoMo', TRUE),
+('ZaloPay', 'Thanh toán qua ví điện tử ZaloPay', TRUE),
+('Thẻ tín dụng/Ghi nợ', 'Thanh toán qua cổng VNPAY (Visa, Mastercard, JCB)', TRUE),
+('Tại quầy', 'Chỉ giữ vé, thanh toán tại quầy', TRUE);
+
+-- 8. MOVIE (Phim)
+INSERT INTO MOVIE (MOVIE_NAME_VN, MOVIE_NAME_EN, DURATION, AGE_LIMIT, CONTENT, DIRECTOR, ACTOR, MOVIE_PRODUCTION_COMPANY, FROM_DATE, TO_DATE, SMALL_IMAGE, LARGE_IMAGE, TRAILER) VALUES
+('Lật Mặt 7: Một Điều Ước', 'Face Off 7: One Wish', 138, 13, 'Câu chuyện về bà Hai và 5 người con của mình, mỗi người một hoàn cảnh. Một tai nạn bất ngờ xảy ra, liệu ai sẽ về chăm sóc mẹ?', 'Lý Hải', 'Trương Minh Cường, Đinh Y Nhung, Quách Ngọc Tuyên', 'Ly Hai Production', '2024-04-26', '2024-06-20', 'https://example.com/images/latmat7_small.jpg', 'https://example.com/images/latmat7_large.jpg', 'https://www.youtube.com/watch?v=kS-t2X_e_tY'),
+('Doraemon: Nobita và Bản Giao Hưởng Địa Cầu', 'Doraemon the Movie: Nobita''s Earth Symphony', 115, 0, 'Nobita và nhóm bạn sử dụng bảo bối âm nhạc để giải cứu thế giới khỏi một hiểm họa bí ẩn.', 'Imai Kazuaki', 'Doraemon, Nobita, Shizuka, Jaian, Suneo', 'Toho', '2024-05-24', '2024-07-15', 'https://example.com/images/doraemon_small.jpg', 'https://example.com/images/doraemon_large.jpg', 'https://www.youtube.com/watch?v=example_trailer_2'),
+('Hành Tinh Khỉ: Vương Quốc Mới', 'Kingdom of the Planet of the Apes', 145, 13, 'Nhiều thế hệ sau triều đại của Caesar, loài khỉ là loài thống trị trong khi con người phải sống trong bóng tối.', 'Wes Ball', 'Owen Teague, Freya Allan, Kevin Durand', '20th Century Studios', '2024-05-10', '2024-06-30', 'https://example.com/images/apes_small.jpg', 'https://example.com/images/apes_large.jpg', 'https://www.youtube.com/watch?v=example_trailer_3');
 
 
 
--- Dữ liệu cho bảng SEAT (Một vài ví dụ cho Phòng Chiếu 1 - ROOM_ID = 1)
--- SEAT_STATUS: 'available', 'booked', 'unavailable'
--- SEAT_TYPE: 'regular', 'vip', 'couple'
-INSERT INTO SEAT (CINEMA_ROOM_ID, SEAT_COL, SEAT_ROW, SEAT_STATUS, SEAT_TYPE) VALUES
-(1, 'A', '1', 'available', 'regular'),  -- SEAT_ID = 1
-(1, 'A', '2', 'available', 'regular'),  -- SEAT_ID = 2
-(1, 'B', '1', 'available', 'regular'),  -- SEAT_ID = 3
-(1, 'B', '2', 'booked', 'regular'),   -- SEAT_ID = 4 (Ghế này đã được đặt)
-(1, 'H', '5', 'available', 'vip'),    -- SEAT_ID = 5 (Ghế VIP)
-(1, 'H', '6', 'available', 'vip');    -- SEAT_ID = 6
 
+-- 9. ACCOUNT (Tài khoản)
+-- LƯU Ý: Mật khẩu trong thực tế phải được mã hóa (hashed). Ở đây dùng text thường để minh họa.
+INSERT INTO ACCOUNT (ROLE_ID, EMAIL, PASSWORD, FULL_NAME, GENDER, PHONE_NUMBER, IDENTITY_CARD, DATE_OF_BIRTH, SCORE, AVATAR, ACCOUNT_STATUS) VALUES
+(1, 'admin@mycinema.com', 'admin_password_hashed', 'Quản Trị Viên', 'Khác', '0987654321', '001090123456', '1990-01-01', 0, 'https://example.com/avatars/admin.png', 1),
+(2, 'nguyenvana@gmail.com', 'userA_password_hashed', 'Nguyễn Văn A', 'Nam', '0123456789', '001200987654', '2000-10-20', 150, 'https://example.com/avatars/userA.png', 1),
+(2, 'tranthib@yahoo.com', 'userB_password_hashed', 'Trần Thị B', 'Nữ', '0912345678', '034199123456', '1999-05-15', 320, 'https://example.com/avatars/userB.png', 1);
+
+-- 10. MOVIE_TYPE (Bảng nối Phim và Thể loại)
+-- Lật Mặt 7 (ID 1) là Tình cảm (ID 4) và Tâm lý (ID 7)
+INSERT INTO MOVIE_TYPE (MOVIE_ID, TYPE_ID) VALUES
+(1, 4), 
+(1, 7);
+-- Doraemon (ID 2) là Hoạt hình (ID 6) và Phiêu lưu (ID 8)
+INSERT INTO MOVIE_TYPE (MOVIE_ID, TYPE_ID) VALUES
+(2, 6),
+(2, 8);
+-- Hành Tinh Khỉ (ID 3) là Hành động (ID 1) và Khoa học viễn tưởng (ID 5)
+INSERT INTO MOVIE_TYPE (MOVIE_ID, TYPE_ID) VALUES
+(3, 1),
+(3, 5);
+
+-- 11. SEAT (Ghế trong phòng chiếu)
+-- Tạo vài ghế mẫu cho Phòng chiếu 1 (ID 1), 80 ghế
+-- Hàng A, B là ghế VIP (SEAT_TYPE_ID 2)
+INSERT INTO SEAT (SEAT_TYPE_ID, CINEMA_ROOM_ID, SEAT_COL, SEAT_ROW, SEAT_STATUS) VALUES
+(2, 1, '1', 'A', 'Available'),
+(2, 1, '2', 'A', 'Available'),
+(2, 1, '3', 'B', 'Available'),
+(2, 1, '4', 'B', 'Available');
+-- Hàng C, D là ghế thường (SEAT_TYPE_ID 1)
+INSERT INTO SEAT (SEAT_TYPE_ID, CINEMA_ROOM_ID, SEAT_COL, SEAT_ROW, SEAT_STATUS) VALUES
+(1, 1, '1', 'C', 'Available'),
+(1, 1, '2', 'C', 'Available'),
+(1, 1, '3', 'D', 'Available'),
+(1, 1, '4', 'D', 'Available');
+-- Hàng cuối là ghế đôi (SEAT_TYPE_ID 3)
+INSERT INTO SEAT (SEAT_TYPE_ID, CINEMA_ROOM_ID, SEAT_COL, SEAT_ROW, SEAT_STATUS) VALUES
+(3, 1, '5', 'H', 'Available'), -- Ghế đôi chiếm 2 vị trí, nhưng ở đây ta chỉ lưu 1 record
+(3, 1, '6', 'H', 'Available');
+-- (Trong thực tế bạn sẽ cần script để tạo đủ 80 ghế cho phòng này)
+
+-- Tạo ghế cho Phòng chiếu 2 (ID 2), 100 ghế
+INSERT INTO SEAT (SEAT_TYPE_ID, CINEMA_ROOM_ID, SEAT_COL, SEAT_ROW, SEAT_STATUS) VALUES
+(1, 2, '5', 'E', 'Available'),
+(1, 2, '6', 'E', 'Available'),
+(2, 2, '7', 'F', 'Available'),
+(2, 2, '8', 'F', 'Available');
+
+-- 12. SCREENING (Suất chiếu)
+INSERT INTO SCREENING (MOVIE_ID, CINEMA_ROOM_ID, FARE_TYPE_ID, SHOW_DATE_TIME) VALUES
+-- Lật Mặt 7 (ID 1) tại phòng 1 (ID 1), suất chiếu cuối tuần 2D (FARE_ID 3)
+(1, 1, 3, '2025-06-18T19:30:00+07:00'),
+-- Doraemon (ID 2) tại phòng 2 (ID 2), suất chiếu ngày thường trước 17h (FARE_ID 1)
+(2, 2, 1, '2025-06-12T15:00:00+07:00'),
+-- Hành Tinh Khỉ (ID 3) tại phòng IMAX 3 (ID 3), suất chiếu IMAX cuối tuần (FARE_ID 6)
+(3, 3, 6, '2025-06-15T20:00:00+07:00'),
+-- Thêm một suất chiếu nữa cho Lật Mặt 7
+(1, 2, 2, '2025-06-14T21:00:00+07:00');
+
+
+-- 13. REVIEW (Đánh giá phim)
+INSERT INTO REVIEW (MOVIE_ID, ACCOUNT_ID, RATING, COMMENT, REVIEW_DATE, IS_APPROVED, SPOILER_ALERT, IS_DELETED) VALUES
+(1, 2, 9, 'Phim rất cảm động và ý nghĩa về gia đình. Mọi người nên đi xem!', '2024-05-10T10:00:00', TRUE, FALSE, FALSE),
+(3, 3, 8, 'Kỹ xảo mãn nhãn, cốt truyện hấp dẫn. Đoạn kết hơi bất ngờ.', '2024-05-15T22:30:00', TRUE, TRUE, FALSE);
 
 

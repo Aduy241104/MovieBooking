@@ -44,6 +44,7 @@ public class MovieScheduleService {
         return result;
     }
 
+
     public List<MovieScheduleDTO> getSchedule(LocalDate date) {
         List<MovieScheduleDTO> result = screeningService.getAllMovieScheduleByDate(date);
         return result;
@@ -70,5 +71,10 @@ public class MovieScheduleService {
                 .types(types)
                 .build();
         return singleMovieDTO;
+    }
+
+    public long getTotalNowShowingMovie() {
+        LocalDate now = LocalDate.now();
+        return movieRepository.fetchTotalNowShowingMovies(now);
     }
 }

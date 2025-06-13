@@ -130,4 +130,8 @@ public class CinemaRoomService {
 
         return seat;
     }
+
+    public Long getTotalCinemaRoom() {
+        return roomRepo.count();
+    }
 }
