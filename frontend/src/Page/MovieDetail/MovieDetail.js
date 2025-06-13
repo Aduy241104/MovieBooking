@@ -7,13 +7,13 @@ import RightComponent from './RightComponent'
 import { getMovieDetailAPI } from '../../service/TheMovieService'
 
 const cx = classNames.bind(styles);
-const DEFAULT_BG =
-    'https://image.tmdb.org/t/p/original/xMgfvjhKwuFTyoXNpa8UVV74rek.jpg';
+const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
+const DEFAULT_SMALL_POSTER = require('../../assets/img/Screenshot 2025-06-13 102311.png')
 
 function MovieDetail() {
     const { id } = useParams();
     const [movie, setMovie] = useState({});
-    const [errorMessage, setError] = useState("");
+    // const [errorMessage, setError] = useState("");
     const [bgUrl, setBgUrl] = useState(DEFAULT_BG);
 
     useLayoutEffect(() => {
@@ -22,7 +22,6 @@ function MovieDetail() {
             behavior: 'smooth'
         });
     }, []);
-
 
     useEffect(() => {
         const fetchMovieData = async (id) => {
@@ -67,14 +66,19 @@ function MovieDetail() {
                             <div className='row'>
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
-                                        <img src={ movie.smallImage }
+                                        <img
+                                            src={ movie.smallImage + "" }
                                             alt=""
                                             className={ cx('poster-small') }
+                                            onError={ (e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = DEFAULT_SMALL_POSTER;
+                                            } }
                                         />
                                     </div>
                                     <div className='mt-4 w-75'>
                                         <h3>{ movie.nameVN }</h3>
-                                        <p className='text-red fs-7 mt-3'>Yadang: The Snitch</p>
+                                        <p className='text-red fs-7 mt-3 fw-bold'>{ movie.nameEN }</p>
                                         <div className='d-flex flex-wrap gap-2 mt-4 mb-3'>
                                             <div className='w-100 pb-2'>
                                                 <span className='p-1 pe-3 ps-3 border-1 border-gold fs-8 rounded-1'>2025</span>
@@ -95,7 +99,7 @@ function MovieDetail() {
                                             <ul className='p-0'>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Thời lượng: </strong>
-                                                    <span className={ cx('text-gray') }>1h 39m</span>
+                                                    <span className={ cx('text-gray') }>{movie.duration} phút</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Đạo diễn: </strong>
@@ -115,7 +119,10 @@ function MovieDetail() {
                                     </div>
                                 </div>
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>
-                                    <RightComponent />
+                                    <RightComponent
+                                        trailer={ movie.trailer }
+                                        startDate={ movie.fromDate }
+                                    />
                                 </div>
                             </div>
                         </div>

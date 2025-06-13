@@ -15,7 +15,7 @@ function DefaultLayout({ children }) {
     <div className='bg-midnight position-relative'>
       <Header user={ isLogin } logout={ logout } />
       { children }
-      <GoToTop/>
+      <GoToTop />
     </div>
   )
 }
