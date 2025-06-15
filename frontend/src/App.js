@@ -13,12 +13,19 @@ import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 
+import MovieList from './components/admin/Movie/MovieList';
+import FilmDetail from './components/admin/Movie/FilmDetail';
+
+import ShowtimeList from './components/admin/Showtime/ShowtimeList';
+
  import { UserPage } from './Page/admin/UserPage';
  import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
  import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+
+
 
 
 
@@ -34,10 +41,17 @@ function App() {
 
         { <Route path='/admin' element={ <AdminLayout /> }>
           <Route index element={ <DashboardPage /> } />
+
           <Route path='room-list' element={ <RoomList /> } />
           <Route path='room-list/add-room' element={ <CreateRoom /> } />
           <Route path='room-list/room/:id' element={ <RoomDetail /> } />
           <Route path='room-list/:id/edit' element={ <EditRoom /> } />
+
+           <Route path='movie-list' element={ <MovieList /> } />
+           <Route path='film-detail/:id' element={ <FilmDetail /> } />
+           <Route path='showtime-list' element={ <ShowtimeList /> } />
+
+
 
           <Route path='users-members' element={
             <UserPage key="members" userText="Thành viên" userFilter="Member" />

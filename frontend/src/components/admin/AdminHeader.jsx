@@ -19,6 +19,10 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ NHÂN VIÊN");
         } else if (location.pathname.includes('promotions')) {
             setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
+        }else if (location.pathname.includes('room-list')) {
+            setTitle("QUẢN LÝ PHÒNG CHIẾU");
+        }else if (location.pathname.includes('movie-list')) {
+            setTitle("QUẢN LÝ PHIM");
         }
     }, [location.pathname]);
 

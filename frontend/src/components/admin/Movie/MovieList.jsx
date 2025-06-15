@@ -1,100 +1,138 @@
-// src/components/admin/Movie/MovieList.jsx
 import React, { useState } from "react";
-//import "./MovieList.css"; // nếu muốn style riêng
+import { Table, Input, Spin, Button } from "antd";
+import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
+
+const movies = [
+  {
+    id: 1,
+    poster: "https://cinema.momocdn.net/img/80099757410724750-doemon.png?size=M",
+    nameVN: "Doraemon Movie 44: Nobita và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh",
+    genres: "Gia đình, Phiêu lưu, Giả tưởng, Hoạt hình",
+    releaseDate: "23/05/2025",
+    endDate: "23/06/2025",
+  },
+  {
+    id: 2,
+    poster: "https://via.placeholder.com/60",
+    nameVN: "Conan: Bản Giao Hưởng Đỏ Thẫm",
+    genres: "Hành động, Trinh thám, Hoạt hình",
+    releaseDate: "01/06/2025",
+    endDate: "30/06/2025",
+  },
+];
 
 const MovieList = () => {
-  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
-  const movie = {
-    poster: "https://cinema.momocdn.net/img/80099757410724750-doemon.png?size=M",
-    titleVN: "Doraemon Movie 44: Nobita và Cuộc Phiêu Lưu Vào Thế Giới Trong Tranh",
-    titleEN: "Doraemon Movie 44: Nobita no Esekai Monogatari",
-    duration: "105 phút",
-    rating: 9.3,
-    releaseDate: "23/05/2025",
-    genres: ["Gia đình", "Phiêu lưu", "Giả tưởng", "Hoạt hình"],
-    descriptionShort:
-      "Doraemon Movie 44 cũng là tác phẩm kỷ niệm 45 năm ra mắt loạt phim \"Doraemon the Movie'\". Câu chuyện của phim kể về Doraemon, Nobita và những người...",
-    descriptionFull:
-      "Doraemon Movie 44 cũng là tác phẩm kỷ niệm 45 năm ra mắt loạt phim \"Doraemon the Movie'\". Câu chuyện của phim kể về Doraemon, Nobita và những người bạn bước vào một bức tranh đến thế giới châu Âu thời Trung cổ. Trong bức tranh, họ gặp những đứa trẻ đến từ đất nước Artoria. Họ cũng chạm trán một con quỷ nhỏ có cánh tên là Chai. Cùng nhau, họ đối mặt với một kẻ thù mạnh mẽ để giành lấy một viên ngọc huyền thoại.",
-  };
+  const filteredMovies = movies.filter((movie) =>
+    movie.nameVN.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const columns = [
+    {
+      title: "STT",
+      dataIndex: "index",
+      key: "index",
+      render: (text, record, index) => index + 1,
+    },
+    {
+      title: "Poster",
+      dataIndex: "poster",
+      key: "poster",
+      render: (poster, record) => (
+        <img
+          src={poster}
+          alt={record.nameVN}
+          style={{ width: 60, borderRadius: 4 }}
+        />
+      ),
+    },
+    {
+      title: "Tên phim (VN)",
+      dataIndex: "nameVN",
+      key: "nameVN",
+    },
+    {
+      title: "Thể loại",
+      dataIndex: "genres",
+      key: "genres",
+    },
+    {
+      title: "Ngày khởi chiếu",
+      dataIndex: "releaseDate",
+      key: "releaseDate",
+    },
+    {
+      title: "Ngày kết thúc",
+      dataIndex: "endDate",
+      key: "endDate",
+    },
+  ];
 
   return (
-    <div style={styles.container}>
-      <h2>Danh sách phim</h2>
-      <div style={styles.card}>
-        <img src={movie.poster} alt="poster" style={styles.poster} />
-        <div style={styles.info}>
-          <h3 style={styles.title}>{movie.titleVN}</h3>
-          <p style={styles.subTitle}>{movie.titleEN}</p>
-          <p><strong>Thời lượng:</strong> {movie.duration}</p>
-          <p><strong>Rating:</strong> ⭐ {movie.rating}</p>
-          <p><strong>Ngày chiếu:</strong> {movie.releaseDate}</p>
-          <p><strong>Thể loại:</strong> {movie.genres.join(", ")}</p>
-          <p style={styles.desc}>
-            {showFullDescription ? movie.descriptionFull : movie.descriptionShort}
-            {!showFullDescription && (
-              <button
-                onClick={() => setShowFullDescription(true)}
-                style={styles.moreBtn}
-              >
-                Xem thêm
-              </button>
-            )}
-          </p>
+    <div
+      style={{
+        padding: 24,
+        background: "#fff",
+        borderRadius: 8,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      }}
+    >
+      <div className="flex justify-between items-center mb-4">
+        {/* Thanh tìm kiếm có icon riêng */}
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div
+            style={{
+              padding: "0 12px",
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+              border: "1px solid #d9d9d9",
+              borderRight: "none",
+              borderTopLeftRadius: 6,
+              borderBottomLeftRadius: 6,
+              height: 40,
+            }}
+          >
+            <SearchOutlined style={{ fontSize: 18, color: "#999" }} />
+          </div>
+          <Input
+            size="large"
+            placeholder="Tìm kiếm tên phim..."
+            allowClear
+            style={{
+              width: "28vw",
+              borderTopLeftRadius: 0,
+              borderBottomLeftRadius: 0,
+            }}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
         </div>
+
+        <Button type="primary" size="large">
+          <PlusOutlined />
+          <span>Thêm phim</span>
+        </Button>
       </div>
+
+      {false ? (
+        <div className="flex flex-col justify-center items-center gap-3 h-screen">
+          <Spin size="large" />
+          <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
+        </div>
+      ) : (
+        <Table
+          dataSource={filteredMovies}
+          columns={columns}
+          rowKey="id"
+          pagination={false}
+          bordered={false}
+          style={{ backgroundColor: "#fff", border: "none" }}
+          className="custom-table"
+        />
+      )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: "20px",
-    fontFamily: "sans-serif",
-    maxWidth: "900px",
-    margin: "0 auto",
-  },
-  card: {
-    display: "flex",
-    gap: "20px",
-    border: "1px solid #ddd",
-    padding: "20px",
-    borderRadius: "10px",
-    background: "#fff",
-    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-  },
-  poster: {
-    width: "200px",
-    height: "auto",
-    borderRadius: "10px",
-  },
-  info: {
-    flex: 1,
-  },
-  title: {
-    margin: "0",
-    fontSize: "20px",
-    fontWeight: "bold",
-  },
-  subTitle: {
-    margin: "4px 0 12px",
-    fontSize: "14px",
-    color: "#666",
-  },
-  desc: {
-    marginTop: "10px",
-    lineHeight: 1.6,
-  },
-  moreBtn: {
-    marginLeft: "10px",
-    background: "none",
-    color: "blue",
-    border: "none",
-    cursor: "pointer",
-    textDecoration: "underline",
-    fontSize: "14px",
-  },
 };
 
 export default MovieList;
