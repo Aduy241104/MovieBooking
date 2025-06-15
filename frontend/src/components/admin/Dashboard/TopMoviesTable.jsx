@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Avatar } from 'antd';
-import { Star, Eye, DollarSign } from 'lucide-react';
+import { Star, DollarSign, Ticket } from 'lucide-react';
 
 export const TopMoviesTable = ({ data = [] }) => {
     const columns = [
@@ -42,7 +42,7 @@ export const TopMoviesTable = ({ data = [] }) => {
             key: 'totalBookings',
             render: (bookings) => (
                 <div className="flex items-center gap-1">
-                    <Eye size={16} color="#1890ff" />
+                    <Ticket size={16} color="#1890ff" />
                     <span>{bookings?.toLocaleString() || 0}</span>
                 </div>
             )

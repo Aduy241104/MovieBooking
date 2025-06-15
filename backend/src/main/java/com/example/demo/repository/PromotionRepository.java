@@ -13,4 +13,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long>, Jpa
     Promotion findByCode(String code);
 
     Boolean existsByCode(String code);
+
+    Long countByActive(Boolean active);
 }
