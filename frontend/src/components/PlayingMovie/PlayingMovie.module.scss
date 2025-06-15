@@ -15,6 +15,12 @@
     }
 }
 
-.coating {
-    background-color: rgba(0, 0, 0, 0.4);
+.bg-text {
+    font-weight: 700;
+        text-align: center;
+        background: linear-gradient(235deg, rgb(255, 255, 255) 30%, rgb(247, 161, 11) 130%);
+        background-size: 200%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
 }

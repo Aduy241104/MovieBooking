@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "seat", uniqueConstraints = @UniqueConstraint(columnNames = {"cinema_room_id", "seat_row", "seat_col"}))
+@Table(name = "seat", uniqueConstraints = @UniqueConstraint(columnNames = { "cinema_room_id", "seat_row", "seat_col" }))
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,7 +20,7 @@ public class Seat {
     private CinemaRoom cinemaRoom;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_type_id", nullable = false)
+    @JoinColumn(name = "seat_type_id", nullable = true)
     private SeatType seatType;
 
     @Column(name = "seat_col", length = 255)
@@ -32,4 +32,3 @@ public class Seat {
     @Column(name = "seat_status")
     private String seatStatus;
 }
-
