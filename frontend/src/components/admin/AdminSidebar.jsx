@@ -52,7 +52,7 @@ export const AdminSidebar = (props) => {
             
         },
           {
-            key: 'Movie-list',
+            key: 'showtime-list',
             icon: <CalendarDays size={20} strokeWidth={1.5}/>,
             label: <Link to="/admin/showtime-list">Quản lý lịch chiếu</Link>
 

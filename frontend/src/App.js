@@ -37,11 +37,6 @@ import MovieDetail from './Page/MovieDetail/MovieDetail';
 
 
 
-
-
-
-
-
 function App() {
   return (
     <>
@@ -63,7 +58,7 @@ function App() {
 
 
            <Route path='movie-list' element={ <MovieList /> } />
-           <Route path='film-detail/:id' element={ <FilmDetail /> } />
+           <Route path='film-detail/:nameVN' element={ <FilmDetail /> } />
            <Route path='showtime-list' element={ <ShowtimeList /> } />
           
 

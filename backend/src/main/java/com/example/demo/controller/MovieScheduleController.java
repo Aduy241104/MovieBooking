@@ -44,7 +44,7 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/by-date")
+    @GetMapping(   "/by-date")
     public ApiResponse<List<MovieScheduleDTO>> getScheduleByDate(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<MovieScheduleDTO> result = movieScheduleService.getSchedule(date);

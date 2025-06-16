@@ -1,27 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "../../../config/axios";
 import { Table, Input, Spin, Button, Pagination, message } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
-  const [filteredMovies, setFilteredMovies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
-  const size = 5;
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const size = 5;
 
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/api/public/findMovie/getAll");
-      const data = res.data.result;
-      setMovies(data);
-      setFilteredMovies(data);
+      const res = await axios.get("/movieSchedule/getAll");
+      if (res.status === 1000 && res.result) {
+        const mapped = res.result.map((item) => ({
+          id: item.id,
+          poster: item.movie.smallImage,
+          nameVN: item.movie.nameVN,
+          genres: item.movie.genres || "Đang cập nhật",
+          releaseDate: item.movie.fromDate,
+          endDate: item.movie.toDate,
+        }));
+        setMovies(mapped);
+      } else {
+        message.warning("Không có dữ liệu lịch chiếu");
+      }
     } catch (err) {
-      message.error("Lỗi tải danh sách phim");
+      message.error("Lỗi tải dữ liệu");
     } finally {
       setLoading(false);
     }
@@ -31,13 +39,11 @@ const MovieList = () => {
     fetchMovies();
   }, []);
 
-  useEffect(() => {
-    const filtered = movies.filter((movie) =>
-      movie.nameVN.toLowerCase().includes(searchText.toLowerCase())
-    );
-    setFilteredMovies(filtered);
-    setPage(1);
-  }, [searchText, movies]);
+  const filteredMovies = movies.filter((movie) =>
+    movie.nameVN.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const pagedMovies = filteredMovies.slice((page - 1) * size, page * size);
 
   const columns = [
     {
@@ -47,15 +53,16 @@ const MovieList = () => {
     },
     {
       title: "Poster",
-      dataIndex: "smallImage",
-      key: "smallImage",
-      render: (url, record) => (
-        <img
-          src={url}
-          alt={record.nameVN}
-          style={{ width: 60, borderRadius: 4, cursor: "pointer" }}
-          onClick={() => navigate(`/admin/film-detail/${record.id}`)}
-        />
+      dataIndex: "poster",
+      key: "poster",
+      render: (poster, record) => (
+        <Link to={`/admin/film-detail/${record.nameVN}`}>
+          <img
+            src={poster || "https://via.placeholder.com/60"}
+            alt={record.nameVN}
+            style={{ width: 60, borderRadius: 4 }}
+          />
+        </Link>
       ),
     },
     {
@@ -63,35 +70,32 @@ const MovieList = () => {
       dataIndex: "nameVN",
       key: "nameVN",
       render: (text, record) => (
-        <span
-          onClick={() => navigate(`/admin/film-detail/${record.id}`)}
-          style={{ cursor: "pointer" }}
-          onMouseEnter={(e) => (e.target.style.color = "#0d6efd")}
-          onMouseLeave={(e) => (e.target.style.color = "")}
+        <Link
+          to={`/admin/film-detail/${record.nameVN}`}
+          style={{ color: "#333", textDecoration: "none" }}
+          onMouseOver={(e) => (e.target.style.color = "#1890ff")}
+          onMouseOut={(e) => (e.target.style.color = "#333")}
         >
           {text}
-        </span>
+        </Link>
       ),
     },
     {
-      title: "Diễn viên",
-      dataIndex: "actor",
-      key: "actor",
-      render: (actor) => actor || "N/A",
+      title: "Thể loại",
+      dataIndex: "genres",
+      key: "genres",
     },
     {
       title: "Ngày khởi chiếu",
-      dataIndex: "fromDate",
-      key: "fromDate",
+      dataIndex: "releaseDate",
+      key: "releaseDate",
     },
     {
       title: "Ngày kết thúc",
-      dataIndex: "toDate",
-      key: "toDate",
+      dataIndex: "endDate",
+      key: "endDate",
     },
   ];
-
-  const pagedMovies = filteredMovies.slice((page - 1) * size, page * size);
 
   return (
     <div
@@ -128,18 +132,21 @@ const MovieList = () => {
               borderTopLeftRadius: 0,
               borderBottomLeftRadius: 0,
             }}
-            onChange={(e) => setSearchText(e.target.value)}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
 
         <Button type="primary" size="large">
           <PlusOutlined />
-          <span style={{ marginLeft: 6 }}>Thêm phim</span>
+          <span>Thêm phim</span>
         </Button>
       </div>
 
       {loading ? (
-        <div className="flex flex-col justify-center items-center gap-3 h-60">
+        <div className="flex flex-col justify-center items-center gap-3 h-screen">
           <Spin size="large" />
           <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
         </div>
@@ -152,6 +159,7 @@ const MovieList = () => {
             pagination={false}
             bordered={false}
             style={{ backgroundColor: "#fff", border: "none" }}
+            className="custom-table"
           />
           <div className="flex justify-center mt-4">
             <Pagination
