@@ -1,87 +1,97 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import RoomForm from "./RoomForm";
-import RoomDetail from "./RoomDetail";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useEffect, useState, useCallback } from "react";
+
 import { useNavigate } from "react-router-dom";
-export default function RoomList() {
+import { SquarePlus } from "lucide-react";
+import { Table, Input, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import "bootstrap/dist/css/bootstrap.min.css";
+import axios from "axios";
+const RoomList = () => {
     const [rooms, setRooms] = useState([]);
-    const [showForm, setShowForm] = useState(false);
-    const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const [filteredRooms, setFilteredRooms] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
     const navigate = useNavigate();
-    const fetchRooms = async () => {
-        const res = await axios.get("/api/public/rooms");
-        setRooms(res.data); 
-    };
+    const fetchRooms = useCallback(async () => {
+        try {
+            const data = await axios.get("http://localhost:8081/api/public/rooms");
+            setRooms(data.data);
+            setFilteredRooms(data.data);
+        } catch (err) {
+            console.error("Lỗi khi load danh sách phòng:", err);
+            message.error("Không thể tải danh sách phòng.");
+        }
+    }, []);
 
     useEffect(() => {
         fetchRooms();
-    }, []);
+    }, [fetchRooms]);
 
-    const handleCloseForm = () => {
-        setShowForm(false);
-        fetchRooms();
+    const handleSearch = (value) => {
+        setSearchValue(value);
+        const filtered = rooms.filter(room =>
+            room.cinemaRoomName.toLowerCase().includes(value.toLowerCase())
+        );
+        setFilteredRooms(filtered);
     };
+
+    const columns = [
+        {
+            title: "STT",
+            render: (_, __, index) => <>{index + 1}</>,
+            width: 80,
+        },
+        {
+            title: "Tên phòng chiếu",
+            dataIndex: "cinemaRoomName",
+            render: (text) => (
+                <span className="text-primary fw-semibold">{text}</span>
+            ),
+        }
+    ];
+
     return (
-        <div className="py-4 ps-2 pe-2 bg-dark text-light min-vh-100">
-            {!selectedRoomId ? (
-                <>
-                    <h2 className="mb-4 text-danger">Danh sách phòng chiếu</h2>
-                    <button
-                        className="btn btn-danger mb-4"
-                        // onClick={() => setShowForm(true)}
-                        onClick={() => navigate("/admin/room-list/add-room")}
-                    >
-                         Thêm phòng chiếu
-                    </button>
-
-                    <div className="row g-3">
-                        {rooms.map((room) => (
-                            <div className="col-md-6 col-lg-4" key={room.cinemaRoomId}>
-                                <div
-                                    className="card bg-white text-light h-100 shadow"
-                                    style={{ cursor: "pointer" }}
-                                    // onClick={() => setSelectedRoomId(room.cinemaRoomId)}
-                                    onClick={() => navigate(`/admin/room-list/room/${room.cinemaRoomId}`)}
-                                >
-                                    <div className="card-body">
-                                        <h5 className="card-title text-danger">{room.cinemaRoomName}</h5>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </>
-            ) : (
-                <RoomDetail roomId={selectedRoomId} onClose={() => {
-                    setSelectedRoomId(null);
-                    fetchRooms();
-                }} />
-            )}
-
-            {showForm && (
-                <div
-                    className="modal show d-block"
-                    tabIndex="-1"
-                    style={{ backgroundColor: "rgba(218, 214, 214, 0.8)" }}
-                >
-                    <div className="modal-dialog modal-lg modal-dialog-centered">
-                        <div className="modal-content bg-dark text-light">
-                            <div className="modal-header border-secondary">
-                                <h5 className="modal-title text-danger">➕ Thêm phòng chiếu</h5>
-                                <button
-                                    type="button"
-                                    className="btn-close btn-close-white"
-                                    onClick={handleCloseForm}
-                                ></button>
-                            </div>
-                            <div className="modal-body">
-                                <RoomForm onBack={handleCloseForm} />
-                            </div>
-                        </div>
-                    </div>
+        <div className="p-4" style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div style={{ width: "300px" }}>
+                    <Input
+                        placeholder="Tìm theo tên phòng..."
+                        allowClear
+                        addonAfter={<SearchOutlined />}
+                        value={searchValue}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        style={{ width: "30vw" }}
+                    />
                 </div>
-            )}
+                <button
+                    className="btn d-flex align-items-center"
+                    style={{
+                        backgroundColor: "#1677ff",
+                        color: "#ffffff",
+                        fontWeight: "bold",
+                        fontSize: "1.05rem",
+                        padding: "8px 16px",
+                        boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)",
+                        borderRadius: "6px"
+                    }}
+                    onClick={() => navigate("/admin/room-list/add-room")}
+                >
+                    <SquarePlus strokeWidth={1.7} className="me-2" /> Thêm phòng
+                </button>
+            </div>
+
+            <Table
+                columns={columns}
+                dataSource={filteredRooms}
+                rowKey="cinemaRoomId"
+                pagination={false}
+                onRow={(record) => ({
+                    onClick: () => navigate(`/admin/room-list/room/${record.cinemaRoomId}`),
+                })}
+                rowClassName="table-row-hover"
+                style={{ border: "1px solid #f0f0f0", borderRadius: "8px" }}
+            />
         </div>
     );
-}
+};
+
+export default RoomList;
