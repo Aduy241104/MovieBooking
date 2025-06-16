@@ -54,7 +54,7 @@ export const AdminSidebar = (props) => {
                 },
                 {
                     key: 'type',
-                    label: <Link to="/admin/movie-types/">Thể loại</Link>
+                    label: <Link to="/admin/movie-type/">Thể loại</Link>
                 },
             ]
         },

@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import RoomForm from "./RoomForm";
-import axios from "axios";
-
+import instance from "../../../config/axios";
 export default function EditRoom() {
   const { id } = useParams();
   const [room, setRoom] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`/api/public/rooms/${id}`)
-      .then(res => setRoom(res.data))
+    instance.get(`/public/rooms/${id}`)
+      .then(data => setRoom(data))
       .catch(err => {
         console.error("Không thể tải phòng:", err);
         alert("Không thể tải phòng.");

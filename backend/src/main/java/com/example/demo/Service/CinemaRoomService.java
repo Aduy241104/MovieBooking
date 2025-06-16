@@ -15,130 +15,115 @@ import com.example.demo.repository.SeatTypeRepository;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor // Tự động inject các repository thông qua constructor
+@RequiredArgsConstructor
 public class CinemaRoomService {
 
     private final CinemaRoomRepository roomRepo;
     private final SeatRepository seatRepo;
     private final SeatTypeRepository seatTypeRepo;
 
-    // Lấy danh sách tất cả các phòng chiếu
-//    public List<CinemaRoom> getAllRooms() {
-//        return roomRepo.findAll();
-//    }
+    // Lấy tất cả phòng chiếu chưa bị xóa mềm
     public List<CinemaRoom> getAllRooms() {
         return roomRepo.findByIsDeletedFalse();
     }
 
-    // Lấy danh sách ghế theo ID phòng chiếu
+    // Lấy danh sách ghế theo ID phòng
     public List<Seat> getSeatsByRoomId(Long roomId) {
-        Optional<CinemaRoom> room = roomRepo.findById(roomId);
-        if (room.isEmpty()) {
-            return Collections.emptyList(); // Nếu không có phòng thì trả về danh sách rỗng
-        }
-
-        List<Seat> seats = seatRepo.findByCinemaRoom(room.get());
-
-        // ✅ Ghi log thông tin ghế để debug hoặc kiểm tra dữ liệu
-        System.out.println("Danh sách ghế của phòng ID: " + roomId);
-        for (Seat seat : seats) {
-            System.out.println("Ghế: row = " + seat.getSeatRow() +
-                               ", col = " + seat.getSeatCol() +
-                               ", type = " + (seat.getSeatType() != null ? seat.getSeatType().getSeatTypeName() : "null") +
-                               ", price = " + (seat.getSeatType() != null ? seat.getSeatType().getSeatTypePrice() : "null"));
-        }
-
-        return seats;
+        return roomRepo.findById(roomId)
+                .map(seatRepo::findByCinemaRoom)
+                .orElse(Collections.emptyList());
     }
 
-    // Tạo mới một phòng chiếu kèm theo ghế
+    // Tạo phòng chiếu mới cùng danh sách ghế
     public CinemaRoom createRoom(RoomRequest request) {
-        // Kiểm tra trùng tên phòng (không phân biệt hoa thường)
-        if (roomRepo.existsByCinemaRoomNameIgnoreCase(request.getName())) {
-            throw new IllegalArgumentException("Tên phòng đã tồn tại.");
-        }
+        validateRoomNameUniqueness(request.getName());
 
-        // Tạo đối tượng phòng chiếu và lưu vào DB
         CinemaRoom room = new CinemaRoom();
         room.setCinemaRoomName(request.getName());
         room.setSeatQuantity(request.getRows() * request.getCols());
-        room = roomRepo.save(room); // lưu để lấy ID phòng
+        room = roomRepo.save(room);
 
-        // Tạo danh sách ghế từ request và gán vào phòng
-        List<Seat> seats = new ArrayList<>();
-        for (SeatResponse dto : request.getSeats()) {
-            seats.add(mapDtoToEntity(dto, room)); // Chuyển từng SeatResponse thành Seat
-        }
-        seatRepo.saveAll(seats); // Lưu tất cả ghế vào DB
+        List<Seat> seats = mapSeatResponsesToEntities(request.getSeats(), room);
+        seatRepo.saveAll(seats);
 
         return room;
     }
 
-    // Cập nhật phòng chiếu và danh sách ghế theo ID
+    // Cập nhật phòng chiếu và ghế
     public CinemaRoom updateRoom(Long id, RoomRequest request) {
-        // Tìm phòng theo ID, nếu không có thì ném lỗi
         CinemaRoom room = roomRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chiếu."));
 
-        // Kiểm tra trùng tên phòng với phòng khác
-        Optional<CinemaRoom> sameNameRoom = roomRepo.findByCinemaRoomNameIgnoreCase(request.getName());
-        if (sameNameRoom.isPresent() && !sameNameRoom.get().getCinemaRoomId().equals(id)) {
-            throw new IllegalArgumentException("Tên phòng đã tồn tại.");
-        }
+        validateRoomNameConflict(id, request.getName());
 
-        // Cập nhật thông tin phòng
         room.setCinemaRoomName(request.getName());
         room.setSeatQuantity(request.getSeats().size());
         room = roomRepo.save(room);
 
-        final CinemaRoom finalRoom = room; // dùng để truyền vào lambda
-
-        // Xoá toàn bộ ghế cũ của phòng
-        List<Seat> oldSeats = seatRepo.findByCinemaRoom(room);
-        seatRepo.deleteAll(oldSeats);
-
-        // Tạo danh sách ghế mới từ dữ liệu gửi lên
-        List<Seat> seats = request.getSeats().stream()
-                .map(dto -> mapDtoToEntity(dto, finalRoom)) // chuyển từng SeatResponse sang Seat
-                .toList();
-        seatRepo.saveAll(seats); // lưu lại danh sách ghế mới
+        // Xóa ghế cũ, tạo ghế mới
+        seatRepo.deleteAll(seatRepo.findByCinemaRoom(room));
+        List<Seat> newSeats = mapSeatResponsesToEntities(request.getSeats(), room);
+        seatRepo.saveAll(newSeats);
 
         return room;
     }
 
-    // Xoá phòng chiếu theo ID (bao gồm cả ghế)
-//    public void deleteRoom(Long id) {
-//        CinemaRoom room = roomRepo.findById(id).orElseThrow(); // tìm phòng
-//        seatRepo.deleteAll(seatRepo.findByCinemaRoom(room)); // xoá hết ghế thuộc phòng
-//        roomRepo.deleteById(id); // xoá phòng
-//    }
-
+    // Xóa mềm phòng chiếu
     public void deleteRoom(Long id) {
         CinemaRoom room = roomRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chiếu với ID: " + id));
-
-        room.setIsDeleted(true); // Đánh dấu là đã xóa
-        roomRepo.save(room);     // Lưu lại thay đổi
+        room.setIsDeleted(true);
+        roomRepo.save(room);
     }
 
-    // Lấy phòng chiếu theo ID (dùng cho API /rooms/rooms/{id})
+    // Lấy thông tin một phòng chiếu theo ID
     public CinemaRoom getRoomById(Long id) {
         return roomRepo.findById(id).orElse(null);
     }
 
-    // Hàm chuyển đổi từ SeatResponse (DTO) sang Seat (Entity)
-    private Seat mapDtoToEntity(SeatResponse dto, CinemaRoom room) {
-        Seat seat = new Seat();
-        seat.setCinemaRoom(room); // Gán phòng chứa ghế
-        seat.setSeatCol(dto.getSeatCol()); // Số cột (dạng chuỗi số)
-        seat.setSeatRow(Character.toString((char) ('A' + dto.getSeatRow()))); // chuyển số hàng thành chữ cái: 0 -> A, 1 -> B,...
-        seat.setSeatStatus("available"); // trạng thái mặc định là có sẵn
+    // ==== Các hàm phụ trợ ====
 
-        // Tìm SeatType theo tên, nếu không có thì ném lỗi
+    // Kiểm tra trùng tên khi tạo phòng
+    private void validateRoomNameUniqueness(String name) {
+        if (roomRepo.existsByCinemaRoomNameIgnoreCase(name)) {
+            throw new IllegalArgumentException("Tên phòng đã tồn tại.");
+        }
+    }
+
+    // Kiểm tra trùng tên khi cập nhật phòng (trừ chính nó)
+    private void validateRoomNameConflict(Long currentRoomId, String name) {
+        Optional<CinemaRoom> existingRoom = roomRepo.findByCinemaRoomNameIgnoreCase(name);
+        if (existingRoom.isPresent() && !existingRoom.get().getCinemaRoomId().equals(currentRoomId)) {
+            throw new IllegalArgumentException("Tên phòng đã tồn tại.");
+        }
+    }
+
+    // Chuyển danh sách DTO sang Entity
+    private List<Seat> mapSeatResponsesToEntities(List<SeatResponse> seatResponses, CinemaRoom room) {
+        List<Seat> seats = new ArrayList<>();
+        for (SeatResponse dto : seatResponses) {
+            seats.add(mapDtoToSeat(dto, room));
+        }
+        return seats;
+    }
+
+    // Chuyển từng DTO sang Seat entity
+    private Seat mapDtoToSeat(SeatResponse dto, CinemaRoom room) {
         SeatType seatType = seatTypeRepo.findBySeatTypeNameIgnoreCase(dto.getSeatType())
                 .orElseThrow(() -> new IllegalArgumentException("Seat type không tồn tại: " + dto.getSeatType()));
-        seat.setSeatType(seatType); // gán loại ghế
+
+        Seat seat = new Seat();
+        seat.setCinemaRoom(room);
+        seat.setSeatCol(dto.getSeatCol());
+        seat.setSeatRow(convertRowIndexToChar(dto.getSeatRow()));
+        seat.setSeatStatus("available");
+        seat.setSeatType(seatType);
 
         return seat;
+    }
+
+    // Chuyển số hàng (int) sang ký tự chữ cái (0 -> A, 1 -> B, ...)
+    private String convertRowIndexToChar(int index) {
+        return String.valueOf((char) ('A' + index));
     }
 }

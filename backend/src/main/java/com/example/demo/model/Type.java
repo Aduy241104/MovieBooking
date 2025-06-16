@@ -19,4 +19,7 @@ public class Type {
 
     @Column(name = "type_name", unique = true, nullable = false)
     private String name;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
 }
