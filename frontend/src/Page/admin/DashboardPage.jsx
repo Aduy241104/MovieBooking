@@ -83,41 +83,24 @@ export const DashboardPage = () => {
                         revenue: movie.revenue,
                         poster: 'https://cdn-icons-png.flaticon.com/512/4831/4831192.png',
                     })),
-                    recentBookings: [
-                        {
-                            bookingId: 1,
-                            bookingCode: 'BK001234',
-                            customerName: 'Nguyễn Văn A',
-                            customerEmail: 'nguyenvana@email.com',
-                            movieTitle: 'Avengers: Endgame',
-                            cinemaRoom: 'Phòng 1',
-                            bookingDate: '2024-06-07T19:30:00',
-                            seatCount: 2,
-                            totalAmount: 200000,
-                            paymentMethod: 'VNPAY',
-                            status: 'PAID'
-                        },
-                        {
-                            bookingId: 2,
-                            bookingCode: 'BK001235',
-                            customerName: 'Trần Thị B',
-                            customerEmail: 'tranthib@email.com',
-                            movieTitle: 'Spider-Man: No Way Home',
-                            cinemaRoom: 'Phòng 2',
-                            bookingDate: '2024-06-07T21:00:00',
-                            seatCount: 4,
-                            totalAmount: 400000,
-                            paymentMethod: 'Momo',
-                            status: 'PENDING'
-                        }
-                    ]
+                    recentBookings: dashboardSummary.data.tables.recentBookings.map((booking, index) => ({
+                        id: index + 1,
+                        customerName: booking.fullName,
+                        customerEmail: booking.email,
+                        movieTitle: booking.movieTitle,
+                        cinemaRoom: booking.cinemaRoomName,
+                        bookingDate: booking.bookingDate,
+                        seatCount: booking.seatCount,
+                        totalAmount: booking.totalPrice,
+                        paymentMethod: booking.paymentMethod,
+                        status: booking.paymentStatus
+                    }))
                 }
             };
 
-            setTimeout(() => {
-                setDashboardData(mockData);
-                setLoading(false);
-            }, 500);
+            setDashboardData(mockData);
+            setLoading(false);
+
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             setLoading(false);

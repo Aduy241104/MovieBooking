@@ -7,7 +7,7 @@ import classNames from 'classnames/bind'
 
 const cx = classNames.bind(styles);
 
-function RightComponent() {
+function RightComponent(props) {
     const [isOpenTrailer, setOpenTrailer] = useState(false);
 
 
@@ -15,7 +15,7 @@ function RightComponent() {
         <div>
             <div className='w-100 d-flex justify-content-between'>
                 <CustomizeButton
-                    className={ cx('fw-bold') }
+                    className={ cx('fw-bold shadow-hover-gold') }
                     gold rounded large leftIcon={ <i className="fa-regular fa-circle-play fs-5"></i> }
                     onClick={ () => setOpenTrailer(true) }
                 >
@@ -25,7 +25,7 @@ function RightComponent() {
                 <TrailerModal
                     open={ isOpenTrailer }
                     onClose={ () => setOpenTrailer(false) }
-                    trailerUrl={ 'https://www.youtube.com/embed/no2HdwAX8jI?si=gytCY554soIGW2mw' }
+                    trailerUrl={ props.trailer }
                 />
 
                 <CustomizeButton
@@ -38,7 +38,7 @@ function RightComponent() {
                 </CustomizeButton>
             </div>
             <div className='mt-3'>
-                <p><strong>Ngày chiếu:</strong> <span className={ cx('text-gray') }>13/06/2025</span></p>
+                <p><strong>Ngày chiếu:</strong> <span className={ cx('text-gray') }>{props.startDate}</span></p>
 
                 <div className='mt-3'>
                     <h5 className='pb-2 fw-bolder'>Lịch chiếu </h5>

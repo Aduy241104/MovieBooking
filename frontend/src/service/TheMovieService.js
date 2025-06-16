@@ -17,7 +17,6 @@ export function getAuthHeaders() {
         : {};
 }
 
-
 export const searchMovieByName = async (keyWord, page, size) => {
     page = page || 0;
     size = size || 4;
@@ -26,7 +25,7 @@ export const searchMovieByName = async (keyWord, page, size) => {
 
     try {
         const response = await axiosInstance.get(`/public/findMovie/search?q=${keyWord}&page=${page}&size=${size}`);
-        console.log(response);
+        // console.log(response);
         return response.data;
     } catch (error) {
         console.error("Error fetching movie:", error);
@@ -34,11 +33,10 @@ export const searchMovieByName = async (keyWord, page, size) => {
     }
 };
 
-
 export const getNowShowingMovieAPI = async () => {
     try {
         const response = await axiosInstance.get('/public/movieSchedule/now-showing');
-        console.log("Now Showing", response);
+        // console.log("Now Showing", response);
         return response.data;
     } catch (error) {
         throw new Error('Cannot connect to server!')
@@ -48,8 +46,17 @@ export const getNowShowingMovieAPI = async () => {
 export const getUpComingMovieAPI = async () => {
     try {
         const response = await axiosInstance.get('/public/movieSchedule/up-coming');
-        console.log("Upcomming: ", response);
+        // console.log("Upcomming: ", response);
+        return response.data;
+    } catch (error) {
+        throw new Error('Cannot connect to server!')
+    }
+}
 
+export const getMovieDetailAPI = async (id) => {
+    try {
+        const response = await axiosInstance.get(`/public/movieSchedule/${id}`)
+        console.log("The movie: ", response);
         return response.data;
     } catch (error) {
         throw new Error('Cannot connect to server!')

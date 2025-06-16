@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ResPagination;
-//import com.example.demo.model.Account;
+import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.service.PromotionService;
 import com.turkraft.springfilter.boot.Filter;
@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-//import java.util.List;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController

@@ -10,7 +10,7 @@
 }
 
 .search-place:focus-within {
-    border: 2px solid var(--red) !important;
+    border: 2px solid black !important;
 
 }
 
@@ -23,7 +23,6 @@
     min-width: 310px;
     max-width: 310px;
     
-
     img {
         width: 70px;
     }
@@ -32,7 +31,6 @@
 .search-input:focus-visible {
     outline-width: 0;
     width: 100%;
-
 }
 
 .genre {
@@ -40,12 +38,8 @@
 }
 
 .arr {
-    // max-height: 516px;
-    // box-sizing: border-box;
-    // overflow-y: auto;
     position: relative;
 }
-
 
 .arr::after {
     content: "";

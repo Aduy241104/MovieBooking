@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { veiryfyOtpAPI } from "../../service/AuthService";
 import ErrorNotification from "../../components/ErrorNotification/ErrorNotification";
-
-// {
-//     "status": 401,
-//         "error": "Unauthorized",
-//             "message": "OTP không hợp lệ hoặc đã hết hạn.",
-//                 "path": "/api/auth/verify-otp"
-// }
+import { Modal } from "antd"; 
 
 function VerifyOtpForm({ registerRequest }) {
     const [otp, setOtp] = useState("");
     const [errorMessage, setErrorMesage] = useState("");
     const [isLoading, setLoading] = useState(false);
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState(false); 
 
     const handleChangeOtp = (e) => {
         setErrorMesage("");
@@ -22,7 +17,6 @@ function VerifyOtpForm({ registerRequest }) {
         }
     };
 
-
     const handleSubmitOtp = async (e) => {
         e.preventDefault();
         if (otp.length === 6) {
@@ -31,13 +25,12 @@ function VerifyOtpForm({ registerRequest }) {
                 verifyOtp: otp,
                 registerRequest: registerRequest
             };
-            console.log("🚀 Xác thực OTP với:", payload);
 
             const response = await veiryfyOtpAPI(payload);
             if (!response.success) {
                 setErrorMesage(response.message);
             } else {
-                alert("create success")
+                setSuccessModalOpen(true);
             }
             setLoading(false);
         } else {
@@ -45,35 +38,53 @@ function VerifyOtpForm({ registerRequest }) {
         }
     };
 
+    const handleSuccessModalOk = () => {
+        setSuccessModalOpen(false);
+        window.location.href = "/login";
+    };
+
     return (
-        <form className="text-light p-4 rounded shadow-sm" onSubmit={ handleSubmitOtp }>
-            <ErrorNotification>{ errorMessage }</ErrorNotification>
-            <h4 className="text-center mb-3">Nhập mã OTP</h4>
-            <p className="text-center text-muted">
-                Mã xác thực đã gửi đến email <strong>{ registerRequest.email }</strong>
-            </p>
+        <>
+            <form className="text-light p-4 rounded shadow-sm" onSubmit={ handleSubmitOtp }>
+                <ErrorNotification>{ errorMessage }</ErrorNotification>
+                <h4 className="text-center mb-3">Nhập mã OTP</h4>
+                <p className="text-center text-light">
+                    Mã xác thực đã gửi đến email <strong>{ registerRequest.email }</strong>
+                </p>
 
-            <div className="d-flex justify-content-center mb-3">
-                <input
-                    type="text"
-                    className="form-control text-center fs-4"
-                    maxLength={ 6 }
-                    value={ otp }
-                    onChange={ handleChangeOtp }
-                    placeholder="______"
-                    style={ { letterSpacing: "10px", maxWidth: "200px" } }
-                    required
-                />
-            </div>
+                <div className="d-flex justify-content-center mb-3">
+                    <input
+                        type="text"
+                        className="form-control text-center fs-4"
+                        maxLength={ 6 }
+                        value={ otp }
+                        onChange={ handleChangeOtp }
+                        placeholder="______"
+                        style={ { letterSpacing: "10px", maxWidth: "200px" } }
+                        required
+                    />
+                </div>
 
-            <button type="submit" className="btn btn-gardient w-100 mt-4 rounded-4 text-light">
-                { (isLoading) ? (
-                    <div className="spinner-border text-light" role="status" style={ { height: '25px', width: '25px' } }>
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                ) : "Xac minh" }
-            </button>
-        </form>
+                <button type="submit" className="btn btn-gardient w-100 mt-4 rounded-4 text-light">
+                    { (isLoading) ? (
+                        <div className="spinner-border text-light" role="status" style={ { height: '25px', width: '25px' } }>
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    ) : "Xác minh" }
+                </button>
+            </form>
+            
+            <Modal
+                title="Xác thực thành công"
+                open={ isSuccessModalOpen }
+                onOk={ handleSuccessModalOk }
+                onCancel={ () => setSuccessModalOpen(false) }
+                okText="Đăng nhập"
+                cancelText="Đóng"
+            >
+                <p>Tài khoản của bạn đã được xác thực thành công! Vui lòng đăng nhập để tiếp tục.</p>
+            </Modal>
+        </>
     );
 }
 

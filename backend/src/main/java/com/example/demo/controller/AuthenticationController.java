@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 import java.text.ParseException;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,39 +75,29 @@ public class AuthenticationController {
                 .result("Email send")
                 .build();
     }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<String> postMethodName(@RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        authService.handleForgotPassword(email);
+        return ApiResponse.<String>builder()
+                .message("success")
+                .result("email send")
+                .build();
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<String> resetPassword(@RequestBody Map<String, String> payload) {
+        String otp = payload.get("otp");
+        String email = payload.get("email");
+        String newPass = payload.get("newPass");
+
+        authService.handleResetPassword(email, otp, newPass);
+
+        return ApiResponse.<String>builder()
+                .message("successful")
+                .result("password updated")
+                .build();
+    }
+
 }
-
-// @PostMapping("/register")
-// public ApiResponse<Account> postMethodName(@RequestBody RegisterRequest
-// request) {
-// try {
-// Account account = authService.register(request);
-// return ApiResponse.<Account>builder()
-// .message("register successfull")
-// .result(account)
-// .build();
-// } catch (RuntimeException e) {
-// return ApiResponse.<Account>builder()
-// .message(e.getMessage())
-// .result(null)
-// .build();
-// }
-// }
-
-// @PostMapping("/login")
-// public ApiResponse<AuthenticationRespond> postMethodName(@RequestBody
-// AuthenticationRequest request) {
-// try {
-// AuthenticationRespond response = authService.authenticate(request);
-// return ApiResponse.<AuthenticationRespond>builder()
-// .message("Success")
-// .result(response)
-// .build();
-// } catch (RuntimeException e) {
-// return ApiResponse.<AuthenticationRespond>builder()
-// .result(null)
-// .build();
-// }
-// }
-
-// }

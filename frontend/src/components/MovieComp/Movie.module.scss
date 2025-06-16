@@ -17,7 +17,6 @@
         cursor: pointer;
         overflow: hidden;
         
-
         &:hover {
             transform: scale(1.15);
         }
@@ -27,4 +26,16 @@
 .genre,
 .rating{
     font-size: 14px;
+}
+
+.number-rank {
+    font-size: 48px;
+    font-weight: 800;
+    font-style: italic;
+    padding-right: 5px;
+    line-height: 46px;
+    background: linear-gradient(to bottom, #e9e2c9, #eec459);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
 }

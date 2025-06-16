@@ -56,6 +56,11 @@ a {
     background-image: linear-gradient(135deg, #eec459, #f1da9f, #e6e6e6);
 }
 
+.shadow-hover-gold:hover {
+    box-shadow: 0 4px 12px rgba(238, 196, 89, 0.6);
+    transition: box-shadow 0.3s ease;
+}
+
 .border-lightGray {
     border-color: rgb(201, 198, 198);
 }
@@ -65,7 +70,7 @@ a {
 }
 
 .red-hover:hover {
-    color: var(--red);
+   background-color: rgba(248, 199, 23, 0.4);
 }
 
 .fs-7 {
@@ -77,7 +82,6 @@ a {
 }
 
 .bg-midnight {
-    // background-color: rgb(25, 27, 36);
     background-color: rgb(25, 27, 36);
 }
 
@@ -115,7 +119,6 @@ a {
 
 .mySwiper {
     position: relative;
-    /* cần để mũi tên định vị đúng */
     z-index: 100;
 }
 

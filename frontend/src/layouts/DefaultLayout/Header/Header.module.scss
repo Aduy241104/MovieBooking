@@ -1,15 +1,20 @@
 .header {
-    // position: fixed !important;
-    position: sticky;
+    position: fixed !important;
+    // position: sticky;
     top: 0;
     left: 0;
     right: 0;
-    height: 58px;
+    height: 60px;
     z-index: 999 !important;
+    transition: background-color 0.3s ease;
+    background-image: linear-gradient(to bottom,
+            rgba(23, 23, 23, 0.7),
+            rgba(23, 23, 23, 0.5), rgba(0, 0, 0, 0.2),
+            rgba(255, 255, 255, 0));
+}
+
+.scrolled {
     background-color: var(--footer-bg);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-    // opacity: 0.5;
-    /* Đừng để là 0 nếu bạn muốn nhìn thấy */
 }
 
 .logo-header {
@@ -46,14 +51,11 @@
         from {
             opacity: 0;
             transform: translateY(-20px);
-        }
-
-        to {
+        }to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-
     ul li {
         cursor: pointer;
     }
