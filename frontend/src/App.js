@@ -3,36 +3,39 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Route, Routes } from 'react-router-dom';
 import './login.css';
 
+
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 
-<<<<<<< HEAD
 
- import RoomList from './components/admin/room/RoomList';
-=======
+
+
 import RoomList from './components/admin/room/RoomList';
->>>>>>> f10de682c49130b1771f4bd125e88c5c15b43dff
 import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 
-<<<<<<< HEAD
+
 import MovieList from './components/admin/Movie/MovieList';
 import FilmDetail from './components/admin/Movie/FilmDetail';
 
+
 import ShowtimeList from './components/admin/Showtime/ShowtimeList';
 
- import { UserPage } from './Page/admin/UserPage';
- import { UserDetailPage } from './Page/admin/UserDetailPage';
-=======
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
->>>>>>> f10de682c49130b1771f4bd125e88c5c15b43dff
 import { PromotionPage } from './Page/admin/PromotionPage';
-import { DashboardPage } from './Page/admin/DashboardPage';
+ import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+
+
+
+
+
+
 
 
 
@@ -43,61 +46,57 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/register' element={<SignUpPage />} />
-        <Route path='/' element={<HomePage />} />
-        <Route path='/movie-detail/:id' element={<MovieDetail />} />
+        <Route path='/login' element={ <LoginPage /> } />
+        <Route path='/register' element={ <SignUpPage /> } />
+        <Route path='/' element={ <HomePage /> } />
+        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
 
-<<<<<<< HEAD
+
         { <Route path='/admin' element={ <AdminLayout /> }>
           <Route index element={ <DashboardPage /> } />
+
 
           <Route path='room-list' element={ <RoomList /> } />
           <Route path='room-list/add-room' element={ <CreateRoom /> } />
           <Route path='room-list/room/:id' element={ <RoomDetail /> } />
           <Route path='room-list/:id/edit' element={ <EditRoom /> } />
-=======
-        <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path='room-list' element={<RoomList />} />
-          <Route path='room-list/add-room' element={<CreateRoom />} />
-          <Route path='room-list/room/:id' element={<RoomDetail />} />
-          <Route path='room-list/:id/edit' element={<EditRoom />} />
->>>>>>> f10de682c49130b1771f4bd125e88c5c15b43dff
+
 
            <Route path='movie-list' element={ <MovieList /> } />
            <Route path='film-detail/:id' element={ <FilmDetail /> } />
            <Route path='showtime-list' element={ <ShowtimeList /> } />
+          
 
 
 
           <Route path='users-members' element={
-            <UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />
+            <UserPage key="members" userText="Thành viên" userFilter="Member" />
           } />
           <Route path='users-members/:accountId' element={
             <UserDetailPage key="members-detail" userText="Thành viên" />
           } />
 
+
           <Route path='users-employees' element={
-            <UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" />
+            <UserPage key="employees" userText="Nhân viên" userFilter="Employee" />
           } />
           <Route path='users-employees/:accountId' element={
             <UserDetailPage key="employees-detail" userText="Nhân viên" />
           } />
 
-
           <Route path='promotions' element={
             <PromotionPage promotionText="Mã khuyến mãi" />
           } />
-<<<<<<< HEAD
         </Route> }
 
-=======
-        </Route>
->>>>>>> f10de682c49130b1771f4bd125e88c5c15b43dff
+
       </Routes>
     </>
   );
 }
 
+
 export default App;
+
+
+
