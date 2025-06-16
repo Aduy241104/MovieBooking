@@ -3,9 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.DTO.request.ReviewRequestDTO;
 import com.example.demo.DTO.response.MovieReviewWrapperDTO;
 import com.example.demo.DTO.response.ReviewResponseDTO;
+import com.example.demo.model.Review;
+import com.example.demo.repository.ReviewRepository;
 import com.example.demo.service.ReviewService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +20,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ReviewController {
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @PostMapping
+    public ResponseEntity<Review> createReview(@Valid @RequestBody Review review) {
+        Review savedReview = reviewRepository.save(review);
+        return ResponseEntity.ok(savedReview);
+    }
 
     private final ReviewService reviewService;
+
 
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<List<MovieReviewWrapperDTO>> getWrappedReviews(@PathVariable Long movieId) {

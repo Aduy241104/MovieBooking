@@ -19,16 +19,20 @@ const ReviewBox = () => {
     const [menuOpenId, setMenuOpenId] = useState(null);
 
     const { user } = useContext(AuthContext);
-    const { movieId } = useParams();
+    const { id } = useParams();
+    const movieId = id;
 
     useEffect(() => {
         fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}`)
             .then((res) => res.json())
             .then((data) => {
-                const movie = data.find((m) => m.id === Number(movieId));
-                if (movie) {
-                    setReviews(movie.reviews.filter((r) => r.approved));
-                    console.log("Reviews:", movie.reviews);
+                if (Array.isArray(data) && data.length > 0) {
+                    const approvedReviews = data[0].reviews || [];
+                    console.log("Fetched reviews:", approvedReviews);
+                    setReviews(approvedReviews);
+                } else {
+                    console.warn("No reviews found for this movie.");
+                    setReviews([]); // hoặc hiển thị trạng thái không có review
                 }
                 setLoading(false);
             })
@@ -37,6 +41,7 @@ const ReviewBox = () => {
                 setLoading(false);
             });
     }, [movieId]);
+
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -49,10 +54,6 @@ const ReviewBox = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (newReview.comment.length < 10) {
-            alert("Vui lòng nhập đánh giá dài ít nhất 10 ký tự!");
-            return;
-        }
 
         if (!user) {
             alert("Vui lòng đăng nhập để gửi đánh giá!");
@@ -89,7 +90,7 @@ const ReviewBox = () => {
             .then(async (res) => {
                 if (!res.ok) {
                     const errorText = await res.text();
-                    throw new Error("Gửi đánh giá thất bại: " + errorText);
+                    throw new Error(errorText || "Đã xảy ra lỗi khi gửi đánh giá.");
                 }
                 return res.json();
             })
@@ -106,11 +107,6 @@ const ReviewBox = () => {
 
     const handleEditSubmit = (e, reviewId) => {
         e.preventDefault();
-
-        if (editedComment.length < 10) {
-            alert("Đánh giá phải dài ít nhất 10 ký tự!");
-            return;
-        }
 
         setSubmitting(true);
 
@@ -145,6 +141,29 @@ const ReviewBox = () => {
             .finally(() => setSubmitting(false));
     };
 
+    // Tách phần fetch review ra thành hàm riêng
+    const loadReviews = async () => {
+        try {
+            const res = await fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}`);
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                const approvedReviews = data[0].reviews || [];
+                setReviews(approvedReviews);
+            } else {
+                setReviews([]);
+            }
+        } catch (err) {
+            console.error("Error loading reviews:", err);
+        }
+    };
+
+
+    // Gọi loadReviews khi component mount
+    useEffect(() => {
+        loadReviews();
+    }, [movieId]);
+
+    // Hàm xử lý xóa review (đã chỉnh lại)
     const handleDelete = async (reviewId) => {
         if (window.confirm('Bạn có chắc muốn xóa đánh giá này?')) {
             try {
@@ -155,10 +174,15 @@ const ReviewBox = () => {
                         'Content-Type': 'application/json',
                     },
                 });
+
                 if (!response.ok) {
                     throw new Error('Xóa đánh giá thất bại');
                 }
-                setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+
+                // Sau khi xóa, load lại danh sách đánh giá từ server
+                await loadReviews();
+
+                // Đóng menu và reset trạng thái
                 setMenuOpenId(null);
             } catch (error) {
                 console.error('Error deleting review:', error);
@@ -168,6 +192,7 @@ const ReviewBox = () => {
             }
         }
     };
+
 
     const renderStars = (rating, onClick, editable = false) => (
         <div className={styles.starRating}>
@@ -235,7 +260,7 @@ const ReviewBox = () => {
                 <div className={styles.commentList}>
                     {reviews.map((r) => (
                         <div className={styles.commentItem} key={r.id}>
-                            <img src={r.avartar} alt="avatar" className={styles.avatar} />
+                            <img src={r.avatar} alt="avatar" className={styles.avatar} />
                             <div className={styles.commentContent}>
                                 <div className={styles.commentHeader}>
                                     <div className={styles.headerInfo}>
@@ -266,6 +291,7 @@ const ReviewBox = () => {
                                                     >
                                                         Chỉnh sửa
                                                     </button>
+                                                    
                                                     <button
                                                         className={styles.menuItem}
                                                         onClick={() => handleDelete(r.id)}

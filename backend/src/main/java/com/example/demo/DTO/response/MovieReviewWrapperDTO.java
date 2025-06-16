@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovieReviewWrapperDTO {
-    private Long id; // movieId
+    private Long movieid; // movieId
     private String movieName;
     private List<ReviewResponseDTO> reviews;
 }

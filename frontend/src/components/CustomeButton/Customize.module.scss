@@ -4,18 +4,22 @@
     border: none;
 
     +.wrapper {
-        margin-left: 12px;
+        margin-left: 18px;
     }
 }
 
 .primary {
     background-color: var(--red);
-    color: white;
+    color: rgb(33, 33, 33);
     font-weight: 600;
 
     &:hover {
-        background-color: rgb(243, 20, 20);
+        background-color: #efc55a;
     }
+}
+
+.gold {
+    background-image: linear-gradient(135deg, #eec459, #f1da9f, #e6e6e6);
 }
 
 
@@ -42,4 +46,8 @@
 
 .rounded {
     border-radius: 8px;
+}
+
+.roundedBig {
+    border-radius: 28px;
 }

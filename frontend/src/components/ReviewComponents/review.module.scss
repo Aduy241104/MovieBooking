@@ -1,8 +1,6 @@
 .wrapper {
-    width: 952.8px;
+    width: 100%;
     margin: auto;
-    padding: 20px;
-    background-color: #181820;
     border-radius: 10px;
     color: #ddd;
 }
@@ -24,7 +22,6 @@
 
 .form {
     background-color: #22222b;
-    padding: 16px;
     width: 100%;
     border-radius: 10px;
 }
@@ -112,7 +109,8 @@
 
 .commentContent {
     flex: 1;
-    word-wrap: break-word; /* Ngăn tràn nội dung */
+    word-wrap: break-word;
+    /* Ngăn tràn nội dung */
 }
 
 .commentHeader {
@@ -160,6 +158,7 @@
 
 .editContainer {
     margin-left: auto;
+
 }
 
 .editButton {
@@ -259,4 +258,46 @@
     .commentItem {
         padding: 8px;
     }
+
+    .menuItem {
+        background: #FFD825;
+    }
+
+
+    .menuDropdown {
+        display: flex;
+        flex-direction: column; // xếp nút theo chiều dọc
+        gap: 20px; // khoảng cách 20px giữa các nút
+        padding: 10px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        position: absolute;
+        top: 100%;
+        right: 0;
+        z-index: 10;
+        min-width: 140px;
+    }
+
+    .menuItem {
+        background-color: transparent;
+        border: none;
+        text-align: left;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #f0f0f0;
+        }
+
+        &:disabled {
+            color: #aaa;
+            cursor: not-allowed;
+        }
+    }
+
+
 }
