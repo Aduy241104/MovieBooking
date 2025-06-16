@@ -1,5 +1,5 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Film, History } from 'lucide-react'
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -40,8 +40,13 @@ export const AdminSidebar = (props) => {
         },
         {
             key: 'room-list',
-            icon: <Film size={20} strokeWidth={1.5}/>,
+            icon: <Film size={20} strokeWidth={1.5} />,
             label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
+        },
+        {
+            key: 'activity-logs',
+            icon: <History size={20} strokeWidth={1.5} />,
+            label: <Link to={"activity-logs"}>Lịch sử hoạt động</Link>
         },
     ];
 
@@ -57,6 +62,10 @@ export const AdminSidebar = (props) => {
             return ['employees'];
         } else if (pathname.includes('promotions')) {
             return ['promotions'];
+        } else if (pathname.includes('room-list')) {
+            return ['room-list'];
+        } else if (pathname.includes('activity-logs')) {
+            return ['activity-logs'];
         }
         return [];
     };

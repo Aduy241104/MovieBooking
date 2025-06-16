@@ -12,7 +12,7 @@ export default function RoomForm({ room, onBack }) {
 
   useEffect(() => {
     if (room) {
-      axios.get(`/api/public/rooms/${room.id}`)
+      axios.get(`${process.env.REACT_APP_BASE_URL}/public/rooms/${room.id}`)
         .then(res => {
           const data = res.data;
           const rowCount = data.rows;
@@ -32,7 +32,7 @@ export default function RoomForm({ room, onBack }) {
             seatsFromAPI[code] =
               typeName === "regular" ? 0 :
                 typeName === "vip" ? 1 :
-                  typeName === "double" ? 2 : 0;
+                  typeName === "couple" ? 2 : 0;
           });
 
           setName(data.name);
@@ -83,7 +83,7 @@ export default function RoomForm({ room, onBack }) {
 
     if (!room) {
       try {
-        const res = await axios.get("/api/public/rooms");
+        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/public/rooms`);
         const existing = res.data.map(r => r.cinemaRoomName.toLowerCase());
         if (existing.includes(name.trim().toLowerCase())) {
           setError("Tên phòng đã tồn tại.");
@@ -109,15 +109,15 @@ export default function RoomForm({ room, onBack }) {
       seatCol: parseInt(code.slice(1)) - 1,
       seatType:
         seatTypes[code] === 0 ? "regular" :
-          seatTypes[code] === 1 ? "vip" : "double"
+          seatTypes[code] === 1 ? "vip" : "couple"
     }));
 
     const payload = { name, rows, cols, seats };
 
     try {
       const res = room
-        ? await axios.put(`/api/public/rooms/${room.id}`, payload)
-        : await axios.post("/api/public/rooms", payload);
+        ? await axios.put(`${process.env.REACT_APP_BASE_URL}/public/rooms/${room.id}`, payload)
+        : await axios.post(`${process.env.REACT_APP_BASE_URL}/public/rooms`, payload);
 
       console.log("Lưu thành công:", res.data);
       onBack();

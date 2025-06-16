@@ -1,14 +1,18 @@
 import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from "@ant-design/icons";
 import { Avatar, Button, Dropdown } from "antd";
 import { Header } from "antd/es/layout/layout";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 
 export const AdminHeader = (props) => {
     const { collapsed, toggleCollapsed } = props;
     const location = useLocation();
     const [title, setTitle] = useState("");
+    const { logout, user } = useContext(AuthContext);
+
+    console.log("AdminHeader rendered", user);
 
     useEffect(() => {
         if (location.pathname === '/admin') {
@@ -19,6 +23,10 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ NHÂN VIÊN");
         } else if (location.pathname.includes('promotions')) {
             setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
+        } else if (location.pathname.includes('room-list')) {
+            setTitle("QUẢN LÝ PHÒNG CHIẾU");
+        } else if (location.pathname.includes('activity-logs')) {
+            setTitle("LỊCH SỬ HOẠT ĐỘNG");
         }
     }, [location.pathname]);
 
@@ -29,7 +37,7 @@ export const AdminHeader = (props) => {
             label:
                 <>
                     <div className="flex flex-col">
-                        <p className="text-black">email@gmail.com</p>
+                        <p className="text-black">{user?.email}</p>
                         <p className="text-gray-500">Administrator</p>
                     </div>
                 </>,
@@ -37,21 +45,21 @@ export const AdminHeader = (props) => {
         {
             type: 'divider',
         },
-        {
-            key: '2',
-            label:
-                <>
-                    <div className="flex gap-3">
-                        <UserOutlined />
-                        <p>Tài khoản</p>
-                    </div>
-                </>,
-        },
+        // {
+        //     key: '2',
+        //     label:
+        //         <>
+        //             <div className="flex gap-3">
+        //                 <UserOutlined />
+        //                 <p>Tài khoản</p>
+        //             </div>
+        //         </>,
+        // },
         {
             key: '3',
             label:
                 <>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3" onClick={logout}>
                         <LogoutOutlined />
                         <p>Đăng xuất</p>
                     </div>

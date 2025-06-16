@@ -10,8 +10,8 @@ export default function RoomList() {
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const navigate = useNavigate();
     const fetchRooms = async () => {
-        const res = await axios.get("/api/public/rooms");
-        setRooms(res.data); 
+        const res = await axios.get(`${process.env.REACT_APP_BASE_URL}/public/rooms`);
+        setRooms(res.data);
     };
 
     useEffect(() => {
@@ -32,7 +32,7 @@ export default function RoomList() {
                         // onClick={() => setShowForm(true)}
                         onClick={() => navigate("/admin/room-list/add-room")}
                     >
-                         Thêm phòng chiếu
+                        Thêm phòng chiếu
                     </button>
 
                     <div className="row g-3">
