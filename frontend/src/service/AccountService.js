@@ -1,17 +1,17 @@
 import axios from "../config/axios";
 
 const fetchAllAccountAPI = (page, size, filter) => {
-    const URL_BACKEND = `/public/accounts?page=${page}&size=${size}&filter=${filter}&sort=accountId,asc`;
+    const URL_BACKEND = `/accounts?page=${page}&size=${size}&filter=${filter}&sort=accountId,asc`;
     return axios.get(URL_BACKEND);
 }
 
 const fetchAccountByIdAPI = (accountId) => {
-    const URL_BACKEND = `public/accounts/${accountId}`;
+    const URL_BACKEND = `/accounts/${accountId}`;
     return axios.get(URL_BACKEND);
 }
 
 const updateAccountQuickAPI = (accountId, dataToUpdate) => {
-    const URL_BACKEND = `/public/accounts`;
+    const URL_BACKEND = `/accounts`;
     const data = {
         accountId,
         ...dataToUpdate
@@ -20,7 +20,7 @@ const updateAccountQuickAPI = (accountId, dataToUpdate) => {
 }
 
 const updateAccountInfoAPI = (accountId, dataToUpdate) => {
-    const URL_BACKEND = `/public/accounts/${accountId}`;
+    const URL_BACKEND = `/accounts/${accountId}`;
     const data = {
         accountId,
         ...dataToUpdate
@@ -29,7 +29,7 @@ const updateAccountInfoAPI = (accountId, dataToUpdate) => {
 }
 
 const updateAccountStatusAPI = (accountId, status) => {
-    const URL_BACKEND = `/public/accounts/status`;
+    const URL_BACKEND = `/accounts/status`;
     const data = {
         accountId,
         status
@@ -38,7 +38,7 @@ const updateAccountStatusAPI = (accountId, status) => {
 }
 
 const createAccountAPI = (roleId, email, fullName, gender, password, phoneNumber, dateOfBirth) => {
-    const URL_BACKEND = `/public/accounts`;
+    const URL_BACKEND = `/accounts`;
     const data = {
         role: {
             roleId
@@ -54,7 +54,7 @@ const createAccountAPI = (roleId, email, fullName, gender, password, phoneNumber
 }
 
 const deleteAccountAPI = (accountId) => {
-    const URL_BACKEND = `/public/accounts/is-deleted`;
+    const URL_BACKEND = `/accounts/is-deleted`;
     const data = {
         accountId,
         isDelete: true
@@ -63,7 +63,7 @@ const deleteAccountAPI = (accountId) => {
 }
 
 const updateAccountAvatarAPI = (accountId, file) => {
-    const URL_BACKEND = `/public/accounts/${accountId}/avatar`;
+    const URL_BACKEND = `/accounts/${accountId}/avatar`;
     const formData = new FormData();
     formData.append('avatar', file);
     return axios.put(URL_BACKEND, formData, {

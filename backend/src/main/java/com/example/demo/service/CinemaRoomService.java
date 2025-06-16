@@ -125,5 +125,10 @@ public class CinemaRoomService {
     // Chuyển số hàng (int) sang ký tự chữ cái (0 -> A, 1 -> B, ...)
     private String convertRowIndexToChar(int index) {
         return String.valueOf((char) ('A' + index));
+
+}
+    public Long getTotalCinemaRoom() {
+        return roomRepo.count();
     }
+
 }

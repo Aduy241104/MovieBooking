@@ -6,6 +6,7 @@ import { MovieChart } from '../../components/admin/Dashboard/MovieChart';
 import { UserChart } from '../../components/admin/Dashboard/UserChart';
 import { TopMoviesTable } from '../../components/admin/Dashboard/TopMoviesTable';
 import { RecentBookingsTable } from '../../components/admin/Dashboard/RecentBookingsTable';
+import axios from '../../config/axios.js';
 
 export const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
@@ -43,62 +44,29 @@ export const DashboardPage = () => {
 
     const loadDashboardData = async () => {
         setLoading(true);
+        const dashboardSummary = await axios.get('/dashboard/summary');
+
         try {
             // Mock data phù hợp với database của bạn
             const mockData = {
                 stats: {
-                    totalRevenue: 125000000,
-                    totalBookings: 1543,
-                    totalUsers: 2847,
-                    activeMovies: 12,
-                    totalReviews: 3456,
-                    avgRating: 4.3,
-                    activePromotions: 5,
-                    totalCinemaRooms: 8
+                    totalRevenue: dashboardSummary.data.totalRevenue,
+                    totalBookings: dashboardSummary.data.totalBookings,
+                    totalUsers: dashboardSummary.data.totalUsers,
+                    activeMovies: dashboardSummary.data.activeMovies,
+                    totalReviews: dashboardSummary.data.totalReviews,
+                    avgRating: dashboardSummary.data.avgRating,
+                    activePromotions: dashboardSummary.data.activePromotions,
+                    totalCinemaRooms: dashboardSummary.data.totalCinemaRooms
                 },
                 charts: {
                     revenue: {
-                        day: [
-                            { name: '01/06', revenue: 2500000, bookings: 45 },
-                            { name: '02/06', revenue: 3200000, bookings: 52 },
-                            { name: '03/06', revenue: 2800000, bookings: 48 },
-                            { name: '04/06', revenue: 4100000, bookings: 68 },
-                            { name: '05/06', revenue: 3600000, bookings: 55 },
-                            { name: '06/06', revenue: 4800000, bookings: 72 },
-                            { name: '07/06', revenue: 5200000, bookings: 83 },
-                        ],
-                        week: [
-                            { name: 'Tuần 1', revenue: 18500000, bookings: 320 },
-                            { name: 'Tuần 2', revenue: 22300000, bookings: 356 },
-                            { name: 'Tuần 3', revenue: 19800000, bookings: 334 },
-                            { name: 'Tuần 4', revenue: 25600000, bookings: 389 },
-                            { name: 'Tuần 5', revenue: 28200000, bookings: 423 },
-                            { name: 'Tuần 6', revenue: 31000000, bookings: 467 },
-                        ],
-                        month: [
-                            { name: 'T1', revenue: 85000000, bookings: 1200 },
-                            { name: 'T2', revenue: 123000000, bookings: 1560 },
-                            { name: 'T3', revenue: 98000000, bookings: 1340 },
-                            { name: 'T4', revenue: 156000000, bookings: 1890 },
-                            { name: 'T5', revenue: 182000000, bookings: 2230 },
-                            { name: 'T6', revenue: 210000000, bookings: 2670 },
-                        ]
+                        day: dashboardSummary.data.charts.revenue.day,
+                        week: dashboardSummary.data.charts.revenue.week,
+                        month: dashboardSummary.data.charts.revenue.month
                     },
-                    moviesByType: [
-                        { name: 'Hành động', count: 8, revenue: 45000000 },
-                        { name: 'Hài', count: 6, revenue: 32000000 },
-                        { name: 'Kinh dị', count: 4, revenue: 28000000 },
-                        { name: 'Tình cảm', count: 3, revenue: 20000000 },
-                        { name: 'Khoa học viễn tưởng', count: 2, revenue: 15000000 },
-                    ],
-                    userRegistrations: [
-                        { name: 'T1', newUsers: 145, totalUsers: 1200 },
-                        { name: 'T2', newUsers: 267, totalUsers: 1467 },
-                        { name: 'T3', newUsers: 354, totalUsers: 1821 },
-                        { name: 'T4', newUsers: 278, totalUsers: 2099 },
-                        { name: 'T5', newUsers: 389, totalUsers: 2488 },
-                        { name: 'T6', newUsers: 359, totalUsers: 2847 },
-                    ],
+                    moviesByType: dashboardSummary.data.charts.moviesByType,
+                    userRegistrations: dashboardSummary.data.charts.userRegistrations,
                     bookingsByPaymentMethod: [
                         { name: 'VNPAY', count: 45, revenue: 55000000 },
                         { name: 'Momo', count: 35, revenue: 42000000 },
@@ -106,47 +74,33 @@ export const DashboardPage = () => {
                     ]
                 },
                 tables: {
-                    topMovies: [
-                        { id: 1, title: 'Avengers: Endgame', genre: 'Hành động', rating: 4.8, totalBookings: 542, revenue: 15420000, poster: 'https://via.placeholder.com/40' },
-                        { id: 2, title: 'Spider-Man: No Way Home', genre: 'Hành động', rating: 4.6, totalBookings: 423, revenue: 12340000, poster: 'https://via.placeholder.com/40' },
-                        { id: 3, title: 'The Batman', genre: 'Hành động', rating: 4.4, totalBookings: 387, revenue: 10890000, poster: 'https://via.placeholder.com/40' },
-                        { id: 4, title: 'Top Gun: Maverick', genre: 'Hành động', rating: 4.5, totalBookings: 356, revenue: 9876000, poster: 'https://via.placeholder.com/40' },
-                    ],
-                    recentBookings: [
-                        {
-                            bookingId: 1,
-                            bookingCode: 'BK001234',
-                            customerName: 'Nguyễn Văn A',
-                            customerEmail: 'nguyenvana@email.com',
-                            movieTitle: 'Avengers: Endgame',
-                            cinemaRoom: 'Phòng 1',
-                            bookingDate: '2024-06-07T19:30:00',
-                            seatCount: 2,
-                            totalAmount: 200000,
-                            paymentMethod: 'VNPAY',
-                            status: 'PAID'
-                        },
-                        {
-                            bookingId: 2,
-                            bookingCode: 'BK001235',
-                            customerName: 'Trần Thị B',
-                            customerEmail: 'tranthib@email.com',
-                            movieTitle: 'Spider-Man: No Way Home',
-                            cinemaRoom: 'Phòng 2',
-                            bookingDate: '2024-06-07T21:00:00',
-                            seatCount: 4,
-                            totalAmount: 400000,
-                            paymentMethod: 'Momo',
-                            status: 'PENDING'
-                        }
-                    ]
+                    topMovies: dashboardSummary.data.tables.topMovies.map((movie, index) => ({
+                        id: index + 1,
+                        title: movie.title,
+                        genre: movie.genre,
+                        rating: movie.rating,
+                        totalBookings: movie.totalBookings,
+                        revenue: movie.revenue,
+                        poster: 'https://cdn-icons-png.flaticon.com/512/4831/4831192.png',
+                    })),
+                    recentBookings: dashboardSummary.data.tables.recentBookings.map((booking, index) => ({
+                        id: index + 1,
+                        customerName: booking.fullName,
+                        customerEmail: booking.email,
+                        movieTitle: booking.movieTitle,
+                        cinemaRoom: booking.cinemaRoomName,
+                        bookingDate: booking.bookingDate,
+                        seatCount: booking.seatCount,
+                        totalAmount: booking.totalPrice,
+                        paymentMethod: booking.paymentMethod,
+                        status: booking.paymentStatus
+                    }))
                 }
             };
 
-            setTimeout(() => {
-                setDashboardData(mockData);
-                setLoading(false);
-            }, 500);
+            setDashboardData(mockData);
+            setLoading(false);
+
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             setLoading(false);

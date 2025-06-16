@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+
 @Getter
 @Setter
 @Entity
@@ -24,7 +25,8 @@ public class Movie {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "content")
+    // Chỉnh sửa ở đây: dùng TEXT thay vì VARCHAR(255)
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "from_date")
@@ -54,4 +56,6 @@ public class Movie {
     @Column(name = "age_limit")
     private Integer ageLimit;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 }

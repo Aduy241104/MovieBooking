@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import java.util.List;
 
 import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
+import com.example.demo.model.Role;
 import com.example.demo.service.RoleService;
 import com.turkraft.springfilter.boot.Filter;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +67,19 @@ public class AccountController {
                 .status(HttpStatus.OK.value())
                 .message("Fetch a account")
                 .result(accountService.fetchAccountById(id))
+                .build();
+    }
+
+    @GetMapping("/accounts/total-customer")
+    public ApiResponse<Long> totalCustomerAccount() {
+        Role role = roleService.findRoleByName("CUSTOMER");
+        if(role == null) {
+            throw new RuntimeException("Role not found");
+        }
+        return ApiResponse.<Long>builder()
+                .status(HttpStatus.OK.value())
+                .message("Count customer account")
+                .result(accountService.getTotalAccountByRole(role))
                 .build();
     }
 
@@ -132,6 +147,11 @@ public class AccountController {
                 .message("Upload avatar")
                 .result(accountService.handleUploadAvatar(id, avatarFile))
                 .build();
+    }
+
+    @GetMapping("/accounts/customers-registrations")
+    public UserRegistrationsResponse getUserRegistrations() {
+        return accountService.getUserRegistrationsDTO(6);
     }
 
 }

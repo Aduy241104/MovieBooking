@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class PromotionService {
@@ -68,6 +67,10 @@ public class PromotionService {
                 .meta(metaDTO)
                 .data(promotions.getContent())
                 .build();
+    }
+
+    public Long getTotalActivePromotions() {
+        return promotionRepository.countByActive(true);
     }
 
     public Promotion fetchPromotionById(Long id) {

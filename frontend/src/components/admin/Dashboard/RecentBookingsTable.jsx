@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, Tag, Button } from 'antd';
 import { Eye } from 'lucide-react';
 import dayjs from 'dayjs';
 
 export const RecentBookingsTable = ({ data }) => {
+    const [pagination, setPagination] = useState({ current: 1, pageSize: 5 });
+
     const columns = [
         {
-            title: 'Mã đặt vé',
-            dataIndex: 'bookingCode',
-            key: 'bookingCode',
-            render: (code) => <span className="font-mono text-blue-600">{code}</span>
+            title: 'STT',
+            dataIndex: 'index',
+            key: 'index',
+            render: (text, record, index) =>
+                <span className="font-mono text-blue-600">
+                    {pagination.pageSize * (pagination.current - 1) + index + 1}
+                </span>
         },
         {
             title: 'Khách hàng',
@@ -80,8 +85,8 @@ export const RecentBookingsTable = ({ data }) => {
             title: 'Thao tác',
             key: 'action',
             render: (_, record) => (
-                <Button 
-                    type="link" 
+                <Button
+                    type="link"
                     icon={<Eye size={16} />}
                     onClick={() => console.log('View booking:', record.bookingId)}
                 >
@@ -138,9 +143,13 @@ export const RecentBookingsTable = ({ data }) => {
         <Table
             columns={columns}
             dataSource={mockData}
-            pagination={{ pageSize: 5 }}
+            pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                onChange: (page, pageSize) => setPagination({ current: page, pageSize })
+            }}
             size="small"
-            rowKey="bookingId"
+            rowKey="id"
             scroll={{ x: 1000 }}
         />
     );

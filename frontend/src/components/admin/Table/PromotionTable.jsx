@@ -19,7 +19,12 @@ export const PromotionTable = (props) => {
     }
 
     const handleUpdatePromotionActive = async (record) => {
-        const res = await updatePromotionActiveAPI(record.id, record.active === false ? true : false)
+        const now = dayjs();
+        if (now.isAfter(dayjs(record.endTime))) {
+            message.error("Không thể khôi phục mã khuyến mãi đã hết hạn");
+            return;
+        }
+        const res = await updatePromotionActiveAPI(record.id, !record.active)
         if (res.result) {
             message.success(
                 <span>
@@ -62,7 +67,7 @@ export const PromotionTable = (props) => {
             dataIndex: 'discountLevel',
             render: (text, record) => (
                 <>
-                    {text ? (record.discountType === 'percent' ? `${text}%` : Number(text).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }))
+                    {text ? (record.discountType === 'PERCENT' ? `${text}%` : Number(text).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }))
                         : "Không có dữ liệu"}
                 </>
             ),
