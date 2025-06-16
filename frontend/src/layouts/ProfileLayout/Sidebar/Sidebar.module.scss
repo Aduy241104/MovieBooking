@@ -1,0 +1,26 @@
+.btn-layout {
+    display: flex;
+    justify-content: start;
+    align-items: end;
+
+    span {
+        line-height: 14px;
+    }
+}
+
+.avt {
+    width: 58px;
+    height: 58px;
+    overflow: hidden;
+     img {
+        width: 100%;
+        object-fit: cover;
+     }
+}
+
+.link-layout {
+    min-width: 290px;
+    max-height: 290px;
+    padding: 9px;
+    border-bottom: 1px solid rgb(64, 64, 64);
+}

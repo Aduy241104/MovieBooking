@@ -1,8 +1,11 @@
 import React, { useContext } from 'react'
 import { AuthContext } from '../../../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-function menu() {
-    const { logout } = useContext(AuthContext)
+function Menu() {
+    const { logout, user } = useContext(AuthContext);
+    const navigate = useNavigate();
+
 
     const items = [
         {
@@ -17,11 +20,9 @@ function menu() {
                         padding: '6px 12px',
                         width: '160px'
                     } }
-                    onClick={ () => navigate('/profile') }
-                    className="text-secondary border-bottom border-gray"
                 >
-                    Chào <br />
-                    Anh Duy 😚
+                    😚Chào <br />
+                    { user && user.fullName }
                 </p>
             ),
         },
@@ -68,4 +69,4 @@ function menu() {
     return items;
 }
 
-export default menu
+export default Menu

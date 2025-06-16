@@ -18,22 +18,27 @@ import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+import ProfileLayout from './layouts/ProfileLayout';
+import Profile from './Page/ProfilePage/Profile/Profile';
 
 function App() {
   return (
     <>
+  
       <Routes>
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/register' element={<SignUpPage />} />
-        <Route path='/' element={<HomePage />} />
-        <Route path='/movie-detail/:id' element={<MovieDetail />} />
+        <Route path='/login' element={ <LoginPage /> } />
+        <Route path='/register' element={ <SignUpPage /> } />
+        <Route path='/' element={ <HomePage /> } />
+        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
+        <Route path='/profile' element={ <Profile /> } />
+        
 
-        <Route path='/admin' element={<AdminLayout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path='room-list' element={<RoomList />} />
-          <Route path='room-list/add-room' element={<CreateRoom />} />
-          <Route path='room-list/room/:id' element={<RoomDetail />} />
-          <Route path='room-list/:id/edit' element={<EditRoom />} />
+        <Route path='/admin' element={ <AdminLayout /> }>
+          <Route index element={ <DashboardPage /> } />
+          <Route path='room-list' element={ <RoomList /> } />
+          <Route path='room-list/add-room' element={ <CreateRoom /> } />
+          <Route path='room-list/room/:id' element={ <RoomDetail /> } />
+          <Route path='room-list/:id/edit' element={ <EditRoom /> } />
 
           <Route path='users-members' element={
             <UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />
