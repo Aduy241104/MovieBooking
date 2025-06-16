@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import instance from "../../../config/axios";
+import axios from "axios";
 import {
     Pencil,
     Trash,
@@ -22,8 +22,8 @@ export default function RoomDetail() {
     useEffect(() => {
         const fetchRoom = async () => {
             try {
-                const data = await instance.get(`/public/rooms/${roomId}`);
-                setRoom(data);
+                const data = await axios.get(`http://localhost:8081/api/public/rooms/${roomId}`);
+                setRoom(data.data);
             } catch (err) {
                 console.error("Lỗi khi lấy chi tiết phòng:", err);
             }
@@ -34,7 +34,7 @@ export default function RoomDetail() {
     const handleDelete = async () => {
         if (window.confirm("Bạn có chắc muốn xóa phòng này?")) {
             try {
-                await instance.delete(`/public/rooms/${roomId}`);
+                await axios.delete(`http://localhost:8081/api/public/rooms/${roomId}`);
                 navigate("/admin/room-list");
             } catch (err) {
                 console.error("Lỗi khi xóa phòng:", err);

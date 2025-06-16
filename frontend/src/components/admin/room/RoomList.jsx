@@ -5,7 +5,7 @@ import { SquarePlus } from "lucide-react";
 import { Table, Input, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
-import instance from "../../../config/axios";
+import axios from "axios";
 const RoomList = () => {
     const [rooms, setRooms] = useState([]);
     const [filteredRooms, setFilteredRooms] = useState([]);
@@ -13,9 +13,9 @@ const RoomList = () => {
     const navigate = useNavigate();
     const fetchRooms = useCallback(async () => {
         try {
-            const data = await instance.get("/public/rooms");
-            setRooms(data);
-            setFilteredRooms(data);
+            const data = await axios.get("http://localhost:8081/api/public/rooms");
+            setRooms(data.data);
+            setFilteredRooms(data.data);
         } catch (err) {
             console.error("Lỗi khi load danh sách phòng:", err);
             message.error("Không thể tải danh sách phòng.");

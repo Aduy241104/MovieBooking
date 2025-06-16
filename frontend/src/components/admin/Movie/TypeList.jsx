@@ -5,7 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import EditTypeForm from './EditTypeForm';
 import AddTypeForm from './AddTypeForm';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import instance from '../../../config/axios';
+import axiosClient from '../../../config/axios'
 
 export default function TypeList() {
     const [types, setTypes] = useState([]);
@@ -19,11 +19,10 @@ export default function TypeList() {
     const fetchTypes = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await instance.get('/public/types');
-            const sorted = response.sort((a, b) => a.name.localeCompare(b.name));
+            const data = await axiosClient.get('/types');
+           const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
             setTypes(sorted);
 
-            // Gộp logic tìm kiếm vào luôn
             const filtered = sorted.filter(t =>
                 t.name.toLowerCase().includes(searchText.toLowerCase())
             );
@@ -43,7 +42,7 @@ export default function TypeList() {
     const handleDelete = async (id) => {
         if (!window.confirm('Bạn có chắc muốn xóa thể loại này?')) return;
         try {
-            await instance.delete(`/public/types/${id}`);
+            await axiosClient.delete(`/types/${id}`)
             message.success("Xoá thành công.");
             fetchTypes();
         } catch (err) {
@@ -131,12 +130,11 @@ export default function TypeList() {
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 footer={null}
-                destroyOnClose
+                destroyOnHidden
             >
                 <AddTypeForm
                     onTypeAdded={() => {
                         fetchTypes();
-                        setIsModalVisible(false);
                     }}
                 />
             </Modal>
@@ -146,7 +144,7 @@ export default function TypeList() {
                 open={editModalVisible}
                 onCancel={() => setEditModalVisible(false)}
                 footer={null}
-                destroyOnClose
+                destroyOnHidden
             >
                 <EditTypeForm
                     typeId={editTypeId}

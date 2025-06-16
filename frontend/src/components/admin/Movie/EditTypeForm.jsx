@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Input, Alert, Button, Spin } from "antd";
-import instance from "../../../config/axios";
+import axiosClient from '../../../config/axios'
 export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
   const [form, setForm] = useState({ name: "", loading: true, message: "", success: null, submitting: false });
 
   useEffect(() => {
     const fetchType = async () => {
       try {
-        const type= await instance.get(`/public/types/${typeId}`);
-        setForm(f => ({ ...f, name: type.name, loading: false }));
+        const data = await axiosClient.get(`/types/${typeId}`);
+        setForm(f => ({ ...f, name: data.name, loading: false }));
       } catch {
         setForm(f => ({ ...f, message: "Không thể tải thể loại!", success: false, loading: false }));
       }
@@ -20,7 +20,7 @@ export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
     if (!form.name.trim()) return;
     setForm(f => ({ ...f, submitting: true }));
     try {
-      await instance.put(`/public/types/${typeId}`, { id: typeId, name: form.name });
+      await axiosClient.put(`/types/${typeId}`, { id: typeId, name: form.name });
       onSuccess?.();
       onCancel?.();
     } catch (err) {

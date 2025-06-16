@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Input, Alert, Button } from "antd";
-import instance from "../../../config/axios";
+import axiosClient from '../../../config/axios'
 export default function AddTypeForm({ onTypeAdded }) {
   const [form, setForm] = useState({ name: "", message: "", success: null, submitting: false });
 
@@ -11,7 +11,7 @@ export default function AddTypeForm({ onTypeAdded }) {
 
     setForm(f => ({ ...f, submitting: true }));
     try {
-      await instance.post("/public/types", { name: form.name });
+      await axiosClient.post("/types", { name: form.name });
       setForm({ name: "", message: "Thêm thể loại thành công!", success: true, submitting: false });
       onTypeAdded?.();
     } catch (err) {

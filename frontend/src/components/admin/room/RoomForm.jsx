@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import instance from "../../../config/axios";
+import axios from "axios";
 export default function RoomForm({ room, onBack }) {
   const [name, setName] = useState("");
   const [rows, setRows] = useState(0);
@@ -11,8 +11,9 @@ export default function RoomForm({ room, onBack }) {
 
   useEffect(() => {
     if (room) {
-      instance.get(`public/rooms/${room.id}`)
-        .then(data => {
+      axios.get(`http://localhost:8081/api/public/rooms/${room.id}`)
+        .then(res => {
+          const data= res.data;
           const rowCount = data.rows;
           const colCount = data.cols;
 
@@ -80,8 +81,8 @@ export default function RoomForm({ room, onBack }) {
 
     if (!room) {
       try {
-        const data = await instance.get("/public/rooms");
-        const existing = data.map(r => r.cinemaRoomName.toLowerCase());
+        const res = await axios.get("http://localhost:8081/api/public/rooms");
+        const existing = res.data.map(r => r.cinemaRoomName.toLowerCase());
         if (existing.includes(name.trim().toLowerCase())) {
           setError("Tên phòng đã tồn tại.");
           return false;
@@ -112,11 +113,11 @@ export default function RoomForm({ room, onBack }) {
     const payload = { name, rows, cols, seats };
 
     try {
-      const data = room
-        ? await instance.put(`/public/rooms/${room.id}`, payload)
-        : await instance.post("/public/rooms", payload);
+      const res = room
+        ? await axios.put(`http://localhost:8081/api/public/rooms/${room.id}`, payload)
+        : await axios.post("http://localhost:8081/api/public/rooms", payload);
 
-      console.log("Lưu thành công:", data);
+      console.log("Lưu thành công:", res.data);
       onBack();
     } catch (err) {
       console.error("Lỗi khi lưu:", err.response || err.message || err);
