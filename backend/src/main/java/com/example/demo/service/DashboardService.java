@@ -178,6 +178,7 @@ public class DashboardService {
         // Tạo map tables
         Map<String, Object> tables = new HashMap<>();
         tables.put("topMovies", topMovies);
+        tables.put("recentBookings", bookingService.getRecentlyBookedTickets(30));
 
         DashboardSummaryResponse.DataSummary dataSummary = DashboardSummaryResponse.DataSummary.builder()
                 .totalRevenue(totalRevenue)

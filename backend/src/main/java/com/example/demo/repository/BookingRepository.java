@@ -63,4 +63,28 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             ORDER BY month_start
             """, nativeQuery = true)
     List<Object[]> getMonthlyRevenueAndTickets(LocalDateTime fromDate, LocalDateTime toDate);
+
+
+    @Query(value = """
+            SELECT
+                b.booking_id AS bookingId,
+                a.full_name AS customerName,
+                a.email AS customerEmail,
+                m.movie_name_en AS movieTitle,
+                r.cinema_room_name AS cinemaRoom,
+                b.booking_time AS bookingDate,
+                (SELECT COUNT(*) FROM booked_seat bs WHERE bs.booking_id = b.booking_id) AS seatCount,
+                b.total_amount AS totalAmount,
+                p.method_name AS paymentMethod,
+                b.booking_status AS status
+            FROM booking b
+            JOIN account a ON b.account_id = a.account_id
+            JOIN screening s ON b.screening_id = s.screening_id
+            JOIN movie m ON s.movie_id = m.movie_id
+            JOIN cinema_room r ON s.cinema_room_id = r.cinema_room_id
+            JOIN payment_method p ON b.payment_method_id = p.payment_method_id
+            ORDER BY b.booking_time DESC
+            LIMIT ?1
+            """, nativeQuery = true)
+    List<Object[]> getBookingTicketRecently(int limit);
 }
