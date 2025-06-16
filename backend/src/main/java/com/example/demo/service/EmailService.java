@@ -26,4 +26,14 @@ public class EmailService {
         message.setText("Mã OTP xác thực của bạn là: " + otp);
         mailSender.send(message);
     }
+
+    public void sendForgotPasswordLink(String toEmail, String otp) {
+        String link = "http://your-frontend-app.com/reset-password?email="
+                + toEmail + "&otp=" + otp;
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Reset Password");
+        message.setText("Click the link to reset password: " + link);
+        mailSender.send(message);
+    }
 }

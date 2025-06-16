@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
+import com.example.demo.DTO.response.ProfileDTO;
 import com.example.demo.model.Account;
 import com.example.demo.model.Role;
 
@@ -43,6 +44,20 @@ public class AccountMapper {
                 .registerDate(account.getRegisterDate())
                 .score(account.getScore())
                 .role(account.getRole().getRoleName())
+                .build();
+    }
+
+    public ProfileDTO toPersonalProfile(Account account) {
+        return ProfileDTO.builder()
+                .accountId(account.getAccountId())
+                .email(account.getEmail())
+                .fullName(account.getFullName())
+                .gender(account.getGender())
+                .phoneNumber(account.getPhoneNumber())
+                .identityCard(account.getIdentityCard())
+                .dateOfBirth(account.getDateOfBirth())
+                .avatar(account.getAvatar())
+                .score(account.getScore())
                 .build();
     }
 

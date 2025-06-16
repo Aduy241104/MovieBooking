@@ -18,33 +18,39 @@
 .opacity::after {
     content: "";
     position: absolute;
-    top: 35.4%;
+    top:480px;
     width: 100%;
-    height: 100vh;
-    background: linear-gradient(to top, 
-    rgb(25, 27, 36), 
-    rgb(25, 27, 36), 
-    rgb(25, 27, 36),
-    rgba(23, 22, 22, 0.5));
+    height:550px;
+    background: linear-gradient(to top,
+            rgb(25, 27, 36),
+            rgb(25, 27, 36),
+            rgb(25, 27, 36),
+            rgb(25, 27, 36),
+            rgba(25, 27, 36,0.9),
+            rgba(25, 27, 36, 0.7),
+            rgba(27, 27, 27, 0.5));
 }
 
 .left-box {
-    border-top-right-radius: 40px;
+    border-top-right-radius: 48px;
     border-top-left-radius: 20px;
-    // background: linear-gradient(0deg, rgb(25, 26, 35), rgb(40, 41, 48)); 
-    background: linear-gradient(0deg, rgba(41, 41, 54, 0.5), rgb(40, 41, 48));
+    background-color: rgba(25, 27, 36, 0.3);
+    backdrop-filter: blur(20px);
+    min-height: 930px;
 }
 
 .right-box {
-    border-top-left-radius: 40px;
+    border-top-left-radius: 48px;
     border-top-right-radius: 20px;
-    background: linear-gradient(0deg, rgba(41, 41, 54, 0.5), rgb(40, 41, 48));
+    background-color: rgba(25, 27, 36, 0.3);
+    backdrop-filter: blur(20px);
+    min-height: 960px;
 }
 
 .opacity {
     width: 100%;
     height: 100%;
-    background: linear-gradient(to right, rgba(27, 27, 27, 0.5), rgba(23, 22, 22, 0.5), rgba(27, 27, 27, 0.5));
+    background: linear-gradient(to top, rgba(27, 27, 27, 0.5), rgba(80, 79, 79, 0.2) ,rgba(80, 79, 79, 0.2), rgba(27, 27, 27, 0.5));
 }
 
 .poster-small {

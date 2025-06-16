@@ -37,7 +37,6 @@ public class SecurityConfig {
             .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(AbstractHttpConfigurer::disable);
-
         return http.build(); 
     }
 
