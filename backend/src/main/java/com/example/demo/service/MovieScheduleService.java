@@ -44,7 +44,6 @@ public class MovieScheduleService {
         return result;
     }
 
-
     public List<MovieScheduleDTO> getSchedule(LocalDate date) {
         List<MovieScheduleDTO> result = screeningService.getAllMovieScheduleByDate(date);
         return result;
@@ -68,6 +67,8 @@ public class MovieScheduleService {
                 .largeImage(movie.getLargeImage())
                 .trailer(movie.getTrailer())
                 .ageLimit(movie.getAgeLimit())
+                .director(movie.getDirector())
+                .movieProductionCompany(movie.getMovieProductionCompany())
                 .types(types)
                 .build();
         return singleMovieDTO;
