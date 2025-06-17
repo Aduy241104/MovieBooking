@@ -17,11 +17,13 @@ import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 
 
+
 import MovieList from './components/admin/Movie/MovieList';
 import FilmDetail from './components/admin/Movie/FilmDetail';
 
 
 import ShowtimeList from './components/admin/Showtime/ShowtimeList';
+import TypeList from './components/admin/Movie/TypeList'
 
 
 import { UserPage } from './Page/admin/UserPage';
@@ -60,8 +62,10 @@ function App() {
            <Route path='movie-list' element={ <MovieList /> } />
            <Route path='film-detail/:nameVN' element={ <FilmDetail /> } />
            <Route path='showtime-list' element={ <ShowtimeList /> } />
-          
 
+
+
+          <Route path='movie-type' element={<TypeList/>} />
 
 
           <Route path='users-members' element={
@@ -79,10 +83,13 @@ function App() {
             <UserDetailPage key="employees-detail" userText="Nhân viên" />
           } />
 
+
+
           <Route path='promotions' element={
             <PromotionPage promotionText="Mã khuyến mãi" />
           } />
         </Route> }
+
 
 
       </Routes>

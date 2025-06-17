@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 export default function RoomForm({ room, onBack }) {
   const [name, setName] = useState("");
   const [rows, setRows] = useState(0);
   const [cols, setCols] = useState(0);
   const [seatTypes, setSeatTypes] = useState({});
   const [error, setError] = useState("");
-
-  const seatColors = ["#2c2c2c", "#c62828", "#e91e63"]; // regular, vip, double
+  const blue = "rgb(22, 119, 255)";
+  const seatColors = ["#e0e0e0", "#f74551", "#f536db"]; // regular, vip, couple
 
   useEffect(() => {
     if (room) {
-      axios.get(`/api/public/rooms/${room.id}`)
+      axios.get(`http://localhost:8081/api/public/rooms/${room.id}`)
         .then(res => {
-          const data = res.data;
+          const data= res.data;
           const rowCount = data.rows;
           const colCount = data.cols;
 
           const seatsFromAPI = {};
           data.seats.forEach(seat => {
-            const rowChar = seat.seatRow; // Đã là "A", "B", ...
+            const rowChar = seat.seatRow;
             const colNumber = parseInt(seat.seatCol) + 1;
             const code = rowChar + colNumber;
 
@@ -32,7 +31,7 @@ export default function RoomForm({ room, onBack }) {
             seatsFromAPI[code] =
               typeName === "regular" ? 0 :
                 typeName === "vip" ? 1 :
-                  typeName === "double" ? 2 : 0;
+                  typeName === "couple" ? 2 : 0;
           });
 
           setName(data.name);
@@ -55,7 +54,6 @@ export default function RoomForm({ room, onBack }) {
         });
     }
   }, [room]);
-
 
   const generateSeats = () => {
     const seats = {};
@@ -83,7 +81,7 @@ export default function RoomForm({ room, onBack }) {
 
     if (!room) {
       try {
-        const res = await axios.get("/api/public/rooms");
+        const res = await axios.get("http://localhost:8081/api/public/rooms");
         const existing = res.data.map(r => r.cinemaRoomName.toLowerCase());
         if (existing.includes(name.trim().toLowerCase())) {
           setError("Tên phòng đã tồn tại.");
@@ -109,15 +107,15 @@ export default function RoomForm({ room, onBack }) {
       seatCol: parseInt(code.slice(1)) - 1,
       seatType:
         seatTypes[code] === 0 ? "regular" :
-          seatTypes[code] === 1 ? "vip" : "double"
+          seatTypes[code] === 1 ? "vip" : "couple"
     }));
 
     const payload = { name, rows, cols, seats };
 
     try {
       const res = room
-        ? await axios.put(`/api/public/rooms/${room.id}`, payload)
-        : await axios.post("/api/public/rooms", payload);
+        ? await axios.put(`http://localhost:8081/api/public/rooms/${room.id}`, payload)
+        : await axios.post("http://localhost:8081/api/public/rooms", payload);
 
       console.log("Lưu thành công:", res.data);
       onBack();
@@ -128,19 +126,19 @@ export default function RoomForm({ room, onBack }) {
   };
 
   return (
-    <div className="container-fluid p-4 bg-dark text-white" style={{ minHeight: "100vh" }}>
+    <div className="container-fluid py-5 px-4 bg-white min-vh-100">
       <div className="d-flex flex-column flex-lg-row gap-4">
-        {/* Left Column: Info */}
-        <div className="flex-grow-1 bg-black p-4 rounded-3 shadow">
-          <h3 className="mb-4 border-bottom pb-2 text-danger text-nowrap">
+        {/* Left: Form */}
+        <div className="flex-grow-1 p-4 shadow rounded-4 bg-light">
+          <h4 className="fw-bold border-bottom pb-3 mb-4" style={{ color: blue }}>
             {room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}
-          </h3>
+          </h4>
 
           <div className="mb-3">
-            <label className="form-label">Tên phòng</label>
+            <label className="form-label fw-semibold" style={{ color: blue }}>Tên phòng</label>
             <input
               type="text"
-              className="form-control bg-dark text-white border-secondary"
+              className="form-control border-secondary"
               value={name}
               onChange={e => setName(e.target.value)}
             />
@@ -149,42 +147,49 @@ export default function RoomForm({ room, onBack }) {
 
           <div className="row mb-3">
             <div className="col">
-              <label className="form-label">Số hàng</label>
+              <label className="form-label fw-semibold" style={{ color: blue }}>Số hàng</label>
               <input
                 type="number"
-                className="form-control bg-dark text-white border-secondary"
+                className="form-control border-secondary"
                 value={rows}
                 min={1}
-                max={26}
-                onChange={e => setRows(Math.min(+e.target.value, 26))}
+                max={15}
+                onChange={e => setRows(Math.min(+e.target.value, 15))}
               />
             </div>
             <div className="col">
-              <label className="form-label">Số cột</label>
+              <label className="form-label fw-semibold" style={{ color: blue }}>Số cột</label>
               <input
                 type="number"
-                className="form-control bg-dark text-white border-secondary"
+                className="form-control border-secondary"
                 value={cols}
                 min={1}
-                max={20}
-                onChange={e => setCols(Math.min(+e.target.value, 20))}
+                max={15}
+                onChange={e => setCols(Math.min(+e.target.value, 15))}
               />
             </div>
           </div>
 
-          <button className="btn btn-danger mb-4" onClick={generateSeats}>
+          <button className="btn fw-bold text-white mb-4" style={{ backgroundColor: blue }} onClick={generateSeats}>
             Tạo sơ đồ ghế
           </button>
 
           <div className="d-flex gap-2">
-            <button className="btn btn-danger" onClick={handleSubmit}>Lưu</button>
-            <button className="btn btn-secondary" onClick={onBack}>Hủy</button>
+            <button className="btn fw-bold text-white" style={{ backgroundColor: blue }} onClick={handleSubmit}>
+              Lưu
+            </button>
+            <button className="btn btn-outline-secondary fw-bold" onClick={onBack}>
+              Hủy
+            </button>
           </div>
         </div>
 
-        {/* Right Column: Seat layout */}
-        <div className="flex-grow-2 bg-black p-4 rounded-3 shadow w-100">
-          <div className="text-center text-white fw-bold py-2 mb-3 rounded bg-danger">
+        {/* Right: Seat layout */}
+        <div className="flex-grow-2 p-4 shadow rounded-4 bg-light w-100">
+          <div
+            className="text-white text-center fw-bold py-2 rounded-3 mb-3"
+            style={{ backgroundColor: blue }}
+          >
             Màn hình
           </div>
 
@@ -192,21 +197,20 @@ export default function RoomForm({ room, onBack }) {
             className="d-grid gap-2 justify-content-center"
             style={{
               gridTemplateColumns: `repeat(${cols}, 40px)`,
-              display: "grid",
-              justifyContent: "center"
             }}
           >
             {Object.keys(seatTypes).map((code) => (
               <div
                 key={code}
-                className="text-center text-light rounded"
+                className="rounded-2 text-dark text-center fw-semibold"
                 style={{
+                  backgroundColor: seatColors[seatTypes[code]],
                   width: "40px",
                   height: "40px",
-                  backgroundColor: seatColors[seatTypes[code]],
-                  cursor: "pointer",
                   lineHeight: "40px",
-                  border: seatTypes[code] === 0 ? "2px solid white" : "none"
+                  cursor: "pointer",
+                  border: "1px solid #ccc",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
                 }}
                 onClick={() => toggleSeatType(code)}
               >
@@ -216,12 +220,13 @@ export default function RoomForm({ room, onBack }) {
           </div>
 
           <div className="mt-4">
-            <span className="badge me-2" style={{ backgroundColor: "#2c2c2c" }}>Thường</span>
-            <span className="badge me-2" style={{ backgroundColor: "#c62828" }}>VIP</span>
-            <span className="badge" style={{ backgroundColor: "#e91e63" }}>Đôi</span>
+            <span className="badge rounded-pill me-2" style={{ backgroundColor: seatColors[0], color: "#000" }}>Thường</span>
+            <span className="badge rounded-pill me-2" style={{ backgroundColor: seatColors[1], color: "#fff" }}>VIP</span>
+            <span className="badge rounded-pill" style={{ backgroundColor: seatColors[2], color: "#fff" }}>Đôi</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

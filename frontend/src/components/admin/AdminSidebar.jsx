@@ -1,5 +1,8 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film, Clapperboard, CalendarDays } from 'lucide-react'
+
+import { LayoutDashboard, Ticket, Users, Film, Video, CalendarDays } from 'lucide-react'
+
+
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -40,17 +43,25 @@ export const AdminSidebar = (props) => {
         },
         {
             key: 'room-list',
-            icon: <Film size={20} strokeWidth={1.5}/>,
+            icon: <Video size={20} strokeWidth={1.5}/>,
             label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
         },
 
-         {
-            key: 'Movie-list',
-            icon: <Clapperboard size={20} strokeWidth={1.5}/>,
-            label: <Link to="/admin/movie-list">Quản lý phim</Link>
-
-            
-        },
+        {
+            key: 'movie',
+            icon: <Film size={20} strokeWidth={1.5}/>,
+            label: 'Quản lý phim',
+            children: [
+                {
+                    key: 'movie',
+                    label: <Link to="/admin/movie-list">Phim</Link>
+                },
+                {
+                    key: 'type',
+                    label: <Link to="/admin/movie-type/">Thể loại</Link>
+                },
+            ]
+        }, 
           {
             key: 'showtime-list',
             icon: <CalendarDays size={20} strokeWidth={1.5}/>,
@@ -61,8 +72,8 @@ export const AdminSidebar = (props) => {
 
 
 
-    ];<CalendarDays />
-
+    // ];<CalendarDays />
+    ];
 
     // Xác định selectedKeys dựa trên pathname
     const getSelectedKeys = () => {
