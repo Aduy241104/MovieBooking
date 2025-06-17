@@ -39,7 +39,7 @@ public class SecurityConfig {
     SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**")
+            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**", "/ws-notification/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(AbstractHttpConfigurer::disable);
         return http.build(); 

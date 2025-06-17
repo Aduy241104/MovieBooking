@@ -137,6 +137,7 @@ public class AccountService {
         // Khi người dùng cập nhật thông tin, lưu thông tin người dùng đã cập nhật
         currentAccount.setUpdateBy(user.getEmail());
 
+        // Lưu log hoạt động cập nhật thông tin tài khoản
         String entityType = "";
         if(currentAccount.getRole().getRoleId() == 2){
             entityType = "NHÂN VIÊN";

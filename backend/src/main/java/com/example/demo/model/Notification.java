@@ -22,7 +22,7 @@ public class Notification {
 
     private String title;
     private String content;
-    private String type;
+    private String type; // MOVIE, SYSTEM, REVIEW, ...
     private Boolean isRead = false;
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -12,7 +12,7 @@ export const AdminHeader = (props) => {
     const [title, setTitle] = useState("");
     const { logout, user } = useContext(AuthContext);
 
-    console.log("AdminHeader rendered", user);
+    // console.log("AdminHeader rendered", user);
 
     useEffect(() => {
         if (location.pathname === '/admin') {

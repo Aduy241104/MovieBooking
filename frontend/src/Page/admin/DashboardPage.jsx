@@ -44,7 +44,7 @@ export const DashboardPage = () => {
 
     const loadDashboardData = async () => {
         setLoading(true);
-        const dashboardSummary = await axios.get('/dashboard/summary');
+        const dashboardSummary = await axios.get('/admin/dashboard/summary');
 
         try {
             // Mock data phù hợp với database của bạn

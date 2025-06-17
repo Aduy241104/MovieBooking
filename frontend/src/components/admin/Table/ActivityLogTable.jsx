@@ -1,8 +1,7 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination, Table, Tag } from "antd";
 import { fetchActivityLogsAPI } from "../../../service/ActivityLogService";
 import dayjs from "dayjs";
-import { set } from "lodash";
 
 
 export const ActivityLogTable = ({ filter }) => {
@@ -104,6 +103,7 @@ export const ActivityLogTable = ({ filter }) => {
                     onChange={handleTableChange}
                 />
             </div>
+
         </>
     );
 };
