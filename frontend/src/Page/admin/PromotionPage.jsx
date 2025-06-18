@@ -11,7 +11,6 @@ import { sfAnd, sfEqual, sfLike, sfOr } from 'spring-filter-query-builder';
 import dayjs from 'dayjs';
 
 
-
 export const PromotionPage = (props) => {
     const { setBreadcrumbItems } = useOutletContext();
     const { promotionText } = props;

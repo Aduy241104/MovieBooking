@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
-@RequestMapping("/api/public")
+@RequestMapping("/api/admin")
 public class AccountController {
 
     private final AccountService accountService;
