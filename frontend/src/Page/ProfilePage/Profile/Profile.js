@@ -2,6 +2,7 @@ import ProfileLayout from '../../../layouts/ProfileLayout'
 import { useState, useEffect } from "react";
 import { Form, Input, Select, Radio, Button } from "antd";
 import Avatar from './Avatar/Avatar';
+import { viewPersonalProfileAPI } from '../../../service/ProfileService';
 
 
 function Profile() {
@@ -9,8 +10,10 @@ function Profile() {
     const [accountInfor, setAccountInfor] = useState({});
     const [isLoading, setLoading] = useState(false);
 
-    useEffect(() => {
 
+    const testAPI = async () => {
+        const res = await viewPersonalProfileAPI();
+        console.log(res);
         const fetched = {
             email: "anhduy@gmail.com",
             fullName: "Anh Duy",
@@ -19,6 +22,13 @@ function Profile() {
             dateOfBirth: "1990-05-20",
         };
         setAccountInfor(fetched);
+
+    }
+    useEffect(() => {
+
+        testAPI()
+
+
     }, []);
 
     useEffect(() => {

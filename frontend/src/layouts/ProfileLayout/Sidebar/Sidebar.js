@@ -11,14 +11,6 @@ function Sidebar() {
     return (
         <div className={ cx("p-3", 'sidebar') }>
             <div className={ cx('p-5 rounded-4', 'inner-sidebar')}>
-                <div className="mb-3">
-                    <button
-                        className="red-hover"
-                        onClick={ () => navigate("/") }
-                    >
-                        <i className="fa-solid fa-arrow-left"></i> Trở về
-                    </button>
-                </div>
                 <h5 className="fw-bolder">Quản lý tài khoản</h5>
                 <ul className="list-unstyled mt-5 pb-5">
                     <li className={ cx('mb-4', 'link-layout') }>
@@ -29,7 +21,7 @@ function Sidebar() {
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
-                            <i className="fa-solid fa-user"></i> <span className="ps-2">Tài khoản</span>
+                            <i className="fa-solid fa-user"></i> <span className="ps-2 fs-7">Tài khoản</span>
                         </NavLink>
                     </li>
                     <li className={ cx('mb-4', 'link-layout') }>
@@ -39,7 +31,7 @@ function Sidebar() {
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
-                            <i className="fa-solid fa-key"></i> <span className="ps-2">Mật khẩu</span>
+                            <i className="fa-solid fa-key"></i> <span className="ps-2 fs-7">Mật khẩu</span>
                         </NavLink>
                     </li>
                     <li className={ cx('mb-4', 'link-layout') }>
@@ -49,7 +41,7 @@ function Sidebar() {
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
-                            <i className="fa-solid fa-clock-rotate-left"></i> <span className="ps-2">Giao dịch</span>
+                            <i className="fa-solid fa-clock-rotate-left"></i> <span className="ps-2 fs-7">Giao dịch</span>
                         </NavLink>
                     </li>
                 </ul>

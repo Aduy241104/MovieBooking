@@ -52,8 +52,8 @@ function Header({ user, logout }) {
                     <div className="d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
+                                <li className="">Trang chủ</li>
                                 <li className="">Lịch chiếu</li>
-                                <li className="">Phim Chiếu</li>
                                 <li className="">Sắp Chiếu</li>
                                 <li className="">Top Phim</li>
                             </ul>
