@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 
 import com.example.demo.DTO.response.ResPagination;
-import com.example.demo.model.Account;
 import com.example.demo.model.ActivityLog;
 import com.example.demo.repository.ActivityLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 
 @Service
 public class ActivityLogService {

@@ -23,5 +23,4 @@ public class ProfileRequest {
     String identityCard;
     LocalDate dateOfBirth;
     String avatar;
-    Integer score;
 }

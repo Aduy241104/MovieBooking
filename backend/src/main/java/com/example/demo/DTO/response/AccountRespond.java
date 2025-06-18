@@ -21,4 +21,5 @@ public class AccountRespond {
     LocalDate registerDate;
     Integer score;
     String role;
+    String avatar;
 }

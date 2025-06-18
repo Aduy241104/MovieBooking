@@ -51,10 +51,10 @@ public class ProfileService {
         account.setFullName(profileRequest.getFullName());
         account.setGender(profileRequest.getGender());
         account.setPhoneNumber(profileRequest.getPhoneNumber());
-        account.setIdentityCard(profileRequest.getIdentityCard());
+        // account.setIdentityCard(profileRequest.getIdentityCard());
         account.setDateOfBirth(profileRequest.getDateOfBirth());
-        account.setAvatar(profileRequest.getAvatar());
-        account.setScore(profileRequest.getScore());
+        // account.setAvatar(profileRequest.getAvatar());
+
 
         accountRepository.save(account);
         return profileRequest;

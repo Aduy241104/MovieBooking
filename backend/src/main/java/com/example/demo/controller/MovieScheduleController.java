@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,10 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.MovieScheduleDTO;
 import com.example.demo.DTO.response.SingleMovieDTO;
+import com.example.demo.model.Account;
 import com.example.demo.model.Screening;
 import com.example.demo.repository.ScreeningRepository;
+import com.example.demo.service.AccountService;
 import com.example.demo.service.MovieScheduleService;
 import com.example.demo.service.ScreeningService;
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/public/movieSchedule")
+@Slf4j
 public class MovieScheduleController {
 
     @Autowired
@@ -35,6 +41,9 @@ public class MovieScheduleController {
 
     @Autowired
     MovieScheduleService movieScheduleService;
+
+    @Autowired
+    AccountService accountService;
 
     @GetMapping("/getAll")
     public ApiResponse<List<Screening>> getMethodName() {
@@ -90,6 +99,19 @@ public class MovieScheduleController {
                 .status(HttpStatus.OK.value())
                 .message("Get total now showing movie")
                 .result(response)
+                .build();
+    }
+
+    @GetMapping("/acc")
+    public ApiResponse<List<Account>> getMethod() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        log.info("User info: {}", authentication.getName());
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
+
+        List<Account> accounts = accountService.getAllAccount();
+        return ApiResponse.<List<Account>>builder()
+                .result(accounts)
                 .build();
     }
 
