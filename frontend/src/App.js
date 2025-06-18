@@ -1,6 +1,6 @@
 import './../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import './styles/login.css';
 
 import LoginPage from './Page/AuthPage/LoginPage';
@@ -22,6 +22,22 @@ import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+import { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
+import { ActivityLogPage } from './Page/admin/ActivityLogPage';
+
+const PrivateRoute = ({ children }) => {
+  const { user, isAuthLoaded } = useContext(AuthContext);
+
+  if (!isAuthLoaded) return; // hoặc loading spinner
+
+  if (!user || user.role !== "ADMIN") {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 
 function App() {
   return (
@@ -32,9 +48,14 @@ function App() {
         <Route path='/' element={<HomePage />} />
         <Route path='/movie-detail/:id' element={<MovieDetail />} />
 
-
-        {<Route path='/admin' element={<AdminLayout />}>
-
+        <Route
+          path='/admin'
+          element={
+            <PrivateRoute>
+              <AdminLayout />
+            </PrivateRoute>
+          }
+        >
           <Route index element={<DashboardPage />} />
           <Route path='room-list' element={<RoomList />} />
           <Route path='room-list/add-room' element={<CreateRoom />} />
@@ -65,7 +86,10 @@ function App() {
             <PromotionPage promotionText="Mã khuyến mãi" />
           } />
 
-        </Route>}
+          <Route path='activity-logs' element={
+            <ActivityLogPage logsText="Lịch sử hoạt động" />
+          } />
+        </Route>
 
       </Routes>
     </>

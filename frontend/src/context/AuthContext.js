@@ -5,6 +5,8 @@ export const AuthContext = createContext();
 function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
+    const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+
 
 
     const login = (userData, token) => {
@@ -30,12 +32,13 @@ function AuthProvider({ children }) {
             setToken(savedToken);
             setUser(JSON.parse(savedUser));
         }
+        setIsAuthLoaded(true);
     }, [])
 
 
     return (
-        <AuthContext.Provider value={ { user, token, login, logout } }>
-            { children }
+        <AuthContext.Provider value={{ user, token, login, logout, isAuthLoaded }}>
+            {children}
         </AuthContext.Provider>
     )
 }
