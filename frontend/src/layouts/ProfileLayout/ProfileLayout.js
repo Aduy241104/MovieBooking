@@ -1,14 +1,19 @@
 import Sidebar from './Sidebar'
+import DefaultLayout from '../DefaultLayout'
+import { Outlet } from "react-router-dom";
 
-function ProfileLayout({ children }) {
+function ProfileLayout() {
     return (
-        <div className="flex min-h-screen text-light bg-midnight">
-            <Sidebar />
-            <div className="flex-1 p-4">
-                <h1>hêllo</h1>
+        <DefaultLayout>
+            <div className='pt-3'>
             </div>
-        </div>
+            <div className="flex min-h-screen text-light bg-midnight pt-5" >
+                <Sidebar />
+                <div className="flex-1 p-4">
+                    <Outlet />
+                </div>
+            </div>
+        </DefaultLayout>
     )
 }
-
 export default ProfileLayout

@@ -16,6 +16,7 @@ function DefaultLayout({ children }) {
       <Header user={ isLogin } logout={ logout } />
       { children }
       <GoToTop />
+      <h1 className='text-red'>HEllo</h1>
     </div>
   )
 }
