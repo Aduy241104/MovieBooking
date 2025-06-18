@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 
-import com.example.demo.DTO.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -129,14 +128,5 @@ public class CinemaRoomController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(room);
-    }
-
-    @GetMapping("/total")
-    public ApiResponse<Long> totalRooms() {
-        return ApiResponse.<Long>builder()
-                .status(HttpStatus.OK.value())
-                .message("Total number of rooms")
-                .result(roomService.getTotalCinemaRoom())
-                .build();
     }
 }

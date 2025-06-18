@@ -27,7 +27,9 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ PHÒNG CHIẾU");
         } else if (location.pathname.includes('activity-logs')) {
             setTitle("LỊCH SỬ HOẠT ĐỘNG");
-        }
+        } else if (location.pathname.includes('movie-type')) {
+            setTitle("DANH SÁCH THỂ LOẠI PHIM");
+        } 
     }, [location.pathname]);
 
     const items = [
