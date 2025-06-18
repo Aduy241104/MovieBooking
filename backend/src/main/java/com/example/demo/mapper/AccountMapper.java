@@ -44,6 +44,7 @@ public class AccountMapper {
                 .registerDate(account.getRegisterDate())
                 .score(account.getScore())
                 .role(account.getRole().getRoleName())
+                .avatar(account.getAvatar())
                 .build();
     }
 

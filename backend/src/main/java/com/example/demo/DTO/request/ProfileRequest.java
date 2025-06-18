@@ -1,25 +1,26 @@
-package com.example.demo.DTO.response;
+package com.example.demo.DTO.request;
 
 import java.time.LocalDate;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountRespond {
-    Long accountID;
-    String email;
+public class ProfileRequest {
     String fullName;
     String gender;
     String phoneNumber;
     String identityCard;
     LocalDate dateOfBirth;
-    LocalDate registerDate;
-    Integer score;
-    String role;
     String avatar;
 }

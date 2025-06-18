@@ -1,10 +1,14 @@
 package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.DTO.request.ProfileRequest;
 import com.example.demo.DTO.response.ProfileDTO;
+import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.mapper.AccountMapper;
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
@@ -26,11 +30,67 @@ public class ProfileService {
     @Autowired
     AccountMapper accountMapper;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    OtpService otpService;
+
     public ProfileDTO getProfile(Long id) {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("account not found !"));
         ProfileDTO profileDTO = accountMapper.toPersonalProfile(account);
         return profileDTO;
+    }
+
+    public ProfileRequest updateProfile(Long id, ProfileRequest profileRequest) {
+
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        account.setFullName(profileRequest.getFullName());
+        account.setGender(profileRequest.getGender());
+        account.setPhoneNumber(profileRequest.getPhoneNumber());
+        // account.setIdentityCard(profileRequest.getIdentityCard());
+        account.setDateOfBirth(profileRequest.getDateOfBirth());
+        // account.setAvatar(profileRequest.getAvatar());
+
+
+        accountRepository.save(account);
+        return profileRequest;
+    }
+
+    public void changePassword(Long accountId, String oldPassword, String newPassword) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found"));
+
+        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
+            throw new UnauthorizedException("Old password is not correct");
+        }
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    public void requestChangeEmail(String email) {
+        if (accountRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException("This Email already exists!");
+        }
+        otpService.sendOtp(email);
+    }
+
+    public void confirmChangeEmail(Long accountId, String otp, String newEmail) {
+        boolean isValid = otpService.verifyOtp(newEmail, otp);
+
+        if (!isValid) {
+            throw new UnauthorizedException("Otp or email not correct");
+        }
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found!"));
+
+        account.setEmail(newEmail);
+        otpService.clearOtp(newEmail);
+        accountRepository.save(account);
     }
 
 }
