@@ -3,8 +3,9 @@ package com.example.demo.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import org.springframework.data.domain.Page;
 
 @Entity
 @Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = { "movie_id", "account_id" }))
@@ -18,7 +19,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
-    private Integer id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "movie_id", nullable = false)
@@ -46,5 +47,10 @@ public class Review {
     @PrePersist
     public void handleBeforeCreate() {
         this.reviewDate = LocalDateTime.now();
+    }
+
+    public Page<Review> stream() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'stream'");
     }
 }

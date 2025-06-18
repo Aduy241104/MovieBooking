@@ -1,7 +1,7 @@
 import './../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Route, Routes } from 'react-router-dom';
-import './login.css';
+import './styles/login.css';
 
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
@@ -19,6 +19,7 @@ import { DashboardPage } from './Page/admin/DashboardPage';
 
 import ReviewUI from './components/ReviewComponents/reviewcomponents';
 
+
 import MovieDetail from './Page/MovieDetail/MovieDetail';
 
 
@@ -26,10 +27,11 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={ <LoginPage /> } />
-        <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <HomePage /> } />
-        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<SignUpPage />} />
+        <Route path='/' element={<HomePage />} />
+        <Route path='/movie-detail/:id' element={<MovieDetail />} />
+
 
         <Route path='/register' element={<SignUpPage />} />
         <Route path='/review/:movieId' element={<ReviewUI />} />
@@ -42,15 +44,16 @@ function App() {
           <Route path='room-list/:id/edit' element={ <EditRoom /> } />
 
 
+
           <Route path='users-members' element={
-            <UserPage key="members" userText="Thành viên" userFilter="Member" />
+            <UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />
           } />
           <Route path='users-members/:accountId' element={
             <UserDetailPage key="members-detail" userText="Thành viên" />
           } />
 
           <Route path='users-employees' element={
-            <UserPage key="employees" userText="Nhân viên" userFilter="Employee" />
+            <UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" />
           } />
           <Route path='users-employees/:accountId' element={
             <UserDetailPage key="employees-detail" userText="Nhân viên" />

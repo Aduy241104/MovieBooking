@@ -2,7 +2,6 @@ package com.example.demo.controller;
 
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ResPagination;
-import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.service.PromotionService;
 import com.turkraft.springfilter.boot.Filter;
@@ -11,18 +10,17 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/public")
 public class PromotionController {
     private final PromotionService promotionService;
     public PromotionController(PromotionService promotionService) {
         this.promotionService = promotionService;
     }
 
-    @PostMapping("public/promotions")
+    @PostMapping("/promotions")
     public ApiResponse<Promotion> createPromotion(@RequestBody Promotion promotion) {
         Promotion currentPromotion = promotionService.fetchPromotionByCode(promotion.getCode());
         if(currentPromotion != null) {
@@ -35,7 +33,7 @@ public class PromotionController {
                 .build();
     }
 
-    @PutMapping("public/promotions")
+    @PutMapping("/promotions")
     public ApiResponse<Promotion> updatePromotion(@RequestBody Promotion promotion) {
         Promotion currentPromotion = promotionService.fetchPromotionById(promotion.getId());
         if(currentPromotion == null) {
@@ -54,7 +52,7 @@ public class PromotionController {
                 .build();
     }
 
-    @PutMapping("public/promotions/active")
+    @PutMapping("/promotions/active")
     public ApiResponse<Promotion> updatePromotionActive(@RequestBody Promotion promotion) {
         Promotion currentPromotion = promotionService.fetchPromotionById(promotion.getId());
         if(currentPromotion == null) {
@@ -67,7 +65,7 @@ public class PromotionController {
                 .build();
     }
 
-    @PutMapping("public/promotions/is-deleted")
+    @PutMapping("/promotions/is-deleted")
     public ApiResponse<Promotion> deletePromotion(@RequestBody Promotion promotion) {
         Promotion currentPromotion = promotionService.fetchPromotionById(promotion.getId());
         if(currentPromotion == null) {
@@ -80,13 +78,22 @@ public class PromotionController {
                 .build();
     }
 
-    @GetMapping("/public/promotions")
+    @GetMapping("/promotions")
     public ApiResponse<ResPagination> getAllPromotions(
             @Filter Specification<Promotion> spec, Pageable pageable) {
         return ApiResponse.<ResPagination>builder()
                 .status(HttpStatus.OK.value())
                 .message("Fetch all promotion")
                 .result(promotionService.fetchAllPromotions(spec, pageable))
+                .build();
+    }
+
+    @GetMapping("/promotions/total-active")
+    public ApiResponse<Long> countActivePromotions() {
+        return ApiResponse.<Long>builder()
+                .status(HttpStatus.OK.value())
+                .message("Total active promotions")
+                .result(promotionService.getTotalActivePromotions())
                 .build();
     }
 }

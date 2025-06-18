@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReviewResponseDTO {
-    private Integer id;
+    private Long id;
     private Long accountId;
     private String avartar;
     private String accountFullName;

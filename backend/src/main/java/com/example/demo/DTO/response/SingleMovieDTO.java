@@ -19,6 +19,7 @@ public class SingleMovieDTO {
     private String smallImage;
     private String largeImage;
     private String trailer;
+    private int ageLimit;
     private Double avgRating;
     private List<String> types; // Thêm danh sách thể loại
 }

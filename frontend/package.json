@@ -2,7 +2,6 @@
   "name": "demo154",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8081",
   "dependencies": {
     "@tailwindcss/cli": "^4.1.8",
     "@tippyjs/react": "^4.2.6",

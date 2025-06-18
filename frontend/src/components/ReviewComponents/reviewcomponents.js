@@ -1,9 +1,12 @@
+
 import { useContext, useState, useEffect } from 'react';
 import styles from "./review.module.scss";
 import { useParams } from "react-router-dom";
 import { AuthContext } from '../../context/AuthContext';
+import ReviewService from '../../service/ReviewService';
 
 const ReviewBox = () => {
+    // --- Khởi tạo State ---
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -21,28 +24,52 @@ const ReviewBox = () => {
     const { user } = useContext(AuthContext);
     const { id } = useParams();
     const movieId = id;
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const pageSize = 7;
 
+
+    const handleLoadMore = () => {
+        setPage((prev) => prev + 1);
+    };
+
+    // --- Xem đánh giá: tải danh sách đánh giá của phim ---
     useEffect(() => {
-        fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}`)
+        setLoading(true);
+        fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}/paged?page=${page}&size=${pageSize}`)
             .then((res) => res.json())
             .then((data) => {
-                if (Array.isArray(data) && data.length > 0) {
-                    const approvedReviews = data[0].reviews || [];
-                    console.log("Fetched reviews:", approvedReviews);
-                    setReviews(approvedReviews);
+                console.log("📦 Dữ liệu phản hồi từ API:", data);
+                const content = data.content || [];
+
+                // Nếu là trang đầu, reset lại danh sách
+                if (page === 0) {
+                    setReviews(content);
                 } else {
-                    console.warn("No reviews found for this movie.");
-                    setReviews([]); // hoặc hiển thị trạng thái không có review
+                    setReviews((prev) => [...prev, ...content]); // 👉 Nối thêm vào danh sách cũ
                 }
+
+                // Kiểm tra còn trang nào nữa không
+                if (content.length < pageSize || data.pageNumber >= data.totalPages - 1) {
+                    setHasMore(false);
+                }
+
+                console.log(" Tổng số trang:", data.totalPages);
+                console.log(" Trang hiện tại:", data.pageNumber);
+                console.log(" Số review trả về:", content.length);
+
                 setLoading(false);
             })
             .catch((err) => {
-                console.error("Error fetching reviews:", err);
+                console.error(" Error fetching reviews:", err);
                 setLoading(false);
+                setHasMore(false);
             });
-    }, [movieId]);
+    }, [movieId, page]);
 
 
+
+    // --- Xử lý nhập liệu cho đánh giá mới ---
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
         setNewReview((prev) => ({
@@ -51,6 +78,7 @@ const ReviewBox = () => {
         }));
     };
 
+    // --- Thêm đánh giá mới ---
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -74,13 +102,19 @@ const ReviewBox = () => {
 
         const payload = {
             movieId: Number(movieId),
-            accountId: user.accountId,
+            accountId: user.accountID,
             rating: newReview.rating,
             comment: newReview.comment,
             spoilerAlert: newReview.spoilerAlert,
             approved: true,
             reviewDate: formattedDate,
         };
+
+        if ('id' in payload) {
+            delete payload.id;
+        }
+
+        console.log("Payload gửi lên:", payload);
 
         fetch(`http://localhost:8081/api/public/reviews/add`, {
             method: "POST",
@@ -105,6 +139,8 @@ const ReviewBox = () => {
             .finally(() => setSubmitting(false));
     };
 
+
+    // --- Sửa đánh giá ---
     const handleEditSubmit = (e, reviewId) => {
         e.preventDefault();
 
@@ -142,13 +178,25 @@ const ReviewBox = () => {
     };
 
     // Tách phần fetch review ra thành hàm riêng
+    // const loadReviews = async () => {
+    //     try {
+    //         const res = await reviewService.getReviewsByMovieId(movieId);
+    //         const data = await res.json();
+    //         if (Array.isArray(data) && data.length > 0) {
+    //             const approvedReviews = data[0].reviews || [];
+    //             setReviews(approvedReviews);
+    //         } else {
+    //             setReviews([]);
+    //         }
+    //     } catch (err) {
+    //         console.error("Error loading reviews:", err);
+    //     }
+    // };
     const loadReviews = async () => {
         try {
-            const res = await fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}`);
-            const data = await res.json();
+            const data = await ReviewService.getReviewsByMovieId(movieId);
             if (Array.isArray(data) && data.length > 0) {
-                const approvedReviews = data[0].reviews || [];
-                setReviews(approvedReviews);
+                setReviews(data[0].reviews || []);
             } else {
                 setReviews([]);
             }
@@ -194,6 +242,7 @@ const ReviewBox = () => {
     };
 
 
+    // --- Hiển thị sao đánh giá ---
     const renderStars = (rating, onClick, editable = false) => (
         <div className={styles.starRating}>
             {[...Array(10)].map((_, i) => {
@@ -214,18 +263,19 @@ const ReviewBox = () => {
         </div>
     );
 
+    // --- JSX render ---
     return (
         <div className={styles.wrapper}>
             <h3 className={styles.title}>Đánh giá phim</h3>
 
             <form className={styles.form} onSubmit={handleSubmit}>
-                <label>★ Đánh giá:</label>
+                <label>Đánh giá:</label>
                 {renderStars(
                     newReview.rating,
                     (value) => setNewReview((prev) => ({ ...prev, rating: value })),
                     true
                 )}
-                <label>Đánh giá:</label>
+                <label>Bình luận:</label>
                 <textarea
                     name="comment"
                     value={newReview.comment}
@@ -245,13 +295,18 @@ const ReviewBox = () => {
                         Cảnh báo spoiler
                     </label>
                 </div>
-                <div className={styles.submitWrapper}>
-                    <button type="submit" className={styles.button} disabled={submitting}>
+                <div className={styles.submitWrapper} >
+                    <button type="submit" className={styles.button} disabled={submitting} style={{
+                        backgroundColor: "#FFD875", // nền vàng
+                        color: "#212121",               // chữ đen
+                        border: "none",
+                    }}>
                         {submitting ? "Đang gửi..." : "Gửi đánh giá"}
                     </button>
                 </div>
             </form>
 
+            {/* Xem danh sách đánh giá */}
             {loading ? (
                 <p className={styles.empty}>Đang tải đánh giá...</p>
             ) : reviews.length === 0 ? (
@@ -259,62 +314,90 @@ const ReviewBox = () => {
             ) : (
                 <div className={styles.commentList}>
                     {reviews.map((r) => (
-                        <div className={styles.commentItem} key={r.id}>
-                            <img src={r.avatar} alt="avatar" className={styles.avatar} />
-                            <div className={styles.commentContent}>
-                                <div className={styles.commentHeader}>
-                                    <div className={styles.headerInfo}>
-                                        <span className={styles.username}>{r.accountFullName}</span>
-                                        <span className={styles.time}>
-                                            • {new Date(r.reviewDate).toLocaleString("vi-VN")}
-                                        </span>
-                                    </div>
-                                    {user && r.accountId === user.accountID && (
-                                        <div className={styles.editContainer}>
-                                            <button
-                                                className={styles.menuButton}
-                                                onClick={() => setMenuOpenId(menuOpenId === r.id ? null : r.id)}
-                                                title="Tùy chọn"
-                                            >
-                                                ⋮
-                                            </button>
-                                            {menuOpenId === r.id && (
-                                                <div className={styles.menuDropdown}>
-                                                    <button
-                                                        className={styles.menuItem}
-                                                        onClick={() => {
-                                                            setEditingReviewId(r.id);
-                                                            setEditedComment(r.comment);
-                                                            setEditedRating(r.rating);
-                                                            setMenuOpenId(null);
-                                                        }}
-                                                    >
-                                                        Chỉnh sửa
-                                                    </button>
-                                                    
-                                                    <button
-                                                        className={styles.menuItem}
-                                                        onClick={() => handleDelete(r.id)}
-                                                        disabled={submitting}
-                                                    >
-                                                        Xóa
-                                                    </button>
-                                                </div>
-                                            )}
+                        <div className="card mb-3  text-light" key={r.id} style={{ backgroundColor: "#22222B", borderColor: "#2A2A2A" }}>
+                            <div className="card-body d-flex">
+                                <img
+                                    src={r.avatar || "/default-avatar.png"}
+                                    alt="avatar"
+                                    className="rounded-circle me-3"
+                                    style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                                />
+                                <div className="flex-grow-1">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{r.accountFullName || "Người dùng ẩn danh"}</strong>
+                                            <span className="text-muted ms-2" style={{ fontSize: "0.9em" }}>
+                                                • {new Date(r.reviewDate).toLocaleString("vi-VN")}
+                                            </span>
                                         </div>
-                                    )}
+                                        {user && r.accountId === user.accountID && (
+                                            <div className="dropdown" >
+                                                <button
+                                                    className="btn btn-sm btn-light" style={{
+                                                        backgroundColor: "#FFD875", // nền vàng
+                                                        color: "#212121",               // chữ đen
+                                                        border: "none",
+                                                    }}
+                                                    onClick={() =>
+                                                        setMenuOpenId(menuOpenId === r.id ? null : r.id)
+                                                    }
+                                                >
+                                                    ⋮
+                                                </button>
+                                                {menuOpenId === r.id && (
+                                                    <div className="dropdown-menu show" >
+                                                        <button
+                                                            className="dropdown-item"
+                                                            onClick={() => {
+                                                                setEditingReviewId(r.id);
+                                                                setEditedComment(r.comment);
+                                                                setEditedRating(r.rating);
+                                                                setMenuOpenId(null);
+                                                            }}
+                                                        >
+                                                            Chỉnh sửa
+                                                        </button>
+                                                        <button
+                                                            className="dropdown-item text-danger"
+                                                            onClick={() => handleDelete(r.id)}
+                                                            disabled={submitting}
+                                                        >
+                                                            Xóa
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="mt-2">
+                                        <span className="text-warning fw-bold">★</span> {r.rating}/10
+                                    </div>
+                                    <p className="mb-0">
+                                        {r.spoilerAlert && (
+                                            <span className="badge bg-danger me-1">[Spoiler]</span>
+                                        )}
+                                        {r.comment}
+                                    </p>
                                 </div>
-                                <div className={styles.rating}>
-                                    <span style={{ color: "#FFD875" }}>★</span> {r.rating}/10
-                                </div>
-                                <p>
-                                    {r.spoilerAlert && <span className={styles.spoiler}>[Spoiler]</span>}
-                                    {r.comment}
-                                </p>
                             </div>
                         </div>
                     ))}
 
+                    {/* Nút Xem thêm */}
+                    {hasMore && !loading && (
+                        <div className={styles.loadMoreWrapper}>
+                            <button className={styles.loadMoreButton} onClick={handleLoadMore}>
+                                Xem thêm
+                            </button>
+                        </div>
+                    )}
+
+                    {!hasMore && reviews.length > 0 && (
+                        <p className={styles.noMore}>Đã hiển thị tất cả đánh giá.</p>
+                    )}
+
+
+                    {/* Form sửa đánh giá */}
                     {editingReviewId && (
                         <form
                             className={styles.editForm}

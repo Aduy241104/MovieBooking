@@ -117,7 +117,7 @@ export const UpdatePromotionModal = (props) => {
                                 <Select
                                     options={[
                                         {
-                                            value: 'percent',
+                                            value: 'PERCENT',
                                             label: (
                                                 <div className="flex items-center gap-1">
                                                     <Percent color="#cf075e" size={16} strokeWidth={1.5} />
@@ -126,7 +126,7 @@ export const UpdatePromotionModal = (props) => {
                                             )
                                         },
                                         {
-                                            value: 'amount',
+                                            value: 'AMOUNT',
                                             label: (
                                                 <div className="flex items-center gap-1">
                                                     <DollarSign color="#106511" size={16} strokeWidth={1.5} />
