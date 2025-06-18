@@ -2,6 +2,7 @@ import { useContext, useState, useEffect } from 'react'
 import Header from './Header'
 import { AuthContext } from '../../context/AuthContext';
 import GoToTop from '../../components/GoToTop/GoToTop';
+import Footer from './Footer/Footer';
 
 function DefaultLayout({ children }) {
   const { user, logout } = useContext(AuthContext);
@@ -16,7 +17,7 @@ function DefaultLayout({ children }) {
       <Header user={ isLogin } logout={ logout } />
       { children }
       <GoToTop />
-      <h1 className='text-red'>HEllo</h1>
+      <Footer />
     </div>
   )
 }

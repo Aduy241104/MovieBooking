@@ -1,8 +1,8 @@
-import ProfileLayout from '../../../layouts/ProfileLayout'
 import { useState, useEffect } from "react";
-import { Form, Input, Select, Radio, Button } from "antd";
+import { Form, Input, Radio, Button } from "antd";
 import Avatar from './Avatar/Avatar';
-import { viewPersonalProfileAPI } from '../../../service/ProfileService';
+import { updateProfileAPI, viewPersonalProfileAPI } from '../../../service/ProfileService';
+import { openNotification } from "../../../Utils/Notification";
 
 
 function Profile() {
@@ -11,51 +11,37 @@ function Profile() {
     const [isLoading, setLoading] = useState(false);
 
 
-    const testAPI = async () => {
-        const res = await viewPersonalProfileAPI();
-        console.log(res);
-        const fetched = {
-            email: "anhduy@gmail.com",
-            fullName: "Anh Duy",
-            gender: "Female",
-            phoneNumber: "0901231289",
-            dateOfBirth: "1990-05-20",
-        };
-        setAccountInfor(fetched);
 
-    }
     useEffect(() => {
-
-        testAPI()
-
-
+        const fetchAccounAPI = async () => {
+            try {
+                const res = await viewPersonalProfileAPI();
+                setAccountInfor(res.result);
+            } catch (error) {
+                setAccountInfor({})
+            }
+        }
+        fetchAccounAPI();
     }, []);
 
     useEffect(() => {
         if (accountInfor && accountInfor.fullName) { // account là dữ từ API
             // Lấy ra các field bạn quan tâm
             const { fullName, gender, phoneNumber, dateOfBirth, email } = accountInfor;
-
             form.setFieldsValue({ fullName, gender, phoneNumber, dateOfBirth, email });
         }
     }, [accountInfor]);
 
     const handleFinish = async (values) => {
+        setLoading(true);
         try {
-            const response = await fetch("/api/user/update", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(values),
-            });
+            await updateProfileAPI(values);
+            openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.")
 
-            if (response.ok) {
-                message.success("Cập nhật thông tin thành công!");
-            } else {
-                message.error("Cập nhật thất bại!");
-            }
         } catch (err) {
-            console.error(err);
-            message.error("Đã xảy ra lỗi!");
+            openNotification("error", "Lỗi cập nhật", "Đã xảy ra lỗi khi cập nhật thông tin.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -73,11 +59,10 @@ function Profile() {
                         form={ form }
                         layout="vertical"
                         onFinish={ handleFinish }>
-
-
+                            
                         <div className='d-flex'>
                             <Form.Item label={ <span className='text-secondary'>Email</span> } name="email" rules={ [
-                                { required: true, message: "Vui lòng nhập họ và tên" },
+                                { required: false, message: "Vui lòng nhập họ và tên" },
                                 { min: 2, message: "Họ và tên tối thiểu 2 ký tự" }
                             ] } className='flex-1'>
                                 <Input className='bg-transparent text-light p-2 border-1 border-secondary' readOnly />
@@ -135,7 +120,7 @@ function Profile() {
                 </div>
                 <div className='col-6'>
                     <Avatar
-                        originalImage={ "https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" }
+                        originalImage={ accountInfor.avatar }
                     />
                 </div>
             </div>

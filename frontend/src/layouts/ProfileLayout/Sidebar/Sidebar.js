@@ -1,16 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import classNames from "classnames/bind";
 import styles from './Sidebar.module.scss'
+import { AuthContext } from "../../../context/AuthContext";
+import { useContext } from "react";
+import Avatar from "../../../components/Avatar/Avatar";
 
 const cx = classNames.bind(styles);
 
 function Sidebar() {
+    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
 
 
     return (
-        <div className={ cx("p-3", 'sidebar') }>
-            <div className={ cx('p-5 rounded-4', 'inner-sidebar')}>
+        <div className={ cx("p-3 ms-5", 'sidebar') }>
+            <div className={ cx('p-5 rounded-4', 'inner-sidebar') }>
                 <h5 className="fw-bolder">Quản lý tài khoản</h5>
                 <ul className="list-unstyled mt-5 pb-5">
                     <li className={ cx('mb-4', 'link-layout') }>
@@ -49,9 +53,13 @@ function Sidebar() {
                 {/* User info at bottom */ }
                 <div className="mb-5 mt-5 pt-5">
                     <div className={ cx("rounded-full mb-2", 'avt') }>
-                        <img src="https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/a0e63af2063dccd1389e1bc27ee465ba~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=76b54e80&x-expires=1749092400&x-signature=L%2FIqvwELh%2BmxK9fobJMEfORbNys%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my"
-                            alt="avatar"
-                        />
+                        { user &&
+                            <Avatar
+                                className={ cx('avt') }
+                                src={ user.avatar + "" }
+                                fallBack={ '/Assests/Image/Screenshot 2025-06-13 102311.png' }
+                            />
+                        }
                     </div>
                     <p>music app</p>
                     <p className="text-secondary fs-7">duya15914@gmail.com</p>

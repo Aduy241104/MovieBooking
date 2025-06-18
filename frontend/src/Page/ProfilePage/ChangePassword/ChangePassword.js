@@ -1,25 +1,41 @@
 import { Form, Input, Button, message } from 'antd';
+import { changePasswordAPI } from '../../../service/ProfileService';
+import { openNotification } from '../../../Utils/Notification';
+import { useState } from 'react';
 
 function ChangePassword() {
+    const [form] = Form.useForm();
+    const [isLoading, setLoading] = useState(false);
+
     const handleFinish = async (values) => {
         try {
-            // Gọi API để đổi mật khẩu
-            const response = await fetch('/api/user/change-password', {
-                method: 'PUT',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(values),
-            });
+            setLoading(true);
+            const response = await changePasswordAPI(values);
 
-            if (response.ok) {
-                message.success("Đổi mật khẩu thành công!");
-            } else {
-                message.error("Đổi mật khẩu thất bại!");
+            if (!response.success) {
+                if (response.status === 401) {
+                    form.setFields([
+                        {
+                            name: 'oldPassword',
+                            errors: ["Mật khẩu hiện tại không đúng"],
+                        },
+                    ]);
+                } else {
+                    openNotification("error", "Lỗi", response.message);
+                }
+                return;
             }
-        } catch (err) {
-            console.error(err);
-            message.error("Đã xảy ra lỗi!");
+            openNotification("success", "Cập nhật thành công", "Mật khẩu đã được thay đổi.");
+            form.resetFields();
+
+        } catch (error) {
+            openNotification("error", "Lỗi");
+        } finally {
+            setLoading(false);
+
         }
     };
+
 
     return (
         <div className='text-light mt-4 w-50 pe-3'>
@@ -27,11 +43,12 @@ function ChangePassword() {
 
             <Form
                 layout="vertical"
+                form={ form }
                 onFinish={ handleFinish }>
 
                 <Form.Item
                     label={ <span className='text-light'>Mật khẩu hiện tại</span> }
-                    name="currentPassword"
+                    name="oldPassword"
                     rules={ [
                         { required: true, message: "Vui lòng nhập mật khẩu hiện tại" }
                     ] }>
@@ -84,12 +101,21 @@ function ChangePassword() {
                 </Form.Item>
 
                 <Button
-                    className='bg-red p-2 text-light'
+                    className='bg-red p-2 text-black'
                     type="primary"
                     htmlType="submit">
                     Đổi mật khẩu
+                    { isLoading &&
+                        <div className="spinner-border spinner-border-sm" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    }
                 </Button>
             </Form>
+            <p className='mt-4 fs-7'>
+                Quên mật khẩu, nhấn vào
+                <button className='text-red'>đây</button>
+            </p>
         </div>
     )
 }
