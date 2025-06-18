@@ -12,6 +12,10 @@ import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 
+
+import TypeList from './components/admin/Movie/TypeList'
+
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
@@ -33,7 +37,6 @@ function App() {
         <Route path='/movie-detail/:id' element={<MovieDetail />} />
 
 
-        <Route path='/register' element={<SignUpPage />} />
         <Route path='/review/:movieId' element={<ReviewUI />} />
 
         <Route path='/admin' element={ <AdminLayout /> }>
@@ -43,6 +46,11 @@ function App() {
           <Route path='room-list/room/:id' element={ <RoomDetail /> } />
           <Route path='room-list/:id/edit' element={ <EditRoom /> } />
 
+
+
+
+
+          <Route path='movie-type' element={<TypeList/>} />
 
 
           <Route path='users-members' element={
@@ -59,10 +67,14 @@ function App() {
             <UserDetailPage key="employees-detail" userText="Nhân viên" />
           } />
 
+
+
           <Route path='promotions' element={
             <PromotionPage promotionText="Mã khuyến mãi" />
           } />
+
         </Route>
+
       </Routes>
     </>
   );
