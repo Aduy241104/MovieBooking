@@ -36,8 +36,7 @@ public class FindMovieService {
         List<Movie> response = movieRepository.findAll();
         return response;
     }
-
-
+    
      public Page<SingleMovieDTO> search(String keyword, int page, int size) {
         Page<SingleMovieDTO> pageResult = movieRepository
                 .searchMoviesWithRating(keyword, PageRequest.of(page, size));
@@ -49,7 +48,4 @@ public class FindMovieService {
 
         return pageResult;
     }
-
-
-
 }

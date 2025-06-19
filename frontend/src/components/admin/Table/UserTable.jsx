@@ -106,6 +106,24 @@ export const UserTable = (props) => {
             dataIndex: 'phoneNumber',
         },
         {
+            title: 'Cập nhật lần cuối',
+            dataIndex: 'updateAt',
+            render: (text, record) => (
+                <>
+                    {text ? dayjs(text).format('DD/MM/YYYY HH:mm') : "Không có dữ liệu"}
+                </>
+            ),
+        },
+        {
+            title: 'Cập nhật bởi',
+            dataIndex: 'updateBy',
+            render: (text, record) => (
+                <>
+                    {text ? text : "Không có dữ liệu"}
+                </>
+            ),
+        },
+        {
             title: 'Trạng thái',
             render: (_, record) => (
                 <>

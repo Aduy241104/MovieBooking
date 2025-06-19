@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import java.util.List;
 
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
@@ -10,7 +9,6 @@ import com.turkraft.springfilter.boot.Filter;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
-@RequestMapping("/api/public")
+@RequestMapping("/api/admin")
 public class AccountController {
 
     private final AccountService accountService;
@@ -37,18 +35,6 @@ public class AccountController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping("/acc")
-    public ApiResponse<List<Account>> getMethodName() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        log.info("User info: {}", authentication.getName());
-        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
-
-        List<Account> accounts = accountService.getAllAccount();
-        return ApiResponse.<List<Account>>builder()
-                .result(accounts)
-                .build();
-    }
 
     @GetMapping("/accounts")
     public ApiResponse<ResPagination> getAllAccount(

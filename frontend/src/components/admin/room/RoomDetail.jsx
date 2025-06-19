@@ -101,6 +101,7 @@ export default function RoomDetail() {
             <div className="text-center bg-blue-500 text-white py-2 rounded mb-4 font-semibold">
               Màn hình
             </div>
+
             <div
               style={{
                 display: "grid",
@@ -145,4 +146,6 @@ export default function RoomDetail() {
       </Card>
     </div>
   );
-}
+}  
+
+

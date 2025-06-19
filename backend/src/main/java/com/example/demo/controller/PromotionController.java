@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/public")
+@RequestMapping("/api/admin")
 public class PromotionController {
     private final PromotionService promotionService;
     public PromotionController(PromotionService promotionService) {
