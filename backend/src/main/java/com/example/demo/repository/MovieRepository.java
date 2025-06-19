@@ -109,5 +109,5 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 LIMIT 5
             """, nativeQuery = true)
     List<Object[]> getTopMoviesByRevenue();
-
+    List<Movie> findByIsDeletedFalse();
 }

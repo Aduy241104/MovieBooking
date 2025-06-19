@@ -50,7 +50,7 @@ export const AdminSidebar = (props) => {
             children: [
                 {
                     key: 'movie',
-                    label: <Link to={"#"}>Phim</Link>
+                    label: <Link to={"/admin/movies"}>Quản lý phim</Link>
                 },
                 {
                     key: 'type',

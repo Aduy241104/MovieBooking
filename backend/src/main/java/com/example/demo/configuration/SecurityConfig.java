@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Order(1)
     SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**")
+            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**", "/images/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(AbstractHttpConfigurer::disable);
         return http.build(); 

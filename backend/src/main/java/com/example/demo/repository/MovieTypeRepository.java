@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import java.util.List;
 
+import com.example.demo.model.Movie;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,5 +28,6 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
             ORDER BY revenue DESC
             """, nativeQuery = true)
     List<Object[]> getMoviesByTypeRevenue();
-
+    List<MovieType> findByMovie(Movie movie);
+    void deleteByMovieId(Long movieId);
 }
