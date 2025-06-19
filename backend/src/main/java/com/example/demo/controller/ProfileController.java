@@ -90,4 +90,13 @@ public class ProfileController {
                 .build();
     }
 
+    @PutMapping("/change-avatar")
+    public ApiResponse<String> putMethodName(@PathVariable String id, @RequestBody String entity) {
+
+        return ApiResponse.<String>builder()
+                .message("Avatar is changed")
+                .result("Avatar changed")
+                .build();
+    }
+
 }
