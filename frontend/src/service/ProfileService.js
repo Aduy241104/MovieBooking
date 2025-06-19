@@ -45,9 +45,10 @@ export const viewPersonalProfileAPI = async () => {
 export const updateProfileAPI = async (data) => {
     try {
         const response = await axiosInstance.put('/me/update-profile', data);
+       
         return response;
     } catch (error) {
-        throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+        throw error;
     }
 }
 

@@ -52,14 +52,14 @@ function Profile() {
                     <h5>Tài khoản</h5>
                     <p className='text-secondary fs-6 pb-4'>Cập nhật thông tin tài khoản</p>
                     <p className='pb-3 fs-6 fw-300'>
-                        Điểm tích lũy: <span className='text-warning'>1500</span>
+                        Điểm tích lũy: <span className='text-warning'>{ accountInfor.score }</span>
                     </p>
 
                     <Form
                         form={ form }
                         layout="vertical"
                         onFinish={ handleFinish }>
-                            
+
                         <div className='d-flex'>
                             <Form.Item label={ <span className='text-secondary'>Email</span> } name="email" rules={ [
                                 { required: false, message: "Vui lòng nhập họ và tên" },

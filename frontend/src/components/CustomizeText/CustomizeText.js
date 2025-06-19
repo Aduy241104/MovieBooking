@@ -7,7 +7,7 @@ function CustomizeText({ level = 'h1', children, className }) {
     const Tag = level; // level sẽ là 'h1', 'h2', 'h3', ...
     return (
         <Tag className={ cx('customize', className) }>
-            <i className="fa-brands fa-hive"></i> { children }
+            <i class="fa-solid fa-circle-play"></i> { children }
         </Tag>
     );
 }
