@@ -5,13 +5,6 @@ import AuhenticationLayout from '../../layouts/AuthenticationLayout';
 import { resetPasswordAPI } from '../../service/AuthService';
 import { openNotification } from '../../Utils/Notification';
 
-// http://localhost:8081/api/auth/reset-password
-
-// {
-//     "email": "nguyenle4767ta@gmail.com",
-//         "otp": "130391",
-//             "newPass": "buianhduy"
-//   }
 function ResetPassword() {
     const [form] = Form.useForm();
     const [params] = useSearchParams();
@@ -94,7 +87,6 @@ function ResetPassword() {
                     </Button>
                 </Form>
             </div>
-
         </AuhenticationLayout>
     );
 }

@@ -1,4 +1,4 @@
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button } from 'antd';
 import { changePasswordAPI } from '../../../service/ProfileService';
 import { openNotification } from '../../../Utils/Notification';
 import { useState } from 'react';

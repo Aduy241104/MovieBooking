@@ -3,6 +3,8 @@ import { Form, Input, Radio, Button } from "antd";
 import Avatar from './Avatar/Avatar';
 import { updateProfileAPI, viewPersonalProfileAPI } from '../../../service/ProfileService';
 import { openNotification } from "../../../Utils/Notification";
+import ChangeEmail from './ChangeEmail'
+
 
 
 function Profile() {
@@ -68,13 +70,9 @@ function Profile() {
                                 <Input className='bg-transparent text-light p-2 border-1 border-secondary' readOnly />
                             </Form.Item>
 
-                            <p
-                                style={ { lineHeight: '100px' } }
-                                onClick={ () => { console.log("hello") } }
-                                className='ms-3 cursor-pointer text-red'
-                            >
-                                Thay đổi Email
-                            </p>
+                         
+                                <ChangeEmail/>
+                         
                         </div>
 
                         <Form.Item label={ <span className='text-secondary'>Họ và tên</span> } name="fullName" rules={ [

@@ -68,12 +68,13 @@ function Header({ user }) {
                                     <div className="d-flex align-items-center gap-1">
                                         {/* <NotificationBell accountId={user?.accountId} />  */ }
                                         <Dropdown menu={ { items } } trigger={ ['click'] } placement="bottomRight">
-                                            <span style={ { cursor: 'pointer', marginLeft: 16 } }>
+                                            <span className="d-flex" style={ { cursor: 'pointer', marginLeft: 16 } }>
                                                 <Avatar
                                                     src={ user.avatar + "" }
                                                     fallBack="/Assests/Image/Screenshot 2025-06-13 102311.png"
 
                                                 />
+                                                <i className="fa-solid fa-sort-down ms-2 fs-8 mt-2 text-light"></i>
                                             </span>
                                         </Dropdown>
                                     </div>
