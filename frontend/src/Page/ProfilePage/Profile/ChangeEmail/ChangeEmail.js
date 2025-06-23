@@ -9,7 +9,7 @@ function ChangeEmail() {
     const [form] = Form.useForm();
     const [isOpen, setOpen] = useState(false);
     const [isLoading, setLoading] = useState(false);
-    const [step, setStep] = useState(3);
+    const [step, setStep] = useState(0);
 
 
     const handleCloseModal = () => {
