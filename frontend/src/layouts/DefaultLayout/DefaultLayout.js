@@ -3,6 +3,8 @@ import Header from './Header'
 import { AuthContext } from '../../context/AuthContext';
 import GoToTop from '../../components/GoToTop/GoToTop';
 import { AIChatBox } from '../../components/AIChatBox/AIChatBox';
+import Footer from './Footer/Footer';
+
 
 function DefaultLayout({ children }) {
   const { user, logout } = useContext(AuthContext);
@@ -18,6 +20,7 @@ function DefaultLayout({ children }) {
       {children}
       <GoToTop />
       <AIChatBox />
+      <Footer />
     </div>
   )
 }

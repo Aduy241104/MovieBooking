@@ -130,7 +130,7 @@ public class AuthenticationService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("account not found"));
 
-        account.setPassword(newPass);
+        account.setPassword(passwordEncoder.encode(newPass));
         accountRepository.save(account);
         otpService.clearOtp(email);
     }
