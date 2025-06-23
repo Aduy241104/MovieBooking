@@ -11,7 +11,7 @@ export default function AddTypeForm({ onTypeAdded }) {
 
     setForm(f => ({ ...f, submitting: true }));
     try {
-      await axiosClient.post("/types", { name: form.name });
+      await axiosClient.post("/public/types", { name: form.name });
       setForm({ name: "", message: "Thêm thể loại thành công!", success: true, submitting: false });
       onTypeAdded?.();
     } catch (err) {

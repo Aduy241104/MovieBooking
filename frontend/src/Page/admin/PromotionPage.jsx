@@ -1,5 +1,5 @@
-import { SearchOutlined } from '@ant-design/icons';
-import { Button, Input, Select } from "antd";
+import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Input, message, Select, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { CreatePromotionModal } from '../../components/admin/Modal/promotions/CreatePromotionModal';
@@ -24,6 +24,7 @@ export const PromotionPage = (props) => {
     const [size, setSize] = useState(10);
     const [total, setTotal] = useState(0);
     const [filter, setFilter] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         setBreadcrumbItems([
@@ -65,6 +66,7 @@ export const PromotionPage = (props) => {
     };
 
     useEffect(() => {
+        setIsLoading(true);
         const loadPromotions = async () => {
             try {
                 const res = await fetchAllPromotionAPI(page, size, filter);
@@ -80,8 +82,13 @@ export const PromotionPage = (props) => {
                         console.log('Some expired promotions have been automatically disabled');
                     }
                 }
+                setIsLoading(false);
             } catch (error) {
-                console.error('Error loading promotions:', error);
+                if (error.message === "Network Error") {
+                    message.error("Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối hoặc thử lại sau!");
+                } else {
+                    message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
+                }
             }
         }
 
@@ -159,12 +166,19 @@ export const PromotionPage = (props) => {
                     </Button>
                 </div>
 
-                <PromotionTable
-                    page={page} setPage={setPage} size={size} total={total}
-                    dataPromotions={dataPromotions}
-                    promotionText={promotionText}
-                    setRefreshFlag={setRefreshFlag}
-                />
+                {isLoading ? (
+                    <div className='flex flex-col justify-center items-center gap-3 h-screen'>
+                        <Spin indicator={<LoadingOutlined spin />} size="large" />
+                        <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
+                    </div>
+                ) : (
+                    <PromotionTable
+                        page={page} setPage={setPage} size={size} total={total}
+                        dataPromotions={dataPromotions}
+                        promotionText={promotionText}
+                        setRefreshFlag={setRefreshFlag}
+                    />
+                )}
 
             </div>
 

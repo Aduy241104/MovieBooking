@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Spin } from 'antd';
+import { Row, Col, Card, Statistic, Spin, message } from 'antd';
 import { TrendingUp, Users, Calendar, DollarSign, Eye, Star, UserCheck, Film } from 'lucide-react';
 import { RevenueChart } from '../../components/admin/Dashboard/RevenueChart';
 import { MovieChart } from '../../components/admin/Dashboard/MovieChart';
@@ -44,9 +44,8 @@ export const DashboardPage = () => {
 
     const loadDashboardData = async () => {
         setLoading(true);
-        const dashboardSummary = await axios.get('/admin/dashboard/summary');
-
         try {
+            const dashboardSummary = await axios.get('/admin/dashboard/summary');
             // Mock data phù hợp với database của bạn
             const mockData = {
                 stats: {
@@ -97,13 +96,14 @@ export const DashboardPage = () => {
                     }))
                 }
             };
-
             setDashboardData(mockData);
             setLoading(false);
-
         } catch (error) {
-            console.error('Error loading dashboard data:', error);
-            setLoading(false);
+            if (error.message === "Network Error") {
+                message.error("Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối hoặc thử lại sau!");
+            } else {
+                message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
+            }
         }
     };
 
