@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.request.ProfileRequest;
+import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ProfileDTO;
 import com.example.demo.service.ProfileService;
@@ -40,11 +41,11 @@ public class ProfileController {
     }
 
     @PutMapping("/update-profile")
-    public ApiResponse<ProfileRequest> putMethodName(@RequestBody ProfileRequest profileRequest) {
+    public ApiResponse<AccountRespond> putMethodName(@RequestBody ProfileRequest profileRequest) {
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
-        ProfileRequest profile = profileService.updateProfile(accountId, profileRequest);
-        return ApiResponse.<ProfileRequest>builder()
+        AccountRespond profile = profileService.updateProfile(accountId, profileRequest);
+        return ApiResponse.<AccountRespond>builder()
                 .message("Account updated successfull")
                 .result(profile)
                 .build();
