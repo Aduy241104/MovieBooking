@@ -4,16 +4,16 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import './styles/login.css';
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
-// import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
-// import RoomList from './components/admin/room/RoomList';
-// import CreateRoom from './components/admin/room/CreateRoom';
-// import EditRoom from './components/admin/room/EditRoom';
-// import RoomDetail from './components/admin/room/RoomDetail';
-// import TypeList from './components/admin/Movie/TypeList'
-// import { UserPage } from './Page/admin/UserPage';
-// import { UserDetailPage } from './Page/admin/UserDetailPage';
-// import { PromotionPage } from './Page/admin/PromotionPage';
-// import { DashboardPage } from './Page/admin/DashboardPage';
+import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
+import RoomList from './components/admin/room/RoomList';
+import CreateRoom from './components/admin/room/CreateRoom';
+import EditRoom from './components/admin/room/EditRoom';
+import RoomDetail from './components/admin/room/RoomDetail';
+import TypeList from './components/admin/Movie/TypeList'
+import { UserPage } from './Page/admin/UserPage';
+import { UserDetailPage } from './Page/admin/UserDetailPage';
+import { PromotionPage } from './Page/admin/PromotionPage';
+import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
 
@@ -26,7 +26,7 @@ import { AuthContext } from './context/AuthContext';
 import TestPage from './Page/TestPage';
 import RequestForgotPassword from './Page/AuthPage/RequestForgotPassword';
 import ResetPassword from './Page/AuthPage/ResetPassword';
-// import { ActivityLogPage } from './Page/admin/ActivityLogPage';
+import { ActivityLogPage } from './Page/admin/ActivityLogPage';
 
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
@@ -67,7 +67,7 @@ function App() {
         </Route>
 
 
-        {/* <Route
+        <Route
           path='/admin'
           element={
             <PrivateRoute>
@@ -104,7 +104,7 @@ function App() {
           <Route path='activity-logs' element={
             <ActivityLogPage logsText="Lịch sử hoạt động" />
           } />
-        </Route> */}
+        </Route>
       </Routes>
     </>
   );

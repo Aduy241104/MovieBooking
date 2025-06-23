@@ -8,7 +8,7 @@ import Avatar from "../../../components/Avatar/Avatar";
 import { Dropdown } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import menu from "./MenuItem/menu";
-// import { NotificationBell } from "../../../components/Notification/NotificationBell";
+import { NotificationBell } from "../../../components/Notification/NotificationBell";
 
 
 const cx = classNames.bind(styles);
@@ -66,7 +66,7 @@ function Header({ user }) {
                             { user ? (
                                 <>
                                     <div className="d-flex align-items-center gap-1">
-                                        {/* <NotificationBell accountId={user?.accountId} />  */ }
+                                        <NotificationBell accountId={ user?.accountId } />
                                         <Dropdown menu={ { items } } trigger={ ['click'] } placement="bottomRight">
                                             <span className="d-flex" style={ { cursor: 'pointer', marginLeft: 16 } }>
                                                 <Avatar
