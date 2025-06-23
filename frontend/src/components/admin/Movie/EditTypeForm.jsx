@@ -7,7 +7,7 @@ export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
   useEffect(() => {
     const fetchType = async () => {
       try {
-        const data = await axiosClient.get(`/types/${typeId}`);
+        const data = await axiosClient.get(`/public/types/${typeId}`);
         setForm(f => ({ ...f, name: data.name, loading: false }));
       } catch {
         setForm(f => ({ ...f, message: "Không thể tải thể loại!", success: false, loading: false }));
@@ -20,7 +20,7 @@ export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
     if (!form.name.trim()) return;
     setForm(f => ({ ...f, submitting: true }));
     try {
-      await axiosClient.put(`/types/${typeId}`, { id: typeId, name: form.name });
+      await axiosClient.put(`/public/types/${typeId}`, { id: typeId, name: form.name });
       onSuccess?.();
       onCancel?.();
     } catch (err) {
