@@ -47,14 +47,9 @@ function OtpForm({ newEmail, nextStep }) {
             otp: otp,
             newEmail: email
         };
-
-        console.log("data sending: ", data);
-
-
         try {
             setLoading(true);
             const response = await confirmChangeEmailAPI(data);
-
             if (!response.success) {
                 if (response.status === 401) {
                     // Đặt lỗi cho tất cả các ô OTP
@@ -71,6 +66,7 @@ function OtpForm({ newEmail, nextStep }) {
                 }
             }
 
+            localStorage.setItem("user", JSON.stringify(response.data.result));
             nextStep(3);
         } catch (error) {
             message.error(error.message || "Đã xảy ra lỗi");
