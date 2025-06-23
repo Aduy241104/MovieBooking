@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -77,26 +76,29 @@ public class ProfileController {
     }
 
     @PutMapping("/confirm-change-email")
-    public ApiResponse<String> confirmChangePassword(@RequestBody Map<String, String> payload) {
+    public ApiResponse<AccountRespond> confirmChangePassword(@RequestBody Map<String, String> payload) {
         String newEmail = payload.get("newEmail");
         String otp = payload.get("otp");
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
 
-        profileService.confirmChangeEmail(accountId, otp, newEmail);
+        AccountRespond accountRespond = profileService.confirmChangeEmail(accountId, otp, newEmail);
 
-        return ApiResponse.<String>builder()
+        return ApiResponse.<AccountRespond>builder()
                 .message("Email changed successful")
-                .result("Email Changed")
+                .result(accountRespond)
                 .build();
     }
 
     @PutMapping("/change-avatar")
-    public ApiResponse<String> putMethodName(@PathVariable String id, @RequestBody String entity) {
-
-        return ApiResponse.<String>builder()
+    public ApiResponse<AccountRespond> changeAvatar(@RequestBody Map<String, String> payload) {
+        String avatarUrl = payload.get("avatar");
+        String currentUsername = SecurityUtils.getCurrentUsername();
+        Long accountId = Long.parseLong(currentUsername);
+        AccountRespond accountRespond = profileService.changeAvatar(accountId, avatarUrl);
+        return ApiResponse.<AccountRespond>builder()
                 .message("Avatar is changed")
-                .result("Avatar changed")
+                .result(accountRespond)
                 .build();
     }
 

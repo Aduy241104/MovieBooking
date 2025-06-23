@@ -96,4 +96,14 @@ public class ProfileService {
         return accountRespond;
     }
 
+    public AccountRespond changeAvatar(Long accountId, String url) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found!"));
+
+        account.setAvatar(url);
+        accountRepository.save(account);
+        AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        return accountRespond;
+    }
+
 }
