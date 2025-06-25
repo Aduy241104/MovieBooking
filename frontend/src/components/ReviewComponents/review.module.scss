@@ -144,6 +144,7 @@
 .starRating {
     display: flex;
     flex-direction: row;
+    font-size: 20px;
 }
 
 .starFilled {
@@ -298,6 +299,8 @@
             cursor: not-allowed;
         }
     }
+    
+    
 
 
 }

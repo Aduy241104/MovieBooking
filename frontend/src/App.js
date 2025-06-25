@@ -11,6 +11,7 @@ import RoomList from './components/admin/room/RoomList';
 import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
+import { PaymentMethodPage } from './components/PaymentMethod/PaymentMethodPage';
 
 
 import TypeList from './components/admin/Movie/TypeList'
@@ -71,6 +72,10 @@ function App() {
 
           <Route path='promotions' element={
             <PromotionPage promotionText="Mã khuyến mãi" />
+          } />
+
+          <Route path='paymentmethod' element={
+            <PaymentMethodPage paymentmethodText="Phương thức thanh toán" />
           } />
 
         </Route>

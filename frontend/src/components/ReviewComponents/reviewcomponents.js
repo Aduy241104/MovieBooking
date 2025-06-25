@@ -4,6 +4,7 @@ import styles from "./review.module.scss";
 import { useParams } from "react-router-dom";
 import { AuthContext } from '../../context/AuthContext';
 import ReviewService from '../../service/ReviewService';
+import { message } from 'antd';
 
 const ReviewBox = () => {
     // --- Khởi tạo State ---
@@ -39,19 +40,21 @@ const ReviewBox = () => {
         fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}/paged?page=${page}&size=${pageSize}`)
             .then((res) => res.json())
             .then((data) => {
-                console.log("📦 Dữ liệu phản hồi từ API:", data);
+                console.log(" Dữ liệu phản hồi từ API:", data);
                 const content = data.content || [];
 
                 // Nếu là trang đầu, reset lại danh sách
                 if (page === 0) {
                     setReviews(content);
                 } else {
-                    setReviews((prev) => [...prev, ...content]); // 👉 Nối thêm vào danh sách cũ
+                    setReviews((prev) => [...prev, ...content]); //  Nối thêm vào danh sách cũ
                 }
 
                 // Kiểm tra còn trang nào nữa không
                 if (content.length < pageSize || data.pageNumber >= data.totalPages - 1) {
                     setHasMore(false);
+                } else {
+                    setHasMore(true);
                 }
 
                 console.log(" Tổng số trang:", data.totalPages);
@@ -84,7 +87,7 @@ const ReviewBox = () => {
 
 
         if (!user) {
-            alert("Vui lòng đăng nhập để gửi đánh giá!");
+            message.warning(" Vui lòng đăng nhập để gửi đánh giá!");
             return;
         }
 
@@ -223,15 +226,18 @@ const ReviewBox = () => {
                     },
                 });
 
-                if (!response.ok) {
+                if (!response.ok)
                     throw new Error('Xóa đánh giá thất bại');
-                }
 
+                setPage(0);
+                setReviews([]);
+                setHasMore(true);
+                
                 // Sau khi xóa, load lại danh sách đánh giá từ server
-                await loadReviews();
+                // await loadReviews();
 
                 // Đóng menu và reset trạng thái
-                setMenuOpenId(null);
+                // setMenuOpenId(null);
             } catch (error) {
                 console.error('Error deleting review:', error);
                 alert('Có lỗi xảy ra khi xóa đánh giá');
@@ -269,22 +275,42 @@ const ReviewBox = () => {
             <h3 className={styles.title}>Đánh giá phim</h3>
 
             <form className={styles.form} onSubmit={handleSubmit}>
-                <label>Đánh giá:</label>
+                <label className={styles.ratingLabel}
+                    style={{
+                        color: "#FAF9FA",
+                        fontFamily: "Netflix Sans, sans-serif",
+                        fontSize: "20px",
+                    }}
+                >
+                    Đánh giá:
+                </label>
                 {renderStars(
                     newReview.rating,
                     (value) => setNewReview((prev) => ({ ...prev, rating: value })),
                     true
                 )}
-                <label>Bình luận:</label>
-                <textarea
-                    name="comment"
-                    value={newReview.comment}
-                    onChange={handleChange}
-                    className={styles.textarea}
-                    placeholder="Viết đánh giá..."
-                    required
-                />
-                <div className={styles.checkboxWrapper}>
+                <label className={styles.ratingLabel}
+                    style={{
+                        color: "#FAF9FA",
+                        fontFamily: "Netflix Sans, sans-serif",
+                        fontSize: "20px",
+                    }} >Bình luận:</label>
+                <div style={{ padding: "10px 16px 0 16px" }}>
+                    <textarea
+                        style={{ backgroundColor: '#18181b', color: '#cccccc' }}
+                        id="comment"
+                        name="comment"
+                        value={newReview.comment}
+                        onChange={handleChange}
+                        className="form-control custom-textarea"
+                        placeholder="Viết bình luận..."
+                        maxLength={1000}
+                        rows={4}
+                        required
+                    />
+                </div>
+
+                <div className={styles.checkboxWrapper} >
                     <label className={styles.checkbox}>
                         <input
                             type="checkbox"
@@ -297,11 +323,25 @@ const ReviewBox = () => {
                 </div>
                 <div className={styles.submitWrapper} >
                     <button type="submit" className={styles.button} disabled={submitting} style={{
-                        backgroundColor: "#FFD875", // nền vàng
-                        color: "#212121",               // chữ đen
-                        border: "none",
+                        backgroundColor: "#22222B", // nền vàng
+                        color: "#FFD875",               // chữ đen
+                        // border: "none",
                     }}>
-                        {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+
+                        {submitting ? "Đang gửi..." : "Gửi"}
+
+                        <img
+                            src="https://cdn-icons-png.flaticon.com/128/10322/10322482.png"
+                            alt="Send icon"
+                            width="20"
+                            height="20"
+                            style={{
+                                filter: "invert(75%)",
+                                display: "inline-block",
+                                paddingLeft: "5px",
+                                verticalAlign: "middle"  // optional để chắc chắn canh đều
+                            }}
+                        />
                     </button>
                 </div>
             </form>
@@ -325,18 +365,20 @@ const ReviewBox = () => {
                                 <div className="flex-grow-1">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>{r.accountFullName || "Người dùng ẩn danh"}</strong>
-                                            <span className="text-muted ms-2" style={{ fontSize: "0.9em" }}>
-                                                • {new Date(r.reviewDate).toLocaleString("vi-VN")}
-                                            </span>
+                                            <div>
+                                                <strong>{r.accountFullName || "Người dùng ẩn danh"}</strong>
+                                            </div>
+                                            <div style={{ fontSize: "0.85em", color: "#666" }}>
+                                                {new Date(r.reviewDate).toLocaleString("vi-VN")}
+                                            </div>
                                         </div>
                                         {user && r.accountId === user.accountID && (
                                             <div className="dropdown" >
                                                 <button
-                                                    className="btn btn-sm btn-light" style={{
-                                                        backgroundColor: "#FFD875", // nền vàng
-                                                        color: "#212121",               // chữ đen
-                                                        border: "none",
+                                                    className="btn btn-sm " style={{
+                                                        // backgroundColor: "#FFD875", // nền vàng
+                                                        color: "#F8F9FA ",               // chữ đen
+                                                        // border: "none",
                                                     }}
                                                     onClick={() =>
                                                         setMenuOpenId(menuOpenId === r.id ? null : r.id)
@@ -345,7 +387,7 @@ const ReviewBox = () => {
                                                     ⋮
                                                 </button>
                                                 {menuOpenId === r.id && (
-                                                    <div className="dropdown-menu show" >
+                                                    <div className="dropdown-menu show dropdown-menu-start" >
                                                         <button
                                                             className="dropdown-item"
                                                             onClick={() => {
@@ -410,7 +452,6 @@ const ReviewBox = () => {
                                 onChange={(e) => setEditedComment(e.target.value)}
                                 required
                                 placeholder="Chỉnh sửa đánh giá..."
-                                minLength={10}
                             />
                             <div className={styles.submitWrapper}>
                                 <button type="submit" className={styles.button} disabled={submitting}>

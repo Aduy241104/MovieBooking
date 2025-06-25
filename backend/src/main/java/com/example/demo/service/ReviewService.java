@@ -8,10 +8,13 @@ import com.example.demo.model.Account;
 import com.example.demo.model.Movie;
 import com.example.demo.model.Review;
 import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.repository.ReviewRepository;
 
 import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +32,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final AccountRepository accountRepo;
     private final ReviewMapper reviewMapper;
+    @Autowired
+    private BookingRepository bookingRepo;
 
     // 1. Xem danh sách review theo movieId (dùng Long)
     public List<ReviewResponseDTO> getReviewsByMovieId(Long movieId) {
@@ -40,6 +45,13 @@ public class ReviewService {
 
     // 2. Thêm review mới
     public ReviewResponseDTO addReview(ReviewRequestDTO dto) {
+        // Kiểm tra đã đặt và thanh toán chưa
+        boolean hasPaid = bookingRepo.countPaidBookings(dto.getAccountId(), dto.getMovieId()) > 0;
+
+        // if (!hasPaid) {
+        //     throw new RuntimeException("Bạn cần mua vé và thanh toán trước khi đánh giá phim này.");
+        // }
+
         Movie movie = movieRepo.findById(dto.getMovieId()).orElseThrow(
                 () -> new RuntimeException("Movie not found"));
         Account account = accountRepo.findById(dto.getAccountId()).orElseThrow(

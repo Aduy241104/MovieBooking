@@ -3,6 +3,7 @@ package com.example.demo.repository;
 import com.example.demo.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -64,7 +65,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """, nativeQuery = true)
     List<Object[]> getMonthlyRevenueAndTickets(LocalDateTime fromDate, LocalDateTime toDate);
 
-
     @Query(value = """
             SELECT
                 b.booking_id AS bookingId,
@@ -87,4 +87,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LIMIT ?1
             """, nativeQuery = true)
     List<Object[]> getBookingTicketRecently(int limit);
+
+    @Query("SELECT COUNT(b) FROM Booking b " +
+            "JOIN Screening s ON b.screening.id = s.id " +
+            "JOIN Movie m ON s.movie.id = m.id " +
+            "WHERE b.account.id = :accountId AND m.id = :movieId AND b.bookingStatus = 'PAID'")
+    long countPaidBookings(@Param("accountId") Long accountId, @Param("movieId") Long movieId);
+
 }

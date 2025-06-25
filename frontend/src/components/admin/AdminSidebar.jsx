@@ -1,5 +1,5 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film, Video } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Film, Video, HandCoins } from 'lucide-react'
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -58,6 +58,11 @@ export const AdminSidebar = (props) => {
                 },
             ]
         },
+        {
+            key: 'paymentmethod',
+            icon: <HandCoins size={20} strokeWidth={1.5} />,
+            label: <Link to={"/admin/paymentmethod"}>Phương thức thanh toán</Link>
+        }
     ];
 
 
