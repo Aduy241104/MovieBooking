@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Form, Input, Button, message } from 'antd';
 import AuhenticationLayout from '../../layouts/AuthenticationLayout';
 import { resetPasswordAPI } from '../../service/AuthService';
@@ -86,6 +86,10 @@ function ResetPassword() {
                         }
                     </Button>
                 </Form>
+
+                <Button htmlType="submit" className="bg-white text-dark fw-bold p-2 mt-3">
+                  <Link to={'/login'}>Đăng nhập</Link>
+                </Button>
             </div>
         </AuhenticationLayout>
     );

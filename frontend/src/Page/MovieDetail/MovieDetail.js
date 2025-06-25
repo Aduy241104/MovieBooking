@@ -5,6 +5,8 @@ import styles from './MovieDetail.module.scss'
 import classNames from 'classnames/bind'
 import RightComponent from './RightComponent'
 import { getMovieDetailAPI } from '../../service/TheMovieService'
+import Artist from '../Artist'
+import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
 const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
@@ -99,7 +101,7 @@ function MovieDetail() {
                                             <ul className='p-0'>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Thời lượng: </strong>
-                                                    <span className={ cx('text-gray') }>{movie.duration} phút</span>
+                                                    <span className={ cx('text-gray') }>{ movie.duration } phút</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Đạo diễn: </strong>
@@ -116,6 +118,8 @@ function MovieDetail() {
 
                                             </ul>
                                         </div>
+
+                                        <ArtistList movieName={ movie.nameEN } />
                                     </div>
                                 </div>
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>

@@ -7,15 +7,12 @@ function AuthProvider({ children }) {
     const [token, setToken] = useState(null);
     const [isAuthLoaded, setIsAuthLoaded] = useState(false);
 
-
-
     const login = (userData, token) => {
         setToken(token);
         setUser(userData);
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("token", token);
     }
-
 
     const logout = () => {
         setUser(null);
@@ -34,7 +31,6 @@ function AuthProvider({ children }) {
         }
         setIsAuthLoaded(true);
     }, [])
-
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout, isAuthLoaded }}>
