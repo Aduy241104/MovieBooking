@@ -54,7 +54,7 @@ function Header({ user }) {
                     <div className="me-5 d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
-                                <li className="">Trang chủ</li>
+                                <li className="" onClick={ () => navigate('/') }>Trang chủ</li>
                                 <li className="">Lịch chiếu</li>
                                 <li className="">Sắp Chiếu</li>
                                 <li className="">Top Phim</li>
@@ -66,14 +66,15 @@ function Header({ user }) {
                             { user ? (
                                 <>
                                     <div className="d-flex align-items-center gap-1">
-                                        <NotificationBell accountId={user?.accountId} /> 
+                                        <NotificationBell accountId={ user?.accountId } />
                                         <Dropdown menu={ { items } } trigger={ ['click'] } placement="bottomRight">
-                                            <span style={ { cursor: 'pointer', marginLeft: 16 } }>
+                                            <span className="d-flex" style={ { cursor: 'pointer', marginLeft: 16 } }>
                                                 <Avatar
                                                     src={ user.avatar + "" }
                                                     fallBack="/Assests/Image/Screenshot 2025-06-13 102311.png"
 
                                                 />
+                                                <i className="fa-solid fa-sort-down ms-2 fs-8 mt-2 text-light"></i>
                                             </span>
                                         </Dropdown>
                                     </div>

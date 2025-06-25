@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { Breadcrumb, Layout } from "antd";
+import { Breadcrumb, Layout, message } from "antd";
 import { Outlet, useLocation } from "react-router-dom";
 import { AdminSidebar } from "../../components/admin/AdminSidebar";
 import { AdminHeader } from "../../components/admin/AdminHeader";
@@ -37,13 +37,24 @@ export const AdminLayout = () => {
         setIsLoading(true);
         const loadAccounts = async () => {
             if (location.pathname.includes('users-')) {
-                const res = await fetchAllAccountAPI(page, size, filter);
-                if (res && res.result) {
-                    setTotal(res.result.meta.total);
-                    setDataUsers(res.result.data);
+                try {
+                    const res = await fetchAllAccountAPI(page, size, filter);
+                    if (res && res.result) {
+                        setTotal(res.result.meta.total);
+                        setDataUsers(res.result.data);
+                    }
+                    setIsLoading(false);
+                } catch (error) {
+                    if (error.message === "Network Error") {
+                        message.error("Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối hoặc thử lại sau!");
+                        setDataUsers([]);
+                        setTotal(0);
+                    } else {
+                        message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
+                    }
                 }
+
             }
-            setIsLoading(false);
         }
 
         loadAccounts();

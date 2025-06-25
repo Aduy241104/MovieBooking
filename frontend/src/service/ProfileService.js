@@ -45,9 +45,9 @@ export const viewPersonalProfileAPI = async () => {
 export const updateProfileAPI = async (data) => {
     try {
         const response = await axiosInstance.put('/me/update-profile', data);
-        return response;
+        return response.data;
     } catch (error) {
-        throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+        throw error;
     }
 }
 
@@ -71,3 +71,70 @@ export const changePasswordAPI = async (data) => {
         };
     }
 };
+
+
+export const requestChangeEmail = async (data) => {
+    try {
+        const response = await axiosInstance.post("/me/request-change-email", data);
+        return { success: true, data: response.data }
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.data.message || "Có lỗi xảy ra"
+            };
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        };
+    }
+}
+
+
+export const confirmChangeEmailAPI = async (data) => {
+    try {
+        const response = await axiosInstance.put("/me/confirm-change-email", data);
+        console.log(response);
+
+        return { success: true, data: response.data }
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.data.message || "Có lỗi xảy ra"
+            };
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        };
+    }
+}
+
+export const updateAvatarAPI = async (data) => {
+    try {
+        const response = await axiosInstance.put("/me/change-avatar", data);
+        return { success: true, data: response.data };
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.data.message || "Có lỗi xảy ra"
+            };
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        };
+    }
+}

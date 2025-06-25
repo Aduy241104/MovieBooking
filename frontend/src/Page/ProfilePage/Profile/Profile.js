@@ -3,14 +3,12 @@ import { Form, Input, Radio, Button } from "antd";
 import Avatar from './Avatar/Avatar';
 import { updateProfileAPI, viewPersonalProfileAPI } from '../../../service/ProfileService';
 import { openNotification } from "../../../Utils/Notification";
-
+import ChangeEmail from './ChangeEmail'
 
 function Profile() {
     const [form] = Form.useForm();
     const [accountInfor, setAccountInfor] = useState({});
     const [isLoading, setLoading] = useState(false);
-
-
 
     useEffect(() => {
         const fetchAccounAPI = async () => {
@@ -25,8 +23,7 @@ function Profile() {
     }, []);
 
     useEffect(() => {
-        if (accountInfor && accountInfor.fullName) { // account là dữ từ API
-            // Lấy ra các field bạn quan tâm
+        if (accountInfor && accountInfor.fullName) {
             const { fullName, gender, phoneNumber, dateOfBirth, email } = accountInfor;
             form.setFieldsValue({ fullName, gender, phoneNumber, dateOfBirth, email });
         }
@@ -35,8 +32,9 @@ function Profile() {
     const handleFinish = async (values) => {
         setLoading(true);
         try {
-            await updateProfileAPI(values);
-            openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.")
+            const response = await updateProfileAPI(values);
+            localStorage.setItem("user", JSON.stringify(response.result));
+            openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.");
 
         } catch (err) {
             openNotification("error", "Lỗi cập nhật", "Đã xảy ra lỗi khi cập nhật thông tin.");
@@ -52,14 +50,14 @@ function Profile() {
                     <h5>Tài khoản</h5>
                     <p className='text-secondary fs-6 pb-4'>Cập nhật thông tin tài khoản</p>
                     <p className='pb-3 fs-6 fw-300'>
-                        Điểm tích lũy: <span className='text-warning'>1500</span>
+                        Điểm tích lũy: <span className='text-warning'>{ accountInfor.score }</span>
                     </p>
 
                     <Form
                         form={ form }
                         layout="vertical"
                         onFinish={ handleFinish }>
-                            
+
                         <div className='d-flex'>
                             <Form.Item label={ <span className='text-secondary'>Email</span> } name="email" rules={ [
                                 { required: false, message: "Vui lòng nhập họ và tên" },
@@ -67,14 +65,7 @@ function Profile() {
                             ] } className='flex-1'>
                                 <Input className='bg-transparent text-light p-2 border-1 border-secondary' readOnly />
                             </Form.Item>
-
-                            <p
-                                style={ { lineHeight: '100px' } }
-                                onClick={ () => { console.log("hello") } }
-                                className='ms-3 cursor-pointer text-red'
-                            >
-                                Thay đổi Email
-                            </p>
+                            <ChangeEmail />
                         </div>
 
                         <Form.Item label={ <span className='text-secondary'>Họ và tên</span> } name="fullName" rules={ [

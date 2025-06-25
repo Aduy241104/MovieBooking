@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { Badge, Dropdown, List, Button, Empty, Typography } from "antd";
+import { Badge, Dropdown, List, Button, Empty, Typography, message } from "antd";
 import { BellOutlined, CheckOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import styles from './NotificationBell.module.scss';
 import classNames from "classnames/bind";
@@ -17,31 +17,60 @@ export const NotificationBell = ({ accountId }) => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        fetchNotificationsAPI().then(res => {
-            setNotifications(res);
-            setUnreadCount(res.filter(n => !n.isRead).length);
-        });
+        fetchNotificationsAPI()
+            .then(res => {
+                setNotifications(res);
+                setUnreadCount(res.filter(n => !n.isRead).length);
+            })
+            .catch(err => {
+                if (err.message === "Network Error") {
+                    message.error("Không thể tải thông báo. Vui lòng thử lại sau.");
+                } else {
+                    message.error(`Đã xảy ra lỗi khi tải thông báo: ${err.message}. Vui lòng thử lại sau.`);
+                }
+            });
     }, []);
 
     useEffect(() => {
-        const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8081/ws-notification"),
-            reconnectDelay: 10000,
-        });
-
-        client.onConnect = () => {
-            client.subscribe(`/queue/notify-${accountId}`, (message) => {
-                const notification = JSON.parse(message.body);
-                setNotifications(prev => [notification, ...prev]);
-                setUnreadCount(prev => prev + 1);
+        let client;
+        try {
+            // Tạo client STOMP với SockJS
+            client = new Client({
+                // Trả về SockJS => dùng để tạo kết nối WebSocket tới server
+                webSocketFactory: () => new SockJS("http://localhost:8081/ws-notification"),
+                reconnectDelay: 10000,
+                onStompError: (frame) => {
+                    // Lỗi STOMP protocol
+                    message.error("STOMP error:", frame);
+                },
+                onWebSocketError: (event) => {
+                    // Lỗi kết nối WebSocket
+                    message.error("WebSocket error:", event);
+                }
             });
-        };
 
-        client.activate();
+            // Khi kết nối WebSocket thành công
+            client.onConnect = () => {
+                client.subscribe(`/queue/notify-${accountId}`, (message) => {
+                    console.log("Received notification:", message);
+                    const notification = JSON.parse(message.body);
+                    setNotifications(prev => [notification, ...prev]);
+                    // Tăng số lượng thông báo chưa đọc
+                    setUnreadCount(prev => prev + 1);
+                });
+            };
+            // Kích hoạt kết nối tới WebSocket server
+            client.activate();
+
+        } catch (error) {
+            console.error("Error connecting to WebSocket:", error);
+            message.error("Không thể kết nối đến máy chủ thông báo. Vui lòng thử lại sau.");
+        }
 
         return () => {
-            client.deactivate();
+            if (client) client.deactivate();
         };
+
     }, [accountId]);
 
     const handleMarkAsRead = async (id) => {

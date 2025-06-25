@@ -19,8 +19,9 @@ export default function TypeList() {
     const fetchTypes = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await axiosClient.get('/types');
-           const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
+            const data = await axiosClient.get('/public/types');
+            console.log('Thể loại:', data);
+            const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
             setTypes(sorted);
 
             const filtered = sorted.filter(t =>
@@ -42,7 +43,7 @@ export default function TypeList() {
     const handleDelete = async (id) => {
         if (!window.confirm('Bạn có chắc muốn xóa thể loại này?')) return;
         try {
-            await axiosClient.delete(`/types/${id}`)
+            await axiosClient.delete(`/public/types/${id}`)
             message.success("Xoá thành công.");
             fetchTypes();
         } catch (err) {

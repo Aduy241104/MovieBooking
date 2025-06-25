@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Pagination, Table, Tag } from "antd";
+import { LoadingOutlined } from '@ant-design/icons';
+import { message, Pagination, Spin, Table, Tag } from "antd";
 import { fetchActivityLogsAPI } from "../../../service/ActivityLogService";
 import dayjs from "dayjs";
 
@@ -17,8 +18,16 @@ export const ActivityLogTable = ({ filter }) => {
             .then(res => {
                 setLogs(res.result.data);
                 setTotal(res.result.meta.total);
+                setLoading(false);
             })
-            .finally(() => setLoading(false));
+            .catch(error => {
+                if (error.message === "Network Error") {
+                    message.error("Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối hoặc thử lại sau!");
+                } else {
+                    message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
+                }
+            })
+
     }, [page, size, filter]);
 
     const handleTableChange = (pagination) => {
@@ -86,23 +95,33 @@ export const ActivityLogTable = ({ filter }) => {
 
     return (
         <>
-            <Table
-                columns={columns}
-                dataSource={logs}
-                loading={loading}
-                rowKey="id"
-                pagination={false}
-            />
+            {loading ? (
+                <div className='flex flex-col justify-center items-center gap-3 h-screen'>
+                    <Spin indicator={<LoadingOutlined spin />} size="large" />
+                    <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
+                </div>
+            ) : (
+                <>
+                    <Table
+                        columns={columns}
+                        dataSource={logs}
+                        // loading={loading}
+                        rowKey="id"
+                        pagination={false}
+                    />
 
-            <div className="flex justify-center mt-4">
-                <Pagination
-                    current={page}
-                    pageSize={size}
-                    total={total}
-                    showTotal={(total, range) => `${range[0]}-${range[1]} trong ${total} mục`}
-                    onChange={handleTableChange}
-                />
-            </div>
+                    <div className="flex justify-center mt-4">
+                        <Pagination
+                            current={page}
+                            pageSize={size}
+                            total={total}
+                            showTotal={(total, range) => `${range[0]}-${range[1]} trong ${total} mục`}
+                            onChange={handleTableChange}
+                        />
+                    </div>
+                </>
+            )}
+
 
         </>
     );
