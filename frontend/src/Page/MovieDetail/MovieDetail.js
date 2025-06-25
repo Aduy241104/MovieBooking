@@ -124,6 +124,7 @@ function MovieDetail() {
                                 </div>
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>
                                     <RightComponent
+                                        movie={movie} // locpng
                                         trailer={ movie.trailer }
                                         startDate={ movie.fromDate }
                                     />
