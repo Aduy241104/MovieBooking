@@ -1,0 +1,22 @@
+.avt-option {
+    height: 102px;
+    width: 102px;
+}
+
+.avt-inner {
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.oppa {
+    background-color: rgba(0, 0, 0, 0.4);
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.0);
+    }
+}
+
+.avt-active {
+    border: 2px solid white !important;
+    background-color: transparent;
+}

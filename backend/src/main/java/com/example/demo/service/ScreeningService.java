@@ -19,38 +19,42 @@ import com.example.demo.repository.ScreeningRepository;
 @Service
 public class ScreeningService {
 
-    @Autowired
-    ScreeningRepository screeningRepository;
+        @Autowired
+        ScreeningRepository screeningRepository;
 
-    @Autowired
-    private MovieTypeRepository movieTypeRepository;
+        @Autowired
+        private MovieTypeRepository movieTypeRepository;
 
-    public List<MovieScheduleDTO> getAllMovieScheduleByDate(LocalDate date) {
+        public List<MovieScheduleDTO> getAllMovieScheduleByDate(LocalDate date) {
 
-        List<Screening> listScreening = screeningRepository.findScreeningsByDate(date);
+                List<Screening> listScreening = screeningRepository.findScreeningsByDate(date);
 
-        Map<Movie, List<Screening>> groupedByMovie = listScreening.stream()
-                .collect(Collectors.groupingBy(Screening::getMovie));
+                Map<Movie, List<Screening>> groupedByMovie = listScreening.stream()
+                                .collect(Collectors.groupingBy(Screening::getMovie));
 
-        List<MovieScheduleDTO> result = groupedByMovie.entrySet().stream()
-                .map(entry -> {
-                    Movie movie = entry.getKey();
+                List<MovieScheduleDTO> result = groupedByMovie.entrySet().stream()
+                                .map(entry -> {
+                                        Movie movie = entry.getKey();
 
-                    List<String> typesName = movieTypeRepository.findTypeNamesByMovieId(movie.getId());
+                                        List<String> typesName = movieTypeRepository
+                                                        .findTypeNamesByMovieId(movie.getId());
 
-                    List<ShowTimeDTO> showTimes = entry.getValue().stream()
-                            .map(s -> new ShowTimeDTO(s.getId(), s.getShowDateTime().toLocalTime()))
-                            .sorted(Comparator.comparing(ShowTimeDTO::getShowTime))
-                            .collect(Collectors.toList());
+                                        List<ShowTimeDTO> showTimes = entry.getValue().stream()
+                                                        .map(s -> new ShowTimeDTO(s.getId(),
+                                                                        s.getShowDateTime().toLocalTime(),
+                                                                        s.getShowDateTime().toLocalTime().plusMinutes(
+                                                                                        movie.getDuration())))
+                                                        .sorted(Comparator.comparing(ShowTimeDTO::getShowTime))
+                                                        .collect(Collectors.toList());
 
-                    return MovieScheduleDTO.builder()
-                            .movie(movie)
-                            .types(typesName)
-                            .showTime(showTimes)
-                            .build();
+                                        return MovieScheduleDTO.builder()
+                                                        .movie(movie)
+                                                        .types(typesName)
+                                                        .showTime(showTimes)
+                                                        .build();
 
-                })
-                .collect(Collectors.toList());
-        return result;
-    }
+                                })
+                                .collect(Collectors.toList());
+                return result;
+        }
 }

@@ -16,4 +16,5 @@ import lombok.Setter;
 public class ShowTimeDTO {
     private Long screeningId;
     private LocalTime showTime;
+    private LocalTime endTime;
 }
