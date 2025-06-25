@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { Form, Input, Radio, Button } from "antd";
 import Avatar from './Avatar/Avatar';
 import { updateProfileAPI, viewPersonalProfileAPI } from '../../../service/ProfileService';
@@ -9,6 +9,13 @@ function Profile() {
     const [form] = Form.useForm();
     const [accountInfor, setAccountInfor] = useState({});
     const [isLoading, setLoading] = useState(false);
+
+    useLayoutEffect(() => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }, [])
 
     useEffect(() => {
         const fetchAccounAPI = async () => {

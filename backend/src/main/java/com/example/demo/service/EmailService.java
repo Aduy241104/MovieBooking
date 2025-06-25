@@ -28,7 +28,7 @@ public class EmailService {
     }
 
     public void sendForgotPasswordLink(String toEmail, String otp) {
-        String link = "http://your-frontend-app.com/reset-password?email="
+        String link = "http://localhost:3000/reset-password?email="
                 + toEmail + "&otp=" + otp;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

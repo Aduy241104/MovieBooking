@@ -57,11 +57,11 @@ public class ProfileController {
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
 
-        profileService.changePassword(accountId, oldPassword, newPassword);
+        String newToken = profileService.changePassword(accountId, oldPassword, newPassword);
 
         return ApiResponse.<String>builder()
                 .message("Password changed successful")
-                .result("password changed")
+                .result(newToken)
                 .build();
     }
 

@@ -84,7 +84,13 @@ function App() {
         <Route path='/forgot-password' element={ <RequestForgotPassword /> } />
         <Route path='/reset-password' element={ <ResetPassword /> } />
 
-{/* Booking routes */}
+        {/* Profile routes */ }
+        <Route path="/profile" element={ <ProfileLayout /> }>
+          <Route index element={ <Profile /> } />
+          <Route path="password" element={ <ChangePassword /> } />
+          <Route path="transactions" element={ <Profile /> } />
+        </Route>
+
         <Route
           path="/booking"
           element={
@@ -102,7 +108,7 @@ function App() {
           }
         />
         <Route
-          path="/booking/failure" // failure page không nhất thiết phải protected
+          path="/booking/failure" 
           element={<BookingFailurePage />}
         />
         <Route
@@ -113,14 +119,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Profile routes */ }
-        <Route path="/profile" element={ <ProfileLayout /> }>
-          <Route index element={ <Profile /> } />
-          <Route path="password" element={ <ChangePassword /> } />
-          <Route path="transactions" element={ <Profile /> } />
-        </Route>
-
 
         <Route
           path='/admin'

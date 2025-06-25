@@ -20,9 +20,6 @@ export function getAuthHeaders() {
 export const searchMovieByName = async (keyWord, page, size) => {
     page = page || 0;
     size = size || 4;
-
-    console.log("key: ", keyWord);
-
     try {
         const response = await axiosInstance.get(`/public/findMovie/search?q=${keyWord}&page=${page}&size=${size}`);
         // console.log(response);
@@ -69,5 +66,16 @@ export const getMovieByDateAPI = async (data) => {
         return response.data;
     } catch (error) {
         throw new Error('Cannot connect to server!')
+    }
+}
+
+
+export const getTopMovieAPI = async () => {
+    try {
+        const response = await axiosInstance.get('/public/movieSchedule/top-booking');
+        return response.data;
+
+    } catch (error) {
+        return null;
     }
 }
