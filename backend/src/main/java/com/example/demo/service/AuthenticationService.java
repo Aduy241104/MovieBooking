@@ -136,7 +136,7 @@ public class AuthenticationService {
     }
 
     // method to generate token
-    private String generateToken(Account account) {
+    public String generateToken(Account account) {
 
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
