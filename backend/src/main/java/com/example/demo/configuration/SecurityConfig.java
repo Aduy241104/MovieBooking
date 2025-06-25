@@ -39,7 +39,7 @@ public class SecurityConfig {
     SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**","/ws-notification/**","/images/**")
+            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**", "/ws-notification/**")
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(AbstractHttpConfigurer::disable);
         return http.build(); 
@@ -69,6 +69,7 @@ public class SecurityConfig {
                 .macAlgorithm(MacAlgorithm.HS512)
                 .build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -80,5 +81,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

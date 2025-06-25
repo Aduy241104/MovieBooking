@@ -1,0 +1,95 @@
+.order-summary-card {
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.summary-title {
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.movie-details {
+    .movie-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: var(--primary-color); /* Sử dụng biến màu nếu có */
+    }
+    p {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 0.3rem;
+        i {
+            margin-right: 8px;
+            color: #777;
+        }
+    }
+}
+
+.selected-seats-info {
+    h6 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .seat-list {
+        max-height: 150px; /* Giới hạn chiều cao, cho phép cuộn */
+        overflow-y: auto;
+        font-size: 0.85rem;
+        padding-right: 5px; /* Cho scrollbar */
+    }
+    .seat-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px dashed #eee;
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+.pricing-details {
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+
+        &.discount {
+            color: green;
+        }
+        &.total {
+            font-size: 1.1rem;
+            color: #e53935; // Màu đỏ cho tổng tiền
+            .amount {
+                font-weight: bold;
+            }
+        }
+        .amount {
+            font-weight: 500;
+        }
+    }
+    .divider {
+        margin: 0.75rem 0;
+    }
+}
+
+// Thêm class cho bookingPage.module.scss để style chung cho trang
+/* src/pages/BookingPage/bookingPage.module.scss */
+.booking-container {
+  .page-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+  }
+  .section {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    margin-bottom: 20px;
+  }
+  .btn-apply-promo, .btn-submit-booking {
+    // Tùy chỉnh thêm nếu cần
+  }
+}
