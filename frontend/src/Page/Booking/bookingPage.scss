@@ -1,0 +1,136 @@
+.booking-container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    background-color: #f4f7f6; // Một màu nền nhẹ cho cả trang
+    min-height: 100vh;
+
+    .page-title {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        color: #2c3e50; // Màu tiêu đề chính
+        font-weight: 600;
+        font-size: 2rem;
+    }
+
+    // Phần chung cho các section
+    .section {
+        background-color: #ffffff;
+        padding: 25px; // Tăng padding một chút
+        border-radius: 12px; // Bo góc mềm mại hơn
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); // Bóng đổ tinh tế hơn
+        margin-bottom: 25px;
+
+        h4 {
+            font-size: 1.3rem; // Tăng kích thước tiêu đề section
+            color: #34495e;   // Màu cho tiêu đề section
+            margin-bottom: 1.2rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid #e0e0e0; // Đường gạch chân tiêu đề
+        }
+    }
+
+    // Thông tin phim
+    .movie-info-section {
+        p {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+
+            i {
+                margin-right: 10px;
+                color: #007bff; // Màu icon
+                width: 20px; // Đảm bảo icon thẳng hàng
+                text-align: center;
+            }
+        }
+        h4 {
+            color: #0056b3; // Màu khác cho tiêu đề phim
+        }
+    }
+
+    // Phần chọn ghế (chủ yếu style ở SeatSelection.module.scss)
+    .seat-selection-section {
+        // Có thể thêm style đặc biệt cho section này nếu cần
+    }
+
+    // Phần khuyến mãi
+    .promotion-section {
+        .input-group {
+            // style cho input group nếu cần
+        }
+        .btn-apply-promo {
+            // Style cho nút "Áp dụng"
+            // Ví dụ: border-top-left-radius: 0; border-bottom-left-radius: 0;
+            // CustomizeButton của bạn có thể đã xử lý việc này
+        }
+        .text-danger, .text-success {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .small.text-muted {
+            font-size: 0.8rem;
+            display: block; // Cho xuống dòng nếu cần
+            margin-top: 5px;
+        }
+    }
+
+    // Phần thanh toán
+    .payment-section {
+        .form-check {
+            margin-bottom: 0.8rem;
+        }
+        .form-check-label {
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        .form-check-input {
+            cursor: pointer;
+            margin-top: 0.2rem; // Căn chỉnh vị trí radio button
+        }
+    }
+
+    // Nút thanh toán
+    .btn-submit-booking {
+        // Style cho nút "Thanh Toán"
+        // CustomizeButton có thể đã style rồi, bạn có thể override
+        // Ví dụ:
+        // padding: 12px 0 !important;
+        // font-size: 1.1rem !important;
+        // font-weight: bold !important;
+        width: 100%; // Nếu CustomizeButton chưa có prop `block` hoặc tương đương
+    }
+}
+
+// Responsive (ví dụ)
+@media (max-width: 991px) { // lg breakpoint của Bootstrap
+    .booking-container {
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        .section {
+            padding: 20px;
+        }
+         // Cột phải có thể sẽ xuống dưới, căn giữa cho đẹp
+        .col-lg-4 {
+            margin-top: 25px;
+        }
+    }
+}
+
+@media (max-width: 767px) { // md breakpoint
+    .booking-container {
+        .page-title {
+            font-size: 1.6rem;
+        }
+        .section h4 {
+            font-size: 1.15rem;
+        }
+        .movie-info-section p,
+        .payment-section .form-check-label {
+            font-size: 0.9rem;
+        }
+    }
+}
