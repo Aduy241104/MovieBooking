@@ -11,7 +11,7 @@ const location = useLocation();
   useEffect(() => {
     if (location.pathname.includes('/admin/room-list/room/edit')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ' },
+        { title: 'Trang chủ', href:"/admin"  },
         { title: 'Phòng chiếu' },
         { title: 'Chi tiết phòng chiếu' },
         { title: 'Chỉnh sửa phòng chiếu' },

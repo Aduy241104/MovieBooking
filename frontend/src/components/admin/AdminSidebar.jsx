@@ -90,7 +90,10 @@ export const AdminSidebar = (props) => {
         const pathname = location.pathname;
         if (pathname.includes('users-members') || pathname.includes('users-employees')) {
             setOpenKeys(['users']);
-        } else {
+        } else if(pathname.includes('movies') || pathname.includes('movie-type')) {
+            setOpenKeys(['movie'])
+        }
+        else {
             setOpenKeys([]);
         }
         // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được
