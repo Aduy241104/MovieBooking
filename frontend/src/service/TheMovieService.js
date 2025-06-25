@@ -28,7 +28,6 @@ export const searchMovieByName = async (keyWord, page, size) => {
         // console.log(response);
         return response.data;
     } catch (error) {
-        console.error("Error fetching movie:", error);
         throw new Error("Lỗi kết nối, vui lòng thử lại sau.");
     }
 };
@@ -56,7 +55,17 @@ export const getUpComingMovieAPI = async () => {
 export const getMovieDetailAPI = async (id) => {
     try {
         const response = await axiosInstance.get(`/public/movieSchedule/${id}`)
-        console.log("The movie: ", response);
+        // console.log("The movie: ", response);
+        return response.data;
+    } catch (error) {
+        throw new Error('Cannot connect to server!')
+    }
+}
+
+export const getMovieByDateAPI = async (data) => {
+    try {
+        const response = await axiosInstance.get(`/public/movieSchedule/by-date?date=2025-06-12`);
+        // console.log(response);
         return response.data;
     } catch (error) {
         throw new Error('Cannot connect to server!')

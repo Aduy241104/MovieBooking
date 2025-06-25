@@ -3,7 +3,7 @@ import { AuthContext } from '../../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function Menu() {
-    const { logout } = useContext(AuthContext)
+    const { logout, user } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const items = [
@@ -16,14 +16,13 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                         width: '160px'
-                    }}
-                    onClick={() => navigate('/profile')}
-                    className="text-secondary border-bottom border-gray"
+                    } }
+
                 >
                     Chào <br />
-                    Anh Duy 😚
+                    { user && user.fullName }
                 </p>
             ),
         },
@@ -36,7 +35,7 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                     }}
                     onClick={() => navigate('/profile')}
                     className="fw-bold"
@@ -55,7 +54,7 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                         color: 'red',
                     }}
                     onClick={logout}

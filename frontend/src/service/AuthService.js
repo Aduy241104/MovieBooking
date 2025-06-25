@@ -61,7 +61,6 @@ export const veiryfyOtpAPI = async (data) => {
     }
 }
 
-
 export const loginOAuth = async (loginData) => {
     try {
         const response = await axiosInstance.post("/auth/login-oauth", loginData);
@@ -70,7 +69,6 @@ export const loginOAuth = async (loginData) => {
     } catch (error) {
         // Trường hợp server trả về lỗi HTTP như 401, 400...
         if (error.response) {
-            console.log(error.response);
             throw new Error("Tài khoản hoặc mật khẩu không đúng");
         }
 
@@ -83,3 +81,46 @@ export const loginOAuth = async (loginData) => {
         throw new Error("Đã xảy ra lỗi không xác định.");
     }
 };
+
+
+export const requestForgotPasswordAPI = async (data) => {
+    try {
+        const response = await axiosInstance.post('/auth/forgot-password', data)
+        return { success: true, data: response.data };
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.message
+            }
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        }
+    }
+}
+
+export const resetPasswordAPI = async (data) => {
+    try {
+        const response = await axiosInstance.post("/auth/reset-password", data);
+        return { success: true, data: response.data }
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.message
+            }
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        }
+    }
+}

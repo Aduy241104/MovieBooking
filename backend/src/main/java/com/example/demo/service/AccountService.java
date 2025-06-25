@@ -13,6 +13,8 @@ import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
 import com.example.demo.model.Role;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.utils.SecurityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,14 +27,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AccountService {
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private ActivityLogService activityLogService;
 
-    private final AccountRepository accountRepository;
-    private final RoleRepository roleRepository;
-
-    public AccountService(AccountRepository accountRepository, RoleRepository roleRepository) {
-        this.accountRepository = accountRepository;
-        this.roleRepository = roleRepository;
-    }
 
     public List<Account> getAllAccount() {
         List<Account> accounts = accountRepository.findAll();
@@ -119,10 +120,38 @@ public class AccountService {
         if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
             throw new RuntimeException("Phone already in use");
         }
+
         currentAccount.setFullName(account.getFullName());
         currentAccount.setGender(account.getGender());
         currentAccount.setDateOfBirth(account.getDateOfBirth());
         currentAccount.setPhoneNumber(account.getPhoneNumber());
+
+        // Lấy thông tin người dùng hiện tại từ SecurityUtils
+        String loginUserId = SecurityUtils.getCurrentUsername();
+        if(loginUserId == null || loginUserId.isEmpty()) {
+            throw new RuntimeException("Current user not found");
+        }
+        Account user = accountRepository.findById(Long.valueOf(loginUserId))
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        // Khi người dùng cập nhật thông tin, lưu thông tin người dùng đã cập nhật
+        currentAccount.setUpdateBy(user.getEmail());
+
+        // Lưu log hoạt động cập nhật thông tin tài khoản
+        String entityType = "";
+        if(currentAccount.getRole().getRoleId() == 2){
+            entityType = "NHÂN VIÊN";
+        } else {
+            entityType = "THÀNH VIÊN";
+        }
+
+        activityLogService.log(
+                user.getEmail(),
+                "CẬP NHẬT",
+                entityType,
+                currentAccount.getEmail(),
+                "Cập nhật thông tin tài khoản   : " + currentAccount.getEmail()
+        );
 
         return accountRepository.save(currentAccount);
     }
