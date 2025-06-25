@@ -46,11 +46,11 @@ export const AdminSidebar = (props) => {
         {
             key: 'movie',
             icon: <Film size={20} strokeWidth={1.5}/>,
-            label: 'Phim',
+            label: 'Quản Lý Phim',
             children: [
                 {
                     key: 'movie',
-                    label: <Link to={"/admin/movies"}>Quản lý phim</Link>
+                    label: <Link to={"/admin/movies"}>Phim</Link>
                 },
                 {
                     key: 'type',

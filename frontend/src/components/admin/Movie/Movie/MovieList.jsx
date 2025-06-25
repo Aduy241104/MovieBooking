@@ -8,15 +8,18 @@ export default function MovieList() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
+
   useEffect(() => {
     if (location.pathname.includes('/admin/movie')) {
       setBreadcrumbItems([
         { title: 'Trang chủ' },
-        { title: 'Phim' },
         { title: 'Quản lý phim' },
+        { title: 'Phim' },
+
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
+
   const fetch = () => {
     axios.get('http://localhost:8081/api/public/movies')
       .then(r => setMovies(r.data))
@@ -28,11 +31,24 @@ export default function MovieList() {
   }, []);
 
   const handleEdit = (id) => {
-    navigate(`/admin/movies/${id}/edit`);
+    navigate(`/admin/movies/edit/${id}`);
   };
 
   const handleAdd = () => {
     navigate('/admin/movies/add');
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa phim này không?')) {
+      axios.delete(`http://localhost:8081/api/public/movies/${id}`)
+        .then(() => {
+          fetch();
+        })
+        .catch(err => {
+          console.error('Lỗi khi xóa phim:', err);
+          alert('Xóa phim thất bại.');
+        });
+    }
   };
 
   return (
@@ -41,7 +57,7 @@ export default function MovieList() {
         <Col>
           <h2 className="mb-4">Danh sách phim</h2>
           <Button variant="success" onClick={handleAdd} className="mb-3">
-            ➕ Thêm phim mới
+            Thêm phim mới
           </Button>
         </Col>
       </Row>
@@ -72,8 +88,11 @@ export default function MovieList() {
                   <td>{m.duration} phút</td>
                   <td>{m.ageLimit}+</td>
                   <td>
-                    <Button variant="primary" size="sm" onClick={() => handleEdit(m.id)}>
+                    <Button variant="primary" size="sm" onClick={() => handleEdit(m.id)} className="me-2">
                       Sửa
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(m.id)}>
+                      Xóa
                     </Button>
                   </td>
                 </tr>

@@ -90,7 +90,7 @@ function App() {
 
           <Route path='movies' element={<MovieList />} />
           <Route path='movies/add' element={<AddMovie />} />
-          <Route path="movies/:id/edit" element={<EditMovie />} />
+          <Route path="movies/edit/:id" element={<EditMovie />} />
 
 
           <Route path='users-members' element={

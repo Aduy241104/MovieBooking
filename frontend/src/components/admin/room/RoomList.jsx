@@ -68,17 +68,18 @@ const RoomList = () => {
     ];
 
     return (
-        <div className="p-4 bg-white min-h-screen">
-            <Card className="shadow-sm rounded-2xl">
+        <div className="p-4 bg-white min-h-screen  shadow-sm" style={{borderRadius:"16px"}}>
+            <Card className="">
                 <div className="d-flex justify-content-between align-items-center mb-4">
-                    <Input
-                        placeholder="Tìm theo tên phòng..."
-                        allowClear
-                        prefix={<SearchOutlined />}
-                        value={searchValue}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        style={{ width: "30vw" }}
-                    />
+                   
+                    <Input style={{ width: "30vw" }}
+                            size='large'
+                            addonBefore={<SearchOutlined />}
+                            placeholder="Tìm kiếm tài khoản..."
+                            allowClear
+                            value={searchValue}
+                            onChange={(value) => handleSearch(value.target.value)}
+                        />
                     <Button
                         type="primary"
                         icon={<SquarePlus size={18} strokeWidth={1.7} />}

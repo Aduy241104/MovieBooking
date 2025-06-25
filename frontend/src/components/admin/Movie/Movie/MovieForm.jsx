@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Form, Button, Row, Col, Dropdown, Badge } from 'react-bootstrap';
+import { BadgePlus, Pencil, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { message } from 'antd';
 
 export default function MovieForm({ movieId, onSuccess }) {
   const isEdit = !!movieId;
@@ -12,6 +15,8 @@ export default function MovieForm({ movieId, onSuccess }) {
     smallImageUrl: '', largeImageUrl: ''
   });
 
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
   const [smallImage, setSmallImage] = useState(null);
   const [largeImage, setLargeImage] = useState(null);
   const [previewSmallImage, setPreviewSmallImage] = useState(null);
@@ -19,8 +24,7 @@ export default function MovieForm({ movieId, onSuccess }) {
   const [types, setTypes] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8081/api/public/types')
-      .then(r => setTypes(r.data));
+    axios.get('http://localhost:8081/api/public/types').then(r => setTypes(r.data));
 
     if (isEdit) {
       axios.get(`http://localhost:8081/api/public/movies/${movieId}`).then(r => {
@@ -60,6 +64,38 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const handleSubmit = e => {
     e.preventDefault();
+    const newErrors = {};
+
+    const requiredFields = [
+      { field: 'nameVN', label: 'Tên phim (VN)' },
+      { field: 'nameEN', label: 'Tên phim (EN)' },
+      { field: 'duration', label: 'Thời lượng' },
+      { field: 'ageLimit', label: 'Giới hạn tuổi' },
+      { field: 'fromDate', label: 'Ngày bắt đầu chiếu' },
+      { field: 'toDate', label: 'Ngày kết thúc' },
+      { field: 'director', label: 'Đạo diễn' },
+      { field: 'actor', label: 'Diễn viên' },
+      { field: 'movieProductionCompany', label: 'Hãng sản xuất' },
+      { field: 'trailerLink', label: 'Trailer Link' },
+      { field: 'content', label: 'Nội dung phim' },
+    ];
+
+    for (const { field, label } of requiredFields) {
+      const value = form[field];
+      if (value === undefined || value === null || (typeof value === 'string' && value.trim() === '')) {
+        newErrors[field] = `Vui lòng nhập ${label}.`;
+      }
+    }
+
+    if (form.typeIds.length === 0) newErrors.typeIds = 'Vui lòng chọn ít nhất một thể loại.';
+    if (!isEdit) {
+      if (!smallImage) newErrors.smallImage = 'Vui lòng chọn ảnh poster.';
+      if (!largeImage) newErrors.largeImage = 'Vui lòng chọn ảnh banner.';
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     const data = new FormData();
     Object.keys(form).forEach(key => {
       if (key === 'typeIds') {
@@ -75,14 +111,17 @@ export default function MovieForm({ movieId, onSuccess }) {
       ? `http://localhost:8081/api/public/movies/${movieId}`
       : 'http://localhost:8081/api/public/movies';
 
-    axios.post(url, data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
-    .then(r => onSuccess(r.data))
-    .catch(err => {
-      console.error('Lỗi khi gửi phim:', err);
-      alert('Có lỗi xảy ra khi gửi dữ liệu phim. Xem console để biết thêm.');
-    });
+    axios.post(url, data, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .then(r => {
+        message.success(isEdit ? 'Cập nhật phim thành công.' : 'Thêm phim thành công.');
+        if (onSuccess) onSuccess(r.data);
+        navigate('/admin/movies');
+      })
+      .catch(err => {
+        const msg = err.response?.data?.message || 'Có lỗi xảy ra khi gửi dữ liệu phim.';
+        message.error(msg);
+        console.error('Lỗi khi gửi phim:', err);
+      });
   };
 
   const handleSelectType = id => {
@@ -95,137 +134,106 @@ export default function MovieForm({ movieId, onSuccess }) {
   };
 
   const handleRemoveType = id => {
-    setForm(prev => ({
-      ...prev,
-      typeIds: prev.typeIds.filter(typeId => typeId !== id)
-    }));
+    setForm(prev => ({ ...prev, typeIds: prev.typeIds.filter(typeId => typeId !== id) }));
   };
 
+  const renderInput = (label, name, type = 'text') => (
+    <Form.Group className="mb-3">
+      <Form.Label style={{ fontSize: '18px' }}>{label}</Form.Label>
+      <Form.Control
+        name={name}
+        type={type}
+        value={form[name]}
+        onChange={handleChange}
+        isInvalid={!!errors[name]}
+      />
+      <Form.Control.Feedback type="invalid">{errors[name]}</Form.Control.Feedback>
+    </Form.Group>
+  );
+
   return (
-    <Form onSubmit={handleSubmit} className="p-4 border rounded bg-light shadow-sm" encType="multipart/form-data">
-      <h4>{isEdit ? 'Cập nhật phim' : 'Thêm phim mới'}</h4>
+    <Form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm" style={{ backgroundColor: '#ffff' }}>
+      <h4 className='mb-3'>{isEdit ? 'Cập nhật phim' : 'Thêm phim mới'}</h4>
       <Row>
         <Col md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Tên phim (VN)</Form.Label>
-            <Form.Control name="nameVN" value={form.nameVN} onChange={handleChange} required />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Tên phim (EN)</Form.Label>
-            <Form.Control name="nameEN" value={form.nameEN} onChange={handleChange} required />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Thời lượng (phút)</Form.Label>
-            <Form.Control name="duration" type="number" value={form.duration} onChange={handleChange} required />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Giới hạn tuổi</Form.Label>
-            <Form.Control name="ageLimit" type="number" value={form.ageLimit} onChange={handleChange} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Ngày chiếu</Form.Label>
-            <Form.Control name="fromDate" type="date" value={form.fromDate} onChange={handleChange} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Ngày kết thúc</Form.Label>
-            <Form.Control name="toDate" type="date" value={form.toDate} onChange={handleChange} />
-          </Form.Group>
+          {renderInput('Tên phim (VN)', 'nameVN')}
+          {renderInput('Tên phim (EN)', 'nameEN')}
+          {renderInput('Thời lượng (phút)', 'duration', 'number')}
+          {renderInput('Giới hạn tuổi', 'ageLimit', 'number')}
+          {renderInput('Ngày bắt đầu chiếu', 'fromDate', 'date')}
+          {renderInput('Ngày kết thúc', 'toDate', 'date')}
         </Col>
         <Col md={6}>
-          <Form.Group className="mb-3">
-            <Form.Label>Đạo diễn</Form.Label>
-            <Form.Control name="director" value={form.director} onChange={handleChange} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Diễn viên</Form.Label>
-            <Form.Control name="actor" value={form.actor} onChange={handleChange} />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Hãng sản xuất</Form.Label>
-            <Form.Control name="movieProductionCompany" value={form.movieProductionCompany} onChange={handleChange} />
-          </Form.Group>
+          {renderInput('Đạo diễn', 'director')}
+          {renderInput('Diễn viên', 'actor')}
+          {renderInput('Hãng sản xuất', 'movieProductionCompany')}
 
           <Form.Group className="mb-3">
-            <Form.Label>Ảnh nhỏ</Form.Label>
-            <Form.Control type="file" accept="image/*" onChange={e => {
+            <Form.Label>Poster</Form.Label>
+            <Form.Control type="file" isInvalid={!!errors.smallImage} onChange={e => {
               const file = e.target.files[0];
               setSmallImage(file);
               if (file) setPreviewSmallImage(URL.createObjectURL(file));
             }} />
-            {previewSmallImage ? (
-              <img src={previewSmallImage} alt="Preview Small" style={{ maxWidth: 100, marginTop: 8 }} />
-            ) : form.smallImageUrl && (
-              <img src={`http://localhost:8081${form.smallImageUrl}`} alt="Small" style={{ maxWidth: 100, marginTop: 8 }} />
-            )}
+            {errors.smallImage && <div className="text-danger mt-1">{errors.smallImage}</div>}
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Ảnh lớn</Form.Label>
-            <Form.Control type="file" accept="image/*" onChange={e => {
+            <Form.Label>Banner</Form.Label>
+            <Form.Control type="file" isInvalid={!!errors.largeImage} onChange={e => {
               const file = e.target.files[0];
               setLargeImage(file);
               if (file) setPreviewLargeImage(URL.createObjectURL(file));
             }} />
-            {previewLargeImage ? (
-              <img src={previewLargeImage} alt="Preview Large" style={{ maxWidth: 100, marginTop: 8 }} />
-            ) : form.largeImageUrl && (
-              <img src={`http://localhost:8081${form.largeImageUrl}`} alt="Large" style={{ maxWidth: 100, marginTop: 8 }} />
-            )}
+            {errors.largeImage && <div className="text-danger mt-1">{errors.largeImage}</div>}
           </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Trailer (YouTube link)</Form.Label>
-            <Form.Control
-              name="trailerLink"
-              value={form.trailerLink}
-              onChange={handleChange}
-              placeholder="Nhập link YouTube trailer"
-            />
-          </Form.Group>
+          {renderInput('Trailer Link', 'trailerLink')}
         </Col>
       </Row>
 
       <Form.Group className="mb-3">
         <Form.Label>Nội dung phim</Form.Label>
-        <Form.Control as="textarea" name="content" rows={4} value={form.content} onChange={handleChange} />
+        <Form.Control as="textarea" name="content" rows={4} value={form.content} onChange={handleChange} isInvalid={!!errors.content} />
+        <Form.Control.Feedback type="invalid">{errors.content}</Form.Control.Feedback>
       </Form.Group>
 
       <Form.Group className="mb-3">
         <Form.Label>Thể loại</Form.Label>
         <Dropdown>
           <Dropdown.Toggle variant="light" className="w-100 text-start">
-            {form.typeIds.length > 0 ? (
-              form.typeIds.map(id => {
-                const type = types.find(t => t.id === id);
-                return (
-                  <Badge key={id} bg="primary" className="me-1">
-                    {type?.name || 'Unknown'}{' '}
-                    <span style={{ cursor: 'pointer' }} onClick={e => {
-                      e.stopPropagation();
-                      handleRemoveType(id);
-                    }}>×</span>
-                  </Badge>
-                );
-              })
-            ) : (
-              <span className="text-muted">Chọn thể loại</span>
-            )}
+            {form.typeIds.length > 0 ? form.typeIds.map(id => {
+              const type = types.find(t => t.id === id);
+              return (
+                <Badge key={id} bg="primary" className="me-1">
+                  {type?.name || 'Unknown'}{' '}
+                  <span style={{ cursor: 'pointer' }} onClick={e => {
+                    e.stopPropagation();
+                    handleRemoveType(id);
+                  }}>×</span>
+                </Badge>
+              );
+            }) : <span className="text-muted">Chọn thể loại</span>}
           </Dropdown.Toggle>
           <Dropdown.Menu>
             {types.map(t => (
-              <Dropdown.Item
-                key={t.id}
-                active={form.typeIds.includes(t.id)}
-                onClick={() => handleSelectType(t.id)}
-              >
+              <Dropdown.Item key={t.id} active={form.typeIds.includes(t.id)} onClick={() => handleSelectType(t.id)}>
                 {t.name}
               </Dropdown.Item>
             ))}
           </Dropdown.Menu>
         </Dropdown>
+        {errors.typeIds && <div className="text-danger mt-1">{errors.typeIds}</div>}
       </Form.Group>
 
-      <Button type="submit" variant="primary">{isEdit ? 'Cập nhật' : 'Thêm phim'}</Button>
+      <div className='d-flex'>
+        <Button type="submit" variant="primary" className='d-flex'>
+          {isEdit ? <><Pencil size={16} className="me-1 mt-1" />Cập nhật</> : <><BadgePlus size={25} className="me-1" />Thêm phim</>}
+        </Button>
+        <Button type="button" variant="secondary" className='ms-1 d-flex' onClick={() => navigate('/admin/movies')}>
+          <X className='me-1' />Hủy
+        </Button>
+      </div>
     </Form>
   );
 }

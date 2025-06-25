@@ -6,8 +6,8 @@ import com.example.demo.model.Movie;
 import com.example.demo.model.MovieType;
 import com.example.demo.model.Type;
 import com.example.demo.repository.MovieRepository;
-import com.example.demo.repository.TypeRepository;
 import com.example.demo.repository.MovieTypeRepository;
+import com.example.demo.repository.TypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +40,12 @@ public class MovieService {
 
     @Transactional
     public MovieResponse createMovie(MovieRequest request) throws IOException {
+        movieRepository.findByNameVNAndIsDeletedFalse(request.getNameVN())
+                .ifPresent(m -> { throw new RuntimeException("Tên phim (VN) đã tồn tại"); });
+
+        movieRepository.findByNameENAndIsDeletedFalse(request.getNameEN())
+                .ifPresent(m -> { throw new RuntimeException("Tên phim (EN) đã tồn tại"); });
+
         Movie movie = new Movie();
         mapRequestToEntity(movie, request);
 
@@ -66,7 +72,17 @@ public class MovieService {
 
     @Transactional
     public MovieResponse updateMovie(Long movieId, MovieRequest request) throws IOException {
-        Movie movie = movieRepository.findById(movieId).orElseThrow(() -> new RuntimeException("Movie not found"));
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim"));
+
+        movieRepository.findByNameVNAndIsDeletedFalse(request.getNameVN())
+                .filter(m -> !m.getId().equals(movieId))
+                .ifPresent(m -> { throw new RuntimeException("Tên phim (VN) đã tồn tại"); });
+
+        movieRepository.findByNameENAndIsDeletedFalse(request.getNameEN())
+                .filter(m -> !m.getId().equals(movieId))
+                .ifPresent(m -> { throw new RuntimeException("Tên phim (EN) đã tồn tại"); });
+
         mapRequestToEntity(movie, request);
 
         if (request.getSmallImage() != null)
@@ -79,12 +95,8 @@ public class MovieService {
             movie.setTrailer(request.getTrailerLink());
 
         movieRepository.save(movie);
-
-        // Bước 1: Xóa các thể loại cũ
         movieTypeRepository.deleteByMovieId(movieId);
-        movieRepository.flush(); // Đảm bảo DELETE thực thi ngay lập tức
-
-        // Bước 2: Thêm lại thể loại mới
+        movieRepository.flush();
         if (request.getTypeIds() != null) {
             List<Type> types = typeRepository.findAllByIdIn(request.getTypeIds());
             for (Type type : types) {
@@ -96,8 +108,22 @@ public class MovieService {
     }
 
     public List<MovieResponse> getAllMovies() {
-        List<Movie> movies = movieRepository.findAll();
+        List<Movie> movies = movieRepository.findByIsDeletedFalse();
         return movies.stream().map(this::mapEntityToResponse).collect(Collectors.toList());
+    }
+
+    public MovieResponse getMovieById(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim với id: " + id));
+        return mapEntityToResponse(movie);
+    }
+
+    @Transactional
+    public void deleteMovie(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim để xóa"));
+        movie.setIsDeleted(true);
+        movieRepository.save(movie);
     }
 
     private void mapRequestToEntity(Movie movie, MovieRequest request) {
@@ -145,11 +171,5 @@ public class MovieService {
                 typeNames,
                 typeIds
         );
-    }
-
-    public MovieResponse getMovieById(Long id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phim với id: " + id));
-        return mapEntityToResponse(movie);
     }
 }
