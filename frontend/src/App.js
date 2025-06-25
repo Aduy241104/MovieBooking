@@ -35,7 +35,6 @@ import ProfileLayout from './layouts/ProfileLayout';
 
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
-import TestPage from './Page/TestPage';
 import RequestForgotPassword from './Page/AuthPage/RequestForgotPassword';
 import ResetPassword from './Page/AuthPage/ResetPassword';
 import { ActivityLogPage } from './Page/admin/ActivityLogPage';
@@ -66,7 +65,6 @@ function App() {
         <Route path='/register' element={ <SignUpPage /> } />
         <Route path='/' element={ <HomePage /> } />
         <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
-        <Route path='/test' element={ <TestPage /> } />
         <Route path='/forgot-password' element={ <RequestForgotPassword /> } />
         <Route path='/reset-password' element={ <ResetPassword /> } />
 
