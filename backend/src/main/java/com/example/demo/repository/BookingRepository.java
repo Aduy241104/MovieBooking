@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
@@ -87,4 +88,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LIMIT ?1
             """, nativeQuery = true)
     List<Object[]> getBookingTicketRecently(int limit);
+
+    //Booking
+    List<Booking> findByAccountAccountIdOrderByBookingTimeDesc(Long accountId);
+    Optional<Booking> findByIdAndAccountAccountId(Integer bookingId, Long accountId);
+    Optional<Booking> findByVnpTxnRef(String vnpTxnRef); // Thêm findByVnpTxnRef
 }

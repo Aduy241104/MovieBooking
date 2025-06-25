@@ -1,0 +1,130 @@
+.seat-map-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    overflow-x: auto; /* Cho phép cuộn ngang nếu sơ đồ ghế quá rộng */
+}
+
+.screen {
+    width: 80%;
+    margin: 0 auto 25px auto;
+    padding: 10px 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.row-label {
+    width: 30px;
+    font-weight: bold;
+    margin-right: 10px;
+    text-align: center;
+}
+
+.seats-in-row {
+    display: flex;
+    flex-wrap: nowrap; /* Ngăn ghế xuống dòng trong 1 hàng */
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    margin: 3px;
+    background-color: #a0a0a0; // Ghế thường trống
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: white;
+    border: 1px solid #888;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+
+    &:hover:not(.disabled) {
+        background-color: #c0c0c0;
+        transform: scale(1.1);
+    }
+
+    // Các loại ghế
+    &.ghe-thuong { // .seat.ghe-thuong
+        // Giữ màu mặc định hoặc chỉnh lại nếu cần
+    }
+    &.ghe-vip {
+        background-color: #ffd700; // Màu vàng cho VIP
+        border-color: #daa520;
+         &:hover:not(.disabled) {
+            background-color: #ffea00;
+        }
+    }
+    &.ghe-doi {
+        background-color: #ff69b4; // Màu hồng cho ghế đôi
+        border-color: #ff1493;
+        width: 76px; // Rộng hơn cho ghế đôi (35*2 + 3*2)
+         &:hover:not(.disabled) {
+            background-color: #ff85c1;
+        }
+    }
+
+
+    &.selected {
+        background-color: #4caf50; // Màu xanh lá cho ghế đang chọn
+        color: white;
+        border-color: #388e3c;
+    }
+
+    &.disabled {
+        background-color: #6c757d; // Màu xám đậm cho ghế đã đặt/không khả dụng
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+}
+
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+
+    .seat { // Sử dụng lại style .seat cho legend, nhưng không có hover
+        margin-right: 8px;
+        cursor: default;
+        width: 25px;
+        height: 25px;
+        pointer-events: none; // Không cho click vào legend
+    }
+    .available-legend {
+        background-color: #a0a0a0;
+         &.ghe-vip {
+            background-color: #ffd700;
+        }
+        &.ghe-doi {
+             background-color: #ff69b4;
+        }
+    }
+    .selected {
+        background-color: #4caf50;
+    }
+    .disabled {
+         background-color: #6c757d;
+    }
+
+}
