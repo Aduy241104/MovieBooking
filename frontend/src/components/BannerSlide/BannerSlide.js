@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import './Slide.css'
 import CustomizeButton from '../CustomeButton';
 import { getTopMovieAPI } from '../../service/TheMovieService';
@@ -115,4 +115,4 @@ function BannerSlide() {
     )
 }
 
-export default BannerSlide
+export default memo(BannerSlide)

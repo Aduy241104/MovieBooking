@@ -10,9 +10,8 @@ const cx = classNames.bind(styles);
 
 function RightComponent(props) {
     const [isOpenTrailer, setOpenTrailer] = useState(false);
-    const { movie, trailer, startDate } = props; // <<<< NHẬN movie TỪ PROPS/locpng
-    console.log('RightComponent received movie prop:', movie); //locpng Thêm log để kiểm tra movie prop trong RightComponent
-
+    const { movie} = props; // <<<< NHẬN movie TỪ PROPS/locpng
+   
     return (
         <div>
             <div className='w-100 d-flex justify-content-between'>
@@ -31,19 +30,18 @@ function RightComponent(props) {
                 />
 
                 <CustomizeButton
-                    className={cx('fw-bold gardient-midNight text-light')}
-                    gold
+                    className={ cx('fw-bold text-light', 'blue')}
                     roundedBig
                     large
-                    leftIcon={<i className="fa-solid fa-ice-cream"></i>}>
+                    leftIcon={ <i className="fa-solid fa-comment-dots"></i> }>
                     Xem đánh giá
                 </CustomizeButton>
             </div>
-            <div className='mt-3'>
-                <p><strong>Ngày chiếu:</strong> <span className={cx('text-gray')}>{props.startDate}</span></p>
+            <div className='mt-5'>
+                <p>Ngày chiếu: <span className={cx('text-gray')}>{props.startDate}</span></p>
 
-                <div className='mt-3'>
-                    <h5 className='pb-2 fw-bolder'>Lịch chiếu </h5>
+                <div className='mt-4'>
+                    <h5 className='pb-2'>Lịch chiếu </h5>
                     {/*  <Schedule /> */}
 
                        {/* Truyền movie prop vào BookingSchedule/ locpng */}

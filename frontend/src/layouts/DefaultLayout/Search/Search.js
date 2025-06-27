@@ -29,6 +29,8 @@ function Search() {
         const value = e.target.value;
         if (value.length > 0 && value.trim() === "") {
             return;
+        } else if (value === "") {
+            setSearchResult([])
         }
         setSearchValue(value);
     }
@@ -95,7 +97,7 @@ function Search() {
                     visible={ isShow }
                     placement="top-end"
                     offset={ [24, 20] }
-                    onClickOutside={ () => setShow(false) }
+                    onClickOutside={ () => { setShow(false); handleClearSearchValue() } }
                     render={ attrs => (
                         <div
                             className={ cx("bg-light p-4 rounded-2 cursor-pointer", 'arr') }
