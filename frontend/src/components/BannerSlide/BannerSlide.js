@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react'
 import './Slide.css'
 import CustomizeButton from '../CustomeButton';
 import { getTopMovieAPI } from '../../service/TheMovieService';
+import { useNavigate } from 'react-router-dom';
 
 const data = [
     {
@@ -42,6 +43,7 @@ const data = [
 
 function BannerSlide() {
     const [initSlide, setSlides] = useState(data);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -97,6 +99,7 @@ function BannerSlide() {
                                             outLine
                                             rounded
                                             large
+                                            onClick={() => navigate(`/movie-detail/${item.id}`)}
                                         >
                                             Xem chi tiết
                                         </CustomizeButton>

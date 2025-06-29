@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { getPayload, getTokenStatus } from "../Utils/CheckExpiredToken";
+import { showSessionExpiredModal } from "../Utils/showSessionExpiredModal ";
 
 function useAutoRefreshToken(token, setToken, logout) {
     useEffect(() => {
@@ -9,11 +10,11 @@ function useAutoRefreshToken(token, setToken, logout) {
         const status = getTokenStatus(token, 3); // 3 phút trước khi hết hạn
         const payload = getPayload(token);
 
-        // ✅ Gọi làm mới ngay nếu token đã/đang hết hạn
+        //Gọi làm mới ngay nếu token đã/đang hết hạn
         if (status === "expired" || status === "invalid" || status === "about-to-expire") {
             refreshAccessToken();
         } else if (status === "valid") {
-            // ✅ Lên lịch tự refresh nếu token còn hạn
+            //Lên lịch tự refresh nếu token còn hạn
             const exp = payload.exp * 1000;
             const now = Date.now();
             const timeUntilRefresh = exp - now - 3 * 60 * 1000;
@@ -29,7 +30,7 @@ function useAutoRefreshToken(token, setToken, logout) {
             const refreshToken = localStorage.getItem("refreshToken");
             if (!refreshToken) {
                 logout();
-                alert("Phiên làm việc đã hết hạn (không tìm thấy refresh token).");
+                showSessionExpiredModal();
                 return;
             }
 
@@ -46,18 +47,15 @@ function useAutoRefreshToken(token, setToken, logout) {
                     if (data.accessToken) {
                         setToken(data.accessToken);
                         localStorage.setItem("token", data.accessToken);
-                        // console.log("🔄 Access token refreshed", data.accessToken);
                     } else {
                         throw new Error("No access token returned");
                     }
                 })
-                .catch((err) => {
-                    // console.error("❌ Refresh token failed:", err);
+                .catch(() => {
                     logout();
-                    alert("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.");
+                    showSessionExpiredModal();
                 });
         }
-
     }, [token]);
 }
 

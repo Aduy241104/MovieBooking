@@ -126,7 +126,7 @@ function Search() {
                                     { searchResult.map((item) => {
                                         return (
                                             <div
-                                                className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') }
+                                                className={ cx('search-result-layout', 'gray-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') }
                                                 key={ item.id }
                                                 onClick={ () => naviagate(`/movie-detail/${item.id}`) }
                                             >
@@ -151,7 +151,7 @@ function Search() {
                                     }) }
 
                                     { !!searchResult.length &&
-                                        <button className='mt-3 text-red fw-bold' onClick={ () => handleShowMore() }>
+                                        <button className='mt-3 text-black fw-bold' onClick={ () => handleShowMore() }>
                                             <i className="fa-solid fa-chevron-down me-1"></i>
                                             Xem thêm
                                         </button>

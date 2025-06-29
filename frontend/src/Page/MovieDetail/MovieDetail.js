@@ -110,11 +110,6 @@ function MovieDetail() {
                                                     <strong>Sản xuất: </strong>
                                                     <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
                                                 </li>
-                                                <li className='fs-7 pb-3' >
-                                                    <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
-                                                </li>
-
                                             </ul>
                                         </div>
 

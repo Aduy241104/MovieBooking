@@ -28,7 +28,7 @@ function PlayingMovie() {
     return (
         <div className="p-5">
             <div className={ cx("container") }>
-                <div className="d-flex flex-column justify-content-center align-items-center text-light">
+                <div className="d-flex flex-column justify-content-center align-items-center text-light mt-5">
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim đang chiếu</h2>
                     <div className={ cx('w-responsive', 'pb-5') }>
                         <SwiperSlides>

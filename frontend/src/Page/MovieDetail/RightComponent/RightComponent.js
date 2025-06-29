@@ -37,10 +37,10 @@ function RightComponent(props) {
                     Xem đánh giá
                 </CustomizeButton>
             </div>
-            <div className='mt-5'>
+            <div className='mt-3'>
                 <p>Ngày chiếu: <span className={cx('text-gray')}>{props.startDate}</span></p>
 
-                <div className='mt-4'>
+                <div className='mt-3'>
                     <h5 className='pb-2'>Lịch chiếu </h5>
                     {/*  <Schedule /> */}
 
