@@ -8,15 +8,15 @@ import SignUpPage from './Page/AuthPage/SignUpPage';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 
 
-import RoomList from './components/admin/room/RoomList';
-import CreateRoom from './components/admin/room/CreateRoom';
-import RoomDetail from './components/admin/room/RoomDetail';
-import EditRoom from './components/admin/room/EditRoom';
+import RoomList from './components/admin/Room/RoomList';
+import CreateRoom from './components/admin/Room/CreateRoom';
+import RoomDetail from './components/admin/Room/RoomDetail';
+import EditRoom from './components/admin/Room/EditRoom';
 import TypeList from './components/admin/Movie/MovieType/TypeList';
 
 
 
-
+ 
 
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
