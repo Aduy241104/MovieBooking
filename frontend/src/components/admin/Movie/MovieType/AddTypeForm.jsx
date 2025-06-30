@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Input, Alert, Button } from "antd";
-import axiosClient from '../../../config/axios'
+import axiosClient from '../../../../config/axios'
 export default function AddTypeForm({ onTypeAdded }) {
   const [form, setForm] = useState({ name: "", message: "", success: null, submitting: false });
 

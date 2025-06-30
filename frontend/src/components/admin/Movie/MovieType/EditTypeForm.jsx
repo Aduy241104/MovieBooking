@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Input, Alert, Button, Spin } from "antd";
-import axiosClient from '../../../config/axios'
+import axiosClient from '../../../../config/axios'
 export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
   const [form, setForm] = useState({ name: "", loading: true, message: "", success: null, submitting: false });
 
