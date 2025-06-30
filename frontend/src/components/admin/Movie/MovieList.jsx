@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../../config/axios";
-import { Table, Input, Spin, Button, Pagination, message } from "antd";
+import { Table, Input, Spin, Button, Pagination, message, Popconfirm, Space } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { SquarePen, Trash2 } from "lucide-react";
+import { Link,useLocation,useOutletContext } from "react-router-dom";
+import axios from "../../../config/axios";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
@@ -10,26 +11,54 @@ const MovieList = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const size = 5;
+const location = useLocation();
+  const { setBreadcrumbItems } = useOutletContext();
 
+  useEffect(() => {
+    if (location.pathname.includes('/admin/movie-list')) {
+      setBreadcrumbItems([
+        { title: 'Trang chủ',href: '/admin' },
+        { title: 'Quản lý phim' },
+        { title: 'Phim' },
+
+      ]);
+    }
+  }, [location.pathname, setBreadcrumbItems]);
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("/movieSchedule/getAll");
-      if (res.status === 1000 && res.result) {
-        const mapped = res.result.map((item) => ({
-          id: item.id,
-          poster: item.movie.smallImage,
-          nameVN: item.movie.nameVN,
-          genres: item.movie.genres || "Đang cập nhật",
-          releaseDate: item.movie.fromDate,
-          endDate: item.movie.toDate,
-        }));
+      console.log("Sending request to /movies/getAll");
+      const res = await axios.get("/movies/getAll");
+      console.log("API response:", res);
+      const responseData = res.data || res;
+      console.log("Response data:", responseData);
+      console.log("Response content:", responseData.content);
+      if (responseData && responseData.content && responseData.content.length > 0) {
+        const mapped = responseData.content.map((item) => {
+          console.log("Mapping item:", item);
+          return {
+            id: item.id,
+            poster: item.smallImage,
+            nameVN: item.nameVN,
+            genres: item.genres || "Đang cập nhật",
+            releaseDate: item.fromDate,
+            endDate: item.toDate,
+          };
+        });
+        console.log("Mapped movies:", mapped);
         setMovies(mapped);
       } else {
-        message.warning("Không có dữ liệu lịch chiếu");
+        console.warn("No data in response:", responseData);
+        message.warning("Không có dữ liệu phim");
       }
     } catch (err) {
-      message.error("Lỗi tải dữ liệu");
+      console.error("Error fetching movies:", {
+        message: err.message,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+      });
+      message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -38,6 +67,14 @@ const MovieList = () => {
   useEffect(() => {
     fetchMovies();
   }, []);
+
+  const handleEdit = (record) => {
+    console.log("Sửa phim:", record);
+  };
+
+  const handleDelete = (id) => {
+    console.log("Xóa phim với ID:", id);
+  };
 
   const filteredMovies = movies.filter((movie) =>
     movie.nameVN.toLowerCase().includes(searchText.toLowerCase())
@@ -66,12 +103,12 @@ const MovieList = () => {
       ),
     },
     {
-      title: "Tên phim (VN)",
+      title: "Tên phim",
       dataIndex: "nameVN",
       key: "nameVN",
       render: (text, record) => (
         <Link
-          to={`/admin/film-detail/${record.nameVN}`}
+          to={`/admin/film-detail/${record.id}`}
           style={{ color: "#333", textDecoration: "none" }}
           onMouseOver={(e) => (e.target.style.color = "#1890ff")}
           onMouseOut={(e) => (e.target.style.color = "#333")}
@@ -94,6 +131,28 @@ const MovieList = () => {
       title: "Ngày kết thúc",
       dataIndex: "endDate",
       key: "endDate",
+    },
+    {
+      title: "Hành động",
+      key: "actions",
+      render: (_, record) => (
+        <Space size="large">
+          <button
+            className="text-blue-600 hover:text-fuchsia-500"
+            onClick={() => handleEdit(record)}
+          >
+            <SquarePen size={16} strokeWidth={1.7} />
+          </button>
+          <Popconfirm
+            title="Xác nhận xóa?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Xóa"
+            cancelText="Hủy"
+          >
+            <Button type="text" danger icon={<Trash2 size={16} strokeWidth={1.7} />} />
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

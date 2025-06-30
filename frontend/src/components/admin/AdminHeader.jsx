@@ -19,13 +19,16 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ NHÂN VIÊN");
         } else if (location.pathname.includes('promotions')) {
             setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
-
         }else if (location.pathname.includes('room-list')) {
             setTitle("QUẢN LÝ PHÒNG CHIẾU");
         }else if (location.pathname.includes('movie-list')) {
             setTitle("QUẢN LÝ PHIM");
-
+        }else if (location.pathname.includes('faretype-list')) {
+            setTitle("QUẢN LÝ LOẠI VÉ");
+        } else if (location.pathname.includes('booking-list')) {
+            setTitle("QUẢN LÝ lỊCH SỬ ĐẶT VÉ");
         }
+
     }, [location.pathname]);
 
     const items = [

@@ -20,10 +20,17 @@ import RoomDetail from './components/admin/room/RoomDetail';
 
 import MovieList from './components/admin/Movie/MovieList';
 import FilmDetail from './components/admin/Movie/FilmDetail';
-
-
 import ShowtimeList from './components/admin/Showtime/ShowtimeList';
 import TypeList from './components/admin/Movie/TypeList'
+
+
+import FareTypeList from './components/admin/TicketPrice/FareTypeList'
+import BookingList from './components/admin/TicketPrice/BookingList'
+import BookingDetail from './components/admin/TicketPrice/BookingDetail'
+
+import ReviewList from './components/admin/Review/ReviewList'
+import ReviewDetail from './components/admin/Review/ReviewDetail'
+
 
 
 import { UserPage } from './Page/admin/UserPage';
@@ -59,9 +66,16 @@ function App() {
           <Route path='room-list/:id/edit' element={ <EditRoom /> } />
 
 
-           <Route path='movie-list' element={ <MovieList /> } />
-           <Route path='film-detail/:nameVN' element={ <FilmDetail /> } />
-           <Route path='showtime-list' element={ <ShowtimeList /> } />
+          <Route path='movie-list' element={ <MovieList /> } />
+          <Route path='film-detail/:id' element={ <FilmDetail /> } />
+          <Route path='showtime-list' element={ <ShowtimeList /> } />
+
+          <Route path='faretype-list' element={ <FareTypeList /> } />
+          <Route path='booking-list' element={ <BookingList /> } />
+          <Route path='booking-detail/:movieId' element={ <BookingDetail /> } />
+
+          <Route path='review-list' element={ <ReviewList /> } />
+           <Route path="review-detail/:movieId" element={<ReviewDetail />} />
 
 
 

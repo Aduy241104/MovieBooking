@@ -1,6 +1,6 @@
 import { Layout } from "antd";
 
-import { LayoutDashboard, Ticket, Users, Film, Video, CalendarDays } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Film, Video, CalendarDays, Receipt, MessageSquareText } from 'lucide-react'
 
 
 import { Menu } from 'antd'
@@ -69,6 +69,32 @@ export const AdminSidebar = (props) => {
 
             
         },
+
+        {
+            key: 'faretype',
+            icon: <Receipt size={20} strokeWidth={1.5}/>,
+            label: 'Quản lý giá vé',
+            children: [
+                {
+                    key: 'faretype-list',
+                    label: <Link to="/admin/faretype-list">Loại giá vé</Link>
+                },
+                {
+                    key: 'type',
+                    label: <Link to="/admin/booking-list">Lịch sử đặt vé</Link>
+                },
+            ]
+        },
+
+          {
+            key: 'review-list',
+            icon: <MessageSquareText  size={20} strokeWidth={1.5}/>,
+            label: <Link to="/admin/review-list">Quản lý Bình Luận</Link>
+
+            
+        },
+
+        
 
 
 
