@@ -3,7 +3,7 @@ import styles from './ComingSoon.module.scss'
 import SwiperSlides from "../SwiperSlide/SwiperSlides";
 import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { getUpComingMovieAPI } from "../../service/TheMovieService";
 
 const cx = classNames.bind(styles);
@@ -15,7 +15,6 @@ function ComingSoon() {
     const fetchData = async () => {
         try {
             const response = await getUpComingMovieAPI();
-            console.log("test: ", response.result);
             setListMovie(response.result);
         } catch (error) {
             console.log(error.message);
@@ -52,4 +51,4 @@ function ComingSoon() {
     )
 }
 
-export default ComingSoon
+export default memo(ComingSoon)

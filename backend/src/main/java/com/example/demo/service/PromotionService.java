@@ -78,9 +78,7 @@ public class PromotionService {
         return promotionRepository.findById(id).orElse(null);
     }
 
-    public Promotion fetchPromotionByCode(String code) {
-        return promotionRepository.findByCode(code);
-    }
+    public Promotion fetchPromotionByCode(String code) {return promotionRepository.findByCode(code);}
 
     public boolean existsByCode(String code) {
         return promotionRepository.existsByCode(code);

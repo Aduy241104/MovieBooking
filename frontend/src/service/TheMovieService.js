@@ -20,15 +20,11 @@ export function getAuthHeaders() {
 export const searchMovieByName = async (keyWord, page, size) => {
     page = page || 0;
     size = size || 4;
-
-    console.log("key: ", keyWord);
-
     try {
         const response = await axiosInstance.get(`/public/findMovie/search?q=${keyWord}&page=${page}&size=${size}`);
         // console.log(response);
         return response.data;
     } catch (error) {
-        console.error("Error fetching movie:", error);
         throw new Error("Lỗi kết nối, vui lòng thử lại sau.");
     }
 };
@@ -56,9 +52,30 @@ export const getUpComingMovieAPI = async () => {
 export const getMovieDetailAPI = async (id) => {
     try {
         const response = await axiosInstance.get(`/public/movieSchedule/${id}`)
-        console.log("The movie: ", response);
+        // console.log("The movie: ", response);
         return response.data;
     } catch (error) {
         throw new Error('Cannot connect to server!')
+    }
+}
+
+export const getMovieByDateAPI = async (data) => {
+    try {
+        const response = await axiosInstance.get(`/public/movieSchedule/by-date?date=2025-06-12`);
+        // console.log(response);
+        return response.data;
+    } catch (error) {
+        throw new Error('Cannot connect to server!')
+    }
+}
+
+
+export const getTopMovieAPI = async () => {
+    try {
+        const response = await axiosInstance.get('/public/movieSchedule/top-booking');
+        return response.data;
+
+    } catch (error) {
+        return null;
     }
 }

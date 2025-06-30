@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,13 +17,23 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-    List<Movie> findByNameVNContainingIgnoreCase(String nameVN);
+    // Tìm phim theo tên tiếng Việt (gần đúng, không phân biệt hoa thường)
+    List<Movie> findByNameVNContainingIgnoreCaseAndIsDeletedFalse(String nameVN);
+
+    // Tìm phim theo tên tiếng Anh (gần đúng, không phân biệt hoa thường)
+    List<Movie> findByNameENContainingIgnoreCaseAndIsDeletedFalse(String nameEN);
+
+    // Tìm phim trong khoảng ngày chiếu
+    List<Movie> findByFromDateLessThanEqualAndToDateGreaterThanEqualAndIsDeletedFalse(LocalDate from, LocalDate to);
+
+    // Tìm tất cả phim chưa bị xóa
+    List<Movie> findByIsDeletedFalse();
 
     @Query("""
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id, m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,m.director, m.movieProductionCompany,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
@@ -39,11 +50,11 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id, m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,m.director, m.movieProductionCompany,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
-                WHERE m.fromDate <= :currentDate AND m.toDate >= :currentDate
+                WHERE m.fromDate <= :currentDate AND m.toDate >= :currentDate AND m.isDeleted = false
                 GROUP BY m.id,m.nameVN, m.nameEN, m.duration, m.content,
                          m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer, m.ageLimit
                 ORDER BY m.id
@@ -54,11 +65,11 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id,m.nameVN, m.nameEN, m.duration, m.content,
                     m.fromDate, m.toDate, m.smallImage, m.largeImage,
-                    m.trailer, m.ageLimit,COALESCE(AVG(r.rating), 0), null
+                    m.trailer, m.ageLimit,m.director, m.movieProductionCompany,COALESCE(AVG(r.rating), 0), null
                 )
                 FROM Movie m
                 LEFT JOIN Review r ON r.movie.id = m.id
-                WHERE m.fromDate > :currentDate
+                WHERE m.fromDate > :currentDate  AND m.isDeleted = false
                 GROUP BY m.id, m.nameVN, m.nameEN, m.duration, m.content,
                          m.fromDate, m.toDate, m.smallImage, m.largeImage, m.trailer, m.ageLimit
                 ORDER BY m.fromDate
@@ -83,7 +94,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 FROM movie m
                 LEFT JOIN movie_type mt ON m.movie_id = mt.movie_id
                 LEFT JOIN type t ON mt.type_id = t.type_id
-            
+
                 -- Subquery tính vé và doanh thu chỉ booking PAID
                 LEFT JOIN (
                     SELECT m2.movie_id,
@@ -95,7 +106,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                     JOIN booked_seat bs ON bs.booking_id = b2.booking_id
                     GROUP BY m2.movie_id
                 ) ticket_stats ON m.movie_id = ticket_stats.movie_id
-            
+
                 -- Subquery tính rating trung bình
                 LEFT JOIN (
                     SELECT r.movie_id, AVG(r.rating) AS avg_rating
@@ -103,11 +114,12 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                     WHERE r.is_approved = true
                     GROUP BY r.movie_id
                 ) avg_reviews ON m.movie_id = avg_reviews.movie_id
-            
+
                 GROUP BY m.movie_id, m.movie_name_en, avg_reviews.avg_rating, ticket_stats.tickets_sold, ticket_stats.revenue
                 ORDER BY revenue DESC
                 LIMIT 5
             """, nativeQuery = true)
     List<Object[]> getTopMoviesByRevenue();
-
+    Optional<Movie> findByNameVNAndIsDeletedFalse(String nameVN);
+    Optional<Movie> findByNameENAndIsDeletedFalse(String nameEN);
 }

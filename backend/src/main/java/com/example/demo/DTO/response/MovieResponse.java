@@ -1,8 +1,5 @@
 package com.example.demo.DTO.response;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDate;
 
 @Getter
@@ -15,11 +12,7 @@ public class MovieResponse {
     private String content;
     private LocalDate fromDate;
     private LocalDate toDate;
-    private String smallImage;
-    private String largeImage;
-    private String trailer;
     private String director;
-    private String movieProductionCompany;
     private String actor;
     private Integer ageLimit;
 }

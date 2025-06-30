@@ -10,6 +10,7 @@ import com.example.demo.DTO.response.MovieScheduleDTO;
 import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Movie;
+import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.repository.TypeRepository;
 
@@ -24,6 +25,9 @@ public class MovieScheduleService {
 
     @Autowired
     ScreeningService screeningService;
+
+    @Autowired
+    BookingRepository bookingRepository;
 
     public List<SingleMovieDTO> getNowShowingMovie(LocalDate currentDate) {
         List<SingleMovieDTO> result = movieRepository.findNowShowingMovies(currentDate);
@@ -43,7 +47,6 @@ public class MovieScheduleService {
         }
         return result;
     }
-
 
     public List<MovieScheduleDTO> getSchedule(LocalDate date) {
         List<MovieScheduleDTO> result = screeningService.getAllMovieScheduleByDate(date);
@@ -68,6 +71,8 @@ public class MovieScheduleService {
                 .largeImage(movie.getLargeImage())
                 .trailer(movie.getTrailer())
                 .ageLimit(movie.getAgeLimit())
+                .director(movie.getDirector())
+                .movieProductionCompany(movie.getMovieProductionCompany())
                 .types(types)
                 .build();
         return singleMovieDTO;
@@ -77,4 +82,15 @@ public class MovieScheduleService {
         LocalDate now = LocalDate.now();
         return movieRepository.fetchTotalNowShowingMovies(now);
     }
+
+    public List<SingleMovieDTO> getTopBookedMovieByDate() {
+        List<SingleMovieDTO> listTopMovie = bookingRepository.getTopBookedCurrentMovies(LocalDate.now());
+
+        for (SingleMovieDTO singleMovieDTO : listTopMovie) {
+            List<String> types = typeRepository.findTypeNamesByMovieId(singleMovieDTO.getId());
+            singleMovieDTO.setTypes(types);
+        }
+        return listTopMovie.stream().limit(5).toList();
+    }
+
 }

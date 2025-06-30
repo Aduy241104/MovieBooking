@@ -16,8 +16,6 @@ function LoginPage() {
         password: ""
     });
 
-
-
     const handleChangeLoginData = (e) => {
         const { name, value } = e.target;
         if (loginData[name].length === 0 && value.startsWith(" ")) {
@@ -36,7 +34,12 @@ function LoginPage() {
             const res = await loginOAuth(loginData);
             console.log(res);
             if (res.result.account && res.result.token) {
-                login(res.result.account, res.result.token);
+                if (res.result.account.role === "ADMIN") {
+                    login(res.result.account, res.result.token, res.result.refresToken);
+                    navigate('/admin');
+                    return;
+                }
+                login(res.result.account, res.result.token, res.result.refresToken);
                 navigate('/');
             } else {
                 setShowLoginFail("Đăng nhập không thành công, vui lòng thử lại.");
@@ -98,9 +101,9 @@ function LoginPage() {
                             Đăng ký
                         </strong>
                     </p>
-                    <Link className="mb-1 d-block">Quên mật khẩu</Link>
+                    <Link to={ '/forgot-password' } className="mb-1 d-block">Quên mật khẩu</Link>
                 </div>
-                <button type="submit" className="btn btn-gardient w-100 mt-4 rounded-4 text-light">
+                <button type="submit" className="btn btn-warning btn-gardient w-100 mt-4 rounded-4 text-black">
                     { (isLoading) ? (
                         <div className="spinner-border text-light" role="status" style={ { height: '25px', width: '25px' } }>
                             <span className="visually-hidden">Loading...</span>

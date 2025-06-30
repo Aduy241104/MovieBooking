@@ -28,7 +28,7 @@ public class FindMovieService {
     private TypeRepository typeRepository;
 
     public List<Movie> findMovieByName(String keyword) {
-        List<Movie> response = movieRepository.findByNameVNContainingIgnoreCase(keyword);
+        List<Movie> response = movieRepository.findByNameVNContainingIgnoreCaseAndIsDeletedFalse(keyword);
         return response;
     }
 
@@ -36,8 +36,7 @@ public class FindMovieService {
         List<Movie> response = movieRepository.findAll();
         return response;
     }
-
-
+    
      public Page<SingleMovieDTO> search(String keyword, int page, int size) {
         Page<SingleMovieDTO> pageResult = movieRepository
                 .searchMoviesWithRating(keyword, PageRequest.of(page, size));
@@ -49,7 +48,4 @@ public class FindMovieService {
 
         return pageResult;
     }
-
-
-
 }

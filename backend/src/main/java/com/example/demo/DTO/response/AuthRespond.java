@@ -12,5 +12,6 @@ public class AuthRespond {
     boolean authenticated;
     AccountRespond account;
     String token;
+    String refresToken;
 
 }

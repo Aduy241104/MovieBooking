@@ -56,6 +56,9 @@ public class Booking {
     @Column(name = "booking_status")
     private String bookingStatus;
 
+    @Column(name = "vnp_TxnRef") // Ánh xạ với cột vnp_TxnRef trong DB
+    private String vnpTxnRef;   // Tên thuộc tính trong Java
+
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<BookedSeat> bookedSeats = new ArrayList<>();
 

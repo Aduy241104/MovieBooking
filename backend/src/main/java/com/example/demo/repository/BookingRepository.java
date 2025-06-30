@@ -55,7 +55,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                 COALESCE(SUM(bs.price_paid), 0) AS revenue,
                 COUNT(bs.booked_seat_id) AS tickets
             FROM booking b
-            JOIN booked_seat bs ON b.booking_id = b.booking_id
+            JOIN booked_seat bs ON b.booking_id = bs.booking_id
             WHERE b.booking_status = 'PAID'
                 AND b.booking_time >= :fromDate
                 AND b.booking_time < :toDate
@@ -63,6 +63,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             ORDER BY month_start
             """, nativeQuery = true)
     List<Object[]> getMonthlyRevenueAndTickets(LocalDateTime fromDate, LocalDateTime toDate);
+
 
     @Query(value = """
             SELECT
@@ -86,9 +87,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LIMIT ?1
             """, nativeQuery = true)
     List<Object[]> getBookingTicketRecently(int limit);
-
-    List<Booking> findAllByOrderByIdAsc(); // Sắp xếp theo booking_id tăng dần
-
-    @Query("SELECT b FROM Booking b WHERE b.screening.movie.id = :movieId ORDER BY b.id ASC")
-    List<Booking> findBookingsByMovieId(Long movieId);
 }

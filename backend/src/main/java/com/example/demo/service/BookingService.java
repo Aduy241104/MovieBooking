@@ -2,22 +2,17 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.response.dashboard.BookingTicketRecentlyResponse;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
-import com.example.demo.DTO.response.BookingResponse;
-import com.example.demo.model.Booking;
 import com.example.demo.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +30,7 @@ public class BookingService {
 
         List<Object[]> stats = bookingRepository.getDailyTicketRevenue(fromDate, toDate);
 
+        // Map ngày -> dữ liệu
         Map<LocalDate, DailyTicketRevenueResponse> map = new HashMap<>();
         for (Object[] row : stats) {
             LocalDate date = ((java.sql.Timestamp) row[0]).toLocalDateTime().toLocalDate();
@@ -42,7 +38,7 @@ public class BookingService {
             Long tickets = ((Number) row[2]).longValue();
             map.put(date, new DailyTicketRevenueResponse(date, revenue, tickets));
         }
-
+        // Fill đủ 7 ngày
         List<DailyTicketRevenueResponse> result = new ArrayList<>();
         for (int i = 0; i < dailyCount; i++) {
             LocalDate date = fromDate.plusDays(i).toLocalDate();
@@ -56,7 +52,7 @@ public class BookingService {
 
     public List<DailyTicketRevenueResponse> getWeeklyTicketRevenue(int weekCount) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fromDate = now.minusWeeks(weekCount).with(DayOfWeek.MONDAY).toLocalDate()
+        LocalDateTime fromDate = now.minusWeeks(weekCount).with(java.time.DayOfWeek.MONDAY).toLocalDate()
                 .atStartOfDay();
         LocalDateTime toDate = now.with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
 
@@ -133,41 +129,4 @@ public class BookingService {
         return result;
     }
 
-    public List<BookingResponse> getAllBookings() {
-        List<Booking> bookings = bookingRepository.findAllByOrderByIdAsc();
-        return bookings.stream()
-                .map(booking -> BookingResponse.builder()
-                        .id(booking.getId())
-                        .account(booking.getAccount())
-                        .screening(booking.getScreening())
-                        .paymentMethod(booking.getPaymentMethod())
-                        .promotionCodeApplied(booking.getPromotionCodeApplied())
-                        .discountTypeApplied(booking.getDiscountTypeApplied())
-                        .discountApplied(booking.getDiscountApplied())
-                        .bookingTime(booking.getBookingTime())
-                        .totalAmount(booking.getTotalAmount())
-                        .bookingStatus(booking.getBookingStatus())
-                        .seatCount(booking.getBookedSeats().size())
-                        .build())
-                .collect(Collectors.toList());
-    }
-
-    public List<BookingResponse> getBookingsByMovieId(Long movieId) {
-        List<Booking> bookings = bookingRepository.findBookingsByMovieId(movieId);
-        return bookings.stream()
-                .map(booking -> BookingResponse.builder()
-                        .id(booking.getId())
-                        .account(booking.getAccount())
-                        .screening(booking.getScreening())
-                        .paymentMethod(booking.getPaymentMethod())
-                        .promotionCodeApplied(booking.getPromotionCodeApplied())
-                        .discountTypeApplied(booking.getDiscountTypeApplied())
-                        .discountApplied(booking.getDiscountApplied())
-                        .bookingTime(booking.getBookingTime())
-                        .totalAmount(booking.getTotalAmount())
-                        .bookingStatus(booking.getBookingStatus())
-                        .seatCount(booking.getBookedSeats().size())
-                        .build())
-                .collect(Collectors.toList());
-    }
 }

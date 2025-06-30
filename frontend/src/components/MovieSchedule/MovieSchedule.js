@@ -1,16 +1,34 @@
-import React, { useState } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { Button } from 'antd';
+import { WarningOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import 'moment/locale/vi';
 import MovieItem from './MovieItem';
+import { getMovieByDateAPI } from '../../service/TheMovieService';
 
 moment.locale('vi');
 
 function MovieSchedule() {
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
+    const [movieList, setMovieList] = useState([]);
+    const [error, setError] = useState(null);
 
     const getNext7Days = () => {
         return Array.from({ length: 7 }, (_, i) => moment().add(i, 'days'));
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getMovieByDateAPI();
+                setMovieList(response.result);
+            } catch (error) {
+                setError("Khong thể tải dữ liệu")
+            }
+        }
+        fetchData();
+
+    }, [selectedDate])
 
     const days = getNext7Days();
 
@@ -40,18 +58,35 @@ function MovieSchedule() {
                 </div>
 
                 <div className='w-100 mt-4 custome-scroll-bar custome-scroll-bar-light' style={ { maxHeight: '400px', overflowY: 'auto' } }>
-                    <MovieItem />
-                    <MovieItem />
-                    <MovieItem />
+                    { error ? (
+                        <div className="w-100 text-center text-danger mt-4">
+                            <WarningOutlined style={ { fontSize: 40, color: 'red' } } />
+                            <p className="mt-2 pb-3">{ error }</p>
+                            <Button className='bg-red text-black' >Thử lại</Button>
+                        </div>
+                    ) : (
+                        (movieList.length === 0) ? (
+                            <div className='w-100 text-center p-5'>
+                                <i className="fa-solid fa-video fs-4"></i>
+                                <p className="text-secondary">Hiện chưa có phim nào để hiển thị.</p>
+                            </div>
+
+                        ) : (
+                            movieList.map((item, index) => {
+                                return (
+                                    <MovieItem key={ index } data={ item } />
+                                )
+                            })
+                        )
+                    ) }
                 </div>
-
-
+                
                 {/* <div className='text-center mt-4'>
-                    <h5>Ngày đã chọn: { moment(selectedDate).format('dddd, DD/MM/YYYY') }</h5>
+                    <h5>Ngày đã chọn: { selectedDate }</h5>
                 </div> */}
             </div>
         </div>
     );
 }
 
-export default MovieSchedule;
+export default memo(MovieSchedule);

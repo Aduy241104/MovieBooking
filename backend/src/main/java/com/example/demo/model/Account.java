@@ -1,9 +1,9 @@
 package com.example.demo.model;
-
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "account")
@@ -47,6 +47,12 @@ public class Account {
     @Column(name = "register_date")
     private LocalDate registerDate;
 
+    @Column(name = "update_at")
+    private LocalDateTime updateAt;
+
+    @Column(name = "update_by")
+    private String updateBy;
+
     @Column(name = "score")
     private Integer score;
 
@@ -67,4 +73,8 @@ public class Account {
         this.registerDate = LocalDate.now();
     }
 
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updateAt = LocalDateTime.now();
+    }
 }
