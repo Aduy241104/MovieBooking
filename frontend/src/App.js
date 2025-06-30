@@ -6,17 +6,29 @@ import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
 
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
-import RoomList from './components/admin/room/RoomList';
-import CreateRoom from './components/admin/room/CreateRoom';
-import EditRoom from './components/admin/room/EditRoom';
-import RoomDetail from './components/admin/room/RoomDetail';
-import TypeList from './components/admin/Movie/TypeList'
+
+
+import RoomList from './components/admin/Room/RoomList';
+import CreateRoom from './components/admin/Room/CreateRoom';
+import EditRoom from './components/admin/Room/EditRoom';
+import RoomDetail from './components/admin/Room/RoomDetail';
+
+
+import TypeList from './components/admin/Movie/MovieType/TypeList'
+
+
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import HomePage from './Page/Home/HomePage';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+
+
+import MovieList from './components/admin/Movie/Movie/MovieList';
+import AddMovie from './components/admin/Movie/Movie/AddMovie';
+import EditMovie from './components/admin/Movie/Movie/EditMovie';
 
 import Profile from './Page/ProfilePage/Profile/Profile';
 import ChangePassword from './Page/ProfilePage/ChangePassword/ChangePassword';
@@ -57,6 +69,7 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
+
 
 function App() {
 
@@ -121,9 +134,16 @@ function App() {
           <Route path='room-list' element={<RoomList />} />
           <Route path='room-list/add-room' element={<CreateRoom />} />
           <Route path='room-list/room/:id' element={<RoomDetail />} />
-          <Route path='room-list/:id/edit' element={<EditRoom />} />
+          <Route path='room-list/room/edit/:id' element={<EditRoom />} />
 
-          <Route path='movie-type' element={<TypeList/>} />
+
+          <Route path='movie-type' element={<TypeList />} />
+
+          <Route path='movies' element={<MovieList />} />
+          <Route path='movies/add' element={<AddMovie />} />
+          <Route path="movies/edit/:id" element={<EditMovie />} />
+
+
           <Route path='users-members' element={
             <UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />
           } />

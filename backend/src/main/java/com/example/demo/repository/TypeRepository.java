@@ -16,7 +16,7 @@ public interface TypeRepository extends JpaRepository<Type, Integer> {
     List<String> findTypeNamesByMovieId(@Param("movieId") Long movieId);
     boolean existsByName(String name);
     List<Type> findByIsDeletedFalse();
-
+    List<Type> findAllByIdIn(List<Integer> ids);
     // Kiểm tra tên trùng với ID khác (dùng khi update)
     boolean existsByNameAndIdNot(String name, Integer id);
 }

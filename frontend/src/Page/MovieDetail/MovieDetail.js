@@ -1,11 +1,10 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import DefaultLayout from '../../layouts/DefaultLayout'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import styles from './MovieDetail.module.scss'
 import classNames from 'classnames/bind'
 import RightComponent from './RightComponent'
 import { getMovieDetailAPI } from '../../service/TheMovieService'
-import Artist from '../Artist'
 import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
@@ -32,7 +31,7 @@ function MovieDetail() {
 
                 const path = response.result?.largeImage;
                 if (path?.trim()) {
-                    const fullUrl = path;
+                    const fullUrl = `http://localhost:8081${path}`; // sửa dòng này thêm localhost
                     const img = new Image();
                     img.src = fullUrl;
 
@@ -68,7 +67,8 @@ function MovieDetail() {
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            src={ movie.smallImage + "" }
+                                            // src={ movie.smallImage + "" }
+                                             src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {
@@ -108,7 +108,7 @@ function MovieDetail() {
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
+                                                    <span className='fw-300'>{movie.movieProductionCompany}</span>
                                                 </li>
                                             </ul>
                                         </div>
