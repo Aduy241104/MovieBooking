@@ -30,4 +30,5 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
     List<Object[]> getMoviesByTypeRevenue();
     List<MovieType> findByMovie(Movie movie);
     void deleteByMovieId(Long movieId);
+    List<MovieType> findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(String typeName);
 }
