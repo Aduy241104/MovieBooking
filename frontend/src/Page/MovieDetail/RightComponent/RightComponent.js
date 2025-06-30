@@ -26,7 +26,8 @@ function RightComponent(props) {
                 <TrailerModal
                     open={isOpenTrailer}
                     onClose={() => setOpenTrailer(false)}
-                    trailerUrl={props.trailer}
+                    // trailerUrl={props.trailer}
+                    trailerUrl={movie?.trailer} // Sửa lại để xem movie
                 />
 
                 <CustomizeButton

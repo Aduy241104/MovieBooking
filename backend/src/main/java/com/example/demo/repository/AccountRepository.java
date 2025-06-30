@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.model.Role;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -37,5 +39,13 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
             ORDER BY month
             """, nativeQuery = true)
     List<Object[]> getUserRegistrationsByMonth(LocalDateTime fromDate, LocalDateTime toDate);
-
+// <<< THÊM PHƯƠNG THỨC NÀY VÀO >>>
+    /**
+     * Tìm tài khoản theo ID và khóa dòng đó lại để ghi (sử dụng cho việc cập nhật điểm).
+     * Điều này ngăn chặn các giao dịch khác sửa đổi tài khoản cùng một lúc.
+     * @param accountId ID của tài khoản.
+     * @return Optional chứa tài khoản nếu tìm thấy.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Account> findWithLockingByAccountId(Long accountId);
 }
