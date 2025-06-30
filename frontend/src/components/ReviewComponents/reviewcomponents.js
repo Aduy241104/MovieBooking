@@ -28,6 +28,8 @@ const ReviewBox = () => {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const pageSize = 7;
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
 
 
     const handleLoadMore = () => {
@@ -68,7 +70,7 @@ const ReviewBox = () => {
                 setLoading(false);
                 setHasMore(false);
             });
-    }, [movieId, page]);
+    }, [movieId, page, refreshTrigger]);
 
 
 
@@ -230,9 +232,9 @@ const ReviewBox = () => {
                     throw new Error('Xóa đánh giá thất bại');
 
                 setPage(0);
-                setReviews([]);
                 setHasMore(true);
-                
+                setRefreshTrigger(prev => prev + 1);
+
                 // Sau khi xóa, load lại danh sách đánh giá từ server
                 // await loadReviews();
 

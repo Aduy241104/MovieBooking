@@ -12,6 +12,7 @@ import CreateRoom from './components/admin/room/CreateRoom';
 import EditRoom from './components/admin/room/EditRoom';
 import RoomDetail from './components/admin/room/RoomDetail';
 import { PaymentMethodPage } from './components/PaymentMethod/PaymentMethodPage';
+import PaymentTransactionPage from './components/PaymentTransaction/PaymentTransactionPage';
 import TypeList from './components/admin/Movie/TypeList';
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
@@ -99,6 +100,10 @@ function App() {
           <Route
             path="paymentmethod"
             element={<PaymentMethodPage paymentmethodText="Phương thức thanh toán" />}
+          />
+          <Route
+            path="payment-transactions"
+            element={<PaymentTransactionPage paymentmethodText="Lịch sử giao dịch" />}
           />
           <Route
             path="activity-logs"

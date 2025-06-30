@@ -6,11 +6,14 @@ import { TicketPlus } from 'lucide-react';
 import { debounce } from 'lodash';
 import { PaymentMethodTable } from '../PaymentMethod/PaymentMethodTable';
 import PaymentMethodService, { fetchAllPaymentMethodAPI } from '../../service/PaymentMethodService';
+import CreatePaymentMethodModal from '../PaymentMethod/CreatePaymentMethodModal';
+
+import UpdatePaymentMethodModal from '../PaymentMethod/UpdatePaymentMethodModal';
 // import {Modal, Form, Input, Switch} from 'antd';
 
 export const PaymentMethodPage = () => {
     const { setBreadcrumbItems } = useOutletContext();
-    
+
     // const [Form] = Form.useForm();
 
     const [paymentMethods, setPaymentMethods] = useState([]);
@@ -18,11 +21,15 @@ export const PaymentMethodPage = () => {
     const [statusFilter, setStatusFilter] = useState(null);
     const [refreshFlag, setRefreshFlag] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [currentId, setCurrentId] = useState(null);
+    const [selectedId, setSelectedId] = useState(null);
+
 
     useEffect(() => {
         setBreadcrumbItems([
             { title: 'Trang chủ', href: '/admin' },
-            { title: 'Phương thức thanh toán' },    
+            { title: 'Phương thức thanh toán' },
         ]);
     }, []);
 
@@ -80,13 +87,39 @@ export const PaymentMethodPage = () => {
                         onChange={(value) => setStatusFilter(value)}
                     />
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)} size='large' type="primary">
+                <Button onClick={() => setIsCreateModalOpen(true)} size="large" type="primary">
                     <TicketPlus size={20} strokeWidth={1.5} />
                     <span>Thêm phương thức</span>
                 </Button>
+
+
+
+                <CreatePaymentMethodModal
+                    isCreateModalOpen={isCreateModalOpen}
+                    setIsCreateModalOpen={setIsCreateModalOpen}
+                    setRefreshFlag={setRefreshFlag}
+                />
+
+
+                <UpdatePaymentMethodModal
+                    visible={isUpdateModalOpen}            
+                    setVisible={setIsUpdateModalOpen}      
+                    methodId={selectedId}                  
+                    setRefreshFlag={setRefreshFlag}
+                />
+
+
+
             </div>
 
-            <PaymentMethodTable data={filteredMethods} setRefreshFlag={setRefreshFlag} />
+            <PaymentMethodTable
+                data={filteredMethods}
+                setRefreshFlag={setRefreshFlag}
+                onEdit={(id) => {
+                    setSelectedId(id);
+                    setIsUpdateModalOpen(true);
+                }}
+            />
 
             {/* <AddPaymentMethodModal
             open={isCreateModalOpen}

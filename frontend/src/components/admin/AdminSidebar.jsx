@@ -1,5 +1,5 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film, Video, HandCoins } from 'lucide-react'
+import { LayoutDashboard, Ticket, Users, Film, Video, HandCoins, History } from 'lucide-react'
 
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
@@ -59,12 +59,28 @@ export const AdminSidebar = (props) => {
                 },
             ]
         },
-        {
+        // {
 
-            key: 'paymentmethod',
+        //     key: 'paymentmethod',
+        //     icon: <HandCoins size={20} strokeWidth={1.5} />,
+        //     label: <Link to={"paymentmethod"}>Phương thức thanh toán</Link>
+        // },
+        {
+            key: 'payment-management',
             icon: <HandCoins size={20} strokeWidth={1.5} />,
-            label: <Link to={"/admin/paymentmethod"}>Phương thức thanh toán</Link>
+            label: 'Quản lí thanh toán',
+            children: [
+                {
+                    key: 'paymenttransactions',
+                    label: <Link to={"payment-transactions"}>Giao dịch </Link>
+                },
+                {
+                    key: 'paymentmethod',
+                    label: <Link to={"paymentmethod"}>Phương thức thanh toán</Link>
+                },
+            ]
         },
+
         {
 
             key: 'activity-logs',
@@ -89,6 +105,10 @@ export const AdminSidebar = (props) => {
             return ['room-list'];
         } else if (pathname.includes('activity-logs')) {
             return ['activity-logs'];
+        } else if (pathname.includes('paymentmethod')) {
+            return ['paymentmethod'];
+        } else if (pathname.includes('payment-transactions')) {
+            return ['paymenttransactions'];
         }
         return [];
     };
@@ -98,7 +118,10 @@ export const AdminSidebar = (props) => {
         const pathname = location.pathname;
         if (pathname.includes('users-members') || pathname.includes('users-employees')) {
             setOpenKeys(['users']);
-        } else {
+        } else if (pathname.includes('paymentmethod') || pathname.includes('payment-transactions')) {
+            setOpenKeys(['payment-management']);
+        }
+         else {
             setOpenKeys([]);
         }
         // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được

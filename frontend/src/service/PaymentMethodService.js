@@ -1,20 +1,20 @@
 
 // src/service/PaymentMethodService.js
 import axios from 'axios';
-const BASE_URL = 'http://localhost:8081/api/admin/payment-methods'; 
+const BASE_URL = 'http://localhost:8081/api/admin/payment-methods';
 
 const instance = axios.create({
     baseURL: BASE_URL
 });
 
-instance.interceptors.request.use(function (config){
+instance.interceptors.request.use(function (config) {
     const token = localStorage.getItem("token");
-    if(token){
-        config.headers.Authorization = `Bearer ${token}` 
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
     }
-    return config; 
+    return config;
 
-}, function (error){
+}, function (error) {
     return Promise.reject(error)
 })
 
@@ -31,12 +31,12 @@ const getAuthHeader = () => {
     // console.log(localStorage.getItem("token"));
     let token = tokenStr;
 
-    try{
+    try {
         const obj = JSON.parse(tokenStr);
         if (obj.token) token = obj.token;
-    } catch(_) {}
+    } catch (_) { }
 
-    if (!token) return{};
+    if (!token) return {};
 
     return {
         Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ const PaymentMethodService = {
     async fetchAll() {
         const res = await fetch(BASE_URL, {
             method: 'GET',
-        
+
             headers: getAuthHeader()
         });
         if (!res.ok) throw new Error("Không thể lấy danh sách phương thức thanh toán");
@@ -74,13 +74,16 @@ const PaymentMethodService = {
 
     // Cập nhật phương thức thanh toán theo ID
     async update(id, data) {
-        const res = await fetch(`${BASE_URL}/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
+        const token = localStorage.getItem('token');
+        return axios.put(`${BASE_URL}/${id}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token && { Authorization: `Bearer ${token}` }),
+            }
         });
-        if (!res.ok) throw new Error("Cập nhật phương thức thất bại");
-        return res.json();
-    },
+    }
+    ,
+
 
     // Bật/tắt trạng thái hoạt động
     async toggleActive(id) {
