@@ -68,7 +68,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """, nativeQuery = true)
     List<Object[]> getMonthlyRevenueAndTickets(LocalDateTime fromDate, LocalDateTime toDate);
 
-
     @Query(value = """
             SELECT
                 b.booking_id AS bookingId,
@@ -92,9 +91,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """, nativeQuery = true)
     List<Object[]> getBookingTicketRecently(int limit);
 
-    //Booking
+    // Booking
     List<Booking> findByAccountAccountIdOrderByBookingTimeDesc(Long accountId);
+
     Optional<Booking> findByIdAndAccountAccountId(Integer bookingId, Long accountId);
+
     Optional<Booking> findByVnpTxnRef(String vnpTxnRef); // Thêm findByVnpTxnRef
 
     @Query("""

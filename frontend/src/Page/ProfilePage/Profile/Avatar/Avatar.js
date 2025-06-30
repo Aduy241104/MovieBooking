@@ -111,15 +111,22 @@ function Avatar({ originalImage }) {
                 open={ isOpen }
                 onCancel={ () => setOpen(false) }
                 footer={ null }
-                title={ <h5 className="fw-bold p-3 bg-midnight text-light">Đổi ảnh đại diện</h5> }
+                title={
+                    <h5
+                        style={ { backgroundColor: "#2a314e", borderTopLeftRadius: '6px', borderTopRightRadius: '6px' } }
+                        className="fw-bold p-3 m-0 p-0 text-light"
+                    >
+                        Đổi ảnh đại diện
+                    </h5>
+                }
                 className="trailer-modal-2 bg-midnight"
                 width={ 600 }
             >
                 <div className='d-flex flex-column align-items-center w-100 p-4 text-light'>
-
                     <div className='w-100 ps-2'>
-                        <button className='p-3' onClick={ () => handleChangeTab("default", imageLink.korea) }>Korea</button>
-                        <button className='p-3' onClick={ () => handleChangeTab("default", imageLink.anime) }>anime</button>
+                        <button className='p-3' onClick={ () => handleChangeTab("default", imageLink.korea) }>Hàn Quốc</button>
+                        <button className='p-3' onClick={ () => handleChangeTab("default", imageLink.korea) }>Hàn Quốc</button>
+                        <button className='p-3' onClick={ () => handleChangeTab("default", imageLink.anime) }>Hoạt hình</button>
                         <button className='p-3' onClick={ () => handleChangeTab("upload") }>Upload</button>
                     </div>
                     { typeUpload === "upload" &&
@@ -166,15 +173,30 @@ function Avatar({ originalImage }) {
                                     )
                                 }) }
                             </ul>
-                            <button onClick={ handleUpdate }
-                            >
-                                Lưu lại
-                                { isLoading &&
-                                    <div className="spinner-border spinner-border-sm" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div>
-                                }
-                            </button>
+                            <div className='w-100 d-flex justify-content-end'>
+                                <button
+                                    onClick={ handleUpdate }
+                                    className='bg-red text-black p-1 pe-3 ps-3 rounded-1 ms-3'
+                                >
+                                    Lưu lại
+                                    { isLoading &&
+                                        <div className="spinner-border spinner-border-sm ms-1" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    }
+                                </button>
+                                <button
+                                    onClick={ () => setOpen(false) }
+                                    className='bg-light text-black p-1 pe-3 ps-3 rounded-1 ms-2 me-4'
+                                >
+                                    Đóng
+                                    { isLoading &&
+                                        <div className="spinner-border spinner-border-sm" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    }
+                                </button>   
+                            </div>
                         </> }
                 </div>
             </Modal>
@@ -197,5 +219,4 @@ function Avatar({ originalImage }) {
         </>
     )
 }
-
 export default Avatar

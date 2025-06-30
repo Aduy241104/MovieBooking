@@ -44,7 +44,8 @@ public class SecurityConfig {
                         "/api/auth/**",
                         "/avatars/**",
                         "/ws-notification/**",
-                        "/api/bookings/payment/vnpay_return")
+                        "/api/bookings/payment/vnpay_return",
+                        "/images/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();

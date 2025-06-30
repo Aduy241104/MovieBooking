@@ -5,10 +5,9 @@ import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
 import { useEffect, useState } from "react";
 import { getNowShowingMovieAPI } from "../../service/TheMovieService";
-
+import { memo } from "react";
 
 const cx = classNames.bind(styles);
-
 
 function PlayingMovie() {
     const [listMovie, setListMovie] = useState([]);
@@ -16,24 +15,20 @@ function PlayingMovie() {
     const fetchData = async () => {
         try {
             const response = await getNowShowingMovieAPI();
-            console.log("test: ", response.result);
             setListMovie(response.result);
         } catch (error) {
             console.log(error.message);
         }
     }
 
-
     useEffect(() => {
         fetchData();
-    }, [])
-    return (
-        <div
-            className="p-5"
+    }, []);
 
-        >
+    return (
+        <div className="p-5">
             <div className={ cx("container") }>
-                <div className="d-flex flex-column justify-content-center align-items-center text-light">
+                <div className="d-flex flex-column justify-content-center align-items-center text-light mt-5">
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim đang chiếu</h2>
                     <div className={ cx('w-responsive', 'pb-5') }>
                         <SwiperSlides>
@@ -42,7 +37,8 @@ function PlayingMovie() {
                                     <SwiperSlide key={ index }>
                                         <MovieComp
                                             index={ index + 1 }
-                                            imglink={ item.smallImage }
+                                            //imglink={ item.smallImage }
+                                            imglink={`http://localhost:8081${item.smallImage}`} // sửa dòng này thêm localhost
                                             nameVN={ item.nameVN }
                                             types={ item.types }
                                             id={ item.id }
@@ -58,4 +54,4 @@ function PlayingMovie() {
     )
 }
 
-export default PlayingMovie
+export default memo(PlayingMovie)

@@ -1,3 +1,10 @@
 .text-gray {
     color: rgb(179, 178, 178);
 }
+.blue {
+    background-color: #3556b6;
+
+    &:hover {
+        background-color: #4a6dd5;
+    }
+}

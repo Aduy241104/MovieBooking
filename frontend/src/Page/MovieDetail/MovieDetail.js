@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import DefaultLayout from '../../layouts/DefaultLayout'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import styles from './MovieDetail.module.scss'
 import classNames from 'classnames/bind'
 import RightComponent from './RightComponent'
 import { getMovieDetailAPI } from '../../service/TheMovieService'
+import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
 const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
@@ -13,7 +14,6 @@ const DEFAULT_SMALL_POSTER = require('../../assets/img/Screenshot 2025-06-13 102
 function MovieDetail() {
     const { id } = useParams();
     const [movie, setMovie] = useState({});
-    // const [errorMessage, setError] = useState("");
     const [bgUrl, setBgUrl] = useState(DEFAULT_BG);
 
     useLayoutEffect(() => {
@@ -31,7 +31,7 @@ function MovieDetail() {
 
                 const path = response.result?.largeImage;
                 if (path?.trim()) {
-                    const fullUrl = path;
+                    const fullUrl = `http://localhost:8081${path}`; // sửa dòng này thêm localhost
                     const img = new Image();
                     img.src = fullUrl;
 
@@ -62,12 +62,13 @@ function MovieDetail() {
                         </div>
                     </div>
                     <div className={ cx('container-fluid text-light bg-midNight', 'hover-face') }>
-                        <div className='container mt-4' style={ { zIndex: '999' } }>
+                        <div className=' mt-4 ps-5 pe-5' style={ { zIndex: '999' } }>
                             <div className='row'>
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            src={ movie.smallImage + "" }
+                                            // src={ movie.smallImage + "" }
+                                             src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {
@@ -99,28 +100,25 @@ function MovieDetail() {
                                             <ul className='p-0'>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Thời lượng: </strong>
-                                                    <span className={ cx('text-gray') }>{movie.duration} phút</span>
+                                                    <span className={ cx('text-gray') }>{ movie.duration } phút</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Đạo diễn: </strong>
-                                                    <span className='fw-300'>Warner Bros</span>
+                                                    <span className='fw-300'>{ movie.director }</span>
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
+                                                    <span className='fw-300'>{movie.movieProductionCompany}</span>
                                                 </li>
-                                                <li className='fs-7 pb-3' >
-                                                    <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
-                                                </li>
-
                                             </ul>
                                         </div>
+
+                                        <ArtistList movieName={ movie.nameEN } />
                                     </div>
                                 </div>
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>
                                     <RightComponent
-                                        movie={movie} // locpng
+                                        movie={ movie } // locpng
                                         trailer={ movie.trailer }
                                         startDate={ movie.fromDate }
                                     />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { WarningOutlined } from '@ant-design/icons';
 import moment from 'moment';
@@ -17,14 +17,13 @@ function MovieSchedule() {
         return Array.from({ length: 7 }, (_, i) => moment().add(i, 'days'));
     };
 
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await getMovieByDateAPI();
                 setMovieList(response.result);
             } catch (error) {
-                setError("Khoont thể tải dữ liệu")
+                setError("Khong thể tải dữ liệu")
             }
         }
         fetchData();
@@ -81,8 +80,7 @@ function MovieSchedule() {
                         )
                     ) }
                 </div>
-
-
+                
                 {/* <div className='text-center mt-4'>
                     <h5>Ngày đã chọn: { selectedDate }</h5>
                 </div> */}
@@ -91,4 +89,4 @@ function MovieSchedule() {
     );
 }
 
-export default MovieSchedule;
+export default memo(MovieSchedule);
