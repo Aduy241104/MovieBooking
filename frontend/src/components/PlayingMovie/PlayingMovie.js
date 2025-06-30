@@ -40,6 +40,7 @@ function PlayingMovie() {
                                             imglink={ item.smallImage }
                                             nameVN={ item.nameVN }
                                             types={ item.types }
+                                            ageLimit={item.ageLimit}
                                             id={ item.id }
                                         />
                                     </SwiperSlide>
