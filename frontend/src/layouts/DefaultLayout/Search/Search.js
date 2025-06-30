@@ -126,7 +126,7 @@ function Search() {
                                             <div
                                                 className={ cx('search-result-layout', 'red-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') }
                                                 key={ item.id }
-                                                onClick={ () => naviagate(`/movie-detail/1`) }
+                                                onClick={ () => naviagate(`/movie-detail/${item.id}`) }
                                             >
                                                 <div className='w-25'>
                                                     <img

@@ -2,10 +2,12 @@ package com.example.demo.service;
 
 import com.example.demo.model.PaymentMethod;
 import com.example.demo.repository.PaymentMethodRepository;
+
 import org.springframework.data.domain.Sort;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,4 +54,10 @@ public class PaymentMethodService {
     public void delete(Long id) {
         paymentMethodRepository.deleteById(id);
     }
+
+    public List<PaymentMethod> getActivePaymentMethods() {
+        return paymentMethodRepository.findByActiveTrue();
+    }
 }
+
+
