@@ -28,4 +28,6 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
             """, nativeQuery = true)
     List<Object[]> getMoviesByTypeRevenue();
 
+    List<MovieType> findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(String typeName);
+
 }
