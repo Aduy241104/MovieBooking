@@ -1,9 +1,20 @@
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
-// import { Input, Button, Card, Row, Col, message, Divider, Badge } from "antd";
+// import {
+//   Input,
+//   Button,
+//   Card,
+//   Row,
+//   Col,
+//   message,
+//   Divider,
+//   Tooltip,
+//   Space,
+//   Tag,
+// } from "antd";
+// import { SquarePen, X } from "lucide-react";
 
-// const blue = "rgb(22, 119, 255)";
-// const seatColors = ["#e0e0e0", "#f74551", "#f536db"]; // regular, vip, couple
+// const seatColors = ["#e0e0e0", "#f74551", "#f536db"];
 
 // export default function RoomForm({ room, onBack }) {
 //   const [name, setName] = useState("");
@@ -26,10 +37,7 @@
 //             const colNumber = parseInt(seat.seatCol) + 1;
 //             const code = rowChar + colNumber;
 //             const typeName = seat.seatType?.seatTypeName?.toLowerCase() || "regular";
-
-//             seatsFromAPI[code] =
-//               typeName === "vip" ? 1 :
-//               typeName === "couple" ? 2 : 0;
+//             seatsFromAPI[code] = typeName === "vip" ? 1 : typeName === "couple" ? 2 : 0;
 //           });
 
 //           const completeSeats = {};
@@ -64,10 +72,7 @@
 //   };
 
 //   const toggleSeatType = (code) => {
-//     setSeatTypes(prev => ({
-//       ...prev,
-//       [code]: (prev[code] + 1) % 3,
-//     }));
+//     setSeatTypes(prev => ({ ...prev, [code]: (prev[code] + 1) % 3 }));
 //   };
 
 //   const validateName = async () => {
@@ -101,7 +106,7 @@
 //     const seats = Object.keys(seatTypes).map(code => ({
 //       seatRow: code.charCodeAt(0) - 65,
 //       seatCol: parseInt(code.slice(1)) - 1,
-//       seatType: seatTypes[code] === 0 ? "regular" : seatTypes[code] === 1 ? "vip" : "couple"
+//       seatType: seatTypes[code] === 0 ? "regular" : seatTypes[code] === 1 ? "vip" : "couple",
 //     }));
 
 //     const payload = { name, rows, cols, seats };
@@ -120,113 +125,136 @@
 //   };
 
 //   return (
-//     <div className="p-4 bg-white min-h-screen">
-//       <Row gutter={24}>
-//         <Col xs={24} lg={10}>
-//           <Card title={room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"} className="rounded-2xl shadow-sm">
-//             <label className="fw-semibold">Tên phòng</label>
-//             <Input
-//               value={name}
-//               onChange={e => setName(e.target.value)}
-//               placeholder="Nhập tên phòng"
-//             />
-//             {error && <div className="text-danger mt-1">{error}</div>}
-
-//             <Row gutter={16} className="mt-3">
-//               <Col span={12}>
-//                 <label className="fw-semibold">Số hàng</label>
-//                 <Input
-//                   type="number"
-//                   min={1}
-//                   max={15}
-//                   value={rows}
-//                   onChange={e => setRows(Math.min(+e.target.value, 15))}
-//                 />
-//               </Col>
-//               <Col span={12}>
-//                 <label className="fw-semibold">Số cột</label>
-//                 <Input
-//                   type="number"
-//                   min={1}
-//                   max={15}
-//                   value={cols}
-//                   onChange={e => setCols(Math.min(+e.target.value, 15))}
-//                 />
-//               </Col>
-//             </Row>
-
-//             <Button type="primary" className="mt-3 w-100 fw-bold" onClick={generateSeats}>
-//               Tạo sơ đồ ghế
-//             </Button>
-
-//             <Divider />
-
-//             <Row justify="space-between">
-//               <Col>
-//                 <Button type="primary" className="fw-bold" onClick={handleSubmit}>
+//     <div className="p-6 min-h-screen bg-white">
+//       <Card bordered={false} className="rounded-xl">
+//         <Row gutter={[24, 24]}>
+//           <Col xs={24} md={6} lg={6}>
+//             <Divider orientation="left" plain>
+//               {room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}
+//             </Divider>
+//             <Space direction="vertical" style={{ width: "100%" }} size="middle">
+//               <Input
+//                 value={name}
+//                 onChange={e => setName(e.target.value)}
+//                 placeholder="Tên phòng"
+//               />
+//               {error && <div className="text-red-500 text-sm">{error}</div>}
+//               <Row gutter={12}>
+//                 <Col span={12}>
+//                   <Input
+//                     type="number"
+//                     value={rows}
+//                     onChange={e => setRows(Math.min(+e.target.value, 15))}
+//                     placeholder="Số hàng (tối đa 15)"
+//                   />
+//                 </Col>
+//                 <Col span={12}>
+//                   <Input
+//                     type="number"
+//                     value={cols}
+//                     onChange={e => setCols(Math.min(+e.target.value, 15))}
+//                     placeholder="Số cột (tối đa 15)"
+//                   />
+//                 </Col>
+//               </Row>
+//               <Button type="primary" onClick={generateSeats} block>
+//                 Tạo sơ đồ ghế
+//               </Button>
+//               <Space>
+//                 <Button type="primary" onClick={handleSubmit} icon={<SquarePen size={16} />}>
 //                   Lưu
 //                 </Button>
-//               </Col>
-//               <Col>
-//                 <Button className="fw-bold" onClick={onBack}>
+//                 <Button danger onClick={onBack} icon={<X size={16} />}>
 //                   Hủy
 //                 </Button>
-//               </Col>
-//             </Row>
-//           </Card>
-//         </Col>
-
-//         <Col xs={24} lg={14}>
-//           <Card title="Sơ đồ ghế" className="rounded-2xl shadow-sm">
-//             <div className="text-center mb-3 fw-bold" style={{ backgroundColor: blue, color: "#fff", padding: "6px", borderRadius: "8px" }}>
-//               Màn hình
+//               </Space>
+//             </Space>
+//           </Col>
+//           <Col xs={24} md={18} lg={18}>
+//             <Divider orientation="left" plain>
+//               Sơ đồ ghế
+//             </Divider>
+//             <div style={{ overflowX: "auto", paddingBottom: 12 }}>
+//               <div
+//                 style={{
+//                   borderRadius: "10px",
+//                   padding: "10px",
+//                   margin: "0 auto 20px",
+//                   color: "#fff",
+//                   backgroundColor: "#1677FF",
+//                   width: `${cols * 42 + (cols - 1) * 6}px`,
+//                   minWidth: 300,
+//                   textAlign: "center",
+//                   fontWeight: 600,
+//                   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+//                 }}
+//               >
+//                 Màn hình
+//               </div>
+//               <div
+//                 style={{
+//                   display: "grid",
+//                   gridTemplateColumns: `repeat(${cols}, 40px)`,
+//                   gap: 6,
+//                   justifyContent: "center",
+//                   minWidth: `${cols * 40 + (cols - 1) * 6}px`,
+//                 }}
+//               >
+//                 {Object.keys(seatTypes).map(code => (
+//                   <Tooltip
+//                     key={code}
+//                     title={`Ghế ${code} (${["Thường", "VIP", "Đôi"][seatTypes[code]]})`}
+//                   >
+//                     <div
+//                       onClick={() => toggleSeatType(code)}
+//                       style={{
+//                         backgroundColor: seatColors[seatTypes[code]],
+//                         width: 40,
+//                         height: 40,
+//                         borderRadius: 6,
+//                         display: "flex",
+//                         alignItems: "center",
+//                         justifyContent: "center",
+//                         cursor: "pointer",
+//                         boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+//                         fontWeight: 500,
+//                         fontSize: 12,
+//                       }}
+//                     >
+//                       {code}
+//                     </div>
+//                   </Tooltip>
+//                 ))}
+//               </div>
+//               <Space style={{ marginTop: 16 }}>
+//                 <Tag color="#e0e0e0">Thường</Tag>
+//                 <Tag color="#f74551">VIP</Tag>
+//                 <Tag color="#f536db">Đôi</Tag>
+//               </Space>
 //             </div>
-
-//             <div
-//               className="d-grid gap-2 justify-content-center"
-//               style={{
-//                 gridTemplateColumns: `repeat(${cols}, 40px)`,
-//                 display: "grid",
-//                 justifyContent: "center"
-//               }}
-//             >
-//               {Object.keys(seatTypes).map((code) => (
-//                 <div
-//                   key={code}
-//                   onClick={() => toggleSeatType(code)}
-//                   className="text-center fw-semibold"
-//                   style={{
-//                     backgroundColor: seatColors[seatTypes[code]],
-//                     width: "40px",
-//                     height: "40px",
-//                     lineHeight: "40px",
-//                     cursor: "pointer",
-//                     borderRadius: "6px",
-//                     border: "1px solid #ccc",
-//                     boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-//                   }}
-//                 >
-//                   {code}
-//                 </div>
-//               ))}
-//             </div>
-
-//             <div className="mt-4 d-flex gap-3">
-//               <Badge color={seatColors[0]} text="Thường" />
-//               <Badge color={seatColors[1]} text="VIP" />
-//               <Badge color={seatColors[2]} text="Đôi" />
-//             </div>
-//           </Card>
-//         </Col>
-//       </Row>
+//           </Col>
+//         </Row>
+//       </Card>
 //     </div>
 //   );
 // }
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Input, Button, Card, Row, Col, message, Divider, Tooltip, Space, Tag } from "antd";
-import {SquarePen, X} from "lucide-react"
-const seatColors = ["#e0e0e0", "#f74551", "#f536db"]; // regular, vip, couple
+import {
+  Input,
+  Button,
+  Card,
+  Row,
+  Col,
+  Divider,
+  Tooltip,
+  Space,
+  Tag,
+  notification,
+} from "antd";
+import { SquarePen, X } from "lucide-react";
+
+const seatColors = ["#e0e0e0", "#f74551", "#f536db"];
 
 export default function RoomForm({ room, onBack }) {
   const [name, setName] = useState("");
@@ -267,7 +295,10 @@ export default function RoomForm({ room, onBack }) {
         })
         .catch(err => {
           console.error("Lỗi khi load phòng:", err);
-          message.error("Không thể tải dữ liệu phòng.");
+          notification.error({
+            message: "TẢI DỮ LIỆU THẤT BẠI",
+            description: "Không thể tải dữ liệu phòng."
+          });
         });
     }
   }, [room]);
@@ -284,10 +315,7 @@ export default function RoomForm({ room, onBack }) {
   };
 
   const toggleSeatType = (code) => {
-    setSeatTypes(prev => ({
-      ...prev,
-      [code]: (prev[code] + 1) % 3,
-    }));
+    setSeatTypes(prev => ({ ...prev, [code]: (prev[code] + 1) % 3 }));
   };
 
   const validateName = async () => {
@@ -305,7 +333,10 @@ export default function RoomForm({ room, onBack }) {
           return false;
         }
       } catch (err) {
-        message.error("Không thể kiểm tra tên phòng.");
+        notification.error({
+          message: "KIỂM TRA TÊN PHÒNG THẤT BẠI",
+          description: "Không thể kiểm tra tên phòng."
+        });
         return false;
       }
     }
@@ -321,139 +352,143 @@ export default function RoomForm({ room, onBack }) {
     const seats = Object.keys(seatTypes).map(code => ({
       seatRow: code.charCodeAt(0) - 65,
       seatCol: parseInt(code.slice(1)) - 1,
-      seatType: seatTypes[code] === 0 ? "regular" : seatTypes[code] === 1 ? "vip" : "couple"
+      seatType: seatTypes[code] === 0 ? "regular" : seatTypes[code] === 1 ? "vip" : "couple",
     }));
 
     const payload = { name, rows, cols, seats };
 
     try {
-      room
-        ? await axios.put(`http://localhost:8081/api/public/rooms/${room.id}`, payload)
-        : await axios.post("http://localhost:8081/api/public/rooms", payload);
-
-      message.success("Lưu phòng thành công");
+      if (room) {
+        await axios.put(`http://localhost:8081/api/public/rooms/${room.id}`, payload);
+        notification.success({
+          message: "CẬP NHẬT THÀNH CÔNG",
+          description: "Cập nhật phòng chiếu thành công."
+        });
+      } else {
+        await axios.post("http://localhost:8081/api/public/rooms", payload);
+        notification.success({
+          message: "THÊM PHÒNG THÀNH CÔNG",
+          description: "Thêm phòng chiếu mới thành công."
+        });
+      }
       onBack();
     } catch (err) {
       console.error("Lỗi khi lưu:", err);
-      message.error("Lỗi khi lưu phòng.");
+      notification.error({
+        message: "LỖI KHI LƯU",
+        description: "Đã xảy ra lỗi khi lưu phòng chiếu."
+      });
     }
   };
 
   return (
-    <div className="p-6 min-h-screen bg-[#f9fafb]">
-      <Card className="shadow-md rounded-2xl border border-gray-200">
-        <Row gutter={[32, 32]}>
-          {/* Form nhập thông tin */}
-          <Col xs={24} md={10}>
-            <Divider orientation="left">{room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}</Divider>
-            <Card className="shadow p-6 rounded-xl bg-white border border-gray-100">
-              <label className="font-semibold text-sm text-gray-600">Tên phòng</label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="Nhập tên phòng" />
-              {error && <div className="text-red-500 mt-1">{error}</div>}
-
-              <Row gutter={16} className="mt-3">
+    <div className="p-6 min-h-screen bg-white">
+      <Card bordered={false} className="rounded-xl">
+        <Row gutter={[24, 24]}>
+          <Col xs={24} md={6} lg={6}>
+            <Divider orientation="left" plain>
+              {room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}
+            </Divider>
+            <Space direction="vertical" style={{ width: "100%" }} size="middle">
+              <Input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Tên phòng"
+              />
+              {error && <div className="text-red-500 text-sm">{error}</div>}
+              <Row gutter={12}>
                 <Col span={12}>
-                  <label className="font-semibold text-sm text-gray-600">Số hàng</label>
                   <Input
                     type="number"
-                    min={1}
-                    max={15}
                     value={rows}
                     onChange={e => setRows(Math.min(+e.target.value, 15))}
+                    placeholder="Số hàng (tối đa 15)"
                   />
                 </Col>
                 <Col span={12}>
-                  <label className="font-semibold text-sm text-gray-600">Số cột</label>
                   <Input
                     type="number"
-                    min={1}
-                    max={15}
                     value={cols}
                     onChange={e => setCols(Math.min(+e.target.value, 15))}
+                    placeholder="Số cột (tối đa 15)"
                   />
                 </Col>
               </Row>
-
-              <Button type="primary" className="mt-4 w-full font-semibold" onClick={generateSeats}>
+              <Button type="primary" onClick={generateSeats} block>
                 Tạo sơ đồ ghế
               </Button>
-
-              <Divider />
-
-              <Space className="w-full justify-between">
-                <Button type="primary" onClick={handleSubmit} className="font-semibold">
-                  <SquarePen size={16} className="me-1 mt-1" />Cập nhật
+              <Space>
+                <Button type="primary" onClick={handleSubmit} icon={<SquarePen size={16} />}>
+                  Lưu
                 </Button>
-                <Button onClick={onBack} className="font-semibold bg-secondary text-light">
-                 <X className='me-1' /> Hủy
+                <Button danger onClick={onBack} icon={<X size={16} />}>
+                  Hủy
                 </Button>
               </Space>
-            </Card>
+            </Space>
           </Col>
-
-          {/* Sơ đồ ghế */}
-          <Col xs={24} md={14}>
-            <Divider orientation="left">Sơ đồ ghế</Divider>
-            <Card className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+          <Col xs={24} md={18} lg={18}>
+            <Divider orientation="left" plain>
+              Sơ đồ ghế
+            </Divider>
+            <div style={{ overflowX: "auto", paddingBottom: 12 }}>
               <div
-                className="text-center font-medium text-base mb-4"
                 style={{
                   borderRadius: "10px",
                   padding: "10px",
-                  margin: "0 auto",
+                  margin: "0 auto 20px",
                   color: "#fff",
                   backgroundColor: "#1677FF",
-                  width: `${cols * 48 + (cols - 1) * 8}px`,
-                  maxWidth: "100%",
+                  width: `${cols * 42 + (cols - 1) * 6}px`,
+                  minWidth: 300,
+                  textAlign: "center",
+                  fontWeight: 600,
                   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
                 }}
               >
                 Màn hình
               </div>
-
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: `repeat(${cols}, 40px)`,
-                  gap: "8px",
+                  gap: 6,
                   justifyContent: "center",
+                  minWidth: `${cols * 40 + (cols - 1) * 6}px`,
                 }}
               >
                 {Object.keys(seatTypes).map(code => (
-                  <Tooltip key={code} title={`Ghế ${code} (${["Thường", "VIP", "Đôi"][seatTypes[code]]})`}>
+                  <Tooltip
+                    key={code}
+                    title={`Ghế ${code} (${["Thường", "VIP", "Đôi"][seatTypes[code]]})`}
+                  >
                     <div
-                      className="hover:scale-105"
+                      onClick={() => toggleSeatType(code)}
                       style={{
                         backgroundColor: seatColors[seatTypes[code]],
-                        borderRadius: "10px",
-                        aspectRatio: "1",
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 6,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "#333",
-                        fontWeight: "500",
-                        fontSize: "0.8rem",
-                        transition: "all 0.2s ease",
                         cursor: "pointer",
+                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                        fontWeight: 500,
+                        fontSize: 12,
                       }}
-                      onClick={() => toggleSeatType(code)}
                     >
                       {code}
                     </div>
                   </Tooltip>
                 ))}
               </div>
-
-              <div className="d-flex mt-5 justify-content-center">
-                <h5 className="text-[#1e40af] mb-2 text-base font-semibold me-3">Loại ghế:</h5>
-                <Space wrap>
-                  <Tag color="#e0e0e0" style={{ color: "#000" }}>Thường</Tag>
-                  <Tag color="#f74551">VIP</Tag>
-                  <Tag color="#f536db">Đôi</Tag>
-                </Space>
-              </div>
-            </Card>
+              <Space style={{ marginTop: 16 }}>
+                <Tag color="#e0e0e0">Thường</Tag>
+                <Tag color="#f74551">VIP</Tag>
+                <Tag color="#f536db">Đôi</Tag>
+              </Space>
+            </div>
           </Col>
         </Row>
       </Card>

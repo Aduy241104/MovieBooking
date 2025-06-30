@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,25 +40,32 @@ public class SecurityConfig {
     SecurityFilterChain publicEndpoints(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-            .securityMatcher("/api/public/**", "/api/auth/**", "/avatars/**", "/ws-notification/**")
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(AbstractHttpConfigurer::disable);
-        return http.build(); 
+                .securityMatcher("/api/public/**",
+                        "/api/auth/**",
+                        "/avatars/**",
+                        "/ws-notification/**",
+                        "/api/bookings/payment/vnpay_return",
+                        "/images/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
     }
 
-    
+
     @Bean
     @Order(2)
     SecurityFilterChain protectedEndpoints(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.decoder(jwtDecoder()))
-                .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-            )
-            .csrf(AbstractHttpConfigurer::disable);
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(new AntPathRequestMatcher("/api/bookings/**")).authenticated()
+                        .anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.decoder(jwtDecoder()))
+                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+                )
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

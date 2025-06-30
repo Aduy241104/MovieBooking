@@ -25,6 +25,6 @@ public class MovieResponse {
     private Integer ageLimit;
     private List<String> typeNames;
 
-    private List<Long> typeIds; // 👈 Thêm dòng này để xử lý khi sửa phim
+    private List<Long> typeIds;
 }
 
