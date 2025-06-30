@@ -55,10 +55,32 @@ export default function MovieForm({ movieId, onSuccess }) {
       });
     }
   }, [form, movieId, isEdit]);
+  const normalizeYouTubeUrl = (url) => {
+    if (!url) return '';
+    try {
+      const videoId =
+        url.includes('youtu.be/')
+          ? url.split('youtu.be/')[1]
+          : url.includes('watch?v=')
+            ? url.split('watch?v=')[1].split('&')[0]
+            : null;
+
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    } catch {
+      return url;
+    }
+  };
 
   const handleSubmit = async (values) => {
     const data = new FormData();
-    Object.entries(values).forEach(([key, value]) => {
+
+
+    const normalizedValues = {
+      ...values,
+      trailerLink: normalizeYouTubeUrl(values.trailerLink),
+    };
+
+    Object.entries(normalizedValues).forEach(([key, value]) => {
       if (key === "fromDate" || key === "toDate") {
         data.append(key, value.format("YYYY-MM-DD"));
       } else if (key === "typeIds") {
@@ -193,9 +215,9 @@ export default function MovieForm({ movieId, onSuccess }) {
           <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item label="Diễn viên" name="actor" rules={[{ required: true }]}>
+          {/* <Form.Item label="Diễn viên" name="actor" rules={[{ required: true }]}>
             <Input />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Hãng sản xuất" name="movieProductionCompany" rules={[{ required: true }]}>
             <Input />
           </Form.Item>

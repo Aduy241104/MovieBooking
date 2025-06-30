@@ -38,7 +38,7 @@ function PlayingMovie() {
                                         <MovieComp
                                             index={ index + 1 }
                                             //imglink={ item.smallImage }
-                                            imglink={`http://localhost:8081${item.smallImage}`}
+                                            imglink={`http://localhost:8081${item.smallImage}`} // sửa dòng này thêm localhost
                                             nameVN={ item.nameVN }
                                             types={ item.types }
                                             id={ item.id }
