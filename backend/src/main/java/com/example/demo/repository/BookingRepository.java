@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    
     @Query(value = """
             SELECT COALESCE(SUM(bs.price_paid), 0)
             FROM booked_seat bs

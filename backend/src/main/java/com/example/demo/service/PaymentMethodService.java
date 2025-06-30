@@ -2,7 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.model.PaymentMethod;
 import com.example.demo.repository.PaymentMethodRepository;
-
+import org.springframework.data.domain.Sort;
 import lombok.AllArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,15 @@ public class PaymentMethodService {
 
     // Lấy tất cả phương thức thanh toán
     public List<PaymentMethod> findAll() {
-        return paymentMethodRepository.findAll();
+        return paymentMethodRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     // Tạo mới phương thức thanh toán
     public PaymentMethod save(PaymentMethod paymentMethod) {
-        paymentMethod.setActive(true); // Mặc định là active
+        // Nếu client không truyền active, thì mặc định là true
+        if (paymentMethod.getActive() == null) {
+            paymentMethod.setActive(true); // Chỉ set mặc định nếu không được gửi từ client
+        }
         return paymentMethodRepository.save(paymentMethod);
     }
 
