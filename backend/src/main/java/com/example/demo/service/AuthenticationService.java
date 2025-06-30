@@ -21,6 +21,7 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.mapper.AccountMapper;
 import com.example.demo.model.Account;
+import com.example.demo.model.RefreshToken;
 import com.example.demo.model.Role;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.RoleRepository;
@@ -65,6 +66,9 @@ public class AuthenticationService {
     @Autowired
     OtpService otpService;
 
+    @Autowired
+    RefreshTokenService refreshTokenService;
+
     // authentication cho table account
     public AuthRespond auth(AuthenticationRequest request) {
         Account account = accountRepository.findByEmailAndStatus(request.getUsername(), 1)
@@ -77,11 +81,14 @@ public class AuthenticationService {
             throw new UnauthorizedException("Invalid Password.");
         }
         var token = generateToken(account);
+        RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
+
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);
         return AuthRespond.builder()
                 .authenticated(true)
                 .account(accountRespond)
                 .token(token)
+                .refresToken(refreshToken.getToken())
                 .build();
     }
 

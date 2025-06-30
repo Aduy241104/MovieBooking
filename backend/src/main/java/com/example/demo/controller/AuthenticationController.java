@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +17,10 @@ import com.example.demo.DTO.response.AuthRespond;
 import com.example.demo.DTO.response.IntrospectRespond;
 import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OtpService;
+import com.example.demo.service.RefreshTokenService;
 import com.example.demo.model.Account;
+import com.example.demo.model.RefreshToken;
+import com.example.demo.repository.RefreshTokenRepository;
 import com.nimbusds.jose.JOSEException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +35,12 @@ public class AuthenticationController {
 
     @Autowired
     OtpService otpService;
+
+    @Autowired
+    RefreshTokenService refreshTokenService;
+
+    @Autowired
+    RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/introspect")
     public ApiResponse<IntrospectRespond> postMethodName(@RequestBody IntrospectRequest request)
@@ -99,5 +109,18 @@ public class AuthenticationController {
                 .result("password updated")
                 .build();
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String requestToken = request.get("refreshToken");
+
+        RefreshToken token = refreshTokenRepository.findByToken(requestToken)
+                .map(refreshTokenService::verifyExpiration)
+                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+
+        Account account = token.getAccount();
+        String newAccessToken = authService.generateToken(account);
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+    }    
 
 }
