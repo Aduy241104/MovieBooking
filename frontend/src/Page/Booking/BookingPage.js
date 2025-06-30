@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getSeatStatus } from '../../service/ScreeningService'; // TODO: KIỂM TRA ĐƯỜNG DẪN
-import { getActivePaymentMethods } from '../../service/PaymentMethodService'; // TODO: KIỂM TRA ĐƯỜNG DẪN
-import { checkPromotion, createBooking } from '../../service/BookingService'; // TODO: KIỂM TRA ĐƯỜNG DẪN
-import { AuthContext } from '../../context/AuthContext'; // TODO: KIỂM TRA ĐƯỜNG DẪN
+import { getSeatStatus } from '../../service/ScreeningService';
+import { getActivePaymentMethods } from '../../service/PaymentMethodService';
+import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService'; // Thêm getUserPoints
+import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
-import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // TODO: KIỂM TRA ĐƯỜNG DẪN
-import styles from './bookingPage.scss'; // Sử dụng .module.scss nếu bạn đặt tên file như vậy
+import CustomizeButton from '../../components/CustomeButton/CustomizeButton';
+import styles from './bookingPage.scss'; // Đảm bảo tên file CSS/SCSS khớp
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -18,133 +18,142 @@ const BookingPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+    const { screeningInfo, movieInfo } = location.state || {};
 
-    // Lấy screeningInfo và movieInfo từ state của navigation
-    // screeningInfo nên chứa: { screeningId, time (HH:mm:ss), cinemaRoom, fareType, movieFormat, showDateTime (ISO string đầy đủ) }
-
+    // States cho dữ liệu tải từ API
     const [seats, setSeats] = useState([]);
-    const [selectedSeats, setSelectedSeats] = useState([]); // [{ seatId, seatRow, seatCol, seatTypeName, seatTypePrice }, ...]
-    const [loadingSeats, setLoadingSeats] = useState(false);
-    const [errorSeats, setErrorSeats] = useState('');
-
     const [paymentMethods, setPaymentMethods] = useState([]);
-    const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
-    const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
+    const [userPoints, setUserPoints] = useState(0);
 
+    // States cho lựa chọn của người dùng
+    const [selectedSeats, setSelectedSeats] = useState([]);
+    const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
     const [promotionCode, setPromotionCode] = useState('');
-    const [appliedPromotion, setAppliedPromotion] = useState(null);
+    const [pointsToUse, setPointsToUse] = useState('');
+
+    // States cho các giá trị tính toán
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [discountAmount, setDiscountAmount] = useState(0);
+    const [pointsDiscount, setPointsDiscount] = useState(0);
+    const [finalPrice, setFinalPrice] = useState(0);
+
+    // States cho trạng thái UI
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [checkingPromotion, setCheckingPromotion] = useState(false);
     const [promotionError, setPromotionError] = useState('');
     const [promotionSuccess, setPromotionSuccess] = useState('');
+    const [pointsInputError, setPointsInputError] = useState('');
+    const [appliedPromotion, setAppliedPromotion] = useState(null);
 
-    const [totalPrice, setTotalPrice] = useState(0); // Tổng tiền gốc của các ghế đã chọn
-    const [discountAmount, setDiscountAmount] = useState(0); // Số tiền được giảm
-    const [finalPrice, setFinalPrice] = useState(0); // Tổng tiền sau khi giảm giá
-
-    const [isSubmitting, setIsSubmitting] = useState(false);
-const { screeningInfo, movieInfo } = location.state || {}; // movieInfo ở đây
+    // Effect để tải tất cả dữ liệu cần thiết khi trang được mở
     useEffect(() => {
-        if (!screeningInfo || !movieInfo || !user || !screeningInfo.screeningId || !movieInfo.id) {
-            console.warn("BookingPage: Missing essential info (screeningInfo, movieInfo, user). Navigating away.");
-            navigate(movieInfo?.id ? `/movie/${movieInfo.id}` : '/');
+        if (!screeningInfo || !movieInfo || !user) {
+            navigate(movieInfo?.id ? `/movie-detail/${movieInfo.id}` : '/');
             return;
         }
 
-        const fetchPageData = async () => {
-            // Tải sơ đồ ghế
-            setLoadingSeats(true);
-            setErrorSeats('');
+        const loadInitialData = async () => {
+            setLoading(true);
+            setError('');
             try {
-                const seatsResponse = await getSeatStatus(screeningInfo.screeningId);
-                if (seatsResponse.data && seatsResponse.data.result) {
-                    setSeats(seatsResponse.data.result);
-                } else {
-                     setErrorSeats('Không tải được sơ đồ ghế (dữ liệu không hợp lệ).');
-                }
-            } catch (err) {
-                console.error("Error fetching seats:", err);
-                setErrorSeats(err.response?.data?.message || 'Không thể tải sơ đồ ghế.');
-            } finally {
-                setLoadingSeats(false);
-            }
+                // Tải song song tất cả API calls
+                const [seatRes, paymentRes, pointsRes] = await Promise.all([
+                    getSeatStatus(screeningInfo.screeningId),
+                    getActivePaymentMethods(),
+                    getUserPoints()
+                ]);
 
-            // Tải phương thức thanh toán
-            setLoadingPaymentMethods(true);
-            try {
-                const paymentResponse = await getActivePaymentMethods();
-                if (paymentResponse.data && paymentResponse.data.result) {
-                    setPaymentMethods(paymentResponse.data.result);
-                    if (paymentResponse.data.result.length > 0) {
-                        setSelectedPaymentMethodId(paymentResponse.data.result[0].id.toString());
-                    }
+                setSeats(seatRes.data?.result || []);
+
+                const activePayments = paymentRes.data?.result || [];
+                setPaymentMethods(activePayments);
+                if (activePayments.length > 0) {
+                    setSelectedPaymentMethodId(activePayments[0].id.toString());
                 }
+
+                setUserPoints(pointsRes.data?.result || 0);
+
             } catch (err) {
-                console.error("Error fetching payment methods:", err);
-                // Có thể set lỗi cho payment methods nếu cần
+                console.error("Error loading booking data:", err);
+                setError(err.response?.data?.message || 'Không thể tải dữ liệu trang đặt vé.');
             } finally {
-                setLoadingPaymentMethods(false);
+                setLoading(false);
             }
         };
 
-        fetchPageData();
+        loadInitialData();
     }, [screeningInfo, movieInfo, user, navigate]);
 
 
+    // Effect để tính toán lại giá tiền mỗi khi có sự thay đổi
     useEffect(() => {
-        if (!screeningInfo || !screeningInfo.fareType) {
-            setTotalPrice(0);
-            setFinalPrice(0);
-            return;
-        }
-
+        // 1. Tính tổng tiền gốc từ ghế đã chọn (originalTotalAmount)
         let currentTotal = 0;
-        const baseTicketPrice = parseFloat(screeningInfo.fareType.basePrice || 0);
+        if (screeningInfo && screeningInfo.fareType) {
+            const basePrice = parseFloat(screeningInfo.fareType.basePrice || 0);
+            
+            const movieFormat = screeningInfo.fareType.movieFormat || '';
+            const timeSlotType = screeningInfo.fareType.timeSlotType || '';
+            let formatSurcharge = 0;
+            if (movieFormat.toUpperCase() === '3D') formatSurcharge = 20000;
+            else if (movieFormat.toUpperCase() === 'IMAX') formatSurcharge = 35000;
+            
+            let timeSurcharge = 0;
+            if (timeSlotType === 'Cuối Tuần') timeSurcharge = 10000;
+            else if (timeSlotType === 'Ngày Lễ') timeSurcharge = 15000;
 
-        selectedSeats.forEach(seat => {
-            // seat.seatTypePrice là phụ thu của loại ghế đã được lấy khi chọn ghế
-            currentTotal += baseTicketPrice + parseFloat(seat.seatTypePrice || 0);
-        });
+            selectedSeats.forEach(seat => {
+                const seatTypePrice = parseFloat(seat.seatTypePrice || 0);
+                currentTotal += basePrice + formatSurcharge + timeSurcharge + seatTypePrice;
+            });
+        }
         setTotalPrice(currentTotal);
 
+        // 2. Tính giảm giá từ khuyến mãi
         let currentDiscount = 0;
-        if (appliedPromotion && currentTotal > 0) {
-            if (currentTotal < parseFloat(appliedPromotion.minOrder)) {
-                setPromotionError(`Tổng tiền ${currentTotal.toLocaleString('vi-VN')}đ không đủ điều kiện tối thiểu ${parseFloat(appliedPromotion.minOrder).toLocaleString('vi-VN')}đ của mã khuyến mãi.`);
-                setAppliedPromotion(null);
-                setPromotionSuccess('');
-            } else {
-                if (appliedPromotion.discountType === 'PERCENT') {
-                    currentDiscount = (currentTotal * parseFloat(appliedPromotion.discountLevel)) / 100;
-                    if (appliedPromotion.maxDiscount && currentDiscount > parseFloat(appliedPromotion.maxDiscount)) {
-                        currentDiscount = parseFloat(appliedPromotion.maxDiscount);
-                    }
-                } else if (appliedPromotion.discountType === 'AMOUNT') {
-                    currentDiscount = parseFloat(appliedPromotion.discountLevel);
+        if (appliedPromotion && currentTotal > 0 && currentTotal >= parseFloat(appliedPromotion.minOrder)) {
+             if (appliedPromotion.discountType === 'PERCENT') {
+                currentDiscount = (currentTotal * parseFloat(appliedPromotion.discountLevel)) / 100;
+                if (appliedPromotion.maxDiscount && currentDiscount > parseFloat(appliedPromotion.maxDiscount)) {
+                    currentDiscount = parseFloat(appliedPromotion.maxDiscount);
                 }
-                if (currentDiscount > currentTotal) {
-                    currentDiscount = currentTotal;
-                }
-                setPromotionError('');
+            } else if (appliedPromotion.discountType === 'AMOUNT') {
+                currentDiscount = parseFloat(appliedPromotion.discountLevel);
             }
-        } else if (appliedPromotion && currentTotal === 0 && selectedSeats.length === 0) {
-            // Nếu không còn ghế nào được chọn, reset KM
-            setAppliedPromotion(null);
-            setPromotionSuccess('');
-            setPromotionError('');
+            if (currentDiscount > currentTotal) {
+                currentDiscount = currentTotal;
+            }
         }
-
         setDiscountAmount(currentDiscount);
-        setFinalPrice(Math.max(0, currentTotal - currentDiscount)); // Đảm bảo giá không âm
+        
+        const finalTotalAfterPromotion = currentTotal - currentDiscount;
 
-    }, [selectedSeats, appliedPromotion, screeningInfo]);
+        // 3. Tính giảm giá từ điểm
+        let currentPointsDiscount = 0;
+        const pointsInputValue = parseInt(pointsToUse) || 0;
+        if (pointsInputValue > 0) {
+            const roundedPoints = Math.floor(pointsInputValue / 1000) * 1000;
+            currentPointsDiscount = roundedPoints;
+            if (currentPointsDiscount > finalTotalAfterPromotion) {
+                currentPointsDiscount = Math.floor(finalTotalAfterPromotion / 1000) * 1000;
+            }
+        }
+        setPointsDiscount(currentPointsDiscount);
 
-    const handleSeatSelect = (seatFromMap) => { // seatFromMap là object từ SeatSelection (API getSeatStatus)
+        // 4. Tính giá cuối cùng
+        setFinalPrice(Math.max(0, finalTotalAfterPromotion - currentPointsDiscount));
+
+    }, [selectedSeats, appliedPromotion, pointsToUse, screeningInfo]);
+
+    // Các hàm xử lý sự kiện (handle)
+    const handleSeatSelect = (seatFromMap) => {
         setSelectedSeats(prevSeats => {
             const isSelected = prevSeats.find(s => s.seatId === seatFromMap.seatId);
             if (isSelected) {
                 return prevSeats.filter(s => s.seatId !== seatFromMap.seatId);
             } else {
-                // Lưu các thông tin cần thiết của ghế đã chọn
                 return [...prevSeats, {
                     seatId: seatFromMap.seatId,
                     seatRow: seatFromMap.seatRow,
@@ -170,33 +179,38 @@ const { screeningInfo, movieInfo } = location.state || {}; // movieInfo ở đâ
             if (response.data && response.data.status === 200 && response.data.result) {
                 const promoData = response.data.result;
                 if (totalPrice < parseFloat(promoData.minOrder)) {
-                    setPromotionError(`Tổng tiền hiện tại ${totalPrice.toLocaleString('vi-VN')}đ chưa đạt mức tối thiểu ${parseFloat(promoData.minOrder).toLocaleString('vi-VN')}đ của khuyến mãi.`);
+                    setPromotionError(`Tổng tiền ${totalPrice.toLocaleString('vi-VN')}đ không đủ điều kiện tối thiểu ${parseFloat(promoData.minOrder).toLocaleString('vi-VN')}đ.`);
                     return;
                 }
                 setAppliedPromotion(promoData);
-                setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
+                setPromotionSuccess('Áp dụng thành công!');
             } else {
-                setPromotionError(response.data?.message || 'Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
+                setPromotionError(response.data?.message || 'Mã không hợp lệ.');
             }
         } catch (err) {
-            console.error("Error applying promotion:", err);
-            setPromotionError(err.response?.data?.message || 'Lỗi khi áp dụng mã khuyến mãi.');
+            setPromotionError(err.response?.data?.message || 'Lỗi khi áp dụng mã.');
         } finally {
             setCheckingPromotion(false);
         }
     };
+    
+    const handlePointsInputChange = (e) => {
+        const value = e.target.value;
+        setPointsInputError('');
+        if (value === '' || /^[0-9\b]+$/.test(value)) {
+            const numValue = parseInt(value) || 0;
+            if (numValue > userPoints) {
+                setPointsInputError(`Bạn chỉ có ${userPoints.toLocaleString('vi-VN')} điểm.`);
+                setPointsToUse(userPoints.toString());
+            } else {
+                setPointsToUse(value);
+            }
+        }
+    };
 
-     const handleSubmitBooking = async () => {
-        if (selectedSeats.length === 0) {
-            alert('Vui lòng chọn ít nhất một ghế.');
-            return;
-        }
-        if (!selectedPaymentMethodId) {
-            alert('Vui lòng chọn phương thức thanh toán.');
-            return;
-        }
-        if (!screeningInfo || !screeningInfo.screeningId) {
-            alert('Thiếu thông tin suất chiếu. Vui lòng thử lại.');
+    const handleSubmitBooking = async () => {
+        if (selectedSeats.length === 0 || !selectedPaymentMethodId) {
+            alert('Vui lòng chọn ghế và phương thức thanh toán.');
             return;
         }
 
@@ -206,211 +220,114 @@ const { screeningInfo, movieInfo } = location.state || {}; // movieInfo ở đâ
             seatIds: selectedSeats.map(s => s.seatId),
             promotionCode: appliedPromotion ? appliedPromotion.code : null,
             paymentMethodId: parseInt(selectedPaymentMethodId),
+            pointsToUse: parseInt(pointsToUse) || 0,
         };
 
         try {
-            console.log('BookingPage - Submitting booking payload:', bookingPayload);
             const response = await createBooking(bookingPayload);
-            console.log('BookingPage - Create booking API raw response:', response);
-
-            if (response && response.data) {
-                console.log('BookingPage - Create booking response.data:', response.data);
-                const bookingResult = response.data.result;
-
-                if (response.data.status === 201 && bookingResult) {
-                    if (bookingResult.paymentUrl) {
-                        console.log('BookingPage - Redirecting to payment URL:', bookingResult.paymentUrl);
-
-                        // LƯU movieInfo VÀO LOCALSTORAGE
-                        if (movieInfo) { // Đảm bảo movieInfo tồn tại
-                            try {
-                                localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
-                                console.log('BookingPage - Saved movieInfo to localStorage:', movieInfo);
-                            } catch (e) {
-                                console.error('BookingPage - Error saving movieInfo to localStorage:', e);
-                                // Có thể lưu chỉ movieId nếu stringify lỗi (movieInfo quá lớn hoặc có circular reference)
-                                if (movieInfo.id) {
-                                     localStorage.setItem('lastMovieIdForBooking', movieInfo.id.toString());
-                                }
-                            }
-                        }
-                        // Optional: Lưu bookingId nếu cần tham chiếu sau khi quay lại từ VNPAY
-                        if (bookingResult.bookingId) {
-                            localStorage.setItem('lastVnpayBookingId', bookingResult.bookingId.toString());
-                        }
-
-                        window.location.href = bookingResult.paymentUrl;
-                    } else {
-                        console.log('BookingPage - Navigating to success page with bookingId:', bookingResult.bookingId);
-                        navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
-                    }
+            const bookingResult = response.data.result;
+            if (response.data.status === 201 && bookingResult) {
+                if (bookingResult.paymentUrl) {
+                    // Lưu movieInfo để dùng ở trang Failure nếu cần
+                    localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
+                    window.location.href = bookingResult.paymentUrl;
                 } else {
-                    console.error('BookingPage - Booking creation failed or API status not 201:', response.data);
-                    alert(response.data.message || 'Đặt vé không thành công. Vui lòng thử lại.');
+                    navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
                 }
             } else {
-                console.error('BookingPage - Invalid API response structure (no data):', response);
-                alert('Không nhận được phản hồi hợp lệ từ máy chủ. Vui lòng thử lại.');
+                 alert(response.data.message || 'Đặt vé không thành công.');
             }
         } catch (err) {
-            console.error("Error creating booking (catch block):", err);
-            alert(err.response?.data?.message || err.message || 'Có lỗi xảy ra trong quá trình đặt vé.');
+            alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt vé.');
         } finally {
             setIsSubmitting(false);
         }
     };
-
-
-    // Hàm format thời gian chiếu, nhận vào ISO string từ screeningInfo.showDateTime
+    
     const formatScreeningTime = (isoDateTimeString) => {
-        if (!isoDateTimeString) {
-             // Fallback nếu screeningInfo.showDateTime không được truyền đúng cách
-            if (screeningInfo && screeningInfo.time && screeningInfo.showDateTimeFromMovieDetail) {
-                 try {
-                    // showDateTimeFromMovieDetail có dạng "YYYY-MM-DDTHH:mm:ss" (được ghép từ BookingSchedule)
-                    // Chúng ta có thể parse trực tiếp nó
-                    return format(parseISO(screeningInfo.showDateTimeFromMovieDetail), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi });
-                } catch (error) {
-                     console.error("Error formatting fallback screening time:", error, screeningInfo);
-                    return "N/A (thời gian không hợp lệ)";
-                }
-            }
-            console.warn("formatScreeningTime called with invalid dateTimeString:", isoDateTimeString, "Full screeningInfo:", screeningInfo);
-            return "N/A";
-        }
+        if (!isoDateTimeString) return "N/A";
         try {
             return format(parseISO(isoDateTimeString), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi });
         } catch (error) {
-            console.error("Error formatting screening time from ISO string:", error, isoDateTimeString);
-            return `Lỗi format: ${isoDateTimeString}`;
+            return "Thời gian không hợp lệ";
         }
     };
 
-
-    if (!screeningInfo || !movieInfo || !user) {
-        // Điều kiện này đã được xử lý ở useEffect đầu tiên, nhưng thêm ở đây để chắc chắn
-        return <div className="container mt-5 text-center"><p>Đang chuyển hướng hoặc thiếu thông tin...</p></div>;
+    if (loading) {
+        return <div className="container mt-5 text-center"><p>Đang tải dữ liệu trang đặt vé...</p></div>;
+    }
+    if (error) {
+        return <div className="container mt-5 text-center"><p className="text-danger">{error}</p></div>;
     }
 
     return (
         <div className={cx('booking-container', 'container', 'mt-4', 'mb-5')}>
             <h2 className={cx('page-title')}>Đặt Vé Xem Phim</h2>
-
             <div className="row">
                 <div className="col-lg-8">
                     <div className={cx('section', 'movie-info-section')}>
                         <h4>{movieInfo?.nameVN || 'Tên phim'}</h4>
-                        <p><i className="fas fa-calendar-alt"></i> Suất chiếu: {screeningInfo ? formatScreeningTime(screeningInfo.showDateTime) : 'N/A'}</p>
+                        <p><i className="fas fa-calendar-alt"></i> Suất chiếu: {formatScreeningTime(screeningInfo?.showDateTime)}</p>
                         <p><i className="fas fa-video"></i> Phòng chiếu: {screeningInfo?.cinemaRoom?.cinemaRoomName || 'N/A'}</p>
-                        <p><i className="fas fa-film"></i> Định dạng: {screeningInfo?.movieFormat || 'N/A'}</p>
+                        <p><i className="fas fa-film"></i> Định dạng: {screeningInfo?.fareType?.movieFormat || 'N/A'}</p>
                     </div>
-
                     <div className={cx('section', 'seat-selection-section')}>
                         <h4>Chọn ghế</h4>
-                        {loadingSeats && <div className="text-center my-3"><p>Đang tải sơ đồ ghế...</p></div>}
-                        {errorSeats && <p className="text-danger text-center my-3">{errorSeats}</p>}
-                        {!loadingSeats && !errorSeats && seats.length > 0 && screeningInfo?.fareType ? (
-                            <SeatSelection
-                                seatsData={seats}
-                                selectedSeats={selectedSeats}
-                                onSeatSelect={handleSeatSelect}
-                                baseTicketPrice={parseFloat(screeningInfo.fareType.basePrice || 0)}
-                            />
-                        ) : null}
-                        {!loadingSeats && !errorSeats && seats.length === 0 && (
-                             <p className="text-center my-3">Không có thông tin ghế cho suất chiếu này.</p>
-                        )}
-                         {!loadingSeats && !errorSeats && !screeningInfo?.fareType && ( // Kiểm tra thêm !screeningInfo?.fareType
-                             <p className="text-center my-3">Không có thông tin giá vé cho suất chiếu này.</p>
-                        )}
+                        <SeatSelection
+                            seatsData={seats}
+                            selectedSeats={selectedSeats}
+                            onSeatSelect={handleSeatSelect}
+                            screeningInfo={screeningInfo} // Truyền screeningInfo vào SeatSelection
+                        />
                     </div>
                 </div>
-
                 <div className="col-lg-4">
-                     {screeningInfo?.fareType ? (
-                        <OrderSummary
-                            movieInfo={movieInfo}
-                            screeningInfo={screeningInfo}
-                            selectedSeats={selectedSeats}
-                            totalPrice={totalPrice}
-                            discountAmount={discountAmount}
-                            finalPrice={finalPrice}
-                            baseTicketPrice={parseFloat(screeningInfo.fareType.basePrice || 0)}
-                        />
-                    ) : (
-                        <div className={cx('section', 'mt-3', 'text-center')}>
-                            <p>Không thể tính toán đơn hàng do thiếu thông tin giá vé.</p>
+                    <OrderSummary
+                        movieInfo={movieInfo}
+                        screeningInfo={screeningInfo}
+                        selectedSeats={selectedSeats}
+                        totalPrice={totalPrice}
+                        discountAmount={discountAmount}
+                        pointsDiscount={pointsDiscount}
+                        finalPrice={finalPrice}
+                    />
+                    <div className={cx('section', 'points-section', 'mt-3')}>
+                        <h4>Sử dụng điểm thưởng</h4>
+                        <p className="text-muted small">Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong> (1 điểm = 1đ)</p>
+                        <div className="input-group">
+                            <input
+                                type="text"
+                                className={`form-control ${pointsInputError ? 'is-invalid' : ''}`}
+                                placeholder="Nhập số điểm"
+                                value={pointsToUse}
+                                onChange={handlePointsInputChange}
+                            />
                         </div>
-                    )}
-
+                        {pointsInputError && <div className="invalid-feedback d-block">{pointsInputError}</div>}
+                        {pointsDiscount > 0 && <p className="text-success small mt-2">Áp dụng giảm {pointsDiscount.toLocaleString('vi-VN')}đ.</p>}
+                    </div>
                     <div className={cx('section', 'promotion-section', 'mt-3')}>
                         <h4>Mã khuyến mãi</h4>
                         <div className="input-group mb-2">
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Nhập mã giảm giá"
-                                value={promotionCode}
-                                onChange={(e) => setPromotionCode(e.target.value)}
-                                disabled={checkingPromotion || totalPrice === 0} // Disable nếu không có gì để áp dụng KM
-                            />
-                            <CustomizeButton // Hoặc <button>
-                                primary
-                                onClick={handleApplyPromotion}
-                                disabled={checkingPromotion || !promotionCode.trim() || totalPrice === 0}
-                                className={cx('btn-apply-promo')}
-                            >
-                                {checkingPromotion ? 'Đang kiểm tra...' : 'Áp dụng'}
+                            <input type="text" className="form-control" placeholder="Nhập mã" value={promotionCode} onChange={(e) => setPromotionCode(e.target.value)} disabled={checkingPromotion || totalPrice === 0}/>
+                            <CustomizeButton primary onClick={handleApplyPromotion} disabled={checkingPromotion || !promotionCode.trim() || totalPrice === 0}>
+                                {checkingPromotion ? '...' : 'Áp dụng'}
                             </CustomizeButton>
                         </div>
                         {promotionError && <p className="text-danger small mt-1">{promotionError}</p>}
                         {promotionSuccess && <p className="text-success small mt-1">{promotionSuccess}</p>}
-                         {appliedPromotion && (
-                            <p className="small text-muted mt-1">
-                                Đã áp dụng: {appliedPromotion.code}
-                            </p>
-                        )}
                     </div>
-
                     <div className={cx('section', 'payment-section', 'mt-3')}>
-                        <h4>Chọn phương thức thanh toán</h4>
-                        {loadingPaymentMethods && <p className="text-center my-2">Đang tải...</p>}
-                        {!loadingPaymentMethods && paymentMethods.map(method => (
+                        <h4>Phương thức thanh toán</h4>
+                        {paymentMethods.map(method => (
                             <div className="form-check" key={method.id}>
-                                <input
-                                    className="form-check-input"
-                                    type="radio"
-                                    name="paymentMethod"
-                                    id={`paymentMethod-${method.id}`}
-                                    value={method.id.toString()}
-                                    checked={selectedPaymentMethodId === method.id.toString()}
-                                    onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
-                                />
-                                <label className="form-check-label" htmlFor={`paymentMethod-${method.id}`}>
-                                    {method.name}
-                                </label>
+                                <input className="form-check-input" type="radio" name="paymentMethod" id={`paymentMethod-${method.id}`} value={method.id.toString()} checked={selectedPaymentMethodId === method.id.toString()} onChange={(e) => setSelectedPaymentMethodId(e.target.value)} />
+                                <label className="form-check-label" htmlFor={`paymentMethod-${method.id}`}>{method.name}</label>
                             </div>
                         ))}
-                         {!loadingPaymentMethods && paymentMethods.length === 0 && (
-                            <p className="text-center my-2">Không có phương thức thanh toán nào.</p>
-                        )}
                     </div>
-
-                    <CustomizeButton // Hoặc <button>
-                        gold
-                        large
-                        block
-                        onClick={handleSubmitBooking}
-                        disabled={
-                            isSubmitting ||
-                            selectedSeats.length === 0 ||
-                            !selectedPaymentMethodId ||
-                            !screeningInfo?.fareType || // Phải có giá vé
-                            finalPrice < 0 // Tổng tiền cuối không thể âm
-                        }
-                        className={cx('btn-submit-booking', 'mt-4')}
-                    >
-                        {isSubmitting ? 'Đang xử lý...' : `Thanh Toán ${finalPrice > 0 ? finalPrice.toLocaleString('vi-VN') + 'đ' : ''}`}
+                    <CustomizeButton gold large block onClick={handleSubmitBooking} disabled={isSubmitting || selectedSeats.length === 0 || !selectedPaymentMethodId}>
+                        {isSubmitting ? 'Đang xử lý...' : `Thanh Toán ${finalPrice > 0 ? finalPrice.toLocaleString('vi-VN') + 'đ' : 'Miễn phí'}`}
                     </CustomizeButton>
                 </div>
             </div>

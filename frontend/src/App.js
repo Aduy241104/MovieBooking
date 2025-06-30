@@ -31,7 +31,7 @@ import BookingPage from './Page/Booking/BookingPage';
 import BookingSuccessPage from './Page/Booking/BookingSuccessPage';
 import BookingFailurePage from './Page/Booking/BookingFailurePage';
 import BookingHistoryPage from './Page/Booking/BookingHistoryPage'; // Tạo component này nếu muốn
-
+import BookingDetailPage from './Page/Booking/BookingDetail/BookingDetailPage';
 
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
@@ -111,6 +111,15 @@ function App() {
             <ProtectedRoute>
               <BookingHistoryPage />
             </ProtectedRoute>
+          }
+        />
+        
+        <Route
+    path="/booking/details/:bookingId"
+    element={
+        <ProtectedRoute>
+            <BookingDetailPage />
+        </ProtectedRoute>
           }
         />
 

@@ -1,12 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.DTO.request.BookingRequestDTO;
+import com.example.demo.DTO.request.booking.BookingRequestDTO;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
+import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
+import com.example.demo.service.AccountService;
 import com.example.demo.service.BookingService;
 import com.example.demo.service.PromotionService;
+import com.example.demo.utils.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,7 @@ import java.util.stream.Collectors;
 public class BookingController {
     private final BookingService bookingService;
     private final PromotionService promotionService; // Booking
+    private final AccountService accountService;
 
     @GetMapping("/revenue")
     public ApiResponse<Long> getTotalRevenueByStatus() {
@@ -121,6 +125,23 @@ public class BookingController {
                 .status(HttpStatus.OK.value())
                 .message("Successfully fetched booking details.")
                 .result(bookingDetail)
+                .build();
+    }
+    @GetMapping("/points") // Endpoint: GET /api/bookings/points
+    public ApiResponse<Integer> getCurrentUserPoints() {
+        // Lấy accountId từ Security Context
+        String accountIdStr = SecurityUtils.getCurrentUsername();
+        Long accountId = Long.parseLong(accountIdStr);
+
+        // Gọi service để lấy thông tin tài khoản
+        // Chúng ta có thể dùng AccountService ở đây vì nó đã có sẵn phương thức cần thiết
+        Account account = accountService.fetchAccountById(accountId);
+
+        // Trả về số điểm
+        return ApiResponse.<Integer>builder()
+                .status(HttpStatus.OK.value())
+                .message("User points fetched successfully.")
+                .result(account.getScore())
                 .build();
     }
 }

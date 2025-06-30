@@ -66,8 +66,11 @@ const BookingHistoryPage = () => {
                         >
                             <div className="d-flex w-100 justify-content-between">
                                 <h5 className="mb-1">{booking.screening?.movieNameVn || 'N/A'}</h5>
-                                <small>Đặt lúc: {formatScreeningDateTime(booking.bookingTime)}</small>
+                               <small>Mã vé: <strong>{booking.bookingCode}</strong></small>
                             </div>
+                            <p className="mb-1">
+                                Đặt lúc: {formatScreeningDateTime(booking.bookingTime)}
+                            </p>
                             <p className="mb-1">
                                 Suất chiếu: {formatScreeningDateTime(booking.screening?.showDateTime)} - Phòng: {booking.screening?.cinemaRoomName}
                             </p>

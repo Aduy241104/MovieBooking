@@ -1,10 +1,13 @@
 package com.example.demo.repository;
 
+import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -93,4 +96,35 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByAccountAccountIdOrderByBookingTimeDesc(Long accountId);
     Optional<Booking> findByIdAndAccountAccountId(Integer bookingId, Long accountId);
     Optional<Booking> findByVnpTxnRef(String vnpTxnRef); // Thêm findByVnpTxnRef
+
+    @Query("""
+                SELECT new com.example.demo.DTO.response.SingleMovieDTO(
+                    m.id,
+                    m.nameVN,
+                    m.nameEN,
+                    m.duration,
+                    m.content,
+                    m.fromDate,
+                    m.toDate,
+                    m.smallImage,
+                    m.largeImage,
+                    m.trailer,
+                    m.ageLimit,
+                    m.director,
+                    m.movieProductionCompany,
+                    null,
+                    null
+                )
+                FROM Booking b
+                JOIN b.screening s
+                JOIN s.movie m
+                WHERE :currentDate BETWEEN m.fromDate AND m.toDate
+                  AND m.isDeleted = false
+                GROUP BY m.id, m.nameVN, m.nameEN, m.duration, m.content, m.fromDate, m.toDate,
+                         m.smallImage, m.largeImage, m.trailer, m.ageLimit,
+                         m.director, m.movieProductionCompany
+                ORDER BY COUNT(b.id) DESC
+            """)
+    List<SingleMovieDTO> getTopBookedCurrentMovies(@Param("currentDate") LocalDate currentDate);
+    boolean existsByBookingCode(String bookingCode); // code
 }

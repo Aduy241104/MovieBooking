@@ -1,4 +1,4 @@
-package com.example.demo.DTO.request;
+package com.example.demo.DTO.request.booking;
 
 import lombok.Data;
 
@@ -10,4 +10,5 @@ public class BookingRequestDTO {
     private List<Long> seatIds;
     private String promotionCode; // Optional
     private Long paymentMethodId; // ID của phương thức thanh toán
+    private int pointsToUse;
 }
