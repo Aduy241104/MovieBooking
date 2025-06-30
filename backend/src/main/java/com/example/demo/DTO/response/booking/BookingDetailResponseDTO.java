@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class BookingDetailResponseDTO {
     private Integer bookingId;
+    private String bookingCode;
     private AccountInfoDTO account;
     private ScreeningInfoDTO screening;
     private PromotionInfoDTO promotion;
@@ -25,6 +26,9 @@ public class BookingDetailResponseDTO {
     private LocalDateTime bookingTime;
     private BigDecimal totalAmount; // Số tiền sau khi đã trừ khuyến mãi
     private BigDecimal originalAmount; // Số tiền gốc trước khuyến mãi
+    // <<< THÊM 2 TRƯỜNG NÀY VÀO >>>
+    private Integer pointsUsed;
+    private BigDecimal pointsDiscount;
     private String bookingStatus;
     private List<BookedSeatInfoDTO> bookedSeats;
     private String paymentUrl; // For VNPAY

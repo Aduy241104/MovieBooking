@@ -17,5 +17,7 @@ export const getUserBookingHistory = () => {
 export const getBookingDetails = (bookingId) => {
     return axiosInstance.get(`${API_URL}/${bookingId}/details`);
 }
-
+export const getUserPoints = () => {
+    return axiosInstance.get(`${API_URL}/points`);
+};
 // Hàm vnpayReturn không cần gọi từ frontend, backend sẽ tự redirect
