@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './styles/login.css';
 import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
+
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
 
 
@@ -47,48 +48,35 @@ import BookingHistoryPage from './Page/Booking/BookingHistoryPage'; // Tạo com
 
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
-
   if (!isAuthLoaded) return; // hoặc loading spinner
-
   if (!user || user.role !== "ADMIN") {
     return <Navigate to="/" replace />;
   }
-
   return children;
 };
 
 // Booking
 const ProtectedRoute = ({ children }) => {
-    const { user, isAuthLoaded } = useContext(AuthContext); // Lấy isAuthLoaded
-    const location = useLocation();
-
-    console.log('ProtectedRoute (in App.js) - Current location:', location.pathname);
-    console.log('ProtectedRoute (in App.js) - isAuthLoaded:', isAuthLoaded);
-    console.log('ProtectedRoute (in App.js) - Auth user:', user);
-
-    if (!isAuthLoaded) {
-        // Nếu AuthProvider chưa load xong, hiển thị loading
-        console.log('ProtectedRoute (in App.js) - Auth state not loaded, showing loading...');
-        return <div>Loading authentication state...</div>; // Hoặc spinner
-    }
-
-    if (!user) {
-        // Sau khi auth đã load xong, nếu không có user thì redirect
-        console.log('ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login');
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-
-    console.log('ProtectedRoute (in App.js) - User found, rendering children.');
-    return children;
+  const { user, isAuthLoaded } = useContext(AuthContext); // Lấy isAuthLoaded
+  const location = useLocation();
+  if (!isAuthLoaded) {
+    return <div>Loading authentication state...</div>;
+  }
+  if (!user) {
+    // Sau khi auth đã load xong, nếu không có user thì redirect
+    console.log('ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login');
+    return <Navigate to="/login" state={ { from: location } } replace />;
+  }
+  return children;
 };
 
 
 function App() {
+
+  // useTokenCheckOnNavigation();
+
   return (
     <>
-
-    
-
       <Routes>
         <Route path='/login' element={ <LoginPage /> } />
         <Route path='/register' element={ <SignUpPage /> } />
@@ -97,7 +85,13 @@ function App() {
         <Route path='/forgot-password' element={ <RequestForgotPassword /> } />
         <Route path='/reset-password' element={ <ResetPassword /> } />
 
-{/* Booking routes */}
+        {/* Profile routes */ }
+        <Route path="/profile" element={ <ProfileLayout /> }>
+          <Route index element={ <Profile /> } />
+          <Route path="password" element={ <ChangePassword /> } />
+          <Route path="transactions" element={ <Profile /> } />
+        </Route>
+
         <Route
           path="/booking"
           element={
@@ -115,7 +109,7 @@ function App() {
           }
         />
         <Route
-          path="/booking/failure" // failure page không nhất thiết phải protected
+          path="/booking/failure" 
           element={<BookingFailurePage />}
         />
         <Route
@@ -126,14 +120,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Profile routes */ }
-        <Route path="/profile" element={ <ProfileLayout /> }>
-          <Route index element={ <Profile /> } />
-          <Route path="password" element={ <ChangePassword /> } />
-          <Route path="transactions" element={ <Profile /> } />
-        </Route>
-
 
         <Route
           path='/admin'

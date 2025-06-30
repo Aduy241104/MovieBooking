@@ -149,14 +149,13 @@ function SignUpPage() {
                         />
                         <div className="invalid-feedback">Vui lòng chọn ngày sinh.</div>
                     </div>
-                    <button type="submit" className="btn w-100 text-white" style={ { backgroundColor: "var(--red)" } }>
+                    <button type="submit" className="btn w-100 text-black" style={ { backgroundColor: "var(--red)" } }>
                         { (isLoading) ? "Loading..." : "Đăng ký" }
                     </button>
                 </form>
             </>
         )
     }
-
     return (
         <AuhenticationLayout>
             { (step === 1) ? (renderSignUpForm()) : (renderOtpVerify()) }
