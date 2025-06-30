@@ -41,6 +41,7 @@ function PlayingMovie() {
                                             imglink={`http://localhost:8081${item.smallImage}`} // sửa dòng này thêm localhost
                                             nameVN={ item.nameVN }
                                             types={ item.types }
+                                            ageLimit={item.ageLimit}
                                             id={ item.id }
                                         />
                                     </SwiperSlide>

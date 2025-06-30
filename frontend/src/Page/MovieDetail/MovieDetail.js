@@ -8,8 +8,8 @@ import { getMovieDetailAPI } from '../../service/TheMovieService'
 import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
-const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
-const DEFAULT_SMALL_POSTER = require('../../assets/img/Screenshot 2025-06-13 102311.png')
+const DEFAULT_BG = require("../../assets/img/dafee077981526e731d544d1205a7832.webp")
+const DEFAULT_SMALL_POSTER = require('../../assets/img/6a56d1a35528e276bb39.jpg')
 
 function MovieDetail() {
     const { id } = useParams();
