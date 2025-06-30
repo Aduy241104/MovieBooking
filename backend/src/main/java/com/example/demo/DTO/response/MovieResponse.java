@@ -1,5 +1,8 @@
 package com.example.demo.DTO.response;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
 @Getter
