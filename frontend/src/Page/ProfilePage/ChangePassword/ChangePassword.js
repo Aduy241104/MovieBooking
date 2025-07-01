@@ -1,7 +1,8 @@
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button } from 'antd';
 import { changePasswordAPI } from '../../../service/ProfileService';
 import { openNotification } from '../../../Utils/Notification';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function ChangePassword() {
     const [form] = Form.useForm();
@@ -26,6 +27,7 @@ function ChangePassword() {
                 return;
             }
             openNotification("success", "Cập nhật thành công", "Mật khẩu đã được thay đổi.");
+            localStorage.setItem("token", response.data.result);
             form.resetFields();
 
         } catch (error) {
@@ -114,7 +116,7 @@ function ChangePassword() {
             </Form>
             <p className='mt-4 fs-7'>
                 Quên mật khẩu, nhấn vào
-                <button className='text-red'>đây</button>
+                <Link className='text-red' to={ '/forgot-password' }> đây</Link>
             </p>
         </div>
     )

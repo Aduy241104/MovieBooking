@@ -3,8 +3,8 @@ package com.example.demo.repository;
 import com.example.demo.model.PaymentMethod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
@@ -20,4 +20,6 @@ public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Lo
 
     // Kiểm tra tồn tại phương thức thanh toán
     boolean existsByNameIgnoreCase(String name);
+
+    Optional<PaymentMethod> findByIdAndActiveTrue(Long id);
 }

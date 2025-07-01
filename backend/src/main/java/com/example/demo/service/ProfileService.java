@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.request.ProfileRequest;
+import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.ProfileDTO;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
@@ -36,6 +37,9 @@ public class ProfileService {
     @Autowired
     OtpService otpService;
 
+    @Autowired
+    AuthenticationService authService;
+
     public ProfileDTO getProfile(Long id) {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("account not found !"));
@@ -43,7 +47,7 @@ public class ProfileService {
         return profileDTO;
     }
 
-    public ProfileRequest updateProfile(Long id, ProfileRequest profileRequest) {
+    public AccountRespond updateProfile(Long id, ProfileRequest profileRequest) {
 
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
@@ -55,12 +59,12 @@ public class ProfileService {
         account.setDateOfBirth(profileRequest.getDateOfBirth());
         // account.setAvatar(profileRequest.getAvatar());
 
-
         accountRepository.save(account);
-        return profileRequest;
+        AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        return accountRespond;
     }
 
-    public void changePassword(Long accountId, String oldPassword, String newPassword) {
+    public String changePassword(Long accountId, String oldPassword, String newPassword) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new NotFoundException("Account not found"));
 
@@ -69,6 +73,9 @@ public class ProfileService {
         }
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
+        String newToken = authService.generateToken(account);
+        return newToken;
+
     }
 
     public void requestChangeEmail(String email) {
@@ -78,7 +85,7 @@ public class ProfileService {
         otpService.sendOtp(email);
     }
 
-    public void confirmChangeEmail(Long accountId, String otp, String newEmail) {
+    public AccountRespond confirmChangeEmail(Long accountId, String otp, String newEmail) {
         boolean isValid = otpService.verifyOtp(newEmail, otp);
 
         if (!isValid) {
@@ -91,6 +98,18 @@ public class ProfileService {
         account.setEmail(newEmail);
         otpService.clearOtp(newEmail);
         accountRepository.save(account);
+        AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        return accountRespond;
+    }
+
+    public AccountRespond changeAvatar(Long accountId, String url) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account not found!"));
+
+        account.setAvatar(url);
+        accountRepository.save(account);
+        AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        return accountRespond;
     }
 
 }

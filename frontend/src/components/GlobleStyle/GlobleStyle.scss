@@ -73,6 +73,9 @@ a {
    background-color: rgba(248, 199, 23, 0.4);
 }
 
+.gray-hover:hover {
+    background-color: rgba(230, 230, 230, 0.4);}
+
 .fs-7 {
     font-size: 14px;
 }
@@ -83,6 +86,10 @@ a {
 
 .bg-midnight {
     background-color: rgb(25, 27, 36);
+}
+
+.bg-midnight-2 {
+    background-color: rgb(43, 46, 57);
 }
 
 .bg-night {

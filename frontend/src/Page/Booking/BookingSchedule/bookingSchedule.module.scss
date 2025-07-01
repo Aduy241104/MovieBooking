@@ -1,0 +1,209 @@
+/* bookingSchedule.module.scss - Light theme, to look good on a dark parent background */
+
+// Biến màu cho chủ đề sáng (tùy chỉnh nếu cần)
+$light-background: #ffffff;       // Nền chính của component này (trắng)
+$light-surface-alt: #f8f9fa;    // Nền phụ (ví dụ: cho phần số ngày)
+$light-text-primary: #212529;   // Màu chữ chính (đen/xám đậm)
+$light-text-secondary: #495057; // Màu chữ phụ (xám vừa)
+$light-text-muted: #6c757d;    // Màu chữ mờ hơn
+$light-border-color: #dee2e6;  // Màu viền
+$light-border-secondary: #ced4da; 
+$primary-color: #007bff;       // Màu nhấn chính (xanh dương)
+$primary-color-hover: #0056b3;
+$warning-color-text: #856404;  // Màu cho text cảnh báo
+$warning-color-bg: #fff3cd;     // Nền cho text cảnh báo
+$danger-color: #dc3545;        // Màu đỏ cho lỗi
+
+// Gradient màu vàng cam cho nút active (giống mẫu)
+$gradient-sunshine-start: #ffc107;
+$gradient-sunshine-end: #ff9800;
+
+// Màu cho hiệu ứng red-hover (giống mẫu)
+$red-hover-bg: #ffebee;
+$red-hover-text: #c62828;
+$red-hover-border: #ffcdd2;
+
+
+.schedule-wrapper {
+    margin-top: 1rem;
+    padding: 20px;
+    background-color: transparent; // Nền trắng hoặc xám rất nhạt
+    border-radius: 8px;
+    // Thêm box-shadow để nổi bật trên nền đen của component cha
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05); // Bóng đổ và viền sáng nhẹ
+    color: $light-text-primary;
+}
+
+.loading-text,
+.error-text,
+.no-schedules-text,
+.no-schedules-for-date {
+    padding: 15px 10px;
+    text-align: center;
+    color: $light-text-muted;
+    font-size: 0.95rem;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-text {
+    color: $danger-color;
+    font-weight: 500;
+    // background-color: lighten($danger-color, 40%); // Nền nhẹ cho lỗi nếu muốn
+    // border: 1px solid lighten($danger-color, 20%);
+    // border-radius: $border-radius;
+}
+
+.date-selector-strip {
+    /* d-flex, justify-content-start, gap-2, pb-3, mb-3 từ JSX */
+    border-bottom: 2px solid $light-border-color;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #adb5bd $light-surface-alt; // Màu scrollbar
+
+    &::-webkit-scrollbar { height: 6px; }
+    &::-webkit-scrollbar-track { background: $light-surface-alt; border-radius: 3px; }
+    &::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 3px; border: 1px solid $light-surface-alt; }
+}
+
+.date-button {
+    // Các class btn, d-flex, flex-column, etc. từ JSX sẽ định hình cơ bản
+    // Style inline width: '60px', height: '58px' từ JSX
+    transition: all 0.15s ease-in-out;
+    flex-shrink: 0;
+    border-radius: 0.25rem; // Bootstrap 'rounded'
+    border: 1px solid $light-border-secondary; // Bootstrap 'border'
+    // background-color: transparent; // Để các phần con quyết định màu nền
+
+    &:hover:not(.active-date):not(.disabled-date) {
+        transform: translateY(-1px) scale(1.02);
+        // box-shadow: 0 2px 5px rgba(0,0,0,0.1); // Thêm bóng đổ nhẹ khi hover
+    }
+
+    .date-button-day {
+        // w-100 h-50 d-flex align-items-center justify-content-center từ JSX
+        // style fontSize từ JSX
+        color: $light-text-primary;
+        background-color: $light-surface-alt; // Bootstrap 'bg-light'
+        border-top-left-radius: inherit;
+        border-top-right-radius: inherit;
+        border-bottom: 1px solid $light-border-color;
+        font-weight: 600; // Làm số ngày đậm hơn
+    }
+
+    .date-button-weekday {
+        // fs-8 h-50 d-flex justify-content-center align-items-center m-0 từ JSX
+        color: $light-text-secondary;
+        text-transform: capitalize;
+        background-color: $light-background; // Nền trắng cho phần thứ
+        width: 100%; // Đảm bảo chiếm hết chiều rộng button
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
+    }
+
+    // Nút không active
+    &.btn-light-custom {
+        // Không cần thêm nhiều vì .date-button-day và .date-button-weekday đã có style
+        // Nếu muốn viền khác: border-color: $light-border-color;
+    }
+
+    // Nút active (giống gardient-sunshine fw-bold từ mẫu)
+    &.active-date {
+        background-image: linear-gradient(to right, $gradient-sunshine-start, $gradient-sunshine-end);
+        color: white !important; // Chữ trắng trên nền gradient
+        font-weight: bold !important; // Đảm bảo ghi đè fw-bold từ JSX nếu cần
+        border-color: darken($gradient-sunshine-end, 10%) !important; // Viền phù hợp gradient
+
+        .date-button-day, .date-button-weekday {
+            color: white !important;
+        }
+        .date-button-day {
+            background-color: transparent !important; // Bỏ nền của phần số ngày để gradient hiển thị
+            border-bottom: none !important;
+        }
+        .date-button-weekday {
+            background-color: transparent !important; // Bỏ nền của phần thứ
+        }
+    }
+    
+    &.disabled-date {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: #e9ecef; // Giữ nguyên màu disable
+        border-color: #ced4da;
+        .date-button-day {
+            background-color: #f1f3f5;
+            color: #6c757d;
+        }
+        .date-button-weekday {
+            color: #6c757d;
+            background-color: #e9ecef;
+        }
+    }
+
+    &:focus:not(.disabled-date) {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.35);
+    }
+}
+
+.time-slots-container {
+    // d-flex flex-wrap gap-2 mt-3 w-100 từ JSX
+    // Có thể thêm padding nếu cần
+    // padding-top: 10px;
+}
+
+.selected-date-header { // Giữ nguyên style này từ phiên bản trước vì nó khá ổn
+    font-size: 1rem;
+    font-weight: 600;
+    color: $light-text-primary;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed $light-border-secondary;
+}
+
+.time-slot-button {
+    // border-1 p-1 pe-2 ps-2 rounded-2 fs-7 me-1 từ JSX
+    // Class red-hover từ JSX sẽ được dùng để định nghĩa hiệu ứng hover
+    background-color: $light-surface-alt; // Nền sáng cho nút
+    border: 1px solid $light-border-color;
+    color: $primary-color; // Chữ màu primary
+    transition: all 0.2s ease-in-out;
+    font-weight: 500; // Hơi đậm một chút
+
+    // fw-bold fs-6 cho time-start đã được áp từ JSX qua class
+    // .fw-bold { font-weight: bold !important; }
+    // .fs-6 { font-size: 1rem !important; } // Giả định fs-6 là 1rem
+
+    // fs-7 cho toàn button đã được áp từ JSX
+    // .fs-7 { font-size: 0.875rem !important; }
+
+    &:hover { // Style mặc định khi hover (nếu không có class red-hover)
+        background-color: darken($light-surface-alt, 5%);
+        border-color: darken($light-border-color, 10%);
+        color: $primary-color-hover;
+        transform: scale(1.03);
+    }
+
+    // Định nghĩa cho class red-hover từ mẫu
+    &.red-hover:hover {
+        background-color: $red-hover-bg;
+        border-color: $red-hover-border;
+        color: $red-hover-text;
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 0.2rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.3);
+    }
+
+    // Các class cho text bên trong nút suất chiếu
+    .time-start { // Đã có fw-bold fs-6
+    }
+    .time-separator, .time-end { // Giữ nguyên font-size mặc định của nút (fs-7)
+        opacity: 0.9;
+    }
+}

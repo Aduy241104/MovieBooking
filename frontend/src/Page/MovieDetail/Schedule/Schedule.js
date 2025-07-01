@@ -47,8 +47,6 @@ function Schedule() {
                 </button>
             </div>
         </div>
-
-
     )
 }
 

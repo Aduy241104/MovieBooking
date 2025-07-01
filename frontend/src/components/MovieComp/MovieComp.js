@@ -4,8 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-function MovieComp({ imglink, types = [], nameVN, index, id }) {
+function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
     const navigate = useNavigate();
+
+    const checkAgeLimit = (age) => {
+        if (age >= 18) {
+            return "tag_red";
+        } else if (age >= 16) {
+            return "tag_orange";
+        }
+    }
 
     return (
         <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate(`/movie-detail/${id}`) }>
@@ -19,12 +27,16 @@ function MovieComp({ imglink, types = [], nameVN, index, id }) {
                         e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"; // Đường dẫn ảnh mặc định
                     } }
                 />
+
+                <div className={ cx('age-limit-tag', `${checkAgeLimit(ageLimit)}`) }>
+                    { ageLimit < 16 ? "k" : ageLimit + "+" }
+                </div>
             </div>
             <div className="text-light d-flex">
                 <div className={ cx("number-rank") }>{ index }</div>
                 <div>
                     <p className="line-clamp-1 fw-medium fs-6">{ nameVN }</p>
-                    <p className={ cx('genre', 'text-secondary fs-7') }>{ types.join(', ') }</p>
+                    <p className={ cx('genre', 'text-secondary fs-7 line-clamp-1') }>{ types.join(', ') }</p>
                 </div>
             </div>
         </div>

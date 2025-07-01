@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,14 +17,17 @@ import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.AuthRespond;
 import com.example.demo.DTO.response.IntrospectRespond;
+import com.example.demo.controller.AccountController;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.mapper.AccountMapper;
 import com.example.demo.model.Account;
+import com.example.demo.model.RefreshToken;
 import com.example.demo.model.Role;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.RoleRepository;
+import com.example.demo.utils.GoogleTokenVerifier;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -65,6 +69,12 @@ public class AuthenticationService {
     @Autowired
     OtpService otpService;
 
+    @Autowired
+    RefreshTokenService refreshTokenService;
+
+    @Autowired
+    GoogleTokenVerifier googleTokenVerifier;
+
     // authentication cho table account
     public AuthRespond auth(AuthenticationRequest request) {
         Account account = accountRepository.findByEmailAndStatus(request.getUsername(), 1)
@@ -77,11 +87,14 @@ public class AuthenticationService {
             throw new UnauthorizedException("Invalid Password.");
         }
         var token = generateToken(account);
+        RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
+
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);
         return AuthRespond.builder()
                 .authenticated(true)
                 .account(accountRespond)
                 .token(token)
+                .refresToken(refreshToken.getToken())
                 .build();
     }
 
@@ -107,6 +120,7 @@ public class AuthenticationService {
                 .orElseThrow(() -> new RuntimeException("Role Customer không tồn tại"));
 
         Account account = accountMapper.toAccount(registerRequest, defaultRole);
+        account.setSocialAccountType("LOCAL");
         account.setPassword(passwordEncoder.encode(account.getPassword()));
 
         accountRepository.save(account);
@@ -135,8 +149,56 @@ public class AuthenticationService {
         otpService.clearOtp(email);
     }
 
+    public AuthRespond handleLoginWithGoogle(String idToken) {
+
+        Map<String, Object> payload = googleTokenVerifier.verify(idToken);
+
+        if (payload == null) {
+            throw new NotFoundException("id not valid");
+        }
+
+        String email = (String) payload.get("email");
+        String name = (String) payload.get("name");
+        String picture = (String) payload.get("picture");
+
+        boolean checkExists = accountRepository.existsByEmail(email);
+        Account account;
+
+        if (checkExists) {
+            account = accountRepository.findByEmailAndStatus(email, 1)
+                    .orElseThrow(() -> new NotFoundException("User not found"));
+            if (account.getSocialAccountType().equals("LOCAL")) {
+                throw new EmailAlreadyExistsException("Email này đã được đăng ký bằng email và mật khẩu.");
+            }
+
+        } else {
+            Role defaultRole = roleRepository.findByRoleName("CUSTOMER")
+                    .orElseThrow(() -> new RuntimeException("Role Customer không tồn tại"));
+            account = Account.builder()
+                    .email(email)
+                    .fullName(name)
+                    .avatar(picture)
+                    .role(defaultRole)
+                    .socialAccountType("GOOGLE")
+                    .build();
+
+            accountRepository.save(account);
+        }
+
+        var token = generateToken(account);
+        RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
+
+        AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        return AuthRespond.builder()
+                .authenticated(true)
+                .account(accountRespond)
+                .token(token)
+                .refresToken(refreshToken.getToken())
+                .build();
+    }
+
     // method to generate token
-    private String generateToken(Account account) {
+    public String generateToken(Account account) {
 
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 

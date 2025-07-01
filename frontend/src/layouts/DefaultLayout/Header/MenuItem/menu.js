@@ -17,12 +17,12 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                         width: '160px'
                     } }
 
                 >
-                    😚Chào <br />
+                    Chào <br />
                     { user && user.fullName }
                 </p>
             ),
@@ -36,7 +36,7 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                     }}
                     onClick={() => navigate('/profile')}
                     className="fw-bold"
@@ -55,7 +55,7 @@ function Menu() {
                         border: 'none',
                         width: '100%',
                         textAlign: 'left',
-                        padding: '6px 12px',
+                        padding: '6px 2px',
                         color: 'red',
                     }}
                     onClick={logout}

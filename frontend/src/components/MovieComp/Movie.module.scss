@@ -9,6 +9,7 @@
     width: 100%;
     overflow: hidden  !important;
     box-sizing: border-box;
+    position: relative;
     img{
         height: 100%;
         object-fit: cover;
@@ -22,6 +23,26 @@
         }
     }
 }
+
+.age-limit-tag {
+    position: absolute;
+    top: 0px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom-right-radius: 8px;
+    background-color: rgb(34, 124, 242);
+}
+
+
+.tag_red {
+    background-color: rgb(242, 67, 67);
+}
+
+.tag_orange {
+    background-color: orange;
+}
+
 
 .genre,
 .rating{

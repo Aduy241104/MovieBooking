@@ -1,6 +1,4 @@
 package com.example.demo.model;
-
-import com.example.demo.utils.SecurityUtils;
 import jakarta.persistence.*;
 import lombok.*;
 

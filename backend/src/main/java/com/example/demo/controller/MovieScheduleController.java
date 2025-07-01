@@ -115,4 +115,13 @@ public class MovieScheduleController {
                 .build();
     }
 
+    @GetMapping("/top-booking")
+    public ApiResponse<List<SingleMovieDTO>> getTopBookedMovie() {
+        List<SingleMovieDTO> listMovie = movieScheduleService.getTopBookedMovieByDate();
+        return ApiResponse.<List<SingleMovieDTO>>builder()
+                .message("success")
+                .result(listMovie)
+                .build();
+    }
+
 }
