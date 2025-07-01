@@ -2,9 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.request.ChatRequest;
 import com.example.demo.DTO.response.ChatResponse;
-import com.example.demo.model.Movie;
-import com.example.demo.model.MovieType;
-import com.example.demo.repository.MovieTypeRepository;
 import com.example.demo.utils.QuestionAnalyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -17,13 +14,17 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Service
 public class ChatService {
     @Autowired
-    private MovieTypeRepository movieTypeRepository;
+    private ChatbotDataService chatbotDataService;
+
     private final RestTemplate restTemplate = new RestTemplate();
     private final String API_URL = "http://localhost:1234/v1/chat/completions";
     // private final String API_KEY = "lm-studio";
@@ -33,37 +34,33 @@ public class ChatService {
         StringBuilder context = new StringBuilder();
 
         // Kiểm tra nếu là chào hỏi chung hoặc không có intent cụ thể
-        boolean hasSpecificIntent = info.genre != null || info.askPromotion || info.askDirector ||
-                info.askActor || info.askDuration || info.askPrice || info.askShowTimes;
+        boolean hasSpecificIntent = info.hasAnyIntent();
 
         if (!hasSpecificIntent) {
             // Chào hỏi chung, không cần context phim
-            context.append("Bạn là trợ lý AI MovieTheater thân thiện. " +
-                    "Chào hỏi tự nhiên và hỏi người dùng cần hỗ trợ gì về phim, đặt vé. " +
-                    "Trả lời ngắn gọn, tự nhiên.\n");
+            context.append(
+                    "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
+                    .append("Hãy trả lời tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
+                    .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
         } else {
-            // Có intent cụ thể về phim
-            context.append("Bạn là trợ lý AI MovieTheater.\n" +
-                    "Chỉ trả lời dựa trên dữ liệu bên dưới. " +
-                    "Trả lời ngắn gọn, tự nhiên, chỉ liệt kê tên phim nếu có. " +
-                    "Nếu không có phim nào phù hợp, chỉ trả lời: 'Hiện tại chưa có phim " +
-                    (info.genre != null ? info.genre : "phù hợp") + " nào.'\n");
+            // Có intent cụ thể về phim hoặc dịch vụ
+            context.append(
+                    "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
+                    .append("QUAN TRỌNG: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                    .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
+                    .append("Nếu có lịch chiếu cụ thể, hãy trả lời thân thiện, có chủ-vị, theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
+                    .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
+                    .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
+                    .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
 
-            // Thêm thông tin về thể loại phim nếu có
-            if (info.genre != null) {
-                List<MovieType> movieTypes = movieTypeRepository
-                        .findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(info.genre);
-                if (!movieTypes.isEmpty()) {
-                    context.append("Danh sách phim thể loại ").append(info.genre).append(":\n");
-                    int i = 1;
-                    for (MovieType mt : movieTypes) {
-                        Movie m = mt.getMovie();
-                        context.append(i++).append(". ").append(m.getNameVN()).append(" (").append(m.getNameEN())
-                                .append(")\n");
-                    }
-                } else {
-                    context.append("Không có phim nào thể loại ").append(info.genre).append(".\n");
-                }
+            // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
+            String additionalContext = chatbotDataService.buildContextForIntent(info);
+            if (!additionalContext.isEmpty()) {
+                context.append("\n").append(additionalContext);
+            } else if (info.movieName != null) {
+                // Nếu hỏi về phim cụ thể nhưng không có dữ liệu trong database
+                context.append("\nKhông tìm thấy thông tin phim '").append(info.movieName)
+                        .append("' trong hệ thống.\n");
             }
         }
 
@@ -113,70 +110,72 @@ public class ChatService {
             StringBuilder context = new StringBuilder();
 
             // Kiểm tra nếu là chào hỏi chung hoặc không có intent cụ thể
-            boolean hasSpecificIntent = info.genre != null || info.askPromotion || info.askDirector ||
-                    info.askActor || info.askDuration || info.askPrice || info.askShowTimes;
+            boolean hasSpecificIntent = info.hasAnyIntent();
 
             if (!hasSpecificIntent) {
                 // Chào hỏi chung, không cần context phim
-                context.append("Bạn là trợ lý AI MovieTheater thân thiện. " +
-                        "Chào hỏi tự nhiên và hỏi người dùng cần hỗ trợ gì về phim, đặt vé. " +
-                        "Trả lời ngắn gọn, tự nhiên.\n");
+                context.append(
+                        "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
+                        .append("Hãy trả lời tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
+                        .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
             } else {
-                // Có intent cụ thể về phim
-                context.append("Bạn là trợ lý AI MovieTheater.\n" +
-                        "Chỉ trả lời dựa trên dữ liệu bên dưới. " +
-                        "Trả lời ngắn gọn, tự nhiên, chỉ liệt kê tên phim nếu có. " +
-                        "Nếu không có phim nào phù hợp, chỉ trả lời: 'Hiện tại chưa có phim " +
-                        (info.genre != null ? info.genre : "phù hợp") + " nào.'\n");
+                // Có intent cụ thể về phim hoặc dịch vụ
+                context.append(
+                        "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
+                        .append("QUAN TRỌNG: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                        .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
+                        .append("Nếu có lịch chiếu cụ thể, hãy trả lời thân thiện, có chủ-vị, theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
+                        .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
+                        .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
+                        .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
 
-                if (info.genre != null) {
-                    List<MovieType> movieTypes = movieTypeRepository
-                            .findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(info.genre);
-                    if (!movieTypes.isEmpty()) {
-                        context.append("Danh sách phim thể loại ").append(info.genre).append(":\n");
-                        int i = 1;
-                        for (MovieType mt : movieTypes) {
-                            Movie m = mt.getMovie();
-                            context.append(i++).append(". ").append(m.getNameVN()).append(" (").append(m.getNameEN())
-                                    .append(")\n");
-                        }
-                    } else {
-                        context.append("Không có phim nào thể loại ").append(info.genre).append(".\n");
-                    }
+                // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
+                String additionalContext = chatbotDataService.buildContextForIntent(info);
+                if (!additionalContext.isEmpty()) {
+                    context.append("\n").append(additionalContext);
+                } else if (info.movieName != null) {
+                    // Nếu hỏi về phim cụ thể nhưng không có dữ liệu trong database
+                    context.append("\nKhông tìm thấy thông tin phim '").append(info.movieName)
+                            .append("' trong hệ thống.\n");
                 }
             }
             String prompt = context + "Người dùng hỏi: " + userContent;
 
             // Build request body đúng chuẩn OpenAI API
             ObjectMapper mapper = new ObjectMapper();
-            java.util.Map<String, Object> bodyMap = new java.util.HashMap<>();
+            Map<String, Object> bodyMap = new HashMap<>();
             bodyMap.put("model", "vistral-7b-chat");
-            java.util.List<java.util.Map<String, String>> messages = new java.util.ArrayList<>();
-            java.util.Map<String, String> sysMsg = new java.util.HashMap<>();
+
+            List<Map<String, String>> messages = new ArrayList<>();
+            Map<String, String> sysMsg = new HashMap<>();
             sysMsg.put("role", "system");
             sysMsg.put("content", prompt);
             messages.add(sysMsg);
-            java.util.Map<String, String> userMsg = new java.util.HashMap<>();
+
+            Map<String, String> userMsg = new HashMap<>();
             userMsg.put("role", "user");
             userMsg.put("content", userContent);
             messages.add(userMsg);
             bodyMap.put("messages", messages);
             bodyMap.put("stream", true);
+
             String body = mapper.writeValueAsString(bodyMap);
-            System.out.println("[DEBUG] LM Studio request body: " + body);
+            // System.out.println("[DEBUG] LM Studio request body: " + body);
             URI uri = URI.create(API_URL);
             URL url = uri.toURL();
+
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
             conn.getOutputStream().write(body.getBytes());
+
             InputStream is = conn.getInputStream();
             byte[] buffer = new byte[2048];
             int len;
             while ((len = is.read(buffer)) != -1) {
                 String chunk = new String(buffer, 0, len);
-                System.out.println("[DEBUG] LM Studio chunk: " + chunk);
+                // System.out.println("[DEBUG] LM Studio chunk: " + chunk);
                 chunkConsumer.accept(chunk);
             }
             is.close();
