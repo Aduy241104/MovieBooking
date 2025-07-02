@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from '../../context/AuthContext';
 import ReviewService from '../../service/ReviewService';
 import { message } from 'antd';
+import { Modal } from 'antd';
 
 const ReviewBox = () => {
     // --- Khởi tạo State ---
@@ -29,6 +30,9 @@ const ReviewBox = () => {
     const [hasMore, setHasMore] = useState(true);
     const pageSize = 7;
     const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+
 
 
 
@@ -174,6 +178,7 @@ const ReviewBox = () => {
                     prev.map((r) => (r.id === reviewId ? updatedReview : r))
                 );
                 setEditingReviewId(null);
+                setIsEditModalOpen(false);
             })
             .catch((err) => {
                 console.error("Lỗi cập nhật đánh giá:", err);
@@ -182,21 +187,6 @@ const ReviewBox = () => {
             .finally(() => setSubmitting(false));
     };
 
-    // Tách phần fetch review ra thành hàm riêng
-    // const loadReviews = async () => {
-    //     try {
-    //         const res = await reviewService.getReviewsByMovieId(movieId);
-    //         const data = await res.json();
-    //         if (Array.isArray(data) && data.length > 0) {
-    //             const approvedReviews = data[0].reviews || [];
-    //             setReviews(approvedReviews);
-    //         } else {
-    //             setReviews([]);
-    //         }
-    //     } catch (err) {
-    //         console.error("Error loading reviews:", err);
-    //     }
-    // };
     const loadReviews = async () => {
         try {
             const data = await ReviewService.getReviewsByMovieId(movieId);
@@ -375,34 +365,30 @@ const ReviewBox = () => {
                                             </div>
                                         </div>
                                         {user && r.accountId === user.accountID && (
-                                            <div className="dropdown" >
-                                                <button
-                                                    className="btn btn-sm " style={{
-                                                        // backgroundColor: "#FFD875", // nền vàng
-                                                        color: "#F8F9FA ",               // chữ đen
-                                                        // border: "none",
-                                                    }}
-                                                    onClick={() =>
-                                                        setMenuOpenId(menuOpenId === r.id ? null : r.id)
-                                                    }
-                                                >
-                                                    ⋮
-                                                </button>
-                                                {menuOpenId === r.id && (
-                                                    <div className="dropdown-menu show dropdown-menu-start" >
+                                            <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                {menuOpenId !== r.id ? (
+                                                    <button
+                                                        className={styles.menuToggle}
+                                                        onClick={() => setMenuOpenId(r.id)}
+                                                    >
+                                                        ⋮
+                                                    </button>
+                                                ) : (
+                                                    <div className={styles.menuDropdown}>
                                                         <button
-                                                            className="dropdown-item"
+                                                            className={styles.menuItem}
                                                             onClick={() => {
                                                                 setEditingReviewId(r.id);
                                                                 setEditedComment(r.comment);
                                                                 setEditedRating(r.rating);
+                                                                setIsEditModalOpen(true);
                                                                 setMenuOpenId(null);
                                                             }}
                                                         >
                                                             Chỉnh sửa
                                                         </button>
                                                         <button
-                                                            className="dropdown-item text-danger"
+                                                            className={`${styles.menuItem} ${styles.danger}`}
                                                             onClick={() => handleDelete(r.id)}
                                                             disabled={submitting}
                                                         >
@@ -412,6 +398,8 @@ const ReviewBox = () => {
                                                 )}
                                             </div>
                                         )}
+
+
                                     </div>
                                     <div className="mt-2">
                                         <span className="text-warning fw-bold">★</span> {r.rating}/10
@@ -442,18 +430,27 @@ const ReviewBox = () => {
 
 
                     {/* Form sửa đánh giá */}
-                    {editingReviewId && (
+                    <Modal
+                        open={isEditModalOpen}
+                        onCancel={() => {
+                            setEditingReviewId(null);
+                            setIsEditModalOpen(false);
+                        }}
+                        footer={null}
+                        title=" ⭐ Chỉnh sửa đánh giá"
+                        centered
+                    >
                         <form
                             className={styles.editForm}
                             onSubmit={(e) => handleEditSubmit(e, editingReviewId)}
                         >
-                            <label>★ Chỉnh sửa đánh giá:</label>
                             {renderStars(editedRating, (value) => setEditedRating(value), true)}
                             <textarea
                                 value={editedComment}
                                 onChange={(e) => setEditedComment(e.target.value)}
                                 required
                                 placeholder="Chỉnh sửa đánh giá..."
+                                className={styles.editTextarea}
                             />
                             <div className={styles.submitWrapper}>
                                 <button type="submit" className={styles.button} disabled={submitting}>
@@ -462,13 +459,17 @@ const ReviewBox = () => {
                                 <button
                                     type="button"
                                     className={styles.cancelButton}
-                                    onClick={() => setEditingReviewId(null)}
+                                    onClick={() => {
+                                        setEditingReviewId(null);
+                                        setIsEditModalOpen(false);
+                                    }}
                                 >
                                     Hủy
                                 </button>
                             </div>
                         </form>
-                    )}
+                    </Modal>
+
                 </div>
             )}
         </div>

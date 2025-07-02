@@ -35,11 +35,11 @@ function LoginPage() {
             console.log(res);
             if (res.result.account && res.result.token) {
                 if (res.result.account.role === "ADMIN") {
-                    login(res.result.account, res.result.token);
+                    login(res.result.account, res.result.token, res.result.refresToken);
                     navigate('/admin');
                     return;
                 }
-                login(res.result.account, res.result.token);
+                login(res.result.account, res.result.token, res.result.refresToken);
                 navigate('/');
             } else {
                 setShowLoginFail("Đăng nhập không thành công, vui lòng thử lại.");

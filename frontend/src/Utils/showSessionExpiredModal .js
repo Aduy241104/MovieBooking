@@ -1,15 +1,14 @@
 import { Modal } from 'antd';
 
-export const showSessionExpiredModal = (onConfirm) => {
-    Modal.error({
+export const showSessionExpiredModal = () => {
+    const modal = Modal.confirm({
         title: 'Phiên đăng nhập đã hết hạn',
         content: 'Vui lòng đăng nhập lại để tiếp tục sử dụng hệ thống.',
         centered: true,
         okText: 'Đăng nhập lại',
-        onOk: () => {
-            if (onConfirm) {
-                onConfirm();
-            }
+        cancelText: 'Đóng',
+        onCancel: () => {
+            modal.destroy(); // Chỉ đóng modal lại
         }
     });
 };

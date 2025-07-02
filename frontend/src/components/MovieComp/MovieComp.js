@@ -19,12 +19,16 @@ function MovieComp({ imglink, types = [], nameVN, index, id }) {
                         e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"; // Đường dẫn ảnh mặc định
                     } }
                 />
+
+                <div className={ cx('age-limit-tag') }>
+                    18+
+                </div>
             </div>
             <div className="text-light d-flex">
                 <div className={ cx("number-rank") }>{ index }</div>
                 <div>
                     <p className="line-clamp-1 fw-medium fs-6">{ nameVN }</p>
-                    <p className={ cx('genre', 'text-secondary fs-7') }>{ types.join(', ') }</p>
+                    <p className={ cx('genre', 'text-secondary fs-7 line-clamp-1') }>{ types.join(', ') }</p>
                 </div>
             </div>
         </div>
