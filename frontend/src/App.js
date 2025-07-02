@@ -16,7 +16,7 @@ import TypeList from './components/admin/Movie/MovieType/TypeList';
 
 
 
- 
+
 
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
@@ -65,7 +65,7 @@ const ProtectedRoute = ({ children }) => {
   if (!user) {
     // Sau khi auth đã load xong, nếu không có user thì redirect
     console.log('ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login');
-    return <Navigate to="/login" state={ { from: location } } replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   return children;
 };
@@ -78,18 +78,23 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={ <LoginPage /> } />
-        <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <HomePage /> } />
-        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
-        <Route path='/forgot-password' element={ <RequestForgotPassword /> } />
-        <Route path='/reset-password' element={ <ResetPassword /> } />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<SignUpPage />} />
+        <Route path='/' element={<HomePage />} />
+        <Route path='/movie-detail/:id' element={<MovieDetail />} />
+        <Route path='/forgot-password' element={<RequestForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
 
-        {/* Profile routes */ }
-        <Route path="/profile" element={ <ProfileLayout /> }>
-          <Route index element={ <Profile /> } />
-          <Route path="password" element={ <ChangePassword /> } />
-          <Route path="transactions" element={ <Profile /> } />
+        {/* Profile routes */}
+        <Route path="/profile" element={<ProfileLayout />}>
+          <Route index element={<Profile />} />
+          <Route path="password" element={<ChangePassword />} />
+          //<Route path="transactions" element={<Profile />} />
+        </Route>
+        {/* muốn có profile layout thì để vào đây~~ */}
+        <Route element={<ProfileLayout />}>
+          <Route path="/booking/history" element={<BookingHistoryPage />} />
+          <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
         </Route>
 
         <Route
@@ -109,7 +114,7 @@ function App() {
           }
         />
         <Route
-          path="/booking/failure" 
+          path="/booking/failure"
           element={<BookingFailurePage />}
         />
         <Route
@@ -120,13 +125,13 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
-    path="/booking/details/:bookingId"
-    element={
-        <ProtectedRoute>
-            <BookingDetailPage />
-        </ProtectedRoute>
+          path="/booking/details/:bookingId"
+          element={
+            <ProtectedRoute>
+              <BookingDetailPage />
+            </ProtectedRoute>
           }
         />
 

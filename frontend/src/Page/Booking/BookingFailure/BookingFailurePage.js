@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 // import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA, không còn sử dụng
 import styles from './bookingFailurePage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
 import classNames from 'classnames/bind';
+import DefaultLayout from '../../../layouts/DefaultLayout';
 
 const cx = classNames.bind(styles);
 
@@ -72,6 +73,7 @@ const BookingFailurePage = () => {
 
 
     return (
+        <DefaultLayout>
         <div className={cx('page-container')}>
             <div className={cx('content-wrapper')}>
                 <i className={cx('icon-failure', 'fas fa-times-circle')}></i>
@@ -103,6 +105,7 @@ const BookingFailurePage = () => {
                 </div>
             </div>
         </div>
+         </DefaultLayout>
     );
 };
 

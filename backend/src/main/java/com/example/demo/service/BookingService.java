@@ -216,7 +216,7 @@ public class BookingService {
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
             promotion = promotionRepository.findByCode(request.getPromotionCode());
             if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
-                throw new RuntimeException("Invalid or expired promotion code.");
+                throw new RuntimeException("Mã khuyến mại không hợp lệ hoặc đã hết hạn.");
             }
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
                 throw new RuntimeException("Order total does not meet promotion's minimum requirement.");

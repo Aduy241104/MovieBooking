@@ -43,6 +43,8 @@ $reserved-color: #9b59b6;
     width: 100%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     overflow: hidden; // Đảm bảo border-radius được áp dụng cho các phần tử con
+     width: 100%; /* Cho phép vé chiếm toàn bộ chiều rộng của cột content */
+    max-width: 1500px; /* Đặt một giới hạn tối đa LỚN HƠN để nó trông rộng rãi, đẹp mắt */
 }
 
 /* --- HEADER CỦA VÉ --- */
