@@ -41,9 +41,9 @@ import ResetPassword from './Page/AuthPage/ResetPassword';
 import { ActivityLogPage } from './Page/admin/ActivityLogPage';
 
 import BookingPage from './Page/Booking/BookingPage';
-import BookingSuccessPage from './Page/Booking/BookingSuccessPage';
-import BookingFailurePage from './Page/Booking/BookingFailurePage';
-import BookingHistoryPage from './Page/Booking/BookingHistoryPage'; // Tạo component này nếu muốn
+import BookingSuccessPage from './Page/Booking/BookingSuccess/BookingSuccessPage';
+import BookingFailurePage from './Page/Booking/BookingFailure/BookingFailurePage';
+import BookingHistoryPage from './Page/Booking/BookingHistory/BookingHistoryPage'; // Tạo component này nếu muốn
 import BookingDetailPage from './Page/Booking/BookingDetail/BookingDetailPage';
 
 const PrivateRoute = ({ children }) => {

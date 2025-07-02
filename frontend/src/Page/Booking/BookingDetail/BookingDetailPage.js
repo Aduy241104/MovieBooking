@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { getBookingDetails } from '../../../service/BookingService'; // Điều chỉnh đường dẫn
 import { AuthContext } from '../../../context/AuthContext'; // Điều chỉnh đường dẫn
-import CustomizeButton from '../../../components/CustomeButton/CustomizeButton'; // Điều chỉnh đường dẫn
+// import CustomizeButton from '../../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA, không còn sử dụng
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingDetailPage.module.scss';
+import styles from './bookingDetailPage.module.scss'; // ĐÃ CẬP NHẬT để sử dụng file SCSS mới
 import classNames from 'classnames/bind';
 
 const cx = classNames.bind(styles);
@@ -20,6 +20,7 @@ const BookingDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    // --- LOGIC GỐC GIỮ NGUYÊN ---
     useEffect(() => {
         if (!bookingId || !user) {
             navigate('/login');
@@ -70,24 +71,27 @@ const BookingDetailPage = () => {
         return <div className={cx('page-container', 'error')}>Không có dữ liệu để hiển thị.</div>;
     }
     
+    // --- LOGIC GỐC GIỮ NGUYÊN ---
     const statusInfo = getStatusInfo(bookingDetails.bookingStatus);
     const qrValue = JSON.stringify({
         bookingCode: bookingDetails.bookingCode,
         movieName: bookingDetails.screening?.movieNameVn,
         showTime: bookingDetails.screening?.showDateTime,
     });
-
     const hasDiscount = (bookingDetails.discountApplied > 0) || (bookingDetails.pointsDiscount > 0);
 
     return (
-        <div className={cx('page-container', 'container-fluid')}>
+        <div className={cx('page-container')}>
             <div className={cx('ticket-wrapper')}>
+                {/* --- HEADER CỦA VÉ --- */}
                 <div className={cx('ticket-header')}>
                     <h2 className={cx('title')}>Vé Xem Phim Điện Tử</h2>
                     <div className={cx('booking-code')}>Mã đặt vé: <strong>{bookingDetails.bookingCode}</strong></div>
                 </div>
 
+                {/* --- THÂN VÉ --- */}
                 <div className={cx('ticket-body')}>
+                    {/* --- CỘT TRÁI - THÔNG TIN CHI TIẾT --- */}
                     <div className={cx('left-panel')}>
                         <h4 className={cx('movie-title')}>{bookingDetails.screening?.movieNameVn}</h4>
                         <div className={cx('info-grid')}>
@@ -113,6 +117,7 @@ const BookingDetailPage = () => {
                             </div>
                         </div>
 
+                        {/* --- TÓM TẮT GIÁ TIỀN --- */}
                         <div className={cx('pricing-summary')}>
                             {hasDiscount && (
                                 <div className={cx('price-row')}>
@@ -140,9 +145,10 @@ const BookingDetailPage = () => {
                         </div>
                     </div>
 
+                    {/* --- CỘT PHẢI - QR CODE & TRẠNG THÁI --- */}
                     <div className={cx('right-panel')}>
                         <div className={cx('qr-code-section')}>
-                            <QRCodeSVG value={qrValue} size={160} level={"H"} includeMargin={true}/>
+                            <QRCodeSVG value={qrValue} size={160} level={"H"} includeMargin={true} bgColor="#ffffff" fgColor="#24283b"/>
                             <p>Dùng mã này để quét tại rạp</p>
                         </div>
                         <div className={cx('status-section')}>
@@ -155,10 +161,16 @@ const BookingDetailPage = () => {
                         </div>
                     </div>
                 </div>
-
+                
+                {/* --- CÁC NÚT HÀNH ĐỘNG --- */}
                 <div className={cx('ticket-actions')}>
-                    <CustomizeButton secondary onClick={() => window.print()}><i className="fas fa-print"></i> In vé</CustomizeButton>
-                    <CustomizeButton primary onClick={() => navigate('/booking/history')}><i className="fas fa-history"></i> Lịch sử đặt vé</CustomizeButton>
+                    {/* Thay thế CustomizeButton bằng button tiêu chuẩn */}
+                    <button className={cx('btn', 'btn-secondary')} onClick={() => window.print()}>
+                        <i className="fas fa-print"></i> In vé
+                    </button>
+                    <button className={cx('btn', 'btn-primary')} onClick={() => navigate('/booking/history')}>
+                        <i className="fas fa-history"></i> Lịch sử đặt vé
+                    </button>
                 </div>
             </div>
         </div>

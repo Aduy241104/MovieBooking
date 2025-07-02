@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 
 const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, baseTicketPrice }) => {
     // Nhóm ghế theo hàng
-    const seatsByRow = seatsData.reduce((acc, seat) => {
+    const seatsByRow = (seatsData || []).reduce((acc, seat) => {
         const row = seat.seatRow;
         if (!acc[row]) {
             acc[row] = [];
@@ -21,60 +21,67 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, baseTicketPrice
     const sortedRows = Object.keys(seatsByRow).sort();
 
     const getSeatDisplayPrice = (seat) => {
-        return baseTicketPrice + (parseFloat(seat.seatTypePrice) || 0);
+        // baseTicketPrice được truyền từ BookingPage, cần logic tính giá đầy đủ ở đó
+        // Ở đây chỉ là ví dụ cơ bản
+        return (baseTicketPrice || 0) + (parseFloat(seat.seatTypePrice) || 0);
     };
 
 
     return (
         <div className={cx('seat-map-container')}>
             <div className={cx('screen')}>MÀN HÌNH</div>
-            {sortedRows.map(rowLabel => (
-                <div key={rowLabel} className={cx('seat-row')}>
-                    <div className={cx('row-label')}>{rowLabel}</div>
-                    <div className={cx('seats-in-row')}>
-                        {seatsByRow[rowLabel].map(seat => {
-                            const isSelected = selectedSeats.some(s => s.seatId === seat.seatId);
-                            const isDisabled = seat.status === 'Booked' || seat.status === 'Unavailable';
-                            let seatClass = cx('seat', seat.seatTypeName.toLowerCase().replace(' ', '-')); // vd: ghe-vip
+            <div className={cx('seat-area')}> {/* Thêm seat-area để dễ căn giữa */}
+                {sortedRows.map(rowLabel => (
+                    <div key={rowLabel} className={cx('seat-row')}>
+                        <div className={cx('row-label')}>{rowLabel}</div>
+                        <div className={cx('seats-in-row')}>
+                            {seatsByRow[rowLabel].map(seat => {
+                                const isSelected = selectedSeats.some(s => s.seatId === seat.seatId);
+                                const isDisabled = seat.status === 'Booked' || seat.status === 'Unavailable';
+                                
+                                // Tạo class CSS từ seatTypeName, ví dụ: "regular", "vip", "couple"
+                                const seatTypeClass = seat.seatTypeName ? seat.seatTypeName.toLowerCase() : 'regular';
 
-                            if (isSelected) {
-                                seatClass = cx(seatClass, 'selected');
-                            }
-                            if (isDisabled) {
-                                seatClass = cx(seatClass, 'disabled');
-                            }
+                                const seatClass = cx('seat', seatTypeClass, {
+                                    'selected': isSelected,
+                                    'disabled': isDisabled,
+                                });
 
-                            return (
-                                <div
-                                    key={seat.seatId}
-                                    className={seatClass}
-                                    onClick={() => !isDisabled && onSeatSelect(seat)}
-                                    title={
-                                        isDisabled
-                                        ? (seat.status === 'Booked' ? 'Ghế đã được đặt' : 'Ghế không khả dụng')
-                                        : `${seat.seatTypeName}: ${getSeatDisplayPrice(seat).toLocaleString('vi-VN')}đ`
-                                    }
-                                >
-                                    {seat.seatCol}
-                                </div>
-                            );
-                        })}
+                                return (
+                                    <div
+                                        key={seat.seatId}
+                                        className={seatClass}
+                                        onClick={() => !isDisabled && onSeatSelect(seat)}
+                                        title={
+                                            isDisabled
+                                            ? (seat.status === 'Booked' ? 'Ghế đã được đặt' : 'Ghế không khả dụng')
+                                            : `${seat.seatTypeName}: ${getSeatDisplayPrice(seat).toLocaleString('vi-VN')}đ`
+                                        }
+                                    >
+                                        {/* --- THAY ĐỔI 1: HIỂN THỊ TỌA ĐỘ ĐẦY ĐỦ --- */}
+                                        {`${seat.seatRow}${seat.seatCol}`}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
 
-            <div className={cx('legend', 'mt-3')}>
+            {/* --- THAY ĐỔI 2: SỬA LẠI LEGEND --- */}
+            <div className={cx('legend', 'mt-4')}>
                 <div className={cx('legend-item')}>
-                    <div className={cx('seat', 'available-legend')}></div>
-                    <span>Ghế trống</span>
+                    {/* Sử dụng class "regular" để khớp với logic */}
+                    <div className={cx('seat', 'regular')}></div>
+                    <span>Ghế thường</span>
                 </div>
                 <div className={cx('legend-item')}>
-                    <div className={cx('seat', 'ghe-vip', 'available-legend')}></div> {/* Ví dụ cho VIP */}
-                    <span>Ghế VIP trống</span>
+                    <div className={cx('seat', 'vip')}></div>
+                    <span>Ghế VIP</span>
                 </div>
                  <div className={cx('legend-item')}>
-                    <div className={cx('seat', 'ghe-doi', 'available-legend')}></div> {/* Ví dụ cho đôi */}
-                    <span>Ghế đôi trống</span>
+                    <div className={cx('seat', 'couple')}></div>
+                    <span>Ghế đôi</span>
                 </div>
                 <div className={cx('legend-item')}>
                     <div className={cx('seat', 'selected')}></div>
@@ -82,7 +89,7 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, baseTicketPrice
                 </div>
                 <div className={cx('legend-item')}>
                     <div className={cx('seat', 'disabled')}></div>
-                    <span>Ghế đã đặt/Không khả dụng</span>
+                    <span>Ghế đã đặt</span>
                 </div>
             </div>
         </div>

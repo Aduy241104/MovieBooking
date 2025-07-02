@@ -1,136 +1,263 @@
-.booking-container {
-    padding-top: 2rem;
-    padding-bottom: 3rem;
-    background-color: #f4f7f6; // Một màu nền nhẹ cho cả trang
+/* --- Biến màu cho Dark Theme --- */
+$dark-bg: #1a1d29;               // Nền chính
+$dark-surface: #24283b;          // Nền cho các section, card (sáng hơn một chút)
+$primary-gradient: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+$text-primary: #e0e0e0;          // Chữ chính (trắng ngà)
+$text-secondary: #9e9e9e;        // Chữ phụ (xám)
+$border-color: #394264;          // Màu viền
+$success-color: #2ecc71;
+$danger-color: #e74c3c;
+$link-color: #58a6ff;
+$input-bg: #2f364a;
+$input-focus-border: #43cea2;
+
+/* --- NỀN VÀ LAYOUT CHUNG --- */
+.page-background {
+    background-color: $dark-bg;
     min-height: 100vh;
+    padding: 2rem 1rem;
+}
 
-    .page-title {
-        text-align: center;
-        margin-bottom: 2.5rem;
-        color: #2c3e50; // Màu tiêu đề chính
-        font-weight: 600;
-        font-size: 2rem;
+.booking-container {
+    display: flex;
+    gap: 2rem;
+    max-width: 1300px;
+}
+
+.main-content {
+    flex: 3;
+}
+
+.sidebar {
+    flex: 2;
+    position: sticky;
+    top: 2rem;
+    align-self: flex-start;
+}
+
+.sidebar-content {
+    background-color: $dark-surface;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid $border-color;
+}
+
+/* --- STYLE CHUNG CHO CÁC SECTION --- */
+.section {
+    background-color: $dark-surface;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid $border-color;
+}
+
+/* --- THÔNG TIN PHIM CHI TIẾT --- */
+.movie-info-section {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    
+    .movie-poster img {
+        width: 120px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
 
-    // Phần chung cho các section
-    .section {
-        background-color: #ffffff;
-        padding: 25px; // Tăng padding một chút
-        border-radius: 12px; // Bo góc mềm mại hơn
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); // Bóng đổ tinh tế hơn
-        margin-bottom: 25px;
-
+    .movie-details {
         h4 {
-            font-size: 1.3rem; // Tăng kích thước tiêu đề section
-            color: #34495e;   // Màu cho tiêu đề section
-            margin-bottom: 1.2rem;
-            padding-bottom: 0.6rem;
-            border-bottom: 1px solid #e0e0e0; // Đường gạch chân tiêu đề
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 1rem;
         }
-    }
-
-    // Thông tin phim
-    .movie-info-section {
         p {
-            font-size: 0.95rem;
-            color: #555;
+            font-size: 0.9rem;
+            color: $text-secondary;
             margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-
-            i {
-                margin-right: 10px;
-                color: #007bff; // Màu icon
-                width: 20px; // Đảm bảo icon thẳng hàng
-                text-align: center;
+            strong {
+                color: $text-primary;
+                font-weight: 500;
             }
         }
-        h4 {
-            color: #0056b3; // Màu khác cho tiêu đề phim
+    }
+}
+
+/* --- THANH TIẾN TRÌNH (TIMELINE) --- */
+.timeline {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    position: relative;
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        background-color: $border-color;
+        transform: translateY(-50%);
+    }
+    .timeline-item {
+        position: relative;
+        background-color: $dark-surface; // Che đường line
+        padding: 0 1rem;
+        color: $text-secondary;
+        font-weight: 500;
+        &.active {
+            color: $input-focus-border; // Dùng màu xanh của gradient làm màu active
+            font-weight: bold;
         }
     }
+}
 
-    // Phần chọn ghế (chủ yếu style ở SeatSelection.module.scss)
-    .seat-selection-section {
-        // Có thể thêm style đặc biệt cho section này nếu cần
+/* --- KHU VỰC GIẢM GIÁ (GOM CHUNG ĐIỂM VÀ KHUYẾN MÃI) --- */
+.discount-area {
+    background-color: rgba(0,0,0,0.1);
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+
+    &.disabled {
+        opacity: 0.4;
+        pointer-events: none;
     }
 
-    // Phần khuyến mãi
-    .promotion-section {
-        .input-group {
-            // style cho input group nếu cần
+    .section { // Reset style cho các section con bên trong
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background: none;
+    }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-primary;
+        margin: 0;
+        i { color: $link-color; margin-right: 0.75rem; }
+    }
+}
+
+.btn-cancel {
+    background: none;
+    border: 1px solid $text-secondary;
+    color: $text-secondary;
+    font-size: 0.75rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 3px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    &:hover {
+        background-color: $danger-color;
+        border-color: $danger-color;
+        color: #fff;
+    }
+}
+
+.points-available {
+    font-size: 0.85rem;
+    color: $text-secondary;
+    margin-bottom: 0.75rem;
+}
+
+/* --- INPUT & BUTTON --- */
+.input-group {
+    .form-control {
+        background-color: $input-bg;
+        border-color: $border-color;
+        color: $text-primary;
+        &:focus {
+            background-color: $input-bg;
+            border-color: $input-focus-border;
+            color: $text-primary;
+            box-shadow: 0 0 0 0.25rem rgba($input-focus-border, 0.25);
         }
-        .btn-apply-promo {
-            // Style cho nút "Áp dụng"
-            // Ví dụ: border-top-left-radius: 0; border-bottom-left-radius: 0;
-            // CustomizeButton của bạn có thể đã xử lý việc này
-        }
-        .text-danger, .text-success {
-            font-size: 0.85rem;
-            margin-top: 5px;
-        }
-        .small.text-muted {
-            font-size: 0.8rem;
-            display: block; // Cho xuống dòng nếu cần
-            margin-top: 5px;
+        &::placeholder { color: #6c757d; }
+    }
+    // Nút "Áp dụng"
+    .btn.btn-primary { 
+        background-image: $primary-gradient;
+        border: none;
+        color: #fff;
+        font-weight: 500;
+        &:hover { filter: brightness(110%); }
+        &:disabled {
+            background-image: none;
+            background-color: #3e445b;
+            opacity: 0.7;
         }
     }
+}
 
-    // Phần thanh toán
-    .payment-section {
-        .form-check {
-            margin-bottom: 0.8rem;
+.applied-promo-info {
+    background-color: rgba($success-color, 0.1);
+    border: 1px solid $success-color;
+    color: $success-color;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+/* --- PHƯƠ-NG THỨC THANH TOÁN --- */
+.payment-section {
+    h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-primary; // Giữ lại màu chữ cho H5 nếu bạn đã thêm
+        margin-bottom: 1rem;
+
+        i { // <<< ĐÚNG: Style này áp dụng cho icon nằm TRONG h5 >>>
+            color: $link-color;
+            margin-right: 0.75rem;
         }
-        .form-check-label {
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
+    }
+    
+    .form-check {
+        margin-bottom: 0.75rem;
+    color: white;
         .form-check-input {
-            cursor: pointer;
-            margin-top: 0.2rem; // Căn chỉnh vị trí radio button
-        }
-    }
-
-    // Nút thanh toán
-    .btn-submit-booking {
-        // Style cho nút "Thanh Toán"
-        // CustomizeButton có thể đã style rồi, bạn có thể override
-        // Ví dụ:
-        // padding: 12px 0 !important;
-        // font-size: 1.1rem !important;
-        // font-weight: bold !important;
-        width: 100%; // Nếu CustomizeButton chưa có prop `block` hoặc tương đương
-    }
-}
-
-// Responsive (ví dụ)
-@media (max-width: 991px) { // lg breakpoint của Bootstrap
-    .booking-container {
-        .page-title {
-            font-size: 1.8rem;
-            margin-bottom: 2rem;
-        }
-        .section {
-            padding: 20px;
-        }
-         // Cột phải có thể sẽ xuống dưới, căn giữa cho đẹp
-        .col-lg-4 {
-            margin-top: 25px;
+            background-color: #444;
+            border-color: #666;
+            &:checked {
+                background-color: $input-focus-border;
+                border-color: $input-focus-border;
+            }
         }
     }
 }
-
-@media (max-width: 767px) { // md breakpoint
-    .booking-container {
-        .page-title {
-            font-size: 1.6rem;
-        }
-        .section h4 {
-            font-size: 1.15rem;
-        }
-        .movie-info-section p,
-        .payment-section .form-check-label {
-            font-size: 0.9rem;
-        }
+/* --- NÚT SUBMIT CHÍNH --- */
+.btn-submit-booking {
+    // Giả sử CustomizeButton là một button
+    background-image: $primary-gradient !important;
+    border: none !important;
+    color: #fff !important;
+    font-weight: bold !important;
+    padding: 12px 0 !important;
+    transition: all 0.3s ease !important;
+    &:hover {
+        box-shadow: 0 0 20px rgba($input-focus-border, 0.5) !important;
+        transform: translateY(-2px);
     }
+    &:disabled {
+        background-image: none !important;
+        background-color: #3e445b !important;
+        opacity: 0.6 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 991px) {
+    .booking-container { flex-direction: column; }
+    .sidebar { position: static; top: auto; }
 }
