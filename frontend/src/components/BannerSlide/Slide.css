@@ -9,7 +9,6 @@
 }
 
 .slide {
-    /* z-index: 999; */
     width: 100%;
     height: auto;
 }
@@ -18,7 +17,7 @@
     width: 110px;
     height: 70px;
     position: absolute;
-    top: 67%;
+    top: 67%;   
     transform: translate(0, 168%);
     border-radius: 7px;
     background-position: center;
@@ -164,7 +163,6 @@
     color: rgb(0, 0, 0);
     background-color: white;
     font-size: 14px;
-    /* background-color: transparent !important; */
 }
 
 .button-slide button:hover {
