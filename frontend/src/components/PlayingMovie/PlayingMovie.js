@@ -37,8 +37,7 @@ function PlayingMovie() {
                                     <SwiperSlide key={ index }>
                                         <MovieComp
                                             index={ index + 1 }
-                                            //imglink={ item.smallImage }
-                                            imglink={`http://localhost:8081${item.smallImage}`} // sửa dòng này thêm localhost
+                                            imglink={ item.smallImage }
                                             nameVN={ item.nameVN }
                                             types={ item.types }
                                             ageLimit={item.ageLimit}

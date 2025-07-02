@@ -26,6 +26,12 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const isEdit = !!movieId;
 
+  // Hàm xử lý path ảnh nếu là dạng tương đối
+  const getFullImageUrl = (path) => {
+    if (!path) return null;
+    return path.startsWith("http") ? path : `http://localhost:8081${path}`;
+  };
+
   useEffect(() => {
     axios.get("http://localhost:8081/api/public/types").then((res) => {
       setTypes(res.data);
@@ -49,12 +55,12 @@ export default function MovieForm({ movieId, onSuccess }) {
           typeIds: m.typeIds || []
         });
 
-        const BASE = "http://localhost:8081";
-        setPreviewSmallImage(m.smallImageUrl ? encodeURI(`${BASE}${m.smallImageUrl}`) : null);
-        setPreviewLargeImage(m.largeImageUrl ? encodeURI(`${BASE}${m.largeImageUrl}`) : null);
+        setPreviewSmallImage(getFullImageUrl(m.smallImageUrl));
+        setPreviewLargeImage(getFullImageUrl(m.largeImageUrl));
       });
     }
   }, [form, movieId, isEdit]);
+
   const normalizeYouTubeUrl = (url) => {
     if (!url) return '';
     try {
@@ -73,7 +79,6 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const handleSubmit = async (values) => {
     const data = new FormData();
-
 
     const normalizedValues = {
       ...values,
@@ -134,12 +139,6 @@ export default function MovieForm({ movieId, onSuccess }) {
           <Form.Item label="Tên phim (EN)" name="nameEN" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          {/* <Form.Item label="Thời lượng (phút)" name="duration" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item label="Giới hạn tuổi" name="ageLimit" rules={[{ required: true }]}>
-            <Input type="number" />
-          </Form.Item> */}
           <Form.Item
             label="Thời lượng (phút)"
             name="duration"
@@ -208,16 +207,13 @@ export default function MovieForm({ movieId, onSuccess }) {
           >
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
-
         </Col>
 
         <Col span={12}>
           <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          {/* <Form.Item label="Diễn viên" name="actor" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item> */}
+
           <Form.Item label="Hãng sản xuất" name="movieProductionCompany" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
