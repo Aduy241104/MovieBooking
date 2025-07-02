@@ -1,12 +1,13 @@
+// src/pages/BookingDetailPage/BookingDetailPage.jsx
+
 import React, { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { getBookingDetails } from '../../../service/BookingService'; // Điều chỉnh đường dẫn
-import { AuthContext } from '../../../context/AuthContext'; // Điều chỉnh đường dẫn
-// import CustomizeButton from '../../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA, không còn sử dụng
+import { getBookingDetails } from '../../../service/BookingService';
+import { AuthContext } from '../../../context/AuthContext';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingDetailPage.module.scss'; // ĐÃ CẬP NHẬT để sử dụng file SCSS mới
+import styles from './bookingDetailPage.module.scss';
 import classNames from 'classnames/bind';
 
 const cx = classNames.bind(styles);
@@ -16,11 +17,11 @@ const BookingDetailPage = () => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
     
+    // --- Toàn bộ logic, state, useEffect, các hàm helper của bạn được giữ nguyên ---
     const [bookingDetails, setBookingDetails] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // --- LOGIC GỐC GIỮ NGUYÊN ---
     useEffect(() => {
         if (!bookingId || !user) {
             navigate('/login');
@@ -45,7 +46,8 @@ const BookingDetailPage = () => {
         fetchDetails();
     }, [bookingId, user, navigate]);
 
-    const formatScreeningDateTime = (dateTime) => {
+    // ... (các hàm format, getStatusInfo giữ nguyên) ...
+     const formatScreeningDateTime = (dateTime) => {
         if (!dateTime) return 'N/A';
         return format(parseISO(dateTime), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi });
     };
@@ -60,18 +62,20 @@ const BookingDetailPage = () => {
             default: return { text: status || 'Không xác định', className: 'status-unknown' };
         }
     };
-    
+
+    // --- CÁCH HIỂN THỊ LOADING VÀ ERROR MỚI ---
+    // Hiển thị trực tiếp bên trong vùng nội dung
     if (loading) {
-        return <div className={cx('page-container', 'loading')}>Đang tải chi tiết vé...</div>;
+        return <div className={cx('status-message')}>Đang tải chi tiết vé...</div>;
     }
     if (error) {
-        return <div className={cx('page-container', 'error')}>{error}</div>;
+        return <div className={cx('status-message', 'error')}>{error}</div>;
     }
     if (!bookingDetails) {
-        return <div className={cx('page-container', 'error')}>Không có dữ liệu để hiển thị.</div>;
+        return <div className={cx('status-message', 'error')}>Không có dữ liệu để hiển thị.</div>;
     }
     
-    // --- LOGIC GỐC GIỮ NGUYÊN ---
+    // --- LOGIC RENDER GIỮ NGUYÊN ---
     const statusInfo = getStatusInfo(bookingDetails.bookingStatus);
     const qrValue = JSON.stringify({
         bookingCode: bookingDetails.bookingCode,
@@ -80,22 +84,23 @@ const BookingDetailPage = () => {
     });
     const hasDiscount = (bookingDetails.discountApplied > 0) || (bookingDetails.pointsDiscount > 0);
 
+    // Bỏ thẻ div .page-container bên ngoài
     return (
-        <div className={cx('page-container')}>
-            <div className={cx('ticket-wrapper')}>
-                {/* --- HEADER CỦA VÉ --- */}
-                <div className={cx('ticket-header')}>
-                    <h2 className={cx('title')}>Vé Xem Phim Điện Tử</h2>
-                    <div className={cx('booking-code')}>Mã đặt vé: <strong>{bookingDetails.bookingCode}</strong></div>
-                </div>
+        <div className={cx('ticket-wrapper')}>
+            {/* --- HEADER CỦA VÉ --- */}
+            <div className={cx('ticket-header')}>
+                <h2 className={cx('title')}>Vé Xem Phim Điện Tử</h2>
+                <div className={cx('booking-code')}>Mã đặt vé: <strong>{bookingDetails.bookingCode}</strong></div>
+            </div>
 
-                {/* --- THÂN VÉ --- */}
-                <div className={cx('ticket-body')}>
-                    {/* --- CỘT TRÁI - THÔNG TIN CHI TIẾT --- */}
-                    <div className={cx('left-panel')}>
-                        <h4 className={cx('movie-title')}>{bookingDetails.screening?.movieNameVn}</h4>
-                        <div className={cx('info-grid')}>
-                            <div className={cx('info-item')}>
+            {/* --- THÂN VÉ --- */}
+            <div className={cx('ticket-body')}>
+                {/* --- CỘT TRÁI - THÔNG TIN CHI TIẾT --- */}
+                <div className={cx('left-panel')}>
+                    <h4 className={cx('movie-title')}>{bookingDetails.screening?.movieNameVn}</h4>
+                    <div className={cx('info-grid')}>
+                        {/* ... nội dung info-grid giữ nguyên ... */}
+                         <div className={cx('info-item')}>
                                 <span className={cx('label')}><i className="fas fa-user"></i> Khách hàng</span>
                                 <span className={cx('value')}>{bookingDetails.account?.fullName}</span>
                             </div>
@@ -115,11 +120,12 @@ const BookingDetailPage = () => {
                                 <span className={cx('label')}><i className="fas fa-chair"></i> Ghế đã chọn</span>
                                 <span className={cx('value', 'seats')}>{bookingDetails.bookedSeats?.map(s => s.seatRow + s.seatCol).join(', ')}</span>
                             </div>
-                        </div>
+                    </div>
 
-                        {/* --- TÓM TẮT GIÁ TIỀN --- */}
-                        <div className={cx('pricing-summary')}>
-                            {hasDiscount && (
+                    {/* --- TÓM TẮT GIÁ TIỀN --- */}
+                    <div className={cx('pricing-summary')}>
+                         {/* ... nội dung pricing-summary giữ nguyên ... */}
+                          {hasDiscount && (
                                 <div className={cx('price-row')}>
                                     <span>Tạm tính</span>
                                     <span>{bookingDetails.originalAmount?.toLocaleString('vi-VN')}đ</span>
@@ -142,12 +148,13 @@ const BookingDetailPage = () => {
                                 <span>Tổng cộng</span>
                                 <span>{bookingDetails.totalAmount?.toLocaleString('vi-VN')}đ</span>
                             </div>
-                        </div>
                     </div>
+                </div>
 
-                    {/* --- CỘT PHẢI - QR CODE & TRẠNG THÁI --- */}
-                    <div className={cx('right-panel')}>
-                        <div className={cx('qr-code-section')}>
+                {/* --- CỘT PHẢI - QR CODE & TRẠNG THÁI --- */}
+                <div className={cx('right-panel')}>
+                     {/* ... nội dung right-panel giữ nguyên ... */}
+                     <div className={cx('qr-code-section')}>
                             <QRCodeSVG value={qrValue} size={160} level={"H"} includeMargin={true} bgColor="#ffffff" fgColor="#24283b"/>
                             <p>Dùng mã này để quét tại rạp</p>
                         </div>
@@ -159,19 +166,17 @@ const BookingDetailPage = () => {
                             <span className={cx('label')}>Thanh toán bằng</span>
                             <span className={cx('value', 'payment-method')}>{bookingDetails.paymentMethod?.methodName}</span>
                         </div>
-                    </div>
                 </div>
-                
-                {/* --- CÁC NÚT HÀNH ĐỘNG --- */}
-                <div className={cx('ticket-actions')}>
-                    {/* Thay thế CustomizeButton bằng button tiêu chuẩn */}
-                    <button className={cx('btn', 'btn-secondary')} onClick={() => window.print()}>
-                        <i className="fas fa-print"></i> In vé
-                    </button>
-                    <button className={cx('btn', 'btn-primary')} onClick={() => navigate('/booking/history')}>
-                        <i className="fas fa-history"></i> Lịch sử đặt vé
-                    </button>
-                </div>
+            </div>
+            
+            {/* --- CÁC NÚT HÀNH ĐỘNG --- */}
+            <div className={cx('ticket-actions')}>
+                <button className={cx('btn', 'btn-secondary')} onClick={() => window.print()}>
+                    <i className="fas fa-print"></i> In vé
+                </button>
+                <button className={cx('btn', 'btn-primary')} onClick={() => navigate('/booking/history')}>
+                    <i className="fas fa-history"></i> Lịch sử đặt vé
+                </button>
             </div>
         </div>
     );
