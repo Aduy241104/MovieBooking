@@ -31,7 +31,7 @@ function MovieDetail() {
 
                 const path = response.result?.largeImage;
                 if (path?.trim()) {
-                    const fullUrl = `http://localhost:8081${path}`; // sửa dòng này thêm localhost
+                    const fullUrl = `${path}`; // sửa dòng này thêm localhost
                     const img = new Image();
                     img.src = fullUrl;
 
@@ -67,8 +67,8 @@ function MovieDetail() {
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            // src={ movie.smallImage + "" }
-                                             src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
+                                             src={ movie.smallImage + "" }
+                                            // src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {

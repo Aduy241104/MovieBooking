@@ -16,7 +16,7 @@ import TypeList from './components/admin/Movie/MovieType/TypeList';
 
 
 
-
+ 
 
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
