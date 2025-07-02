@@ -59,6 +59,14 @@ public class Booking {
     @Column(name = "vnp_TxnRef") // Ánh xạ với cột vnp_TxnRef trong DB
     private String vnpTxnRef;   // Tên thuộc tính trong Java
 
+    @Column(name = "booking_code", unique = true, length = 20)
+    private String bookingCode;
+    @Column(name = "points_used")
+    private Integer pointsUsed;
+
+    @Column(name = "points_discount")
+    private BigDecimal pointsDiscount;
+
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
     private List<BookedSeat> bookedSeats = new ArrayList<>();
 

@@ -124,3 +124,24 @@ export const resetPasswordAPI = async (data) => {
         }
     }
 }
+
+export const handleLoginGoogleApi = async (idToken) => {
+    try {
+        const response = await axiosInstance.post("/auth/google-login", { idToken: idToken });
+        return { success: true, data: response.data }
+
+    } catch (error) {
+        if (error.response) {
+            return {
+                success: false,
+                status: error.response.status,
+                message: error.response.message
+            }
+        }
+        return {
+            success: false,
+            status: 500,
+            message: "Không thể kết nối đến máy chủ"
+        }
+    }
+}

@@ -5,7 +5,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import EditTypeForm from './EditTypeForm';
 import AddTypeForm from './AddTypeForm';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axiosClient from '../../../config/axios'
+import axiosClient from '../../../../config/axios'
 
 export default function TypeList() {
     const [types, setTypes] = useState([]);

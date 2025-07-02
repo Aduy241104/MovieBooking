@@ -28,7 +28,7 @@ public class FindMovieService {
     private TypeRepository typeRepository;
 
     public List<Movie> findMovieByName(String keyword) {
-        List<Movie> response = movieRepository.findByNameVNContainingIgnoreCase(keyword);
+        List<Movie> response = movieRepository.findByNameVNContainingIgnoreCaseAndIsDeletedFalse(keyword);
         return response;
     }
 

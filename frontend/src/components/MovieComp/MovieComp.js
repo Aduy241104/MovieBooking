@@ -4,8 +4,16 @@ import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-function MovieComp({ imglink, types = [], nameVN, index, id }) {
+function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
     const navigate = useNavigate();
+
+    const checkAgeLimit = (age) => {
+        if (age >= 18) {
+            return "tag_red";
+        } else if (age >= 16) {
+            return "tag_orange";
+        }
+    }
 
     return (
         <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate(`/movie-detail/${id}`) }>
@@ -20,8 +28,8 @@ function MovieComp({ imglink, types = [], nameVN, index, id }) {
                     } }
                 />
 
-                <div className={ cx('age-limit-tag') }>
-                    18+
+                <div className={ cx('age-limit-tag', `${checkAgeLimit(ageLimit)}`) }>
+                    { ageLimit < 16 ? "k" : ageLimit + "+" }
                 </div>
             </div>
             <div className="text-light d-flex">

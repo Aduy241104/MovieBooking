@@ -137,4 +137,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     List<SingleMovieDTO> getTopBookedCurrentMovies(@Param("currentDate") LocalDate currentDate);
 
+    boolean existsByBookingCode(String bookingCode); // code
 }
+

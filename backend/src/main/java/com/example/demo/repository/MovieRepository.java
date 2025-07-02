@@ -2,6 +2,7 @@ package com.example.demo.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,17 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-    List<Movie> findByNameVNContainingIgnoreCase(String nameVN);
+    // Tìm phim theo tên tiếng Việt (gần đúng, không phân biệt hoa thường)
+    List<Movie> findByNameVNContainingIgnoreCaseAndIsDeletedFalse(String nameVN);
+
+    // Tìm phim theo tên tiếng Anh (gần đúng, không phân biệt hoa thường)
+    List<Movie> findByNameENContainingIgnoreCaseAndIsDeletedFalse(String nameEN);
+
+    // Tìm phim trong khoảng ngày chiếu
+    List<Movie> findByFromDateLessThanEqualAndToDateGreaterThanEqualAndIsDeletedFalse(LocalDate from, LocalDate to);
+
+    // Tìm tất cả phim chưa bị xóa
+    List<Movie> findByIsDeletedFalse();
 
     @Query("""
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
@@ -109,6 +120,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 LIMIT 5
             """, nativeQuery = true)
     List<Object[]> getTopMoviesByRevenue();
-
+    Optional<Movie> findByNameVNAndIsDeletedFalse(String nameVN);
+    Optional<Movie> findByNameENAndIsDeletedFalse(String nameEN);
 }
 

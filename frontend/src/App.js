@@ -6,19 +6,36 @@ import LoginPage from './Page/AuthPage/LoginPage';
 import SignUpPage from './Page/AuthPage/SignUpPage';
 import HomePage from './Page/Home';
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
-import RoomList from './components/admin/room/RoomList';
-import CreateRoom from './components/admin/room/CreateRoom';
-import EditRoom from './components/admin/room/EditRoom';
-import RoomDetail from './components/admin/room/RoomDetail';
+
+
 import { PaymentMethodPage } from './components/PaymentMethod/PaymentMethodPage';
 import PaymentTransactionPage from './components/PaymentTransaction/PaymentTransactionPage';
-import TypeList from './components/admin/Movie/TypeList';
+
+
+
+import RoomList from './components/admin/Room/RoomList';
+import CreateRoom from './components/admin/Room/CreateRoom';
+import RoomDetail from './components/admin/Room/RoomDetail';
+import EditRoom from './components/admin/Room/EditRoom';
+import TypeList from './components/admin/Movie/MovieType/TypeList';
+
+
+
+ 
+
 import { UserPage } from './Page/admin/UserPage';
 import { UserDetailPage } from './Page/admin/UserDetailPage';
 import { PromotionPage } from './Page/admin/PromotionPage';
 import { DashboardPage } from './Page/admin/DashboardPage';
 import ReviewUI from './components/ReviewComponents/reviewcomponents';
 import MovieDetail from './Page/MovieDetail/MovieDetail';
+
+
+import MovieList from './components/admin/Movie/Movie/MovieList';
+import AddMovie from './components/admin/Movie/Movie/AddMovie';
+import EditMovie from './components/admin/Movie/Movie/EditMovie';
+
+
 import Profile from './Page/ProfilePage/Profile/Profile';
 import ChangePassword from './Page/ProfilePage/ChangePassword/ChangePassword';
 import ProfileLayout from './layouts/ProfileLayout';
@@ -32,7 +49,7 @@ import BookingPage from './Page/Booking/BookingPage';
 import BookingSuccessPage from './Page/Booking/BookingSuccessPage';
 import BookingFailurePage from './Page/Booking/BookingFailurePage';
 import BookingHistoryPage from './Page/Booking/BookingHistoryPage'; // Tạo component này nếu muốn
-
+import BookingDetailPage from './Page/Booking/BookingDetail/BookingDetailPage';
 
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
@@ -62,6 +79,7 @@ const ProtectedRoute = ({ children }) => {
   }
   return children;
 };
+
 
 function App() {
 
@@ -113,6 +131,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        
+        <Route
+    path="/booking/details/:bookingId"
+    element={
+        <ProtectedRoute>
+            <BookingDetailPage />
+        </ProtectedRoute>
+          }
+        />
 
 
         <Route
@@ -124,6 +151,7 @@ function App() {
           }
         >
           <Route index element={<DashboardPage />} />
+
           <Route path="room-list" element={<RoomList />} />
           <Route path="room-list/add-room" element={<CreateRoom />} />
           <Route path="room-list/room/:id" element={<RoomDetail />} />

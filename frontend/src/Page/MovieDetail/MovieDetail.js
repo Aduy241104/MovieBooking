@@ -1,16 +1,15 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import DefaultLayout from '../../layouts/DefaultLayout'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import styles from './MovieDetail.module.scss'
 import classNames from 'classnames/bind'
 import RightComponent from './RightComponent'
 import { getMovieDetailAPI } from '../../service/TheMovieService'
-import Artist from '../Artist'
 import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
-const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
-const DEFAULT_SMALL_POSTER = require('../../assets/img/Screenshot 2025-06-13 102311.png')
+const DEFAULT_BG = require("../../assets/img/dafee077981526e731d544d1205a7832.webp")
+const DEFAULT_SMALL_POSTER = require('../../assets/img/6a56d1a35528e276bb39.jpg')
 
 function MovieDetail() {
     const { id } = useParams();
@@ -32,7 +31,7 @@ function MovieDetail() {
 
                 const path = response.result?.largeImage;
                 if (path?.trim()) {
-                    const fullUrl = path;
+                    const fullUrl = `${path}`; // sửa dòng này thêm localhost
                     const img = new Image();
                     img.src = fullUrl;
 
@@ -68,7 +67,8 @@ function MovieDetail() {
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            src={ movie.smallImage + "" }
+                                             src={ movie.smallImage + "" }
+                                            // src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {
@@ -108,7 +108,7 @@ function MovieDetail() {
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>Warner Bros. Animation, DC Entertainment</span>
+                                                    <span className='fw-300'>{movie.movieProductionCompany}</span>
                                                 </li>
                                             </ul>
                                         </div>

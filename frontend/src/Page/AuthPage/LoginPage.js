@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import ErrorNotification from "../../components/ErrorNotification/ErrorNotification";
 import { AuthContext } from "../../context/AuthContext";
 import { loginOAuth } from "../../service/AuthService";
+import GoogleBtn from "../../components/GoogleBtn/GoogleBtn";
 
 function LoginPage() {
     const { login } = useContext(AuthContext);
@@ -111,7 +112,9 @@ function LoginPage() {
                     ) : "Đăng nhập" }
                 </button>
             </form>
-            <button className="btn btn-secondary w-100 mt-2 rounded-4"><i className="fa-brands fa-google"></i> Đăng nhập bằng google</button>
+            <button className="w-100 mt-3 rounded-4" style={{overflow:'hidden'}}>
+                <GoogleBtn/>
+            </button>
         </AuhenticationLayout>
     );
 }

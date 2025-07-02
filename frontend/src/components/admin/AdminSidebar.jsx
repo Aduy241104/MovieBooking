@@ -47,11 +47,11 @@ export const AdminSidebar = (props) => {
         {
             key: 'movie',
             icon: <Film size={20} strokeWidth={1.5}/>,
-            label: 'Phim',
+            label: 'Quản Lý Phim',
             children: [
                 {
                     key: 'movie',
-                    label: <Link to={"#"}>Phim</Link>
+                    label: <Link to={"/admin/movies"}>Phim</Link>
                 },
                 {
                     key: 'type',
@@ -118,10 +118,15 @@ export const AdminSidebar = (props) => {
         const pathname = location.pathname;
         if (pathname.includes('users-members') || pathname.includes('users-employees')) {
             setOpenKeys(['users']);
+
         } else if (pathname.includes('paymentmethod') || pathname.includes('payment-transactions')) {
             setOpenKeys(['payment-management']);
         }
-         else {
+         else if(pathname.includes('movies') || pathname.includes('movie-type')) {
+            setOpenKeys(['movie'])
+        }
+        else {
+
             setOpenKeys([]);
         }
         // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được
