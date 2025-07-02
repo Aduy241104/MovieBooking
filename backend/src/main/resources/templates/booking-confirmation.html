@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${subject}"></title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background-color: #0056b3; color: #fff; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 30px; }
+        .content h2 { color: #0056b3; }
+        .booking-details { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        .booking-details td { padding: 10px; border-bottom: 1px solid #eee; }
+        .booking-details .label { font-weight: bold; color: #555; width: 40%; }
+        .qr-code { text-align: center; margin-top: 20px; }
+        .qr-code img { max-width: 150px; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #777; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 th:text="${subject}">Xác nhận đặt vé thành công</h1>
+    </div>
+    <div class="content">
+        <h2>Xin chào, <span th:text="${customerName}">Tên Khách Hàng</span>!</h2>
+        <p>Cảm ơn bạn đã đặt vé tại TheMovie. Dưới đây là thông tin chi tiết về vé của bạn:</p>
+
+        <table class="booking-details">
+            <tr>
+                <td class="label">Mã đặt vé:</td>
+                <td th:text="${bookingCode}">CINE-ABCDEF</td>
+            </tr>
+            <tr>
+                <td class="label">Phim:</td>
+                <td th:text="${movieName}">Tên Phim</td>
+            </tr>
+            <tr>
+                <td class="label">Suất chiếu:</td>
+                <td th:text="${showTime}">19:30 - Thứ Hai, 30/06/2025</td>
+            </tr>
+            <tr>
+                <td class="label">Rạp / Định dạng:</td>
+                <td th:text="${roomAndFormat}">Phòng chiếu 1 / 3D</td>
+            </tr>
+            <tr>
+                <td class="label">Ghế đã chọn:</td>
+                <td th:text="${seats}">A1, A2</td>
+            </tr>
+            <tr>
+                <td class="label">Tổng thanh toán:</td>
+                <td th:text="${totalAmount} + 'đ'">150.000đ</td>
+            </tr>
+        </table>
+
+        <div class="qr-code">
+            <p>Quét mã QR này tại quầy để nhận vé:</p>
+            <!-- Thymeleaf sẽ thay thế src bằng cid:qrCodeImage -->
+            <img th:src="|cid:${qrCodeImageCid}|" alt="QR Code" />
+        </div>
+
+        <p>Vui lòng có mặt trước giờ chiếu phim ít nhất 15 phút. Chúc bạn có một buổi xem phim vui vẻ!</p>
+    </div>
+    <div class="footer">
+        <p>© <span th:text="${#dates.year(#dates.createNow())}">2025</span> TheMovie. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
