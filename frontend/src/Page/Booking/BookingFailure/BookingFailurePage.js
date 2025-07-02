@@ -1,7 +1,11 @@
-// src/pages/BookingFailurePage/BookingFailurePage.js
+// src/pages/BookingFailurePage/BookingFailurePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // TODO: KIỂM TRA ĐƯỜNG DẪN
+// import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA, không còn sử dụng
+import styles from './bookingFailurePage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
+import classNames from 'classnames/bind';
+
+const cx = classNames.bind(styles);
 
 const BookingFailurePage = () => {
     const location = useLocation();
@@ -13,6 +17,7 @@ const BookingFailurePage = () => {
     const [retrievedMovieInfo, setRetrievedMovieInfo] = useState(null);
     const [tryAgainLink, setTryAgainLink] = useState('/');
 
+    // --- LOGIC GỐC GIỮ NGUYÊN ---
     useEffect(() => {
         let movieInfoString = localStorage.getItem('lastMovieInfoForBooking');
         let movieIdForLink = null;
@@ -49,12 +54,9 @@ const BookingFailurePage = () => {
             setTryAgainLink('/'); // Mặc định về trang chủ nếu không có thông tin phim
         }
 
-        // Xóa bookingId nếu bạn đã lưu (tùy chọn)
-        // localStorage.removeItem('lastVnpayBookingId');
-
     }, []); // Chạy một lần khi component mount
 
-
+    // --- LOGIC GỐC GIỮ NGUYÊN ---
     let message = "Giao dịch không thành công.";
     if (reason === 'payment_declined') {
         message = `Thanh toán bị từ chối bởi VNPAY. (Mã lỗi: ${vnpResponseCode || 'N/A'})`;
@@ -70,26 +72,35 @@ const BookingFailurePage = () => {
 
 
     return (
-        <div className="container mt-5 text-center">
-            <i className="fas fa-times-circle fa-5x text-danger mb-3"></i>
-            <h2>Đặt vé không thành công!</h2>
-            {retrievedMovieInfo && <p className="text-muted">Phim: {retrievedMovieInfo.nameVN || retrievedMovieInfo.nameEN}</p>}
-            <p>{message}</p>
-            {bookingIdFromQuery && <p>Mã tham chiếu (nếu có): #{bookingIdFromQuery}</p>}
-            <p>Vui lòng thử lại hoặc chọn phương thức thanh toán khác.</p>
-            <div className="mt-4 d-flex justify-content-center gap-3">
-                <Link to={tryAgainLink}>
-                    <CustomizeButton secondary large>
-                        {tryAgainLink === '/' ? 'Về Trang Chủ' : 'Chọn Lại Suất Chiếu'}
-                    </CustomizeButton>
-                </Link>
-                {tryAgainLink !== '/' && ( // Chỉ hiển thị nút "Về Trang Chủ" thứ hai nếu nút "Thử Lại" không phải là về trang chủ
-                     <Link to="/">
-                        <CustomizeButton primary large>
-                            Về Trang Chủ
-                        </CustomizeButton>
+        <div className={cx('page-container')}>
+            <div className={cx('content-wrapper')}>
+                <i className={cx('icon-failure', 'fas fa-times-circle')}></i>
+                <h2 className={cx('title')}>Đặt vé không thành công!</h2>
+
+                {retrievedMovieInfo && <p className={cx('movie-info')}>Phim: {retrievedMovieInfo.nameVN || retrievedMovieInfo.nameEN}</p>}
+                
+                <p className={cx('message')}>{message}</p>
+                
+                {bookingIdFromQuery && <p className={cx('reference-code')}>Mã tham chiếu: #{bookingIdFromQuery}</p>}
+                
+                <p className={cx('sub-message')}>Vui lòng thử lại hoặc chọn phương thức thanh toán khác.</p>
+                
+                <div className={cx('actions-container')}>
+                    {/* Thay thế CustomizeButton bằng Link và button thông thường */}
+                    <Link to={tryAgainLink}>
+                        <button className={cx('btn', 'btn-secondary')}>
+                            {tryAgainLink === '/' ? 'Về Trang Chủ' : 'Chọn Lại Suất Chiếu'}
+                        </button>
                     </Link>
-                )}
+                    
+                    {tryAgainLink !== '/' && ( // Chỉ hiển thị nút "Về Trang Chủ" thứ hai nếu nút "Thử Lại" không phải là về trang chủ
+                         <Link to="/">
+                            <button className={cx('btn', 'btn-primary')}>
+                                Về Trang Chủ
+                            </button>
+                        </Link>
+                    )}
+                </div>
             </div>
         </div>
     );
