@@ -1,23 +1,55 @@
 package com.example.demo.service;
 
+import com.example.demo.DTO.request.booking.BookingRequestDTO;
+import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.BookingTicketRecentlyResponse;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
-import com.example.demo.repository.BookingRepository;
+import com.example.demo.configuration.VnpayConfig;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+// mail confim
+import org.thymeleaf.context.Context;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import java.io.ByteArrayOutputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class BookingService {
     private final BookingRepository bookingRepository;
+    private final AccountRepository accountRepository;
+    private final ScreeningRepository screeningRepository;
+    private final SeatRepository seatRepository;
+    private final PromotionRepository promotionRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final BookedSeatRepository bookedSeatRepository;
+    private final VnpayConfig vnpayConfig; // Inject VNPAY config
+    private final EmailService emailService;
+    private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
+    private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
 
     public Long getTotalRevenueByStatus(String status) {
         return bookingRepository.getTotalRevenueByStatus(status);
@@ -128,5 +160,535 @@ public class BookingService {
         }
         return result;
     }
+    //booking
+
+    private String generateUniqueBookingCode() {
+        String code;
+        do {
+            // Định dạng: CINE- + 6 ký tự ngẫu nhiên (chữ và số)
+            String randomPart = UUID.randomUUID().toString().substring(30).toUpperCase();
+            code = "CINE-" + randomPart;
+        } while (bookingRepository.existsByBookingCode(code)); // Lặp lại nếu mã đã tồn tại
+        return code;
+    }
+
+    @Transactional
+    public BookingDetailResponseDTO createBooking(BookingRequestDTO request, Long accountId, HttpServletRequest httpServletRequest) {
+        // 1. KIỂM TRA ĐẦU VÀO
+        Account account = accountRepository.findWithLockingByAccountId(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Screening screening = screeningRepository.findById(request.getScreeningId())
+                .orElseThrow(() -> new RuntimeException("Screening not found"));
+        PaymentMethod paymentMethod = paymentMethodRepository.findByIdAndActiveTrue(request.getPaymentMethodId())
+                .orElseThrow(() -> new RuntimeException("Payment method not found or not active"));
+
+        if (screening.getShowDateTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Cannot book for a past screening.");
+        }
+        if (request.getSeatIds() == null || request.getSeatIds().isEmpty()) {
+            throw new RuntimeException("Please select at least one seat.");
+        }
+        List<Seat> selectedSeats = seatRepository.findBySeatIdIn(request.getSeatIds());
+        if (selectedSeats.size() != request.getSeatIds().size()) {
+            throw new RuntimeException("One or more selected seats not found.");
+        }
+        Set<Long> alreadyBookedSeatIds = seatRepository.findBookedSeatIdsByScreeningId(screening.getId());
+        for (Seat seat : selectedSeats) {
+            if (alreadyBookedSeatIds.contains(seat.getSeatId())) {
+                throw new RuntimeException("Seat " + seat.getSeatRow() + seat.getSeatCol() + " is already booked.");
+            }
+            if (!seat.getCinemaRoom().getCinemaRoomId().equals(screening.getCinemaRoom().getCinemaRoomId())) {
+                throw new RuntimeException("Seat " + seat.getSeatRow() + seat.getSeatCol() + " does not belong to the screening's cinema room.");
+            }
+            if ("Unavailable".equalsIgnoreCase(seat.getSeatStatus())) {
+                throw new RuntimeException("Seat " + seat.getSeatRow() + seat.getSeatCol() + " is unavailable.");
+            }
+        }
+
+        // 2. TÍNH TOÁN TỔNG TIỀN GỐC
+        BigDecimal originalTotalAmount = calculateOriginalTotalAmount(screening, selectedSeats);
+
+        // 3. ÁP DỤNG KHUYẾN MÃI
+        Promotion promotion = null;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+        String promotionCodeApplied = null;
+        String discountTypeApplied = null;
+        if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
+            promotion = promotionRepository.findByCode(request.getPromotionCode());
+            if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
+                throw new RuntimeException("Invalid or expired promotion code.");
+            }
+            if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
+                throw new RuntimeException("Order total does not meet promotion's minimum requirement.");
+            }
+            promotionCodeApplied = promotion.getCode();
+            discountTypeApplied = promotion.getDiscountType();
+            if ("PERCENT".equalsIgnoreCase(promotion.getDiscountType())) {
+                discountAmount = originalTotalAmount.multiply(promotion.getDiscountLevel().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+                if (promotion.getMaxDiscount() != null && discountAmount.compareTo(promotion.getMaxDiscount()) > 0) {
+                    discountAmount = promotion.getMaxDiscount();
+                }
+            } else if ("AMOUNT".equalsIgnoreCase(promotion.getDiscountType())) {
+                discountAmount = promotion.getDiscountLevel();
+            }
+            if (discountAmount.compareTo(originalTotalAmount) > 0) {
+                discountAmount = originalTotalAmount;
+            }
+        }
+        BigDecimal finalTotalAmountAfterPromotion = originalTotalAmount.subtract(discountAmount);
+
+        // 4. ÁP DỤNG ĐIỂM THƯỞNG
+        BigDecimal pointsDiscountAmount = BigDecimal.ZERO;
+        int pointsUsed = 0;
+        if (request.getPointsToUse() > 0) {
+            if (request.getPointsToUse() > account.getScore()) {
+                throw new RuntimeException("Số điểm sử dụng vượt quá số điểm hiện có.");
+            }
+            int pointsToUseRounded = (request.getPointsToUse() / 1000) * 1000;
+            pointsDiscountAmount = new BigDecimal(pointsToUseRounded);
+            if (pointsDiscountAmount.compareTo(finalTotalAmountAfterPromotion) > 0) {
+                int maxPointsToUse = (finalTotalAmountAfterPromotion.intValue() / 1000) * 1000;
+                pointsDiscountAmount = new BigDecimal(maxPointsToUse);
+                pointsUsed = maxPointsToUse;
+            } else {
+                pointsUsed = pointsToUseRounded;
+            }
+            account.setScore(account.getScore() - pointsUsed);
+        }
+        BigDecimal finalAmountToPay = finalTotalAmountAfterPromotion.subtract(pointsDiscountAmount);
+
+        // 5. TẠO BOOKING VÀ XỬ LÝ THANH TOÁN
+        Booking booking = new Booking();
+        booking.setBookingCode(generateUniqueBookingCode());
+        booking.setAccount(account);
+        booking.setScreening(screening);
+        booking.setPromotion(promotion);
+        booking.setPaymentMethod(paymentMethod);
+        booking.setPromotionCodeApplied(promotionCodeApplied);
+        booking.setDiscountTypeApplied(discountTypeApplied);
+        booking.setDiscountApplied(discountAmount);
+        booking.setTotalAmount(finalAmountToPay);
+        booking.setPointsUsed(pointsUsed);
+        booking.setPointsDiscount(pointsDiscountAmount);
+
+        String paymentUrl = null;
+        if ("VNPAY".equalsIgnoreCase(paymentMethod.getName())) {
+            booking.setBookingStatus("PENDING_PAYMENT");
+            String vnp_TxnRef = booking.getBookingCode() + "-" + System.currentTimeMillis();
+            booking.setVnpTxnRef(vnp_TxnRef);
+            if (finalAmountToPay.compareTo(BigDecimal.ZERO) > 0) {
+                paymentUrl = createVnpayPaymentUrl(finalAmountToPay, vnp_TxnRef, screening.getMovie().getNameVN(), httpServletRequest);
+            } else {
+                booking.setBookingStatus("PAID");
+            }
+        } else {
+            throw new RuntimeException("Unsupported payment method: " + paymentMethod.getName());
+        }
+
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 6. LƯU CHI TIẾT CÁC GHẾ ĐÃ ĐẶT
+        saveBookedSeats(savedBooking, selectedSeats, screening, discountAmount, pointsDiscountAmount);
+
+        if ("PAID".equals(savedBooking.getBookingStatus())) {
+            addPointsToAccount(savedBooking);
+            sendBookingConfirmationEmail(savedBooking); // <<< GỌI HÀM GỬI MAIL
+        }
+
+        return convertToBookingDetailResponseDTO(savedBooking, paymentUrl, originalTotalAmount);
+    }
+
+    @Transactional
+    public String handleVnpayReturn(Map<String, String> vnpayParams) {
+        String vnp_SecureHash_FromVNPay = vnpayParams.remove("vnp_SecureHash");
+        if (vnp_SecureHash_FromVNPay == null) {
+            logger.error("VNPAY return missing vnp_SecureHash. Params: {}", vnpayParams);
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=missing_secure_hash";
+        }
+        String calculatedSecureHash = VnpayConfig.hashAllFields(vnpayParams, vnpayConfig.getVnp_HashSecret());
+        String vnp_TxnRef = vnpayParams.get("vnp_TxnRef");
+        if (vnp_TxnRef == null) {
+            logger.error("VNPAY return missing vnp_TxnRef. Params: {}", vnpayParams);
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=missing_transaction_ref";
+        }
+        Optional<Booking> bookingOptional = bookingRepository.findByVnpTxnRef(vnp_TxnRef);
+        if (!bookingOptional.isPresent()) {
+            logger.warn("Booking not found for vnp_TxnRef: {}. Params: {}", vnp_TxnRef, vnpayParams);
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=booking_not_found&txnRef=" + vnp_TxnRef;
+        }
+
+        Booking booking = bookingOptional.get();
+        String movieIdParam = (booking.getScreening() != null && booking.getScreening().getMovie() != null) ? "&movieId=" + booking.getScreening().getMovie().getId() : "";
+
+        if (!"PENDING_PAYMENT".equals(booking.getBookingStatus())) {
+            if ("PAID".equals(booking.getBookingStatus())) {
+                return vnpayConfig.getFrontendSuccessUrl() + "?bookingId=" + booking.getId() + movieIdParam;
+            }
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=booking_already_processed&bookingId=" + booking.getId() + movieIdParam;
+        }
+
+        if (calculatedSecureHash.equals(vnp_SecureHash_FromVNPay)) {
+            String vnp_ResponseCode = vnpayParams.get("vnp_ResponseCode");
+            if ("00".equals(vnp_ResponseCode)) {
+                booking.setBookingStatus("PAID");
+                addPointsToAccount(booking); // Tích điểm
+                bookingRepository.save(booking); // Lưu lại trạng thái PAID và điểm đã tích
+                sendBookingConfirmationEmail(booking); // <<< ĐÂY LÀ DÒNG THÊM VÀO
+                // Không cần save booking lần nữa vì addPointsToAccount đã save account,
+                // và booking sẽ được save bởi transaction commit.
+            } else {
+                booking.setBookingStatus("PAYMENT_FAILED");
+                refundPoints(booking); // Hoàn điểm
+            }
+            bookingRepository.save(booking); // Lưu trạng thái cuối cùng của booking
+
+            if ("PAID".equals(booking.getBookingStatus())) {
+                return vnpayConfig.getFrontendSuccessUrl() + "?bookingId=" + booking.getId() + movieIdParam;
+            } else {
+                return vnpayConfig.getFrontendFailureUrl() + "?reason=payment_declined&bookingId=" + booking.getId() + "&vnp_ResponseCode=" + vnp_ResponseCode + movieIdParam;
+            }
+        } else {
+            logger.error("SecureHash Mismatch for Booking ID: {}", booking.getId());
+            booking.setBookingStatus("PAYMENT_FAILED");
+            refundPoints(booking); // Hoàn điểm nếu chữ ký sai
+            bookingRepository.save(booking);
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=invalid_signature&bookingId=" + booking.getId() + movieIdParam;
+        }
+    }
+
+    // --- CÁC PHƯƠNG THỨC HELPER ---
+    private BigDecimal calculateOriginalTotalAmount(Screening screening, List<Seat> selectedSeats) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        FareType fareType = screening.getFareType();
+        BigDecimal basePrice = fareType.getBasePrice();
+        BigDecimal movieFormatSurcharge = getMovieFormatSurcharge(fareType.getMovieFormat());
+        BigDecimal timeSlotSurcharge = getTimeSlotSurcharge(fareType.getTimeSlotType());
+        for (Seat seat : selectedSeats) {
+            BigDecimal seatPrice = new BigDecimal(basePrice.toString())
+                    .add(movieFormatSurcharge)
+                    .add(timeSlotSurcharge);
+            if (seat.getSeatType() != null && seat.getSeatType().getSeatTypePrice() != null) {
+                seatPrice = seatPrice.add(seat.getSeatType().getSeatTypePrice());
+            }
+            totalAmount = totalAmount.add(seatPrice);
+        }
+        return totalAmount;
+    }
+
+    private void saveBookedSeats(Booking booking, List<Seat> selectedSeats, Screening screening, BigDecimal promotionDiscount, BigDecimal pointsDiscount) {
+        FareType fareType = screening.getFareType();
+        BigDecimal basePrice = fareType.getBasePrice();
+        BigDecimal movieFormatSurcharge = getMovieFormatSurcharge(fareType.getMovieFormat());
+        BigDecimal timeSlotSurcharge = getTimeSlotSurcharge(fareType.getTimeSlotType());
+        BigDecimal totalDiscount = promotionDiscount.add(pointsDiscount);
+        BigDecimal discountPerSeat = (selectedSeats.isEmpty()) ? BigDecimal.ZERO : totalDiscount.divide(new BigDecimal(selectedSeats.size()), 2, RoundingMode.HALF_UP);
+
+        List<BookedSeat> bookedSeatEntities = new ArrayList<>();
+        for (Seat seat : selectedSeats) {
+            BigDecimal originalSeatPrice = new BigDecimal(basePrice.toString())
+                    .add(movieFormatSurcharge)
+                    .add(timeSlotSurcharge);
+            if (seat.getSeatType() != null && seat.getSeatType().getSeatTypePrice() != null) {
+                originalSeatPrice = originalSeatPrice.add(seat.getSeatType().getSeatTypePrice());
+            }
+            BigDecimal pricePaidForThisSeat = originalSeatPrice.subtract(discountPerSeat);
+            if (pricePaidForThisSeat.compareTo(BigDecimal.ZERO) < 0) {
+                pricePaidForThisSeat = BigDecimal.ZERO;
+            }
+            BookedSeat bookedSeat = new BookedSeat();
+            bookedSeat.setBooking(booking);
+            bookedSeat.setSeat(seat);
+            bookedSeat.setPricePaid(pricePaidForThisSeat);
+            bookedSeatEntities.add(bookedSeat);
+        }
+        bookedSeatRepository.saveAll(bookedSeatEntities);
+    }
+
+    private void addPointsToAccount(Booking booking) {
+        if (booking == null || !"PAID".equals(booking.getBookingStatus())) return;
+        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId()).orElse(null);
+        if (account == null) {
+            logger.warn("Account not found for adding points. Booking ID: {}", booking.getId());
+            return;
+        }
+        BigDecimal amountPaid = booking.getTotalAmount();
+        if (amountPaid != null && amountPaid.compareTo(BigDecimal.ZERO) > 0) {
+            int pointsEarned = amountPaid.multiply(POINTS_EARNING_RATE).intValue();
+            account.setScore(account.getScore() + pointsEarned);
+            logger.info("Added {} points to account ID {}. New score: {}", pointsEarned, account.getAccountId(), account.getScore());
+        }
+    }
+
+    private void refundPoints(Booking booking) {
+        if (booking == null || booking.getPointsUsed() == null || booking.getPointsUsed() <= 0) {
+            return;
+        }
+        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId()).orElse(null);
+        if (account == null) {
+            logger.warn("Account not found for refunding points. Booking ID: {}", booking.getId());
+            return;
+        }
+        account.setScore(account.getScore() + booking.getPointsUsed());
+        logger.info("Refunded {} points to account ID {} due to failed/cancelled payment.", booking.getPointsUsed(), account.getAccountId());
+    }
+
+    private BigDecimal getMovieFormatSurcharge(String movieFormat) {
+        if ("3D".equalsIgnoreCase(movieFormat)) return new BigDecimal("20000");
+        if ("IMAX".equalsIgnoreCase(movieFormat)) return new BigDecimal("35000");
+        return BigDecimal.ZERO;
+    }
+
+    private BigDecimal getTimeSlotSurcharge(String timeSlotType) {
+        if ("Cuối Tuần".equalsIgnoreCase(timeSlotType)) return new BigDecimal("10000");
+        if ("Ngày Lễ".equalsIgnoreCase(timeSlotType)) return new BigDecimal("15000");
+        return BigDecimal.ZERO;
+    }
+
+    private String createVnpayPaymentUrl(BigDecimal amount, String vnpTxnRef, String orderInfoDesc, HttpServletRequest req) {
+        long amountLong = amount.multiply(BigDecimal.valueOf(100)).longValue();
+
+        Map<String, String> vnp_Params = new TreeMap<>(); // Sử dụng TreeMap để tự động sắp xếp theo key
+        vnp_Params.put("vnp_Version", VnpayConfig.VNP_VERSION);
+        vnp_Params.put("vnp_Command", VnpayConfig.VNP_COMMAND_PAY);
+        vnp_Params.put("vnp_TmnCode", vnpayConfig.getVnp_TmnCode());
+        vnp_Params.put("vnp_Amount", String.valueOf(amountLong));
+        vnp_Params.put("vnp_CurrCode", VnpayConfig.VNP_CURRCODE);
+        vnp_Params.put("vnp_TxnRef", vnpTxnRef);
+        String vnp_OrderInfo = "Thanh toan don hang: " + vnpTxnRef + ". Noi dung: " + orderInfoDesc;
+        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+        vnp_Params.put("vnp_OrderType", VnpayConfig.VNP_ORDERTYPE);
+        vnp_Params.put("vnp_Locale", VnpayConfig.VNP_LOCALE);
+        vnp_Params.put("vnp_ReturnUrl", vnpayConfig.getVnp_ReturnUrl());
+        vnp_Params.put("vnp_IpAddr", VnpayConfig.getIpAddress(req));
+
+        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        String vnp_CreateDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
+
+        cld.add(Calendar.MINUTE, 15);
+        String vnp_ExpireDate = formatter.format(cld.getTime());
+        vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
+
+        // Build hashData và queryUrl
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : vnp_Params.entrySet()) {
+            String fieldName = entry.getKey();
+            String fieldValue = entry.getValue();
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                // Build hash data (value được URL encode)
+                if (hashData.length() > 0) {
+                    hashData.append('&');
+                }
+                hashData.append(fieldName);
+                hashData.append('=');
+                try {
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                } catch (UnsupportedEncodingException e) {
+                    // Nên log lỗi và có thể throw exception thay vì chỉ printStackTrace
+                    throw new RuntimeException("Error encoding VNPAY param: " + fieldName, e);
+                }
+
+                // Build query string (cả key và value đều được URL encode)
+                if (query.length() > 0) {
+                    query.append('&');
+                }
+                try {
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException("Error encoding VNPAY query param: " + fieldName, e);
+                }
+            }
+        }
+
+        String queryUrl = query.toString();
+        String vnp_SecureHash = VnpayConfig.hmacSHA512(vnpayConfig.getVnp_HashSecret(), hashData.toString());
+        System.out.println("createVnpayPaymentUrl - String to hash (for sending): " + hashData.toString());
+        System.out.println("createVnpayPaymentUrl - SecureHash (for sending): " + vnp_SecureHash);
+
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        return vnpayConfig.getVnp_PayUrl() + "?" + queryUrl;
+    }
+
+    @Transactional
+
+    public List<BookingDetailResponseDTO> getUserBookingHistory(Long accountId) {
+        List<Booking> bookings = bookingRepository.findByAccountAccountIdOrderByBookingTimeDesc(accountId);
+        return bookings.stream()
+                .map(b -> convertToBookingDetailResponseDTO(b, null, calculateOriginalAmount(b)))
+                .collect(Collectors.toList());
+    }
+
+    public BookingDetailResponseDTO getBookingDetailsForUser(Integer bookingId, Long accountId) {
+        Booking booking = bookingRepository.findByIdAndAccountAccountId(bookingId, accountId)
+                .orElseThrow(() -> new RuntimeException("Booking not found or does not belong to the user."));
+        return convertToBookingDetailResponseDTO(booking, null, calculateOriginalAmount(booking));
+    }
+
+
+    private BigDecimal calculateOriginalAmount(Booking booking) {
+        // Tổng tiền gốc = tiền thanh toán + tổng giảm giá
+        BigDecimal totalDiscount = BigDecimal.ZERO;
+        if (booking.getDiscountApplied() != null) {
+            totalDiscount = totalDiscount.add(booking.getDiscountApplied());
+        }
+        if (booking.getPointsDiscount() != null) {
+            totalDiscount = totalDiscount.add(booking.getPointsDiscount());
+        }
+        return booking.getTotalAmount().add(totalDiscount);
+    }
+
+
+    private BookingDetailResponseDTO convertToBookingDetailResponseDTO(Booking booking, String paymentUrl, BigDecimal originalAmount) {
+        if (booking == null) return null;
+
+        BookingDetailResponseDTO.AccountInfoDTO accountInfo = null;
+        if (booking.getAccount() != null) {
+            accountInfo = BookingDetailResponseDTO.AccountInfoDTO.builder()
+                    .accountId(booking.getAccount().getAccountId())
+                    .email(booking.getAccount().getEmail())
+                    .fullName(booking.getAccount().getFullName())
+                    .phoneNumber(booking.getAccount().getPhoneNumber())
+                    .build();
+        }
+
+        BookingDetailResponseDTO.ScreeningInfoDTO screeningInfo = null;
+        if (booking.getScreening() != null) {
+            Screening s = booking.getScreening();
+            screeningInfo = BookingDetailResponseDTO.ScreeningInfoDTO.builder()
+                    .screeningId(s.getId())
+                    .movieNameVn(s.getMovie() != null ? s.getMovie().getNameVN() : "N/A")
+                    .movieNameEn(s.getMovie() != null ? s.getMovie().getNameEN() : "N/A")
+                    .cinemaRoomName(s.getCinemaRoom() != null ? s.getCinemaRoom().getCinemaRoomName() : "N/A")
+                    .showDateTime(s.getShowDateTime())
+                    .movieFormat(s.getFareType() != null ? s.getFareType().getMovieFormat() : "N/A")
+                    .build();
+        }
+
+        BookingDetailResponseDTO.PromotionInfoDTO promotionInfo = null;
+        if (booking.getPromotion() != null) {
+            Promotion p = booking.getPromotion();
+            promotionInfo = BookingDetailResponseDTO.PromotionInfoDTO.builder()
+                    .promotionId(p.getId())
+                    .code(p.getCode())
+                    // .detail(p.getDetail()) // Bạn chưa có detail trong Promotion model, nếu có thì thêm vào
+                    .build();
+        }
+
+        BookingDetailResponseDTO.PaymentMethodInfoDTO paymentMethodInfo = null;
+        if(booking.getPaymentMethod() != null){
+            PaymentMethod pm = booking.getPaymentMethod();
+            paymentMethodInfo = BookingDetailResponseDTO.PaymentMethodInfoDTO.builder()
+                    .paymentMethodId(pm.getId())
+                    .methodName(pm.getName())
+                    .build();
+        }
+
+
+        List<BookingDetailResponseDTO.BookedSeatInfoDTO> bookedSeatInfoList = Collections.emptyList();
+        if (booking.getBookedSeats() != null && !booking.getBookedSeats().isEmpty()) {
+            bookedSeatInfoList = booking.getBookedSeats().stream().map(bs -> {
+                Seat seat = bs.getSeat();
+                return BookingDetailResponseDTO.BookedSeatInfoDTO.builder()
+                        .bookedSeatId(bs.getId())
+                        .seatId(seat.getSeatId())
+                        .seatRow(seat.getSeatRow())
+                        .seatCol(seat.getSeatCol())
+                        .seatTypeName(seat.getSeatType() != null ? seat.getSeatType().getSeatTypeName() : "Standard")
+                        .pricePaid(bs.getPricePaid())
+                        .build();
+            }).collect(Collectors.toList());
+        }
+
+        return BookingDetailResponseDTO.builder()
+                .bookingId(booking.getId())
+                .bookingCode(booking.getBookingCode())
+                .account(accountInfo)
+                .screening(screeningInfo)
+                .promotion(promotionInfo)
+                .paymentMethod(paymentMethodInfo)
+                .promotionCodeApplied(booking.getPromotionCodeApplied())
+                .discountTypeApplied(booking.getDiscountTypeApplied())
+                .discountApplied(booking.getDiscountApplied())
+                // <<< THÊM 2 DÒNG NÀY VÀO >>>
+                .pointsUsed(booking.getPointsUsed())
+                .pointsDiscount(booking.getPointsDiscount())
+                .bookingTime(booking.getBookingTime())
+                .totalAmount(booking.getTotalAmount())
+                .originalAmount(originalAmount) // Truyền vào
+                .bookingStatus(booking.getBookingStatus())
+                .bookedSeats(bookedSeatInfoList)
+                .paymentUrl(paymentUrl) // Thêm paymentUrl vào response
+                .build();
+    }
+    //send confirm email:
+// <<< THÊM PHƯƠNG THỨC GỬI EMAIL MỚI VÀO BOOKINGSERVICE >>>
+    private void sendBookingConfirmationEmail(Booking booking) {
+        if (booking == null || booking.getAccount() == null) {
+            logger.warn("Cannot send confirmation email. Booking or account is null.");
+            return;
+        }
+
+        try {
+            // 1. Chuẩn bị dữ liệu cho template
+            Context context = new Context();
+            context.setVariable("subject", "Xác nhận đặt vé thành công!");
+            context.setVariable("customerName", booking.getAccount().getFullName());
+            context.setVariable("bookingCode", booking.getBookingCode());
+            context.setVariable("movieName", booking.getScreening().getMovie().getNameVN());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm - EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+            context.setVariable("showTime", booking.getScreening().getShowDateTime().format(formatter));
+
+            context.setVariable("roomAndFormat",
+                    String.format("%s / %s",
+                            booking.getScreening().getCinemaRoom().getCinemaRoomName(),
+                            booking.getScreening().getFareType().getMovieFormat())
+            );
+
+            String seats = booking.getBookedSeats().stream()
+                    .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
+                    .collect(Collectors.joining(", "));
+            context.setVariable("seats", seats);
+
+            context.setVariable("totalAmount", String.format("%,.0f", booking.getTotalAmount()));
+
+            // 2. Tạo QR Code
+            String qrContent = "Booking Code: " + booking.getBookingCode();
+            byte[] qrCodeBytes = generateQrCodeImage(qrContent, 200, 200);
+
+            String qrCodeImageCid = "qrCodeImage"; // Content-ID này phải khớp với cid: trong HTML
+            context.setVariable("qrCodeImageCid", qrCodeImageCid);
+
+            // 3. Gọi EmailService
+            emailService.sendHtmlEmailWithInlineImage(
+                    booking.getAccount().getEmail(),
+                    "Xác nhận đặt vé thành công - Mã vé: " + booking.getBookingCode(),
+                    "booking-confirmation", // Tên file template (không có .html)
+                    context,
+                    qrCodeImageCid,
+                    qrCodeBytes,
+                    "image/png"
+            );
+
+            logger.info("Successfully sent booking confirmation email for booking code: {}", booking.getBookingCode());
+        } catch (Exception e) {
+            logger.error("Failed to send booking confirmation email for booking code: {}. Error: {}", booking.getBookingCode(), e.getMessage());
+        }
+    }
+
+    // <<< THÊM PHƯƠNG THỨC TẠO QR CODE VÀO BOOKINGSERVICE >>>
+    private byte[] generateQrCodeImage(String text, int width, int height) throws Exception {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+        return pngOutputStream.toByteArray();
+    }
+
 
 }

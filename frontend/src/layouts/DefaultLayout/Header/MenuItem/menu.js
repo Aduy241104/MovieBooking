@@ -5,11 +5,6 @@ import { useNavigate } from 'react-router-dom';
 function Menu() {
     const { logout, user } = useContext(AuthContext);
     const navigate = useNavigate();
-
-<<<<<<< HEAD
-=======
-
->>>>>>> c28ef7f7c14835efae1a009edd805f7fe1431633
     const items = [
         {
             key: 'welcome',

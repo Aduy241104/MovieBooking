@@ -23,7 +23,6 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ NHÂN VIÊN");
         } else if (location.pathname.includes('promotions')) {
             setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
-<<<<<<< HEAD
         }else if (location.pathname.includes('room-list')) {
             setTitle("QUẢN LÝ PHÒNG CHIẾU");
         }else if (location.pathname.includes('movie-list')) {
@@ -34,15 +33,11 @@ export const AdminHeader = (props) => {
             setTitle("QUẢN LÝ lỊCH SỬ ĐẶT VÉ");
         }
 
-=======
-        } else if (location.pathname.includes('room-list')) {
-            setTitle("QUẢN LÝ PHÒNG CHIẾU");
-        } else if (location.pathname.includes('activity-logs')) {
+         else if (location.pathname.includes('activity-logs')) {
             setTitle("LỊCH SỬ HOẠT ĐỘNG");
         } else if (location.pathname.includes('movie-type')) {
             setTitle("DANH SÁCH THỂ LOẠI PHIM");
         } 
->>>>>>> c28ef7f7c14835efae1a009edd805f7fe1431633
     }, [location.pathname]);
 
     const items = [

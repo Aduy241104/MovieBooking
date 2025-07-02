@@ -31,8 +31,18 @@
     font-size: 13px;
     font-weight: 500;
     border-bottom-right-radius: 8px;
-    background-color: rgb(242, 110, 34);
+    background-color: rgb(34, 124, 242);
 }
+
+
+.tag_red {
+    background-color: rgb(242, 67, 67);
+}
+
+.tag_orange {
+    background-color: orange;
+}
+
 
 .genre,
 .rating{

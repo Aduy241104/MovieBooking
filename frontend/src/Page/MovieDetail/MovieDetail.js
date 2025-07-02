@@ -8,8 +8,8 @@ import { getMovieDetailAPI } from '../../service/TheMovieService'
 import ArtistList from './ArtistList'
 
 const cx = classNames.bind(styles);
-const DEFAULT_BG = require("../../assets/img/pexels-simon73-1323550.jpg")
-const DEFAULT_SMALL_POSTER = require('../../assets/img/Screenshot 2025-06-13 102311.png')
+const DEFAULT_BG = require("../../assets/img/dafee077981526e731d544d1205a7832.webp")
+const DEFAULT_SMALL_POSTER = require('../../assets/img/6a56d1a35528e276bb39.jpg')
 
 function MovieDetail() {
     const { id } = useParams();
@@ -31,7 +31,7 @@ function MovieDetail() {
 
                 const path = response.result?.largeImage;
                 if (path?.trim()) {
-                    const fullUrl = `http://localhost:8081${path}`; // sửa dòng này thêm localhost
+                    const fullUrl = `${path}`; // sửa dòng này thêm localhost
                     const img = new Image();
                     img.src = fullUrl;
 
@@ -67,8 +67,8 @@ function MovieDetail() {
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            // src={ movie.smallImage + "" }
-                                             src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
+                                             src={ movie.smallImage + "" }
+                                            // src={`http://localhost:8081${movie.smallImage}`} // sửa dòng này thêm localhost
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {
