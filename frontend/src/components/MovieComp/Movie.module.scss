@@ -1,23 +1,28 @@
 .wrapper {
     height: 350px;
-    width: 100%;
+    font-size: 18px;
+    width: 200px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
     overflow: hidden;
 }
 
 .poster {
     height: 80%;
     width: 100%;
-    overflow: hidden  !important;
+    overflow: hidden !important;
     box-sizing: border-box;
     position: relative;
-    img{
+
+    img {
         height: 100%;
         object-fit: cover;
         transition: transform 0.3s ease-in-out;
         width: 100%;
         cursor: pointer;
         overflow: hidden;
-        
+
         &:hover {
             transform: scale(1.15);
         }
@@ -43,9 +48,8 @@
     background-color: orange;
 }
 
-
 .genre,
-.rating{
+.rating {
     font-size: 14px;
 }
 
@@ -53,10 +57,25 @@
     font-size: 48px;
     font-weight: 800;
     font-style: italic;
-    padding-right: 5px;
+    padding-right: 7px;
     line-height: 46px;
     background: linear-gradient(to bottom, #e9e2c9, #eec459);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
+}
+
+@media screen and (max-width: 780px) {
+    .wrapper {
+        height: 270px;
+    }
+
+    .nameVN {
+        font-size: 14px !important;
+    }
+
+    .number-rank {
+        font-size: 30px !important;
+        line-height: 38px;
+    }
 }

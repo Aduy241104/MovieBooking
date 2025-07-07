@@ -1,137 +1,287 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+/* --- Biến màu cho Dark Theme (theo style tham khảo) --- */
+$dark-bg: #1a1d29;
+$dark-surface: #24283b;
+$primary-gradient: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+$text-primary: #e0e0e0;
+$text-secondary: #9e9e9e;
+$border-color: #394264;
 
+// Colors for status
+$success-color: #2ecc71;
+$danger-color: #e74c3c;
+$warning-color: #f39c12;
+$info-color: #3498db;
+$reserved-color: #9b59b6;
+
+/* --- NỀN VÀ LAYOUT CHUNG --- */
 .page-container {
+    background-color: $dark-bg;
+    min-height: 100vh;
+    padding: 2rem 1rem;
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    font-family: 'Roboto', sans-serif;
-    padding: 2rem 1rem;
-    &.loading, &.error { font-size: 1.5rem; color: #333; }
+    align-items: flex-start;
+    color: $text-primary;
+
+    &.loading,
+    &.error {
+        align-items: center;
+        font-size: 1.2rem;
+        color: $text-secondary;
+    }
+    &.error {
+        color: $danger-color;
+    }
 }
-    
+
+/* --- KHUNG VÉ CHÍNH --- */
 .ticket-wrapper {
-    max-width: 850px;
+    background-color: $dark-surface;
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    max-width: 900px;
     width: 100%;
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden; // Đảm bảo border-radius được áp dụng cho các phần tử con
+     width: 100%; /* Cho phép vé chiếm toàn bộ chiều rộng của cột content */
+    max-width: 1500px; /* Đặt một giới hạn tối đa LỚN HƠN để nó trông rộng rãi, đẹp mắt */
 }
 
+/* --- HEADER CỦA VÉ --- */
 .ticket-header {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: white;
-    padding: 25px 35px;
-    text-align: center;
-    position: relative;
-    .title { margin: 0; font-size: 1.8rem; font-weight: 700; }
-    .booking-code { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
+    padding: 1.5rem 2rem;
+    border-bottom: 1px dashed $border-color;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .booking-code {
+        font-size: 1rem;
+        color: $text-secondary;
+        strong {
+            color: $success-color;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+    }
 }
 
+/* --- THÂN VÉ (CHỨA 2 CỘT) --- */
 .ticket-body {
     display: flex;
-    padding: 35px;
-    position: relative;
-    &::before, &::after {
-        content: ''; position: absolute; width: 40px; height: 40px;
-        background-color: #eef2f7; border-radius: 50%;
-    }
-    &::before { top: -20px; left: 50%; transform: translateX(-50%); }
-    &::after { bottom: -20px; left: 50%; transform: translateX(-50%); }
 }
 
+/* --- CỘT TRÁI - THÔNG TIN --- */
 .left-panel {
-    flex-grow: 1;
-    padding-right: 35px;
-    border-right: 2px dashed #ddd;
-}
-.right-panel {
-    width: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 35px;
-}
+    flex: 2;
+    padding: 2rem;
+    border-right: 1px dashed $border-color;
 
-.movie-title {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 2rem;
+    .movie-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: #fff;
+        line-height: 1.2;
+    }
 }
 
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
+    gap: 1.25rem;
     margin-bottom: 2rem;
 }
 
 .info-item {
     display: flex;
     flex-direction: column;
-    &.full-width { grid-column: 1 / -1; }
-    .label {
-        font-size: 0.8rem; color: #777;
-        text-transform: uppercase; margin-bottom: 5px;
-        display: flex; align-items: center;
-        i { margin-right: 8px; width: 14px; }
-    }
-    .value {
-        font-size: 1rem; color: #222; font-weight: 500;
-        &.seats { font-weight: bold; color: #6a11cb; }
-    }
-}
+    gap: 0.25rem;
 
-.pricing-summary {
-    border-top: 1px solid #eee;
-    padding-top: 1.2rem;
-    .price-row {
-        display: flex; justify-content: space-between;
-        margin-bottom: 10px; font-size: 1rem;
-        &.discount { color: #28a745; font-size: 0.95rem; }
-        &.total {
-            margin-top: 10px; font-size: 1.3rem;
-            font-weight: 700; color: #e53935;
-            border-top: 1px solid #eee; padding-top: 10px;
+    &.full-width {
+        grid-column: 1 / -1; // Chiếm toàn bộ chiều rộng
+    }
+
+    .label {
+        font-size: 0.85rem;
+        color: $text-secondary;
+        font-weight: 500;
+        i {
+            margin-right: 0.5rem;
+            width: 16px; // Đảm bảo icon thẳng hàng
+            text-align: center;
+            color: $info-color;
+        }
+    }
+
+    .value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-primary;
+        &.seats {
+            color: $success-color;
+            font-size: 1.1rem;
         }
     }
 }
 
-.qr-code-section {
-    text-align: center;
-    p { font-size: 0.8rem; color: #555; margin-top: 10px; }
-}
+/* --- TÓM TẮT GIÁ --- */
+.pricing-summary {
+    border-top: 1px solid $border-color;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
 
-.status-section, .payment-section {
-    width: 100%; text-align: center;
-    .label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 6px; }
-    .value {
-        font-size: 0.9rem; font-weight: bold; padding: 6px 18px;
-        border-radius: 20px; color: white; display: inline-block;
-        &.status-paid { background-color: #28a745; }
-        &.status-reserved { background-color: #17a2b8; }
-        &.status-pending { background-color: #ffc107; color: #333; }
-        &.status-cancelled, &.status-failed { background-color: #dc3545; }
-        &.status-unknown { background-color: #6c757d; }
-        &.payment-method { background-color: #6c757d; font-size: 1rem; }
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+
+        span:first-child {
+            color: $text-secondary;
+        }
+        span:last-child {
+            color: $text-primary;
+            font-weight: 500;
+        }
+
+        &.discount {
+            span:first-child { color: $warning-color; }
+            span:last-child { color: $warning-color; }
+        }
+
+        &.total {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid $border-color;
+            font-size: 1.2rem;
+            font-weight: bold;
+            span:first-child { color: #fff; }
+            span:last-child { color: $success-color; }
+        }
     }
 }
 
-.ticket-actions {
-    background-color: #f8f9fa; padding: 20px 35px;
-    display: flex; justify-content: center; gap: 20px;
-    border-top: 1px solid #e9ecef;
+/* --- CỘT PHẢI - QR & TRẠNG THÁI --- */
+.right-panel {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
 }
 
-@media (max-width: 767px) {
-    .ticket-body { flex-direction: column; padding: 25px; }
-    .left-panel { padding-right: 0; border-right: none; border-bottom: 2px dashed #ddd; padding-bottom: 25px; margin-bottom: 25px; }
-    .right-panel { width: 100%; padding-left: 0; }
-    .info-grid { grid-template-columns: 1fr; }
+.qr-code-section {
+    text-align: center;
+    p {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: $text-secondary;
+    }
+}
+
+.status-section,
+.payment-section {
+    width: 100%;
+    text-align: center;
+    .label {
+        display: block;
+        color: $text-secondary;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    .value {
+        font-size: 1.1rem;
+        font-weight: bold;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        display: inline-block;
+        &.status-paid { background-color: rgba($success-color, 0.2); color: $success-color; }
+        &.status-cancelled, &.status-failed { background-color: rgba($danger-color, 0.2); color: $danger-color; }
+        &.status-pending { background-color: rgba($warning-color, 0.2); color: $warning-color; }
+        &.status-reserved { background-color: rgba($reserved-color, 0.2); color: $reserved-color; }
+    }
+}
+
+/* --- CÁC NÚT HÀNH ĐỘNG --- */
+.ticket-actions {
+    padding: 1.5rem 2rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* --- STYLE CHO CÁC NÚT MỚI --- */
+.btn {
+    padding: 10px 24px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    i {
+        font-size: 1rem;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+}
+
+.btn-primary {
+    background-image: $primary-gradient;
+    color: #fff;
+    &:hover {
+        filter: brightness(110%);
+    }
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border-color: $border-color;
+    color: $text-primary;
+    &:hover {
+        background-color: $border-color;
+        color: #fff;
+    }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .ticket-body {
+        flex-direction: column;
+    }
+    .left-panel {
+        border-right: none;
+        border-bottom: 1px dashed $border-color;
+    }
+    .ticket-header, .left-panel, .right-panel, .ticket-actions {
+        padding: 1.5rem;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    .ticket-actions {
+        flex-direction: column;
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 }

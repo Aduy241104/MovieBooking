@@ -26,6 +26,16 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+// mail confim
+import org.thymeleaf.context.Context;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import java.io.ByteArrayOutputStream;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -37,6 +47,7 @@ public class BookingService {
     private final PaymentMethodRepository paymentMethodRepository;
     private final BookedSeatRepository bookedSeatRepository;
     private final VnpayConfig vnpayConfig; // Inject VNPAY config
+    private final EmailService emailService;
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
 
@@ -205,7 +216,7 @@ public class BookingService {
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
             promotion = promotionRepository.findByCode(request.getPromotionCode());
             if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
-                throw new RuntimeException("Invalid or expired promotion code.");
+                throw new RuntimeException("Mã khuyến mại không hợp lệ hoặc đã hết hạn.");
             }
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
                 throw new RuntimeException("Order total does not meet promotion's minimum requirement.");
@@ -281,6 +292,7 @@ public class BookingService {
 
         if ("PAID".equals(savedBooking.getBookingStatus())) {
             addPointsToAccount(savedBooking);
+            sendBookingConfirmationEmail(savedBooking); // <<< GỌI HÀM GỬI MAIL
         }
 
         return convertToBookingDetailResponseDTO(savedBooking, paymentUrl, originalTotalAmount);
@@ -320,6 +332,8 @@ public class BookingService {
             if ("00".equals(vnp_ResponseCode)) {
                 booking.setBookingStatus("PAID");
                 addPointsToAccount(booking); // Tích điểm
+                bookingRepository.save(booking); // Lưu lại trạng thái PAID và điểm đã tích
+                sendBookingConfirmationEmail(booking); // <<< ĐÂY LÀ DÒNG THÊM VÀO
                 // Không cần save booking lần nữa vì addPointsToAccount đã save account,
                 // và booking sẽ được save bởi transaction commit.
             } else {
@@ -611,7 +625,70 @@ public class BookingService {
                 .paymentUrl(paymentUrl) // Thêm paymentUrl vào response
                 .build();
     }
+//send confirm email:
+// <<< THÊM PHƯƠNG THỨC GỬI EMAIL MỚI VÀO BOOKINGSERVICE >>>
+private void sendBookingConfirmationEmail(Booking booking) {
+    if (booking == null || booking.getAccount() == null) {
+        logger.warn("Cannot send confirmation email. Booking or account is null.");
+        return;
+    }
 
+    try {
+        // 1. Chuẩn bị dữ liệu cho template
+        Context context = new Context();
+        context.setVariable("subject", "Xác nhận đặt vé thành công!");
+        context.setVariable("customerName", booking.getAccount().getFullName());
+        context.setVariable("bookingCode", booking.getBookingCode());
+        context.setVariable("movieName", booking.getScreening().getMovie().getNameVN());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm - EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+        context.setVariable("showTime", booking.getScreening().getShowDateTime().format(formatter));
+
+        context.setVariable("roomAndFormat",
+                String.format("%s / %s",
+                        booking.getScreening().getCinemaRoom().getCinemaRoomName(),
+                        booking.getScreening().getFareType().getMovieFormat())
+        );
+
+        String seats = booking.getBookedSeats().stream()
+                .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
+                .collect(Collectors.joining(", "));
+        context.setVariable("seats", seats);
+
+        context.setVariable("totalAmount", String.format("%,.0f", booking.getTotalAmount()));
+
+        // 2. Tạo QR Code
+        String qrContent = "Booking Code: " + booking.getBookingCode();
+        byte[] qrCodeBytes = generateQrCodeImage(qrContent, 200, 200);
+
+        String qrCodeImageCid = "qrCodeImage"; // Content-ID này phải khớp với cid: trong HTML
+        context.setVariable("qrCodeImageCid", qrCodeImageCid);
+
+        // 3. Gọi EmailService
+        emailService.sendHtmlEmailWithInlineImage(
+                booking.getAccount().getEmail(),
+                "Xác nhận đặt vé thành công - Mã vé: " + booking.getBookingCode(),
+                "booking-confirmation", // Tên file template (không có .html)
+                context,
+                qrCodeImageCid,
+                qrCodeBytes,
+                "image/png"
+        );
+
+        logger.info("Successfully sent booking confirmation email for booking code: {}", booking.getBookingCode());
+    } catch (Exception e) {
+        logger.error("Failed to send booking confirmation email for booking code: {}. Error: {}", booking.getBookingCode(), e.getMessage());
+    }
+}
+
+    // <<< THÊM PHƯƠNG THỨC TẠO QR CODE VÀO BOOKINGSERVICE >>>
+    private byte[] generateQrCodeImage(String text, int width, int height) throws Exception {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+        return pngOutputStream.toByteArray();
+    }
 
 
 }

@@ -1,5 +1,5 @@
 .header {
-    position: fixed !important;
+    position: fixed ;
     // position: sticky;
     top: 0;
     left: 0;
@@ -7,35 +7,7 @@
     height: 60px;
     z-index: 999 !important;
     transition: background-color 0.3s ease;
-    background-image: linear-gradient(to bottom,
-            rgba(23, 23, 23, 0.9),
-            rgba(23, 23, 23, 0.5), rgba(0, 0, 0, 0.2),
-            rgba(255, 255, 255, 0));
-    // backdrop-filter: blur(6px);
-}
-
-.scrolled {
-    background-color: var(--footer-bg);
-}
-
-.logo-header {
-    width: 80px;
-}
-
-.custome-btn {
-    background-color: var(--red);
-    font-size: 14px;
-}
-
-.login-btn {
-    background-image: linear-gradient(to right, #ffd875, #d5d5d5) !important;
-    color: red;
-}
-
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
+    backdrop-filter: blur(2px);
 
     .mobileMenu {
         position: fixed;
@@ -52,12 +24,39 @@
         from {
             opacity: 0;
             transform: translateY(-20px);
-        }to {
+        }
+
+        to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
     ul li {
         cursor: pointer;
+    }
+}
+
+.scrolled {
+    background-color: var(--footer-bg);
+}
+
+.logo-header {
+    width: 80px;
+}
+
+.custome-btn {
+    background-color: var(--red);
+    font-size: 14px;
+}
+
+.login-btn {
+    background-color: white !important;
+}
+
+@media screen and (max-width: 780px) {
+    .header {
+        background-color: var(--footer-bg);
+        position: relative;
     }
 }
