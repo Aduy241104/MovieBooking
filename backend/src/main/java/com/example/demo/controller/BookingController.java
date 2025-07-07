@@ -74,18 +74,27 @@ public class BookingController {
     @GetMapping("/promotions/check/{code}")
     public ApiResponse<Promotion> checkPromotion(@PathVariable String code) {
         Promotion promotion = promotionService.fetchPromotionByCode(code);
+
+        // Kiểm tra tất cả các điều kiện
         if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() ||
                 java.time.LocalDateTime.now().isBefore(promotion.getStartTime()) ||
                 java.time.LocalDateTime.now().isAfter(promotion.getEndTime())) {
-            // throw new RuntimeException("Invalid or expired promotion code."); // Hoặc trả về lỗi rõ ràng hơn
+
+            // <<< THAY ĐỔI QUAN TRỌNG >>>
+            // Nếu không hợp lệ, trả về một response thành công về mặt HTTP (status 200)
+            // nhưng với result là null và một message mã lỗi.
+            // Hoặc đơn giản là trả về result null, frontend sẽ tự hiểu.
             return ApiResponse.<Promotion>builder()
-                    .status(HttpStatus.NOT_FOUND.value())
-                    .message("Invalid or expired promotion code.")
+                    .status(HttpStatus.OK.value()) // Vẫn là OK, vì request đã được xử lý
+                    .message("PROMOTION_INVALID") // Một mã lỗi để frontend bắt
+                    .result(null) // Quan trọng: result là null
                     .build();
         }
+
+        // Nếu hợp lệ, trả về như cũ
         return ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
-                .message("Promotion is valid.")
+                .message("PROMOTION_VALID")
                 .result(promotion)
                 .build();
     }

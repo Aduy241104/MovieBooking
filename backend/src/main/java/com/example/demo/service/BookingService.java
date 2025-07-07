@@ -213,13 +213,17 @@ public class BookingService {
         BigDecimal discountAmount = BigDecimal.ZERO;
         String promotionCodeApplied = null;
         String discountTypeApplied = null;
+        // 3. ÁP DỤNG KHUYẾN MÃI
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
             promotion = promotionRepository.findByCode(request.getPromotionCode());
             if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
-                throw new RuntimeException("Mã khuyến mại không hợp lệ hoặc đã hết hạn.");
+                // <<< SỬA LẠI MESSAGE LỖI >>>
+                throw new RuntimeException("PROMOTION_INVALID_OR_EXPIRED");
             }
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
-                throw new RuntimeException("Order total does not meet promotion's minimum requirement.");
+                // <<< SỬA LẠI MESSAGE LỖI >>>
+                // Có thể truyền cả giá trị vào message để frontend hiển thị
+                throw new RuntimeException("PROMOTION_MIN_ORDER_NOT_MET:" + promotion.getMinOrder());
             }
             promotionCodeApplied = promotion.getCode();
             discountTypeApplied = promotion.getDiscountType();
@@ -242,7 +246,7 @@ public class BookingService {
         int pointsUsed = 0;
         if (request.getPointsToUse() > 0) {
             if (request.getPointsToUse() > account.getScore()) {
-                throw new RuntimeException("Số điểm sử dụng vượt quá số điểm hiện có.");
+                throw new RuntimeException("POINTS_EXCEEDED");
             }
             int pointsToUseRounded = (request.getPointsToUse() / 1000) * 1000;
             pointsDiscountAmount = new BigDecimal(pointsToUseRounded);
