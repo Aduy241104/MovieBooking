@@ -67,8 +67,7 @@ function MovieDetail() {
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
                                         <img
-                                            // src={ movie.smallImage + "" }
-                                             src={`${movie.smallImage}`} // sửa dòng này thêm localhost
+                                            src={ movie.smallImage + "" }
                                             alt=""
                                             className={ cx('poster-small') }
                                             onError={ (e) => {
@@ -108,7 +107,7 @@ function MovieDetail() {
                                                 </li>
                                                 <li className='fs-7 pb-3' >
                                                     <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>{movie.movieProductionCompany}</span>
+                                                    <span className='fw-300'>{ movie.movieProductionCompany }</span>
                                                 </li>
                                             </ul>
                                         </div>

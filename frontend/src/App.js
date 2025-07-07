@@ -41,9 +41,9 @@ import ResetPassword from './Page/AuthPage/ResetPassword';
 import { ActivityLogPage } from './Page/admin/ActivityLogPage';
 
 import BookingPage from './Page/Booking/BookingPage';
-import BookingSuccessPage from './Page/Booking/BookingSuccessPage';
-import BookingFailurePage from './Page/Booking/BookingFailurePage';
-import BookingHistoryPage from './Page/Booking/BookingHistoryPage'; // Tạo component này nếu muốn
+import BookingSuccessPage from './Page/Booking/BookingSuccess/BookingSuccessPage';
+import BookingFailurePage from './Page/Booking/BookingFailure/BookingFailurePage';
+import BookingHistoryPage from './Page/Booking/BookingHistory/BookingHistoryPage'; // Tạo component này nếu muốn
 import BookingDetailPage from './Page/Booking/BookingDetail/BookingDetailPage';
 
 const PrivateRoute = ({ children }) => {
@@ -65,7 +65,7 @@ const ProtectedRoute = ({ children }) => {
   if (!user) {
     // Sau khi auth đã load xong, nếu không có user thì redirect
     console.log('ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login');
-    return <Navigate to="/login" state={ { from: location } } replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
   return children;
 };
@@ -78,18 +78,23 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/login' element={ <LoginPage /> } />
-        <Route path='/register' element={ <SignUpPage /> } />
-        <Route path='/' element={ <HomePage /> } />
-        <Route path='/movie-detail/:id' element={ <MovieDetail /> } />
-        <Route path='/forgot-password' element={ <RequestForgotPassword /> } />
-        <Route path='/reset-password' element={ <ResetPassword /> } />
+        <Route path='/login' element={<LoginPage />} />
+        <Route path='/register' element={<SignUpPage />} />
+        <Route path='/' element={<HomePage />} />
+        <Route path='/movie-detail/:id' element={<MovieDetail />} />
+        <Route path='/forgot-password' element={<RequestForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
 
-        {/* Profile routes */ }
-        <Route path="/profile" element={ <ProfileLayout /> }>
-          <Route index element={ <Profile /> } />
-          <Route path="password" element={ <ChangePassword /> } />
-          <Route path="transactions" element={ <Profile /> } />
+        {/* Profile routes */}
+        <Route path="/profile" element={<ProfileLayout />}>
+          <Route index element={<Profile />} />
+          <Route path="password" element={<ChangePassword />} />
+          //<Route path="transactions" element={<Profile />} />
+        </Route>
+        {/* muốn có profile layout thì để vào đây~~ */}
+        <Route element={<ProfileLayout />}>
+          <Route path="/booking/history" element={<BookingHistoryPage />} />
+          <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
         </Route>
 
         <Route
@@ -109,7 +114,7 @@ function App() {
           }
         />
         <Route
-          path="/booking/failure" 
+          path="/booking/failure"
           element={<BookingFailurePage />}
         />
         <Route
@@ -120,13 +125,13 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
+
         <Route
-    path="/booking/details/:bookingId"
-    element={
-        <ProtectedRoute>
-            <BookingDetailPage />
-        </ProtectedRoute>
+          path="/booking/details/:bookingId"
+          element={
+            <ProtectedRoute>
+              <BookingDetailPage />
+            </ProtectedRoute>
           }
         />
 

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
@@ -28,15 +30,26 @@ public class MovieService {
 
     private final Path uploadRoot = Paths.get("uploads");
 
-    private String saveFile(MultipartFile file, String subfolder) throws IOException {
-        if (file == null || file.isEmpty()) return null;
-        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path dir = uploadRoot.resolve(subfolder);
-        Files.createDirectories(dir);
-        Path filepath = dir.resolve(filename);
-        Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
-        return "/images/" + filename;
-    }
+//    private String saveFile(MultipartFile file, String subfolder) throws IOException {
+//        if (file == null || file.isEmpty()) return null;
+//        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+//        Path dir = uploadRoot.resolve(subfolder);
+//        Files.createDirectories(dir);
+//        Path filepath = dir.resolve(filename);
+//        Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+//        return "/images/" + filename;
+//    }
+private String saveFile(MultipartFile file, String subfolder) throws IOException {
+    if (file == null || file.isEmpty()) return null;
+
+    String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+    Path dir = uploadRoot.resolve(subfolder);
+    Files.createDirectories(dir);
+    Path filepath = dir.resolve(filename);
+    Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+    return baseUrl + "/images/" + filename;
+}
 
     @Transactional
     public MovieResponse createMovie(MovieRequest request) throws IOException {
