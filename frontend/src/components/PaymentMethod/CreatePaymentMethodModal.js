@@ -31,9 +31,16 @@ const CreatePaymentMethodModal = ({ isCreateModalOpen, setIsCreateModalOpen, set
             setIsCreateModalOpen(false);
             form.resetFields();
         } catch (err) {
-            console.error("Lỗi validate hoặc API:", err);
-            message.error('Thêm phương thức thất bại!');
+            let errorMessage = 'Thêm phương thức thất bại!';
+
+            // Nếu backend trả về message cụ thể
+            if (err?.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            }
+
+            message.error(errorMessage);
         }
+
     };
 
     return (

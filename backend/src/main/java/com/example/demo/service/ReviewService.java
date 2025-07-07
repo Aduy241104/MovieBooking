@@ -45,12 +45,20 @@ public class ReviewService {
 
     // 2. Thêm review mới
     public ReviewResponseDTO addReview(ReviewRequestDTO dto) {
+
+        if (reviewRepo.hasReviewed(dto.getAccountId(), dto.getMovieId())) {
+            throw new RuntimeException("Bạn đã đánh giá phim này rồi!");
+        }
+
         // Kiểm tra đã đặt và thanh toán chưa
         boolean hasPaid = bookingRepo.countPaidBookings(dto.getAccountId(), dto.getMovieId()) > 0;
+        System.out.println("result");
+        System.out.println(bookingRepo.countPaidBookings(dto.getAccountId(), dto.getMovieId()));
 
-        // if (!hasPaid) {
-        //     throw new RuntimeException("Bạn cần mua vé và thanh toán trước khi đánh giá phim này.");
-        // }
+        if (!hasPaid) {
+            throw new RuntimeException("Bạn cần mua vé và thanh toán trước khi đánh giá phim này.");
+
+        }
 
         Movie movie = movieRepo.findById(dto.getMovieId()).orElseThrow(
                 () -> new RuntimeException("Movie not found"));

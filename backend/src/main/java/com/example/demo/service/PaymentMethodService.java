@@ -29,7 +29,12 @@ public class PaymentMethodService {
         // Nếu client không truyền active, thì mặc định là true
         if (paymentMethod.getActive() == null) {
             paymentMethod.setActive(true); // Chỉ set mặc định nếu không được gửi từ client
-        }
+        } 
+
+        if (paymentMethodRepository.existsByNameIgnoreCase(paymentMethod.getName())) {
+        throw new RuntimeException("Tên phương thức thanh toán đã tồn tại.");
+    }
+        
         return paymentMethodRepository.save(paymentMethod);
     }
 

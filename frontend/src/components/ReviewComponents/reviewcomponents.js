@@ -6,6 +6,7 @@ import { AuthContext } from '../../context/AuthContext';
 import ReviewService from '../../service/ReviewService';
 import { message } from 'antd';
 import { Modal } from 'antd';
+import { openNotification } from '../../Utils/Notification';
 
 const ReviewBox = () => {
     // --- Khởi tạo State ---
@@ -142,9 +143,25 @@ const ReviewBox = () => {
                 setNewReview({ rating: 10, comment: "", spoilerAlert: false });
             })
             .catch((err) => {
-                console.error("Lỗi gửi đánh giá:", err);
-                alert("Lỗi khi gửi đánh giá: " + err.message);
+                let errorMessage = 'Gửi đánh giá thất bại!';
+
+                try {
+                    // Nếu err.message là chuỗi JSON: {"status":400,"message":"..."}
+                    const parsed = JSON.parse(err.message);
+                    if (parsed?.message) {
+                        errorMessage = parsed.message;
+                    }
+                } catch (e) {
+                    // Nếu parse thất bại, giữ nguyên thông báo mặc định
+                    console.error("Lỗi parse JSON trong message:", e);
+                }
+
+                openNotification("error", errorMessage);
             })
+
+
+
+
             .finally(() => setSubmitting(false));
     };
 
@@ -349,11 +366,16 @@ const ReviewBox = () => {
                         <div className="card mb-3  text-light" key={r.id} style={{ backgroundColor: "#22222B", borderColor: "#2A2A2A" }}>
                             <div className="card-body d-flex">
                                 <img
-                                    src={r.avatar || "/default-avatar.png"}
+                                    src={r.avatar || "https://tse4.mm.bing.net/th/id/OIP.Kv5Yubx4NNPg5fVApv23wQHaLB?rs=1&pid=ImgDetMain&o=7&rm=3"}
                                     alt="avatar"
                                     className="rounded-circle me-3"
                                     style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                                    onError={(e) => {
+                                        e.target.onerror = null; // tránh lặp vô hạn nếu ảnh fallback cũng lỗi
+                                        e.target.src = "https://tse4.mm.bing.net/th/id/OIP.Kv5Yubx4NNPg5fVApv23wQHaLB?rs=1&pid=ImgDetMain&o=7&rm=3";
+                                    }}
                                 />
+
                                 <div className="flex-grow-1">
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
