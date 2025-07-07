@@ -1,0 +1,58 @@
+.wrapper {
+    width: 100%;
+
+    @media (min-width: 992px) {
+        // Tương đương với Bootstrap 'lg'
+        width: 75%;
+    }
+}
+
+
+
+
+.dateScroll {
+    overflow-x: auto;
+    width: 100%;
+
+    .scrollContent {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        min-width: max-content;
+        border-bottom: 1px solid #6c757d;
+        padding-bottom: 1rem;
+    }
+}
+
+
+.dateButton {
+    width: 60px;
+    height: 60px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+
+    strong {
+        font-weight: 500;
+        font-size: 18px;
+    }
+
+    small {
+        font-size: 11px;
+    }
+
+    @media (min-width: 992px) {
+        width: 60px;
+        height: 60px;
+        font-size: 14px;
+
+        strong {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        small {
+            font-size: 13px;
+        }
+    }
+}

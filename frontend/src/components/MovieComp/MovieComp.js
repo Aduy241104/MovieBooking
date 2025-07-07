@@ -32,10 +32,10 @@ function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
                     { ageLimit < 16 ? "k" : ageLimit + "+" }
                 </div>
             </div>
-            <div className="text-light d-flex">
+            <div className="text-light d-flex mt-1">
                 <div className={ cx("number-rank") }>{ index }</div>
                 <div>
-                    <p className="line-clamp-1 fw-medium fs-6">{ nameVN }</p>
+                    <p className={ cx('line-clamp-1 fw-medium fs-6', 'nameVN')}>{ nameVN }</p>
                     <p className={ cx('genre', 'text-secondary fs-7 line-clamp-1') }>{ types.join(', ') }</p>
                 </div>
             </div>
