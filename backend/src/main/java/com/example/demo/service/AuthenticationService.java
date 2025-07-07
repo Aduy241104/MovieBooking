@@ -179,6 +179,8 @@ public class AuthenticationService {
                     .fullName(name)
                     .avatar(picture)
                     .role(defaultRole)
+                    .status(1)
+                    .isDeleted(false)
                     .socialAccountType("GOOGLE")
                     .build();
 
