@@ -116,7 +116,7 @@ function App() {
 
                 {/* Movie */}
                 <Route path='movie-type' element={<TypeList />} />
-                <Route path='movies' element={<MovieList />} />
+                <Route path='movie-list' element={<MovieList />} />
                 <Route path='movies/add' element={<AddMovie />} />
                 <Route path='movies/edit/:id' element={<EditMovie />} />
                 <Route path='film-detail/:id' element={<FilmDetail />} />

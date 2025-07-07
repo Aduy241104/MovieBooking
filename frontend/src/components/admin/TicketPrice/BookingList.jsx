@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback} from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Table, Input, Spin, Pagination, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-import { Link,useLocation,useOutletContext } from "react-router-dom";
+import { Link, useLocation, useOutletContext } from "react-router-dom";
 import { debounce } from "lodash";
 import axios from "../../../config/axios";
 
@@ -12,19 +12,19 @@ const BookingList = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
   const size = 5;
-const location = useLocation();
+  const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
     if (location.pathname.includes('/admin/booking-list')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ',href: '/admin' },
+        { title: 'Trang chủ', href: '/admin' },
         { title: 'Quản lý vé' },
         { title: 'Lịch sử đặt vé' },
-
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
+
   // Hàm gọi API với retry
   const fetchMovies = useCallback(
     async (retries = 3) => {
@@ -51,7 +51,7 @@ const location = useLocation();
         } else {
           setMovies([]);
           setTotalElements(0);
-          message.warning("Không có dữ liệu phim");
+          message.warning("Không có dữ liệu lịch sử đặt vé");
         }
       } catch (err) {
         if (retries > 0) {
@@ -166,13 +166,11 @@ const location = useLocation();
       </div>
 
       {loading ? (
-        <div className="flex flex-col justify-center items-center gap-3 h-screen">
-          <Spin size="large" />
-          <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
-        </div>
-      ) : movies.length === 0 ? (
-        <div className="text-center text-lg">Không tìm thấy phim nào</div>
-      ) : (
+             <div className="flex flex-col justify-center items-center gap-3 h-screen">
+               <Spin size="large" />
+               <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
+             </div>
+           ) : (
         <>
           <Table
             dataSource={movies}

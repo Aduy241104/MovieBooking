@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useCallback } from "react";
 import { Table, Input, Spin, Pagination, message } from "antd";
 import { SearchOutlined, StarFilled } from "@ant-design/icons";
@@ -18,11 +17,11 @@ const ReviewList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/review-list')) {
+    if (location.pathname.includes("/admin/review-list")) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
-        { title: 'Quản lý đánh giá' },
-        { title: 'Danh sách đánh giá phim' },
+        { title: "Trang chủ", href: "/admin" },
+        { title: "Quản lý đánh giá" },
+        { title: "Danh sách đánh giá phim" },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
@@ -31,7 +30,7 @@ const ReviewList = () => {
     async (retries = 3) => {
       setLoading(true);
       try {
-        const res = await axios.get("/movies/getAll", {
+        const res = await axios.get("http://localhost:8081/api/public/movies", {
           params: {
             search: searchText,
             page: page - 1,
@@ -39,13 +38,14 @@ const ReviewList = () => {
           },
         });
         const responseData = res.data || res;
-        console.log("Phản hồi API /movies/getAll:", responseData);
+        console.log("Phản hồi API:", responseData);
 
-        if (responseData && responseData.content && responseData.content.length > 0) {
+        if (responseData && Array.isArray(responseData) && responseData.length > 0) {
           const moviesWithReviews = await Promise.all(
-            responseData.content.map(async (item) => {
+            responseData.map(async (item) => {
               try {
-                const { averageRating, totalApproved } = await getAverageRatingAndCountByMovieId(item.id);
+                const { averageRating, totalApproved } =
+                  await getAverageRatingAndCountByMovieId(item.id);
                 return {
                   id: item.id,
                   nameVN: item.nameVN,
@@ -54,12 +54,10 @@ const ReviewList = () => {
                   hasReviews: totalApproved > 0,
                 };
               } catch (err) {
-                console.error(`Lỗi khi lấy đánh giá cho phim ${item.id}:`, err.message);
-                if (err.response && err.response.status === 404) {
-                  message.warning(`Không tìm thấy đánh giá cho phim ${item.nameVN}`);
-                } else {
-                  message.error(`Lỗi khi lấy đánh giá cho phim ${item.nameVN}: ${err.message}`);
-                }
+                console.error(
+                  `Lỗi khi lấy đánh giá cho phim ${item.id}:`,
+                  err.message
+                );
                 return {
                   id: item.id,
                   nameVN: item.nameVN,
@@ -71,7 +69,7 @@ const ReviewList = () => {
             })
           );
           setMovies(moviesWithReviews);
-          setTotalElements(responseData.totalElements || moviesWithReviews.length);
+          setTotalElements(moviesWithReviews.length);
         } else {
           setMovies([]);
           setTotalElements(0);
@@ -83,7 +81,7 @@ const ReviewList = () => {
           return fetchMovies(retries - 1);
         }
         message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
-        console.error("Lỗi API /movies/getAll:", err.response || err);
+        console.error("Lỗi API:", err.response || err);
       } finally {
         setLoading(false);
       }
@@ -131,7 +129,9 @@ const ReviewList = () => {
       render: (record) =>
         record.hasReviews ? (
           <span>
-            {record.averageRating}/10 <StarFilled style={{ color: "#fadb14", marginLeft: 4 }} /> ({record.totalReviews} đánh giá)
+            {record.averageRating}/10{" "}
+            <StarFilled style={{ color: "#fadb14", marginLeft: 4 }} /> (
+            {record.totalReviews} đánh giá)
           </span>
         ) : (
           "Chưa có đánh giá"
@@ -182,8 +182,6 @@ const ReviewList = () => {
           <Spin size="large" />
           <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
         </div>
-      ) : movies.length === 0 ? (
-        <div className="text-center text-lg">Không tìm thấy phim nào</div>
       ) : (
         <>
           <Table

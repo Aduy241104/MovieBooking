@@ -200,14 +200,12 @@ const ReviewDetail = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex flex-col justify-center items-center gap-3 h-screen">
-          <Spin size="large" />
-          <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
-        </div>
-      ) : pagedReviews.length === 0 ? (
-        <div className="text-center text-lg">Không có đánh giá nào</div>
-      ) : (
+        {loading ? (
+              <div className="flex flex-col justify-center items-center gap-3 h-screen">
+                <Spin size="large" />
+                <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
+              </div>
+            ) : (
         <>
           <Table
             dataSource={pagedReviews}

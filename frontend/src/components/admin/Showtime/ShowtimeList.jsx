@@ -40,8 +40,8 @@ const ShowtimeList = () => {
   const fetchShowtimes = async () => {
     setLoading(true);
     try {
-      console.log("Sending request to /movieSchedule/admin/all-active");
-      const response = await axiosInstance.get("/movieSchedule/admin/all-active");
+      console.log("Sending request to /public/movieSchedule/admin/all-active");
+      const response = await axiosInstance.get("/public/movieSchedule/admin/all-active");
       console.log("Showtimes API response:", response);
       const data = response.data || response;
       console.log("Showtimes response data:", data);
@@ -98,7 +98,7 @@ const ShowtimeList = () => {
   const handleDelete = async (record) => {
     try {
       console.log("Deleting showtime with id:", record.id);
-      const res = await axiosInstance.delete(`/movieSchedule/admin/delete-time/${record.id}`);
+      const res = await axiosInstance.delete(`/public/movieSchedule/admin/delete-time/${record.id}`);
       console.log("Delete showtime response:", res);
       const data = res.data || res;
       if (data.status === 1000 || data.status === 200) {

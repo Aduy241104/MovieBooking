@@ -40,7 +40,7 @@ public class ReviewController {
                 .build();
     }
 
-    // Thêm mới: Lấy tất cả đánh giá của một phim
+    //Lấy tất cả đánh giá của một phim
     @GetMapping("/movie/{movieId}")
     public ApiResponse<List<Review>> getReviewsByMovieId(@PathVariable Long movieId) {
         return ApiResponse.<List<Review>>builder()
@@ -50,7 +50,7 @@ public class ReviewController {
                 .build();
     }
 
-    // Thêm mới: Đếm số đánh giá được duyệt của một phim
+    //Đếm số đánh giá được duyệt của một phim
     @GetMapping("/movie/total-approved/{movieId}")
     public ApiResponse<Long> totalApprovedReviewsByMovieId(@PathVariable Long movieId) {
         return ApiResponse.<Long>builder()
@@ -60,7 +60,7 @@ public class ReviewController {
                 .build();
     }
 
-    // Thêm mới: Tính trung bình sao của một phim
+    //Tính trung bình sao của một phim
     @GetMapping("/movie/average-rating/{movieId}")
     public ApiResponse<Double> averageRatingByMovieId(@PathVariable Long movieId) {
         return ApiResponse.<Double>builder()
@@ -70,7 +70,7 @@ public class ReviewController {
                 .build();
     }
 
-    // Thêm mới: Xóa mềm một đánh giá
+    //  Xóa mềm một đánh giá
     @DeleteMapping("/{reviewId}")
     public ApiResponse<Void> softDeleteReview(@PathVariable Long reviewId) {
         reviewService.softDeleteReview(reviewId);

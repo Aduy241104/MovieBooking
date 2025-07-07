@@ -17,8 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // Thêm mới: Lấy danh sách đánh giá của một phim
     List<Review> findByMovieId(Long movieId);
 
-
-
     // Thêm mới: Đếm số đánh giá được duyệt của một phim
     long countByMovieIdAndApproved(Long movieId, Boolean approved);
 

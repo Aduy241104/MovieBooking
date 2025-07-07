@@ -205,7 +205,7 @@ const FareTypeList = () => {
       ) : (
         <>
           <Table
-            dataSource={pagedFareTypes}
+            dataSource={pagedFareTypes} 
             columns={columns}
             rowKey="id"
             pagination={false}
