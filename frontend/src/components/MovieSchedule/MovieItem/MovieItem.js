@@ -20,7 +20,7 @@ function MovieItem({ data }) {
 
             <div className='ms-3 w-75 cursor-pointer'>
                 <p className='fs-7'>{ data.movie.ageLimit }+</p>
-                <strong className='fs-5'>{ data.movie.nameVN }</strong>
+                <strong className={ cx('nameEn') }>{ data.movie.nameVN }</strong>
                 <p className='text-secondary'>{ data.movie.nameEN }</p>
                 <p className='text-secondary fs-7'>{ data.types && data.types.join(', ') }</p>
 

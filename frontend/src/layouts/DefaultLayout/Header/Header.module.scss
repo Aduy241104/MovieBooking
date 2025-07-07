@@ -1,5 +1,5 @@
 .header {
-    position: fixed !important;
+    position: fixed ;
     // position: sticky;
     top: 0;
     left: 0;
@@ -7,39 +7,7 @@
     height: 60px;
     z-index: 999 !important;
     transition: background-color 0.3s ease;
-    // background: linear-gradient(to right,
-    //             rgba(58, 60, 67, 0.8),
-    //             rgba(177, 177, 177, 0),
-    //             rgba(177, 177, 177, 0),
-    //             rgba(177, 177, 177, 0),
-    //             rgba(177, 177, 177, 0),
-    //             rgba(177, 177, 177, 0),
-    //             rgb(77, 79, 85));
     backdrop-filter: blur(2px);
-}
-
-.scrolled {
-    background-color: var(--footer-bg);
-}
-
-.logo-header {
-    width: 80px;
-}
-
-.custome-btn {
-    background-color: var(--red);
-    font-size: 14px;
-}
-
-.login-btn {
-    background-image: linear-gradient(to right, #ffd875, #d5d5d5) !important;
-    color: red;
-}
-
-.header {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
 
     .mobileMenu {
         position: fixed;
@@ -56,12 +24,39 @@
         from {
             opacity: 0;
             transform: translateY(-20px);
-        }to {
+        }
+
+        to {
             opacity: 1;
             transform: translateY(0);
         }
     }
+
     ul li {
         cursor: pointer;
+    }
+}
+
+.scrolled {
+    background-color: var(--footer-bg);
+}
+
+.logo-header {
+    width: 80px;
+}
+
+.custome-btn {
+    background-color: var(--red);
+    font-size: 14px;
+}
+
+.login-btn {
+    background-color: white !important;
+}
+
+@media screen and (max-width: 780px) {
+    .header {
+        background-color: var(--footer-bg);
+        position: relative;
     }
 }

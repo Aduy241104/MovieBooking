@@ -12,21 +12,20 @@ const cx = classNames.bind(styles);
 function PlayingMovie() {
     const [listMovie, setListMovie] = useState([]);
 
-    const fetchData = async () => {
-        try {
-            const response = await getNowShowingMovieAPI();
-            setListMovie(response.result);
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
-
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await getNowShowingMovieAPI();
+                setListMovie(response.result);
+            } catch (error) {
+                console.log(error.message);
+            }
+        }
         fetchData();
     }, []);
 
     return (
-        <div className="p-5">
+        <div className="pt-5 mt-3">
             <div className={ cx("container") }>
                 <div className="d-flex flex-column justify-content-center align-items-center text-light mt-5">
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim đang chiếu</h2>
@@ -38,10 +37,9 @@ function PlayingMovie() {
                                         <MovieComp
                                             index={ index + 1 }
                                             imglink={ item.smallImage }
-                                            // imglink={`http://localhost:8081${item.smallImage}`} // sửa dòng này thêm localhost
                                             nameVN={ item.nameVN }
                                             types={ item.types }
-                                            ageLimit={item.ageLimit}
+                                            ageLimit={ item.ageLimit }
                                             id={ item.id }
                                         />
                                     </SwiperSlide>
