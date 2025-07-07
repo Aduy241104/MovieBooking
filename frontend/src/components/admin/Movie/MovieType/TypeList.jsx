@@ -1,36 +1,48 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { Table, Input, Modal, Space, message } from 'antd';
-import { BadgePlus, Trash2, Pencil, Film } from 'lucide-react';
-import { SearchOutlined } from '@ant-design/icons';
-import EditTypeForm from './EditTypeForm';
-import AddTypeForm from './AddTypeForm';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import axiosClient from '../../../../config/axios'
+import React, { useEffect, useState, useCallback } from "react";
+import { Table, Input, Modal, Space, message } from "antd";
+import { BadgePlus, Trash2, Pencil, Film } from "lucide-react";
+import { SearchOutlined } from "@ant-design/icons";
+import EditTypeForm from "./EditTypeForm";
+import AddTypeForm from "./AddTypeForm";
+import "bootstrap/dist/css/bootstrap.min.css";
+import axiosClient from "../../../../config/axios";
+import { useLocation, useOutletContext } from "react-router-dom";
 
 export default function TypeList() {
     const [types, setTypes] = useState([]);
     const [filteredTypes, setFilteredTypes] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [searchText, setSearchText] = useState('');
+    const [searchText, setSearchText] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editTypeId, setEditTypeId] = useState(null);
+    const { setBreadcrumbItems } = useOutletContext();
+
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname.includes("/admin/movie")) {
+            setBreadcrumbItems([
+                { title: "Trang chủ" },
+                { title: "Quản lý thể loại phim" },
+                { title: "Thể loại phim" },
+            ]);
+        }
+    }, [location.pathname, setBreadcrumbItems]);
 
     const fetchTypes = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await axiosClient.get('/public/types');
-            console.log('Thể loại:', data);
+            const data = await axiosClient.get("/public/types");
+            console.log("Thể loại:", data);
             const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
             setTypes(sorted);
 
-            const filtered = sorted.filter(t =>
-                t.name.toLowerCase().includes(searchText.toLowerCase())
-            );
+            const filtered = sorted.filter((t) => t.name.toLowerCase().includes(searchText.toLowerCase()));
             setFilteredTypes(filtered);
         } catch (err) {
-            console.error('Lỗi khi tải thể loại:', err);
-            message.error('Không thể tải danh sách thể loại.');
+            console.error("Lỗi khi tải thể loại:", err);
+            message.error("Không thể tải danh sách thể loại.");
         } finally {
             setLoading(false);
         }
@@ -41,52 +53,53 @@ export default function TypeList() {
     }, [fetchTypes]);
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Bạn có chắc muốn xóa thể loại này?')) return;
+        if (!window.confirm("Bạn có chắc muốn xóa thể loại này?")) return;
         try {
-            await axiosClient.delete(`/public/types/${id}`)
+            await axiosClient.delete(`/public/types/${id}`);
             message.success("Xoá thành công.");
             fetchTypes();
         } catch (err) {
-            console.error('Lỗi khi xóa thể loại:', err);
-            message.error('Xoá thất bại!');
+            console.error("Lỗi khi xóa thể loại:", err);
+            message.error("Xoá thất bại!");
         }
     };
 
     const handleSearchInput = (value) => {
         setSearchText(value);
-        const filtered = types.filter(t =>
-            t.name.toLowerCase().includes(value.toLowerCase())
-        );
+        const filtered = types.filter((t) => t.name.toLowerCase().includes(value.toLowerCase()));
         setFilteredTypes(filtered);
     };
 
     const columns = [
         {
-            title: 'STT',
-            dataIndex: 'index',
+            title: "STT",
+            dataIndex: "index",
             render: (_, __, index) => index + 1,
         },
         {
-            title: 'Tên thể loại',
-            dataIndex: 'name',
+            title: "Tên thể loại",
+            dataIndex: "name",
         },
         {
-            title: 'Hành động',
-            align: 'center',
+            title: "Hành động",
+            align: "center",
             render: (_, record) => (
                 <Space size="middle">
-                    <button className="btn btn-outline-primary btn-sm" onClick={() => {
-                        setEditTypeId(record.id);
-                        setEditModalVisible(true);
-                    }}>
+                    <button
+                        className="btn btn-outline-primary btn-sm"
+                        onClick={() => {
+                            setEditTypeId(record.id);
+                            setEditModalVisible(true);
+                        }}
+                    >
                         <Pencil size={16} />
                     </button>
                     <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(record.id)}>
                         <Trash2 size={16} />
                     </button>
                 </Space>
-            )
-        }
+            ),
+        },
     ];
 
     return (
@@ -110,7 +123,7 @@ export default function TypeList() {
                         fontSize: "1.1rem",
                         padding: "5px 10px",
                         marginBottom: "24px",
-                        boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)"
+                        boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)",
                     }}
                     onClick={() => setIsModalVisible(true)}
                 >
@@ -123,11 +136,16 @@ export default function TypeList() {
                 dataSource={filteredTypes}
                 rowKey="id"
                 loading={loading}
-                pagination={{ pageSize: 10, position: ['bottomCenter'] }}
+                pagination={{ pageSize: 10, position: ["bottomCenter"] }}
             />
 
             <Modal
-                title={<span className='d-flex'><Film className="me-2" size={20} />Thêm thể loại phim</span>}
+                title={
+                    <span className="d-flex">
+                        <Film className="me-2" size={20} />
+                        Thêm thể loại phim
+                    </span>
+                }
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 footer={null}

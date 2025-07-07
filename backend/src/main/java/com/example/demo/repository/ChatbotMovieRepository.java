@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -37,14 +38,34 @@ public interface ChatbotMovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByNameContaining(@Param("keyword") String keyword);
 
     // Phim có phụ đề tiếng Việt
-//    @Query("SELECT m FROM Movie m WHERE LOWER(m.language) LIKE '%subtitle%' OR LOWER(m.language) LIKE '%phụ đề%' AND m.isDeleted = false")
-//    List<Movie> findMoviesWithSubtitle();
+    // @Query("SELECT m FROM Movie m WHERE LOWER(m.language) LIKE '%subtitle%' OR
+    // LOWER(m.language) LIKE '%phụ đề%' AND m.isDeleted = false")
+    // List<Movie> findMoviesWithSubtitle();
 
-//    // Phim lồng tiếng
-//    @Query("SELECT m FROM Movie m WHERE LOWER(m.language) LIKE '%dubbed%' OR LOWER(m.language) LIKE '%lồng tiếng%' AND m.isDeleted = false")
-//    List<Movie> findDubbedMovies();
+    // // Phim lồng tiếng
+    // @Query("SELECT m FROM Movie m WHERE LOWER(m.language) LIKE '%dubbed%' OR
+    // LOWER(m.language) LIKE '%lồng tiếng%' AND m.isDeleted = false")
+    // List<Movie> findDubbedMovies();
 
     // Phim 3D
     @Query("SELECT m FROM Movie m WHERE LOWER(m.nameVN) LIKE '%3d%' OR LOWER(m.nameEN) LIKE '%3d%' AND m.isDeleted = false")
     List<Movie> find3DMovies();
+
+    /**
+     * Lấy top phim hot nhất theo số vé bán ra trong tuần hiện tại
+     */
+    @Query(value = """
+                SELECT m.* FROM movie m
+                JOIN screening s ON m.movie_id = s.movie_id
+                JOIN booking b ON s.screening_id = b.screening_id
+                WHERE b.booking_status = 'PAID'
+                  AND b.booking_time >= :startOfWeek
+                  AND b.booking_time < :endOfWeek
+                  AND m.is_deleted = false
+                GROUP BY m.movie_id
+                ORDER BY COUNT(b.booking_id) DESC, MAX(b.booking_time) DESC
+                LIMIT 5
+            """, nativeQuery = true)
+    List<Movie> findTopHotMoviesThisWeek(@Param("startOfWeek") LocalDateTime startOfWeek,
+            @Param("endOfWeek") LocalDateTime endOfWeek);
 }
