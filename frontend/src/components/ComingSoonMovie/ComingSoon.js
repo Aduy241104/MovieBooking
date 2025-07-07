@@ -25,7 +25,7 @@ function ComingSoon() {
         fetchData()
     }, [])
     return (
-        <div className="p-5" >
+        <div className="pt-5" >
             <div className="container">
                 <div className="d-flex flex-column justify-content-center align-items-center text-light">
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim sắp chiếu</h2>
