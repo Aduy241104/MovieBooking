@@ -98,6 +98,16 @@ public class ChatbotDataService {
             count++;
         if (info.askHelp)
             count++;
+        if (info.askChangeTicket)
+            count++;
+        if (info.askRefund)
+            count++;
+        if (info.askForgotPassword)
+            count++;
+        if (info.askRegister)
+            count++;
+        if (info.askUpdateProfile)
+            count++;
         // ... có thể bổ sung intent mới ở đây
         // Chỉ đúng 1 intent được bật và intent đó là intentCheck
         return count == 1 && intentCheck.test(info);
@@ -154,12 +164,22 @@ public class ChatbotDataService {
 
         // Hiển thị top phim hot/bom tấn
         if (info.askTop) {
-            List<Movie> topMovies = chatbotMovieRepository.findTopMovies();
-            context.append("PHIM HOT/BOM TẤN:\n");
-            for (int i = 0; i < Math.min(5, topMovies.size()); i++) {
-                Movie movie = topMovies.get(i);
-                context.append((i + 1)).append(". ").append(movie.getNameVN()).append(" (").append(movie.getNameEN())
-                        .append(")\n");
+            // Lấy phim hot theo số vé bán ra trong tuần hiện tại
+            LocalDateTime now = LocalDateTime.now();
+            // Tìm ngày đầu tuần (thứ 2)
+            LocalDateTime startOfWeek = now.with(java.time.DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
+            LocalDateTime endOfWeek = startOfWeek.plusDays(7);
+            List<Movie> topMovies = chatbotMovieRepository.findTopHotMoviesThisWeek(startOfWeek, endOfWeek);
+            context.append("PHIM HOT NHẤT TUẦN NÀY (dựa trên số vé bán ra):\n");
+            if (!topMovies.isEmpty()) {
+                for (int i = 0; i < topMovies.size(); i++) {
+                    Movie movie = topMovies.get(i);
+                    context.append((i + 1)).append(". ").append(movie.getNameVN()).append(" (")
+                            .append(movie.getNameEN())
+                            .append(")\n");
+                }
+            } else {
+                context.append("Chưa có dữ liệu phim hot cho tuần này.\n");
             }
         }
 
@@ -319,7 +339,27 @@ public class ChatbotDataService {
                     context.append("- Thời lượng: ").append(movie.getDuration()).append(" phút\n");
                     context.append("- Đạo diễn: ").append(movie.getDirector()).append("\n");
                     context.append("- Giới hạn tuổi: ").append(movie.getAgeLimit()).append("\n");
-                    context.append("- Nội dung: ").append(movie.getContent()).append("\n");
+                    // Nếu intent là hỏi nội dung/tóm tắt phim, chỉ trả lời ngắn gọn, không spoil
+                    // chi tiết
+                    if (info.askContent) {
+                        context.append("- Nội dung: ");
+                        if (movie.getContent() != null && !movie.getContent().isEmpty()) {
+                            // Lấy tối đa 200 ký tự đầu, không cắt giữa câu
+                            String content = movie.getContent();
+                            int cut = Math.min(content.length(), 200);
+                            int lastDot = content.lastIndexOf('.', cut);
+                            if (lastDot > 50)
+                                cut = lastDot + 1;
+                            context.append(content.substring(0, cut).trim());
+                            if (cut < content.length())
+                                context.append(" ...");
+                        } else {
+                            context.append("Chưa có nội dung tóm tắt.");
+                        }
+                        context.append("\n");
+                    } else {
+                        context.append("- Nội dung: ").append(movie.getContent()).append("\n");
+                    }
 
                     // Chỉ hiển thị lịch chiếu nếu người dùng không hỏi riêng về lịch chiếu
                     List<Screening> screenings = chatbotScreeningRepository.findByMovieName(info.movieName,
@@ -335,6 +375,9 @@ public class ChatbotDataService {
                         }
                     }
                 }
+            } else {
+                // Nếu không tìm thấy phim, trả về context rõ ràng, không để AI tự bịa nội dung
+                context.append("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này.\n");
             }
         }
 
@@ -347,10 +390,62 @@ public class ChatbotDataService {
                     "- Bán vé online 24/7\n";
         }
 
-        // Trả lời cho intent đổi vé/suất chiếu hoặc hủy vé/hoàn tiền
+        // ===== XỬ LÝ ĐẶC BIỆT: Nếu chỉ hỏi lịch chiếu phim hôm nay, trả về đúng
+        // context =====
+
+        if (isOnlyIntent(info, i -> i.askShowTimes && "today".equals(i.date))) {
+            List<Screening> todayScreenings = chatbotScreeningRepository.findTodayScreenings(LocalDateTime.now());
+            if (!todayScreenings.isEmpty()) {
+                StringBuilder todayContext = new StringBuilder();
+                todayContext.append("LỊCH CHIẾU HÔM NAY:\n");
+                for (Screening screening : todayScreenings) {
+                    todayContext.append("- ").append(screening.getMovie().getNameVN())
+                            .append(" lúc ").append(screening.getShowDateTime().toLocalTime())
+                            .append(" - Phòng ").append(screening.getCinemaRoom().getCinemaRoomName()).append("\n");
+                }
+                return todayContext.toString();
+            } else {
+                return "Hiện tại chưa có lịch chiếu nào cho hôm nay.\n";
+            }
+        }
+
         if (info.askChangeTicket || info.askRefund) {
-            context.append(
-                    "Theo quy định của MovieTheater, sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, bạn có thể chuyển vé cho người khác sử dụng.\n");
+            return "Theo quy định của MovieTheater, sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, bạn có thể chuyển vé cho người khác sử dụng.";
+        }
+
+        // Account-related responses
+        if (info.askForgotPassword) {
+            return "HƯỚNG DẪN LẤY LẠI MẬT KHẨU:\n" +
+                    "1. Truy cập trang đăng nhập của MovieTheater\n" +
+                    "2. Nhấp vào liên kết 'Quên mật khẩu?'\n" +
+                    "3. Nhập email đã đăng ký tài khoản\n" +
+                    "4. Kiểm tra email và làm theo hướng dẫn để đặt lại mật khẩu\n" +
+                    "5. Đăng nhập bằng mật khẩu mới\n\n" +
+                    "Nếu gặp khó khăn, vui lòng liên hệ hotline: 1900-xxxx để được hỗ trợ.";
+        }
+
+        if (info.askRegister) {
+            return "HƯỚNG DẪN ĐĂNG KÝ TÀI KHOẢN MOVIETHEATER:\n" +
+                    "1. Tại trang chủ nhấp vào nút 'Đăng nhập' ở góc phải màn hình\n" +
+                    "2. Nhấp vào nút 'Đăng ký' màu đỏ\n" +
+                    "3. Điền đầy đủ thông tin yêu cầu\n" +
+                    "4. Nhấn 'Đăng ký' để hoàn tất\n" +
+                    "5. Kiểm tra email để xác thực tài khoản\n\n" +
+                    "Lưu ý: Tài khoản thành viên sẽ được tích điểm và nhận nhiều ưu đãi hấp dẫn!";
+        }
+
+        if (info.askUpdateProfile) {
+            return "HƯỚNG DẪN CẬP NHẬT THÔNG TIN CÁ NHÂN:\n" +
+                    "1. Đăng nhập vào tài khoản MovieTheater\n" +
+                    "2. Nhấp vào avatar/tên của bạn ở góc phải màn hình\n" +
+                    "3. Chọn 'Tài khoản'\n" +
+                    "4. Chỉnh sửa các thông tin cần thiết:\n" +
+                    "   - Họ tên, số điện thoại, email\n" +
+                    "   - Ngày sinh, giới tính\n" +
+                    "   - Địa chỉ\n" +
+                    "   - Ảnh đại diện\n" +
+                    "5. Nhấn 'Cập nhật' để lưu thay đổi\n\n" +
+                    "Lưu ý: Một số thông tin như email có thể cần xác thực lại qua email mới.";
         }
 
         return context.toString();

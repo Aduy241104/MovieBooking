@@ -34,6 +34,11 @@ public class QuestionAnalyzer {
         public boolean askChangeTicket; // Đổi vé/suất chiếu
         public boolean askRefund; // Hủy vé/hoàn tiền
 
+        // Account-related intents
+        public boolean askForgotPassword; // Quên mật khẩu
+        public boolean askRegister; // Đăng ký tài khoản
+        public boolean askUpdateProfile; // Cập nhật thông tin cá nhân
+
         public boolean askSeatSelection; // Chọn ghế
         public boolean askGroupDiscount; // Giảm giá nhóm
         public boolean askStudentDiscount; // Giảm giá học sinh
@@ -53,16 +58,20 @@ public class QuestionAnalyzer {
         public boolean askError; // Lỗi kỹ thuật
         public boolean askHelp; // Cần hỗ trợ
 
+        public boolean askContent; // Hỏi về nội dung/tóm tắt phim
+
         // Kiểm tra có intent nào được bật
         public boolean hasAnyIntent() {
             return genre != null || askPromotion || askDirector || askActor || askDuration || askPrice || askShowTimes
                     ||
                     askLanguage || askAgeLimit || askTrailer || askBooking || askReview || askCinemaInfo || askPayment
                     ||
+                    askContent
+                    ||
                     askSeatSelection || askGroupDiscount || askStudentDiscount || askLocation || askContact
                     || askOpenHours ||
                     askComingSoon || askNowShowing || askTop || askNew || askSubtitle || askDubbing || ask3D || askError
-                    || askHelp;
+                    || askHelp || askChangeTicket || askRefund || askForgotPassword || askRegister || askUpdateProfile;
         }
     }
 
@@ -262,83 +271,27 @@ public class QuestionAnalyzer {
                 || q.contains("cancel ticket"))
             info.askRefund = true;
 
-        // Chọn ghế
-        if (q.contains("chọn ghế") || q.contains("seat") || q.contains("vị trí ghế") ||
-                q.contains("ghế ngồi") || q.contains("hàng ghế"))
-            info.askSeatSelection = true;
+        // Account-related intents
+        // Quên mật khẩu
+        if (q.contains("quên mật khẩu") || q.contains("quên password") || q.contains("forgot password") ||
+                q.contains("reset password") || q.contains("đặt lại mật khẩu") || q.contains("lấy lại mật khẩu") ||
+                q.contains("khôi phục mật khẩu") || q.contains("không nhớ mật khẩu"))
+            info.askForgotPassword = true;
 
-        // Giảm giá nhóm
-        if (q.contains("giảm giá nhóm") || q.contains("group discount") ||
-                q.contains("vé nhóm") || q.contains("đi nhóm"))
-            info.askGroupDiscount = true;
+        // Đăng ký tài khoản
+        if (q.contains("đăng ký") || q.contains("đăng kí") || q.contains("tạo tài khoản") ||
+                q.contains("register") || q.contains("sign up") || q.contains("tài khoản mới") ||
+                q.contains("lập tài khoản") || q.contains("mở tài khoản"))
+            info.askRegister = true;
 
-        // Giảm giá học sinh
-        if (q.contains("học sinh") || q.contains("sinh viên") || q.contains("student") ||
-                q.contains("giảm giá học sinh") || q.contains("ưu đãi học sinh"))
-            info.askStudentDiscount = true;
-
-        // Địa chỉ rạp
-        if (q.contains("địa chỉ") || q.contains("ở đâu") || q.contains("location") ||
-                q.contains("address") || q.contains("đường") || q.contains("quận"))
-            info.askLocation = true;
-
-        // Liên hệ
-        if (q.contains("liên hệ") || q.contains("contact") || q.contains("số điện thoại") ||
-                q.contains("hotline") || q.contains("email") || q.contains("facebook"))
-            info.askContact = true;
-
-        // Giờ mở cửa
-        if (q.contains("giờ mở cửa") || q.contains("mở cửa") || q.contains("đóng cửa") ||
-                q.contains("open") || q.contains("close") || q.contains("hoạt động"))
-            info.askOpenHours = true;
-
-        // Phim sắp chiếu
-        if (q.contains("sắp chiếu") || q.contains("coming soon") || q.contains("sắp ra") ||
-                q.contains("tương lai") || q.contains("tuần sau") || q.contains("tháng sau"))
-            info.askComingSoon = true;
-
-        // Phim đang chiếu
-        if (q.contains("đang chiếu") || q.contains("now showing") || q.contains("hiện tại") ||
-                q.contains("bây giờ") || q.contains("tuần này"))
-            info.askNowShowing = true;
-
-        // Phim hot/top
-        if (q.contains("hot") || q.contains("top") || q.contains("nổi tiếng") ||
-                q.contains("phổ biến") || q.contains("trending") || q.contains("bom tấn"))
-            info.askTop = true;
-
-        // Phim mới
-        if (q.contains("phim mới") || q.contains("new") || q.contains("ra mắt") ||
-                q.contains("vừa ra") || q.contains("mới nhất"))
-            info.askNew = true;
-
-        // Phụ đề
-        if (q.contains("phụ đề") || q.contains("subtitle") || q.contains("sub") ||
-                q.contains("tiếng việt") || q.contains("phụ đề việt"))
-            info.askSubtitle = true;
-
-        // Lồng tiếng
-        if (q.contains("lồng tiếng") || q.contains("dubbed") || q.contains("voice over") ||
-                q.contains("thuyết minh"))
-            info.askDubbing = true;
-
-        // Phim 3D
-        if (q.contains("3d") || q.contains("ba chiều") || q.contains("three d"))
-            info.ask3D = true;
-
-        // IMAX
-        // if (q.contains("imax") || q.contains("màn hình lớn"))
-        // info.askIMAX = true;
-
-        // Lỗi kỹ thuật
-        if (q.contains("lỗi") || q.contains("error") || q.contains("không hoạt động") ||
-                q.contains("bị lỗi") || q.contains("không được") || q.contains("sự cố"))
-            info.askError = true;
-
-        // Cần hỗ trợ
-        if (q.contains("hỗ trợ") || q.contains("help") || q.contains("giúp đỡ") ||
-                q.contains("trợ giúp") || q.contains("support") || q.contains("assistance"))
-            info.askHelp = true;
+        // Cập nhật thông tin cá nhân
+        if (q.contains("cập nhật thông tin") || q.contains("chỉnh sửa thông tin") || q.contains("thay đổi thông tin") ||
+                q.contains("update profile") || q.contains("edit profile") || q.contains("sửa hồ sơ") ||
+                q.contains("đổi thông tin") || q.contains("thay đổi hồ sơ") || q.contains("cập nhật hồ sơ") ||
+                q.contains("chỉnh sửa hồ sơ") || q.contains("đổi tên") || q.contains("đổi số điện thoại") ||
+                q.contains("đổi email") || q.contains("thay đổi email") || q.contains("cập nhật email") ||
+                q.contains("đổi địa chỉ") || q.contains("thay đổi avatar") || q.contains("đổi ảnh đại diện"))
+            info.askUpdateProfile = true;
 
         // Nhận diện giờ cụ thể (HH:mm hoặc HHh)
         Pattern timePattern = Pattern.compile("(\\d{1,2})[:h]\\s*(\\d{0,2})");
