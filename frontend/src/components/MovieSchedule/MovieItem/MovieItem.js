@@ -8,7 +8,7 @@ function MovieItem({ data }) {
         <div className='d-flex w-100 pb-4'>
             <div className={ cx('poster') }>
                 <img
-                    src={ data.smallImage + "" }
+                    src={ data.movie.smallImage + "" } // thêm .movie để lấy ảnh
                     alt=""
                     loading="lazy"
                     onError={ (e) => {
