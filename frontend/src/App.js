@@ -35,9 +35,9 @@ import ResetPassword from "./Page/AuthPage/ResetPassword";
 import { ActivityLogPage } from "./Page/admin/ActivityLogPage";
 
 import BookingPage from "./Page/Booking/BookingPage";
-import BookingSuccessPage from "./Page/Booking/BookingSuccessPage";
-import BookingFailurePage from "./Page/Booking/BookingFailurePage";
-import BookingHistoryPage from "./Page/Booking/BookingHistoryPage"; // Tạo component này nếu muốn
+import BookingSuccessPage from "./Page/Booking/BookingSuccess/BookingSuccessPage";
+import BookingFailurePage from "./Page/Booking/BookingFailure/BookingFailurePage";
+import BookingHistoryPage from "./Page/Booking/BookingHistory/BookingHistoryPage"; // Tạo component này nếu muốn
 import BookingDetailPage from "./Page/Booking/BookingDetail/BookingDetailPage";
 import { EmployeeLayout } from "./layouts/EmployeeLayout/EmployeeLayout";
 
@@ -83,6 +83,11 @@ function App() {
                     <Route index element={<Profile />} />
                     <Route path="password" element={<ChangePassword />} />
                     <Route path="transactions" element={<Profile />} />
+                </Route>
+                {/* muốn có profile layout thì để vào đây~~ */}
+                <Route element={<ProfileLayout />}>
+                    <Route path="/booking/history" element={<BookingHistoryPage />} />
+                    <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
                 </Route>
 
                 <Route
