@@ -1,12 +1,20 @@
-import { Layout } from "antd";
-import {LayoutDashboard, Ticket, Users, Film, Video, CalendarDays, Receipt, MessageSquareText, History, } from "lucide-react";
-import { Menu } from "antd";
+import { Layout, Menu } from "antd";
+import {
+  LayoutDashboard,
+  Ticket,
+  Users,
+  Film,
+  Video,
+  CalendarDays,
+  Receipt,
+  MessageSquareText,
+  History,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "./admin.scss";
 
-export const AdminSidebar = (props) => {
-  const { collapsed, width, theme } = props;
+export const AdminSidebar = ({ collapsed, width, theme }) => {
   const { Sider } = Layout;
   const location = useLocation();
   const [openKeys, setOpenKeys] = useState([]);
@@ -15,7 +23,7 @@ export const AdminSidebar = (props) => {
     {
       key: "dashboard",
       icon: <LayoutDashboard size={20} strokeWidth={1.5} />,
-      label: <Link to={"/admin"}>Dashboard</Link>,
+      label: <Link to="/admin">Dashboard</Link>,
     },
     {
       key: "users",
@@ -24,18 +32,18 @@ export const AdminSidebar = (props) => {
       children: [
         {
           key: "members",
-          label: <Link to={"users-members"}>Thành viên</Link>,
+          label: <Link to="/admin/users-members">Thành viên</Link>,
         },
         {
           key: "employees",
-          label: <Link to={"users-employees"}>Nhân viên</Link>,
+          label: <Link to="/admin/users-employees">Nhân viên</Link>,
         },
       ],
     },
     {
       key: "promotions",
       icon: <Ticket size={20} strokeWidth={1.5} />,
-      label: <Link to={"promotions"}>Mã khuyến mãi</Link>,
+      label: <Link to="/admin/promotions">Mã khuyến mãi</Link>,
     },
     {
       key: "room-list",
@@ -80,48 +88,39 @@ export const AdminSidebar = (props) => {
     {
       key: "review-list",
       icon: <MessageSquareText size={20} strokeWidth={1.5} />,
-      label: <Link to="/admin/review-list">Quản lý Bình Luận</Link>,
+      label: <Link to="/admin/review-list">Quản lý bình luận</Link>,
     },
     {
       key: "activity-logs",
       icon: <History size={20} strokeWidth={1.5} />,
-      label: <Link to={"activity-logs"}>Lịch sử hoạt động</Link>,
+      label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
     },
   ];
 
   const getSelectedKeys = () => {
-    const pathname = location.pathname;
-    if (pathname === "/admin") return ["dashboard"];
-    if (pathname.includes("users-members")) return ["members"];
-    if (pathname.includes("users-employees")) return ["employees"];
-    if (pathname.includes("promotions")) return ["promotions"];
-    if (pathname.includes("room-list")) return ["room-list"];
-    if (pathname.includes("movie-list")) return ["movie-list"];
-    if (pathname.includes("movie-type")) return ["movie-type"];
-    if (pathname.includes("showtime-list")) return ["showtime-list"];
-    if (pathname.includes("faretype-list")) return ["faretype-list"];
-    if (pathname.includes("booking-list")) return ["booking-list"];
-    if (pathname.includes("review-list")) return ["review-list"];
-    if (pathname.includes("activity-logs")) return ["activity-logs"];
+    const path = location.pathname;
+    if (path === "/admin") return ["dashboard"];
+    if (path.includes("users-members")) return ["members"];
+    if (path.includes("users-employees")) return ["employees"];
+    if (path.includes("promotions")) return ["promotions"];
+    if (path.includes("room-list")) return ["room-list"];
+    if (path.includes("movie-list")) return ["movie-list"];
+    if (path.includes("movie-type")) return ["movie-type"];
+    if (path.includes("showtime-list")) return ["showtime-list"];
+    if (path.includes("faretype-list")) return ["faretype-list"];
+    if (path.includes("booking-list")) return ["booking-list"];
+    if (path.includes("review-list")) return ["review-list"];
+    if (path.includes("activity-logs")) return ["activity-logs"];
     return [];
   };
 
   useEffect(() => {
-    const pathname = location.pathname;
-    if (
-      pathname.includes("users-members") ||
-      pathname.includes("users-employees")
-    ) {
+    const path = location.pathname;
+    if (path.includes("users-members") || path.includes("users-employees")) {
       setOpenKeys(["users"]);
-    } else if (
-      pathname.includes("movie-list") ||
-      pathname.includes("movie-type")
-    ) {
+    } else if (path.includes("movie-list") || path.includes("movie-type")) {
       setOpenKeys(["movie"]);
-    } else if (
-      pathname.includes("faretype-list") ||
-      pathname.includes("booking-list")
-    ) {
+    } else if (path.includes("faretype-list") || path.includes("booking-list")) {
       setOpenKeys(["faretype"]);
     } else {
       setOpenKeys([]);

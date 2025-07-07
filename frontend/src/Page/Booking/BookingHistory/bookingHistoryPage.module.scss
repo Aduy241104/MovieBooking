@@ -1,0 +1,170 @@
+/* bookingHistoryPage.module.scss */
+
+/* --- Biến màu (giữ nguyên) --- */
+$dark-surface: #24283b;
+$text-primary: #e0e0e0;
+$text-secondary: #9e9e9e;
+$border-color: #394264;
+$success-color: #2ecc71;
+$danger-color: #e74c3c;
+$warning-color: #f39c12;
+$info-color: #3498db;
+$reserved-color: #9b59b6;
+
+
+/* --- Style cho wrapper của trang này --- */
+// Component ProfileLayout đã có nền, padding, v.v.
+// Wrapper này chỉ để gom nhóm, không cần style phức tạp
+.history-page-wrapper {
+    // Có thể bạn không cần style gì ở đây cả, hoặc chỉ cần style đơn giản
+    // background-color: $dark-surface; // Có thể bỏ nếu nền của ProfileLayout đã đủ tốt
+    // border-radius: 12px;
+    // padding: 2rem;
+}
+
+/* --- CÁC STYLE CÒN LẠI GIỮ NGUYÊN --- */
+.page-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $border-color;
+}
+
+.centered-message {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: $text-secondary;
+    font-size: 1.1rem;
+    background-color: $dark-surface;
+    border-radius: 12px;
+    &.error-message { color: $danger-color; }
+}
+/* --- DANH SÁCH LỊCH SỬ ĐẶT VÉ --- */
+.booking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.booking-item {
+    display: block;
+    background-color: $dark-surface; 
+    border: 1px solid $border-color;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: $text-primary;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+        transform: translateY(-5px);
+        border-color: $info-color;
+        box-shadow: 0 8px 25px rgba($info-color, 0.15);
+    }
+}
+
+
+/* --- CÁC STYLE CON BÊN TRONG ITEM (giữ nguyên không đổi) --- */
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px dashed $border-color;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.movie-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.booking-code {
+    font-size: 0.9rem;
+    color: $text-secondary;
+    white-space: nowrap;
+    margin-left: 1rem;
+    strong {
+        color: $success-color;
+        font-weight: 700;
+    }
+}
+
+.item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.info-label {
+    color: $text-secondary;
+    flex-shrink: 0;
+    i {
+        margin-right: 0.5rem;
+        color: $info-color;
+        width: 16px;
+    }
+}
+
+.info-value {
+    color: $text-primary;
+    &.seats {
+        font-weight: bold;
+        color: $warning-color;
+    }
+}
+
+.item-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-amount {
+    font-size: 0.9rem;
+    color: $text-secondary;
+    strong {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: $text-primary;
+    }
+    span {
+        font-style: italic;
+    }
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    
+    &.status-paid { background-color: rgba($success-color, 0.2); color: $success-color; }
+    &.status-cancelled, &.status-failed { background-color: rgba($danger-color, 0.2); color: $danger-color; }
+    &.status-pending { background-color: rgba($warning-color, 0.2); color: $warning-color; }
+    &.status-reserved { background-color: rgba($reserved-color, 0.2); color: $reserved-color; }
+    &.status-unknown { background-color: rgba($text-secondary, 0.2); color: $text-secondary; }
+}
+
+/* RESPONSIVE: Khi màn hình nhỏ, sidebar có thể sẽ ẩn đi, ta bỏ margin-left */
+@media (max-width: 768px) {
+    .page-content-wrapper {
+        margin-left: 0;
+        padding: 1.5rem;
+    }
+}

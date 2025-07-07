@@ -24,6 +24,7 @@ public class ChatbotController {
     @PostMapping
     public Object chat(@RequestBody ChatRequest request,
             @RequestParam(value = "stream", required = false) Boolean stream, HttpServletResponse response) {
+        System.out.println("Received chatbot request: " + request);
         boolean isStream = (request.getStream() != null && request.getStream()) || (stream != null && stream);
         if (isStream) {
             response.setContentType("application/octet-stream");

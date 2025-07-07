@@ -14,6 +14,7 @@ import ResetPassword from './Page/AuthPage/ResetPassword';
 
 // Layouts
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout';
+import { EmployeeLayout } from './layouts/EmployeeLayout/EmployeeLayout';
 import ProfileLayout from './layouts/ProfileLayout';
 
 // Trang chính
@@ -55,15 +56,15 @@ import ChangePassword from './Page/ProfilePage/ChangePassword/ChangePassword';
 // Booking
 import BookingPage from './Page/Booking/BookingPage';
 import BookingSuccessPage from './Page/Booking/BookingSuccessPage';
-import BookingFailurePage from './Page/Booking/BookingFailurePage';
-import BookingHistoryPage from './Page/Booking/BookingHistoryPage';
+import BookingFailurePage from './Page/Booking/BookingFailure/BookingFailurePage';
+import BookingHistoryPage from './Page/Booking/BookingHistory/BookingHistoryPage';
 import BookingDetailPage from './Page/Booking/BookingDetail/BookingDetailPage';
 
 // Route bảo vệ
 const PrivateRoute = ({ children }) => {
     const { user, isAuthLoaded } = useContext(AuthContext);
     if (!isAuthLoaded) return;
-    if (!user || user.role !== "ADMIN") {
+    if (!user || user.role !== 'ADMIN') {
         return <Navigate to="/" replace />;
     }
     return children;
@@ -81,16 +82,16 @@ function App() {
     return (
         <Routes>
             {/* Auth */}
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/register' element={<SignUpPage />} />
-            <Route path='/forgot-password' element={<RequestForgotPassword />} />
-            <Route path='/reset-password' element={<ResetPassword />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<SignUpPage />} />
+            <Route path="/forgot-password" element={<RequestForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Public */}
-            <Route path='/' element={<HomePage />} />
-            <Route path='/movie-detail/:id' element={<MovieDetail />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/movie-detail/:id" element={<MovieDetail />} />
 
-            {/* Booking (cần đăng nhập) */}
+            {/* Booking */}
             <Route path="/booking" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
             <Route path="/booking/success" element={<ProtectedRoute><BookingSuccessPage /></ProtectedRoute>} />
             <Route path="/booking/failure" element={<BookingFailurePage />} />
@@ -104,46 +105,52 @@ function App() {
                 <Route path="transactions" element={<Profile />} />
             </Route>
 
-            {/* Admin layout (admin mới vào được) */}
-            <Route path='/admin' element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
+            {/* Admin layout */}
+            <Route path="/admin" element={<PrivateRoute><AdminLayout /></PrivateRoute>}>
                 <Route index element={<DashboardPage />} />
 
                 {/* Room */}
-                <Route path='room-list' element={<RoomList />} />
-                <Route path='room-list/add-room' element={<CreateRoom />} />
-                <Route path='room-list/room/:id' element={<RoomDetail />} />
-                <Route path='room-list/:id/edit' element={<EditRoom />} />
+                <Route path="room-list" element={<RoomList />} />
+                <Route path="room-list/add-room" element={<CreateRoom />} />
+                <Route path="room-list/room/:id" element={<RoomDetail />} />
+                <Route path="room-list/room/edit/:id" element={<EditRoom />} />
 
                 {/* Movie */}
-                <Route path='movie-type' element={<TypeList />} />
-                <Route path='movie-list' element={<MovieList />} />
-                <Route path='movies/add' element={<AddMovie />} />
-                <Route path='movies/edit/:id' element={<EditMovie />} />
-                <Route path='film-detail/:id' element={<FilmDetail />} />
+                <Route path="movie-type" element={<TypeList />} />
+                <Route path="movie-list" element={<MovieList />} />
+                <Route path="movies/add" element={<AddMovie />} />
+                <Route path="movies/edit/:id" element={<EditMovie />} />
+                <Route path="film-detail/:id" element={<FilmDetail />} />
 
                 {/* Showtime */}
-                <Route path='showtime-list' element={<ShowtimeList />} />
+                <Route path="showtime-list" element={<ShowtimeList />} />
 
                 {/* Fare & Booking */}
-                <Route path='faretype-list' element={<FareTypeList />} />
-                <Route path='booking-list' element={<BookingList />} />
-                <Route path='booking-detail/:movieId' element={<BookingDetail />} />
+                <Route path="faretype-list" element={<FareTypeList />} />
+                <Route path="booking-list" element={<BookingList />} />
+                <Route path="booking-detail/:movieId" element={<BookingDetail />} />
 
                 {/* Review */}
-                <Route path='review-list' element={<ReviewList />} />
-                <Route path='review-detail/:movieId' element={<ReviewDetail />} />
+                <Route path="review-list" element={<ReviewList />} />
+                <Route path="review-detail/:movieId" element={<ReviewDetail />} />
 
                 {/* Users */}
-                <Route path='users-members' element={<UserPage key="members" userText="Thành viên" userFilter="Member" />} />
-                <Route path='users-members/:accountId' element={<UserDetailPage key="members-detail" userText="Thành viên" />} />
-                <Route path='users-employees' element={<UserPage key="employees" userText="Nhân viên" userFilter="Employee" />} />
-                <Route path='users-employees/:accountId' element={<UserDetailPage key="employees-detail" userText="Nhân viên" />} />
+                <Route path="users-members" element={<UserPage key="members" userText="Thành viên" userFilter="Member" />} />
+                <Route path="users-members/:accountId" element={<UserDetailPage key="members-detail" userText="Thành viên" />} />
+                <Route path="users-employees" element={<UserPage key="employees" userText="Nhân viên" userFilter="Employee" />} />
+                <Route path="users-employees/:accountId" element={<UserDetailPage key="employees-detail" userText="Nhân viên" />} />
 
-                {/* Promotions */}
-                <Route path='promotions' element={<PromotionPage promotionText="Mã khuyến mãi" />} />
+                {/* Promotion */}
+                <Route path="promotions" element={<PromotionPage promotionText="Mã khuyến mãi" />} />
 
                 {/* Logs */}
-                <Route path='activity-logs' element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+                <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+            </Route>
+
+            {/* Employee layout */}
+            <Route path="/employee" element={<PrivateRoute><EmployeeLayout /></PrivateRoute>}>
+                <Route index element={<h1>Employee Dashboard</h1>} />
+                {/* Add more employee-specific routes here */}
             </Route>
         </Routes>
     );

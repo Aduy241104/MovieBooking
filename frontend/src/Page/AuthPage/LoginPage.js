@@ -74,7 +74,7 @@ function LoginPage() {
                         placeholder="Email"
                         type="text"
                         name="username"
-                        className="border border-0 lz bg-transparent"
+                        className="border border-0 lz bg-transparent w-100"
                         required
                         value={ loginData.email }
                         onChange={ handleChangeLoginData }
@@ -87,7 +87,7 @@ function LoginPage() {
                         placeholder="Password"
                         type="password"
                         name="password"
-                        className="border border-0 text-light lz bg-transparent"
+                        className="border border-0 text-light lz bg-transparent w-100"
                         required
                         minLength={ 6 }
                         value={ loginData.password }

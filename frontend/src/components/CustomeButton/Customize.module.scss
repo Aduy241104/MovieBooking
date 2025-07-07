@@ -27,7 +27,7 @@
     border: 1px solid white;
     color: white;
     background-color: transparent;
-    font-weight: 600;
+    font-family: var(--font) !important;
 
     &:hover {
         background-color: rgb(255, 255, 255);

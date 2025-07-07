@@ -40,7 +40,7 @@ function Sidebar() {
                     </li>
                     <li className={ cx('mb-4', 'link-layout') }>
                         <NavLink
-                            to="/profile/transactions"
+                            to="/booking/history"
                             className={ ({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }

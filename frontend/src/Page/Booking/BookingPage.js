@@ -6,8 +6,10 @@ import { checkPromotion, createBooking, getUserPoints } from '../../service/Book
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
-import CustomizeButton from '../../components/CustomeButton/CustomizeButton';
-import styles from './bookingPage.scss'; // Đảm bảo tên file CSS/SCSS khớp
+import { promotionErrorMessages, getFriendlyErrorMessage } from '../../Utils/booking/BookingErrorMessages';
+// import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA
+import DefaultLayout from '../../layouts/DefaultLayout'; // GIẢ SỬ ĐƯỜNG DẪN ĐÚNG
+import styles from './bookingPage.scss'; // ĐÃ ĐỔI TÊN FILE CSS CHO NHẤT QUÁN
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -46,6 +48,9 @@ const BookingPage = () => {
     const [promotionSuccess, setPromotionSuccess] = useState('');
     const [pointsInputError, setPointsInputError] = useState('');
     const [appliedPromotion, setAppliedPromotion] = useState(null);
+
+    // --- TOÀN BỘ LOGIC, USEEFFECT, HÀM HANDLE GIỮ NGUYÊN NHƯ CŨ ---
+    // ... (logic của bạn được giữ nguyên ở đây) ...
 
     // Effect để tải tất cả dữ liệu cần thiết khi trang được mở
     useEffect(() => {
@@ -93,13 +98,13 @@ const BookingPage = () => {
         let currentTotal = 0;
         if (screeningInfo && screeningInfo.fareType) {
             const basePrice = parseFloat(screeningInfo.fareType.basePrice || 0);
-            
+
             const movieFormat = screeningInfo.fareType.movieFormat || '';
             const timeSlotType = screeningInfo.fareType.timeSlotType || '';
             let formatSurcharge = 0;
             if (movieFormat.toUpperCase() === '3D') formatSurcharge = 20000;
             else if (movieFormat.toUpperCase() === 'IMAX') formatSurcharge = 35000;
-            
+
             let timeSurcharge = 0;
             if (timeSlotType === 'Cuối Tuần') timeSurcharge = 10000;
             else if (timeSlotType === 'Ngày Lễ') timeSurcharge = 15000;
@@ -114,7 +119,7 @@ const BookingPage = () => {
         // 2. Tính giảm giá từ khuyến mãi
         let currentDiscount = 0;
         if (appliedPromotion && currentTotal > 0 && currentTotal >= parseFloat(appliedPromotion.minOrder)) {
-             if (appliedPromotion.discountType === 'PERCENT') {
+            if (appliedPromotion.discountType === 'PERCENT') {
                 currentDiscount = (currentTotal * parseFloat(appliedPromotion.discountLevel)) / 100;
                 if (appliedPromotion.maxDiscount && currentDiscount > parseFloat(appliedPromotion.maxDiscount)) {
                     currentDiscount = parseFloat(appliedPromotion.maxDiscount);
@@ -127,7 +132,7 @@ const BookingPage = () => {
             }
         }
         setDiscountAmount(currentDiscount);
-        
+
         const finalTotalAfterPromotion = currentTotal - currentDiscount;
 
         // 3. Tính giảm giá từ điểm
@@ -165,7 +170,7 @@ const BookingPage = () => {
         });
     };
 
-    const handleApplyPromotion = async () => {
+     const handleApplyPromotion = async () => {
         if (!promotionCode.trim()) {
             setPromotionError('Vui lòng nhập mã khuyến mãi.');
             return;
@@ -176,35 +181,45 @@ const BookingPage = () => {
         setAppliedPromotion(null);
         try {
             const response = await checkPromotion(promotionCode);
-            if (response.data && response.data.status === 200 && response.data.result) {
+            // <<< LOGIC MỚI >>>
+            if (response.data && response.data.result) {
+                // Áp dụng thành công
                 const promoData = response.data.result;
                 if (totalPrice < parseFloat(promoData.minOrder)) {
-                    setPromotionError(`Tổng tiền ${totalPrice.toLocaleString('vi-VN')}đ không đủ điều kiện tối thiểu ${parseFloat(promoData.minOrder).toLocaleString('vi-VN')}đ.`);
+                    // Frontend tự kiểm tra minOrder trước khi áp dụng
+                    setPromotionError(getFriendlyErrorMessage(`PROMOTION_MIN_ORDER_NOT_MET:${promoData.minOrder}`));
                     return;
                 }
                 setAppliedPromotion(promoData);
                 setPromotionSuccess('Áp dụng thành công!');
             } else {
-                setPromotionError(response.data?.message || 'Mã không hợp lệ.');
+                // Áp dụng thất bại (result là null)
+                setPromotionError(promotionErrorMessages.PROMOTION_INVALID);
             }
         } catch (err) {
-            setPromotionError(err.response?.data?.message || 'Lỗi khi áp dụng mã.');
+            // Xử lý lỗi từ server (ví dụ: mất kết nối)
+            setPromotionError(getFriendlyErrorMessage(err.response?.data?.message));
         } finally {
             setCheckingPromotion(false);
         }
     };
-    
+
     const handlePointsInputChange = (e) => {
         const value = e.target.value;
         setPointsInputError('');
         if (value === '' || /^[0-9\b]+$/.test(value)) {
             const numValue = parseInt(value) || 0;
-            if (numValue > userPoints) {
+            if (numValue < 0) {
+                setPointsInputError('Số điểm không được âm.');
+                setPointsToUse('');
+            } else if (numValue > userPoints) {
                 setPointsInputError(`Bạn chỉ có ${userPoints.toLocaleString('vi-VN')} điểm.`);
                 setPointsToUse(userPoints.toString());
             } else {
                 setPointsToUse(value);
             }
+        } else {
+            setPointsInputError('Vui lòng chỉ nhập số.');
         }
     };
 
@@ -228,22 +243,23 @@ const BookingPage = () => {
             const bookingResult = response.data.result;
             if (response.data.status === 201 && bookingResult) {
                 if (bookingResult.paymentUrl) {
-                    // Lưu movieInfo để dùng ở trang Failure nếu cần
                     localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
                     window.location.href = bookingResult.paymentUrl;
                 } else {
                     navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
                 }
             } else {
-                 alert(response.data.message || 'Đặt vé không thành công.');
+                // Bắt các lỗi trả về từ createBooking (ví dụ: ghế đã được đặt)
+                alert(getFriendlyErrorMessage(response.data.message));
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt vé.');
+            // Bắt các lỗi exception (ví dụ: dùng quá điểm, KM hết hạn)
+            alert(getFriendlyErrorMessage(err.response?.data?.message));
         } finally {
             setIsSubmitting(false);
         }
     };
-    
+
     const formatScreeningTime = (isoDateTimeString) => {
         if (!isoDateTimeString) return "N/A";
         try {
@@ -253,85 +269,163 @@ const BookingPage = () => {
         }
     };
 
-    if (loading) {
-        return <div className="container mt-5 text-center"><p>Đang tải dữ liệu trang đặt vé...</p></div>;
-    }
-    if (error) {
-        return <div className="container mt-5 text-center"><p className="text-danger">{error}</p></div>;
+    // --- CÁC HÀM HELPER GIỮ NGUYÊN ---
+    const getSubmitButtonText = () => {
+        if (isSubmitting) return 'Đang xử lý...';
+        if (selectedSeats.length === 0) return 'Thanh Toán';
+        if (finalPrice > 0) return `Thanh Toán ${finalPrice.toLocaleString('vi-VN')}đ`;
+        return 'Xác nhận đặt vé (Miễn phí)';
+    };
+
+    const handleCancelPromotion = () => {
+        setAppliedPromotion(null);
+        setPromotionCode('');
+        setPromotionError('');
+        setPromotionSuccess('');
+    };
+
+    const handleCancelPoints = () => {
+        setPointsToUse('');
+        setPointsInputError('');
+    };
+
+    // Hàm này giúp xóa lỗi khi người dùng bắt đầu nhập lại
+    const handlePromotionCodeChange = (e) => {
+        setPromotionCode(e.target.value);
+        if (promotionError) setPromotionError('');
+        if (promotionSuccess) setPromotionSuccess('');
+    };
+
+    const canApplyDiscount = selectedSeats.length > 0;
+    // --- HIỂN THỊ TRẠNG THÁI LOADING/ERROR TRONG LAYOUT ---
+    if (loading || error) {
+        return (
+            <DefaultLayout>
+                <div className={cx('page-status-container')}>
+                    {loading && <p>Đang tải dữ liệu trang đặt vé...</p>}
+                    {error && <p className={cx('error-message')}>{error}</p>}
+                </div>
+            </DefaultLayout>
+        );
     }
 
     return (
-        <div className={cx('booking-container', 'container', 'mt-4', 'mb-5')}>
-            <h2 className={cx('page-title')}>Đặt Vé Xem Phim</h2>
-            <div className="row">
-                <div className="col-lg-8">
-                    <div className={cx('section', 'movie-info-section')}>
-                        <h4>{movieInfo?.nameVN || 'Tên phim'}</h4>
-                        <p><i className="fas fa-calendar-alt"></i> Suất chiếu: {formatScreeningTime(screeningInfo?.showDateTime)}</p>
-                        <p><i className="fas fa-video"></i> Phòng chiếu: {screeningInfo?.cinemaRoom?.cinemaRoomName || 'N/A'}</p>
-                        <p><i className="fas fa-film"></i> Định dạng: {screeningInfo?.fareType?.movieFormat || 'N/A'}</p>
-                    </div>
-                    <div className={cx('section', 'seat-selection-section')}>
-                        <h4>Chọn ghế</h4>
-                        <SeatSelection
-                            seatsData={seats}
-                            selectedSeats={selectedSeats}
-                            onSeatSelect={handleSeatSelect}
-                            screeningInfo={screeningInfo} // Truyền screeningInfo vào SeatSelection
-                        />
-                    </div>
-                </div>
-                <div className="col-lg-4">
-                    <OrderSummary
-                        movieInfo={movieInfo}
-                        screeningInfo={screeningInfo}
-                        selectedSeats={selectedSeats}
-                        totalPrice={totalPrice}
-                        discountAmount={discountAmount}
-                        pointsDiscount={pointsDiscount}
-                        finalPrice={finalPrice}
-                    />
-                    <div className={cx('section', 'points-section', 'mt-3')}>
-                        <h4>Sử dụng điểm thưởng</h4>
-                        <p className="text-muted small">Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong> (1 điểm = 1đ)</p>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                className={`form-control ${pointsInputError ? 'is-invalid' : ''}`}
-                                placeholder="Nhập số điểm"
-                                value={pointsToUse}
-                                onChange={handlePointsInputChange}
+        <DefaultLayout>
+            <div className={cx('page-background')}>
+                <div className={cx('booking-container')}>
+                    {/* --- CỘT TRÁI - CHỌN GHẾ --- */}
+                    <div className={cx('main-content')}>
+                        <div className={cx('section', 'movie-info-section')}>
+                            <div className={cx('movie-poster')}>
+                                <img src={movieInfo?.smallImage || 'https://via.placeholder.com/150x220'} alt={movieInfo?.nameVN} />
+                            </div>
+                            <div className={cx('movie-details')}>
+                                <h4>{movieInfo?.nameVN || 'Tên phim'}</h4>
+                                <p><strong>Suất chiếu:</strong> {formatScreeningTime(screeningInfo?.showDateTime)}</p>
+                                <p><strong>Phòng chiếu:</strong> {screeningInfo?.cinemaRoom?.cinemaRoomName || 'N/A'}</p>
+                                <p><strong>Định dạng:</strong> {screeningInfo?.fareType?.movieFormat || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div className={cx('section', 'seat-selection-section')}>
+                            <div className={cx('timeline')}>
+                                <div className={cx('timeline-item', 'active')}>Chọn ghế</div>
+                                <div className={cx('timeline-item')}>Thanh toán</div>
+                                <div className={cx('timeline-item')}>Hoàn tất</div>
+                            </div>
+                            <SeatSelection
+                                seatsData={seats}
+                                selectedSeats={selectedSeats}
+                                onSeatSelect={handleSeatSelect}
+                                screeningInfo={screeningInfo}
                             />
                         </div>
-                        {pointsInputError && <div className="invalid-feedback d-block">{pointsInputError}</div>}
-                        {pointsDiscount > 0 && <p className="text-success small mt-2">Áp dụng giảm {pointsDiscount.toLocaleString('vi-VN')}đ.</p>}
                     </div>
-                    <div className={cx('section', 'promotion-section', 'mt-3')}>
-                        <h4>Mã khuyến mãi</h4>
-                        <div className="input-group mb-2">
-                            <input type="text" className="form-control" placeholder="Nhập mã" value={promotionCode} onChange={(e) => setPromotionCode(e.target.value)} disabled={checkingPromotion || totalPrice === 0}/>
-                            <CustomizeButton primary onClick={handleApplyPromotion} disabled={checkingPromotion || !promotionCode.trim() || totalPrice === 0}>
-                                {checkingPromotion ? '...' : 'Áp dụng'}
-                            </CustomizeButton>
-                        </div>
-                        {promotionError && <p className="text-danger small mt-1">{promotionError}</p>}
-                        {promotionSuccess && <p className="text-success small mt-1">{promotionSuccess}</p>}
-                    </div>
-                    <div className={cx('section', 'payment-section', 'mt-3')}>
-                        <h4>Phương thức thanh toán</h4>
-                        {paymentMethods.map(method => (
-                            <div className="form-check" key={method.id}>
-                                <input className="form-check-input" type="radio" name="paymentMethod" id={`paymentMethod-${method.id}`} value={method.id.toString()} checked={selectedPaymentMethodId === method.id.toString()} onChange={(e) => setSelectedPaymentMethodId(e.target.value)} />
-                                <label className="form-check-label" htmlFor={`paymentMethod-${method.id}`}>{method.name}</label>
+
+                    {/* --- CỘT PHẢI - THANH TOÁN --- */}
+                    <div className={cx('sidebar')}>
+                        <div className={cx('sidebar-content')}>
+                            <OrderSummary
+                                movieInfo={movieInfo}
+                                screeningInfo={screeningInfo}
+                                selectedSeats={selectedSeats}
+                                totalPrice={totalPrice}
+                                discountAmount={discountAmount}
+                                pointsDiscount={pointsDiscount}
+                                finalPrice={finalPrice}
+                            />
+
+                            {/* --- KHU VỰC GIẢM GIÁ --- */}
+                            <div className={cx('discount-area', { 'disabled': !canApplyDiscount })}>
+                                {/* --- ĐIỂM THƯỞNG --- */}
+                                <div className={cx('discount-section')}>
+                                    <div className={cx('section-header')}>
+                                        <h5><i className="fas fa-star"></i> Sử dụng điểm</h5>
+                                        {pointsToUse && <button onClick={handleCancelPoints} className={cx('btn-cancel')}>Hủy</button>}
+                                    </div>
+                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong></p>
+                                    <div className={cx('input-group')}>
+                                        <input type="text" className={cx('form-control', { 'is-invalid': pointsInputError })} placeholder="Nhập số điểm" value={pointsToUse} onChange={handlePointsInputChange} disabled={!canApplyDiscount} />
+                                    </div>
+                                    {pointsInputError && <div className={cx('invalid-feedback')}>{pointsInputError}</div>}
+                                </div>
+
+                                {/* --- MÃ KHUYẾN MÃI --- */}
+                                <div className={cx('discount-section')}>
+                                    <div className={cx('section-header')}>
+                                        <h5><i className="fas fa-tags"></i> Mã khuyến mãi</h5>
+                                        {appliedPromotion && <button onClick={handleCancelPromotion} className={cx('btn-cancel')}>Hủy mã</button>}
+                                    </div>
+                                    {!appliedPromotion ? (
+                                        <div className={cx('input-group')}>
+                                            <input
+                                                type="text"
+                                                className={cx('form-control')}
+                                                placeholder="Nhập mã"
+                                                value={promotionCode}
+                                                onChange={handlePromotionCodeChange} // Sử dụng hàm mới
+                                                disabled={checkingPromotion || !canApplyDiscount}
+                                            />
+                                            <button
+                                                className={cx('btn', 'btn-apply')}
+                                                onClick={handleApplyPromotion}
+                                                disabled={checkingPromotion || !promotionCode.trim() || !canApplyDiscount}>
+                                                Áp dụng
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className={cx('applied-promo-info')}>
+                                            <span>Đã áp dụng mã: <strong>{appliedPromotion.code}</strong></span>
+                                        </div>
+                                    )}
+                                    {promotionError && <p className={cx('error-feedback')}>{promotionError}</p>}
+                                    {promotionSuccess && <p className={cx('success-feedback')}>{promotionSuccess}</p>}
+                                </div>
                             </div>
-                        ))}
+
+                            {/* --- THANH TOÁN --- */}
+                            <div className={cx('payment-section')}>
+                                <h5><i className="fas fa-credit-card"></i> Phương thức thanh toán</h5>
+                                {paymentMethods.map(method => (
+                                    <div className={cx('form-check')} key={method.id}>
+                                        <input className={cx('form-check-input')} type="radio" name="paymentMethod" id={`paymentMethod-${method.id}`} value={method.id.toString()} checked={selectedPaymentMethodId === method.id.toString()} onChange={(e) => setSelectedPaymentMethodId(e.target.value)} />
+                                        <label className={cx('form-check-label')} htmlFor={`paymentMethod-${method.id}`}>{method.name}</label>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* NÚT SUBMIT ĐÃ ĐƯỢC THAY THẾ */}
+                            <button
+                                onClick={handleSubmitBooking}
+                                disabled={isSubmitting || selectedSeats.length === 0 || !selectedPaymentMethodId}
+                                className={cx('btn', 'btn-submit-booking')}
+                            >
+                                {getSubmitButtonText()}
+                            </button>
+                        </div>
                     </div>
-                    <CustomizeButton gold large block onClick={handleSubmitBooking} disabled={isSubmitting || selectedSeats.length === 0 || !selectedPaymentMethodId}>
-                        {isSubmitting ? 'Đang xử lý...' : `Thanh Toán ${finalPrice > 0 ? finalPrice.toLocaleString('vi-VN') + 'đ' : 'Miễn phí'}`}
-                    </CustomizeButton>
                 </div>
             </div>
-        </div>
+        </DefaultLayout>
     );
 };
 
