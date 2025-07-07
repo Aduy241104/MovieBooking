@@ -6,6 +6,7 @@ import { checkPromotion, createBooking, getUserPoints } from '../../service/Book
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
+import { promotionErrorMessages, getFriendlyErrorMessage } from '../../Utils/booking/BookingErrorMessages';
 // import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA
 import DefaultLayout from '../../layouts/DefaultLayout'; // GIẢ SỬ ĐƯỜNG DẪN ĐÚNG
 import styles from './bookingPage.scss'; // ĐÃ ĐỔI TÊN FILE CSS CHO NHẤT QUÁN
@@ -169,7 +170,7 @@ const BookingPage = () => {
         });
     };
 
-    const handleApplyPromotion = async () => {
+     const handleApplyPromotion = async () => {
         if (!promotionCode.trim()) {
             setPromotionError('Vui lòng nhập mã khuyến mãi.');
             return;
@@ -180,19 +181,24 @@ const BookingPage = () => {
         setAppliedPromotion(null);
         try {
             const response = await checkPromotion(promotionCode);
-            if (response.data && response.data.status === 200 && response.data.result) {
+            // <<< LOGIC MỚI >>>
+            if (response.data && response.data.result) {
+                // Áp dụng thành công
                 const promoData = response.data.result;
                 if (totalPrice < parseFloat(promoData.minOrder)) {
-                    setPromotionError(`Tổng tiền ${totalPrice.toLocaleString('vi-VN')}đ không đủ điều kiện tối thiểu ${parseFloat(promoData.minOrder).toLocaleString('vi-VN')}đ.`);
+                    // Frontend tự kiểm tra minOrder trước khi áp dụng
+                    setPromotionError(getFriendlyErrorMessage(`PROMOTION_MIN_ORDER_NOT_MET:${promoData.minOrder}`));
                     return;
                 }
                 setAppliedPromotion(promoData);
                 setPromotionSuccess('Áp dụng thành công!');
             } else {
-                setPromotionError(response.data?.message || 'Mã không hợp lệ.');
+                // Áp dụng thất bại (result là null)
+                setPromotionError(promotionErrorMessages.PROMOTION_INVALID);
             }
         } catch (err) {
-            setPromotionError(err.response?.data?.message || 'Lỗi khi áp dụng mã.');
+            // Xử lý lỗi từ server (ví dụ: mất kết nối)
+            setPromotionError(getFriendlyErrorMessage(err.response?.data?.message));
         } finally {
             setCheckingPromotion(false);
         }
@@ -216,6 +222,7 @@ const BookingPage = () => {
             setPointsInputError('Vui lòng chỉ nhập số.');
         }
     };
+
     const handleSubmitBooking = async () => {
         if (selectedSeats.length === 0 || !selectedPaymentMethodId) {
             alert('Vui lòng chọn ghế và phương thức thanh toán.');
@@ -236,17 +243,18 @@ const BookingPage = () => {
             const bookingResult = response.data.result;
             if (response.data.status === 201 && bookingResult) {
                 if (bookingResult.paymentUrl) {
-                    // Lưu movieInfo để dùng ở trang Failure nếu cần
                     localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
                     window.location.href = bookingResult.paymentUrl;
                 } else {
                     navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
                 }
             } else {
-                alert(response.data.message || 'Đặt vé không thành công.');
+                // Bắt các lỗi trả về từ createBooking (ví dụ: ghế đã được đặt)
+                alert(getFriendlyErrorMessage(response.data.message));
             }
         } catch (err) {
-            alert(err.response?.data?.message || 'Có lỗi xảy ra khi đặt vé.');
+            // Bắt các lỗi exception (ví dụ: dùng quá điểm, KM hết hạn)
+            alert(getFriendlyErrorMessage(err.response?.data?.message));
         } finally {
             setIsSubmitting(false);
         }
@@ -281,18 +289,11 @@ const BookingPage = () => {
         setPointsInputError('');
     };
 
+    // Hàm này giúp xóa lỗi khi người dùng bắt đầu nhập lại
     const handlePromotionCodeChange = (e) => {
-        // Cập nhật giá trị của mã khuyến mãi vào state
         setPromotionCode(e.target.value);
-
-        // CHÌA KHÓA: Nếu có lỗi đang hiển thị, hãy xóa nó đi
-        if (promotionError) {
-            setPromotionError('');
-        }
-        // Nếu có thông báo thành công đang hiển thị, cũng xóa luôn
-        if (promotionSuccess) {
-            setPromotionSuccess('');
-        }
+        if (promotionError) setPromotionError('');
+        if (promotionSuccess) setPromotionSuccess('');
     };
 
     const canApplyDiscount = selectedSeats.length > 0;
