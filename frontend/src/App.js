@@ -164,6 +164,9 @@ function App() {
           <Route path="room-list/room/:id" element={<RoomDetail />} />
           <Route path="room-list/:id/edit" element={<EditRoom />} />
           <Route path="movie-type" element={<TypeList />} />
+          <Route path="movies" element={<MovieList />} />
+                    <Route path="movies/add" element={<AddMovie />} />
+                    <Route path="movies/edit/:id" element={<EditMovie />} />
           <Route
             path="users-members"
             element={<UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />}

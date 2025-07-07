@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class ReviewResponseDTO {
     private Long id;
     private Long accountId;
-    private String avartar;
+    private String avatar;
     private String accountFullName;
     private Integer rating;
     private String comment;

@@ -44,13 +44,13 @@ const ReviewBox = () => {
     // --- Xem đánh giá: tải danh sách đánh giá của phim ---
     useEffect(() => {
         setLoading(true);
-        fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}/paged?page=${page}&size=${pageSize}`)
+        fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}/paged?page=${page}&size=${7}`)
             .then((res) => res.json())
             .then((data) => {
-                console.log(" Dữ liệu phản hồi từ API:", data);
                 const content = data.content || [];
 
                 // Nếu là trang đầu, reset lại danh sách
+                console.log("data review: ", data)
                 if (page === 0) {
                     setReviews(content);
                 } else {
@@ -64,14 +64,9 @@ const ReviewBox = () => {
                     setHasMore(true);
                 }
 
-                console.log(" Tổng số trang:", data.totalPages);
-                console.log(" Trang hiện tại:", data.pageNumber);
-                console.log(" Số review trả về:", content.length);
-
                 setLoading(false);
             })
             .catch((err) => {
-                console.error(" Error fetching reviews:", err);
                 setLoading(false);
                 setHasMore(false);
             });
@@ -139,7 +134,14 @@ const ReviewBox = () => {
                 return res.json();
             })
             .then((data) => {
-                setReviews([data, ...reviews]);
+                setReviews([]); // 🧹 Reset review trước
+                setPage(-1);    // Ép đổi trạng thái để useEffect chạy lại
+                setTimeout(() => {
+                    setPage(0); // Quay về trang đầu
+                    setHasMore(true);
+                    setRefreshTrigger(prev => !prev); // Gọi useEffect lại
+                }, 0);
+
                 setNewReview({ rating: 10, comment: "", spoilerAlert: false });
             })
             .catch((err) => {
@@ -219,9 +221,12 @@ const ReviewBox = () => {
 
 
     // Gọi loadReviews khi component mount
-    useEffect(() => {
-        loadReviews();
-    }, [movieId]);
+    // useEffect(() => {
+    //     loadReviews();
+    // }, [movieId]);
+
+    console.log("test2: ", reviews);
+    
 
     // Hàm xử lý xóa review (đã chỉnh lại)
     const handleDelete = async (reviewId) => {
@@ -289,20 +294,24 @@ const ReviewBox = () => {
                         color: "#FAF9FA",
                         fontFamily: "Netflix Sans, sans-serif",
                         fontSize: "20px",
+                        padding: "10px 16px 0 16px"
                     }}
                 >
                     Đánh giá:
                 </label>
-                {renderStars(
-                    newReview.rating,
-                    (value) => setNewReview((prev) => ({ ...prev, rating: value })),
-                    true
-                )}
+                <div style={{ padding: "10px 16px 0 16px" }}>
+                    {renderStars(
+                        newReview.rating,
+                        (value) => setNewReview((prev) => ({ ...prev, rating: value })),
+                        true
+                    )}
+                </div>
                 <label className={styles.ratingLabel}
                     style={{
                         color: "#FAF9FA",
                         fontFamily: "Netflix Sans, sans-serif",
                         fontSize: "20px",
+                        padding: "10px 16px 0 16px"
                     }} >Bình luận:</label>
                 <div style={{ padding: "10px 16px 0 16px" }}>
                     <textarea
@@ -319,7 +328,7 @@ const ReviewBox = () => {
                     />
                 </div>
 
-                <div className={styles.checkboxWrapper} >
+                <div className={styles.checkboxWrapper} style={{ padding: "10px 16px 0 16px" }} >
                     <label className={styles.checkbox}>
                         <input
                             type="checkbox"

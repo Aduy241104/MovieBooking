@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class ReviewService {
 
     // 1. Xem danh sách review theo movieId (dùng Long)
     public List<ReviewResponseDTO> getReviewsByMovieId(Long movieId) {
-        List<Review> reviews = reviewRepo.findByMovieId(movieId); // Tên method trong repository
+        List<Review> reviews = reviewRepo.findByMovieIdOrderByReviewDateDesc(movieId); // ✅ Mới nhất trước
         return reviews.stream()
                 .map(reviewMapper::toResponseDTO)
                 .collect(Collectors.toList());
@@ -105,7 +106,7 @@ public class ReviewService {
     }
 
     public Page<ReviewResponseDTO> getPaginatedReviewsByMovieId(Long movieId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+         Pageable pageable = PageRequest.of(page, size, Sort.by("reviewDate").descending());
         Page<Review> reviewPage = reviewRepo.findByMovieId(movieId, pageable);
 
         System.out.println("MovieId: " + movieId);

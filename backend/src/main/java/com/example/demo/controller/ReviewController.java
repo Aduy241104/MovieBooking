@@ -93,6 +93,8 @@ public class ReviewController {
                 resultPage.getSize(), // pageSize
                 resultPage.getTotalPages(), // totalPages
                 resultPage.getContent() // content list
+
+                
         );
 
         return ResponseEntity.ok(response);

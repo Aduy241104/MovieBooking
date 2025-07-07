@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
     Page<Review> findByMovieId(Long movieId, Pageable pageable);
     List<Review> findByMovieId(Long movieId);
+    List<Review> findByMovieIdOrderByReviewDateDesc(Long movieId);
      long countByApproved(Boolean approved);
 
      @Query("SELECT COUNT(r) > 0 FROM Review r WHERE r.account.id = :accountId AND r.movie.id = :movieId")
