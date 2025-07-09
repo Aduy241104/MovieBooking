@@ -33,7 +33,7 @@ const MovieList = () => {
       if (res && Array.isArray(res.data)) {
         const mapped = res.data.map((item) => ({
           id: item.id,
-          poster: item.smallImage || "https://via.placeholder.com/60",
+          poster: item.smallImageUrl || "https://via.placeholder.com/60",
           nameVN: item.nameVN,
           genres: item.typeNames?.join(', ') || "Đang cập nhật",
           releaseDate: item.fromDate,
