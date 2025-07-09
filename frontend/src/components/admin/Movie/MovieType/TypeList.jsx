@@ -1,502 +1,198 @@
-// <<<<<<< HEAD
-// import React, { useEffect, useState, useCallback } from 'react';
-// import {
-//   Table,
-//   Input,
-//   Modal,
-//   Space,
-//   Popconfirm,
-//   notification,
-// } from 'antd';
-// import { BadgePlus, Trash2, SquarePen, Film } from 'lucide-react';
-// import { SearchOutlined } from '@ant-design/icons';
-// import EditTypeForm from './EditTypeForm';
-// import AddTypeForm from './AddTypeForm';
-// import 'bootstrap/dist/css/bootstrap.min.css';
-// import axiosClient from '../../../../config/axios';
-
-// export default function TypeList() {
-//   const [types, setTypes] = useState([]);
-//   const [filteredTypes, setFilteredTypes] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [searchText, setSearchText] = useState('');
-//   const [isModalVisible, setIsModalVisible] = useState(false);
-//   const [editModalVisible, setEditModalVisible] = useState(false);
-//   const [editTypeId, setEditTypeId] = useState(null);
-
-//   const fetchTypes = useCallback(async () => {
-//     try {
-//       setLoading(true);
-//       const data = await axiosClient.get('/public/types');
-//       const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
-//       setTypes(sorted);
-
-//       const filtered = sorted.filter((t) =>
-//         t.name.toLowerCase().includes(searchText.toLowerCase())
-//       );
-//       setFilteredTypes(filtered);
-//     } catch (err) {
-//       console.error('Lỗi khi tải thể loại:', err);
-//       notification.error({
-//         message: 'TẢI DỮ LIỆU THẤT BẠI',
-//         description: 'Không thể tải danh sách thể loại. Vui lòng thử lại.',
-//       });
-//     } finally {
-//       setLoading(false);
-//     }
-//   }, [searchText]);
-
-
-//   useEffect(() => {
-//     fetchTypes();
-//   }, [fetchTypes]);
-
-// <<<<<<< HEAD
-//   const handleDelete = async (id) => {
-//     try {
-//       await axiosClient.delete(`/public/types/${id}`);
-//       notification.success({
-//         message: 'XOÁ THÀNH CÔNG',
-//         description: 'Thể loại đã được xoá thành công.',
-//       });
-//       fetchTypes();
-//     } catch (err) {
-//       console.error('Lỗi khi xóa thể loại:', err);
-//       notification.error({
-//         message: 'XOÁ THẤT BẠI',
-//         description: 'Không thể xoá thể loại. Vui lòng thử lại.',
-//       });
-//     }
-//   };
-
-//   const handleSearchInput = (value) => {
-//     setSearchText(value);
-//     const filtered = types.filter((t) =>
-//       t.name.toLowerCase().includes(value.toLowerCase())
-// =======
-//     const handleDelete = async (id) => {
-//         if (!window.confirm("Bạn có chắc muốn xóa thể loại này?")) return;
-//         try {
-//             await axiosClient.delete(`/public/types/${id}`);
-//             message.success("Xoá thành công.");
-//             fetchTypes();
-//         } catch (err) {
-//             console.error("Lỗi khi xóa thể loại:", err);
-//             message.error("Xoá thất bại!");
-//         }
-//     };
-
-//     const handleSearchInput = (value) => {
-//         setSearchText(value);
-//         const filtered = types.filter((t) => t.name.toLowerCase().includes(value.toLowerCase()));
-//         setFilteredTypes(filtered);
-//     };
-
-//     const columns = [
-//         {
-//             title: "STT",
-//             dataIndex: "index",
-//             render: (_, __, index) => index + 1,
-//         },
-//         {
-//             title: "Tên thể loại",
-//             dataIndex: "name",
-//         },
-//         {
-//             title: "Hành động",
-//             align: "center",
-//             render: (_, record) => (
-//                 <Space size="middle">
-//                     <button
-//                         className="btn btn-outline-primary btn-sm"
-//                         onClick={() => {
-//                             setEditTypeId(record.id);
-//                             setEditModalVisible(true);
-//                         }}
-//                     >
-//                         <Pencil size={16} />
-//                     </button>
-//                     <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(record.id)}>
-//                         <Trash2 size={16} />
-//                     </button>
-//                 </Space>
-//             ),
-//         },
-//     ];
-
-//     return (
-//         <div className="container py-5" style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
-//             <div className="d-flex justify-content-between mb-4">
-//                 <Input
-//                     size="large"
-//                     placeholder="Tìm theo tên thể loại..."
-//                     addonAfter={<SearchOutlined />}
-//                     allowClear
-//                     value={searchText}
-//                     onChange={(e) => handleSearchInput(e.target.value)}
-//                     style={{ width: "30vw" }}
-//                 />
-//                 <button
-//                     className="btn d-flex"
-//                     style={{
-//                         backgroundColor: "#1677ff",
-//                         color: "#ffffff",
-//                         fontWeight: "bold",
-//                         fontSize: "1.1rem",
-//                         padding: "5px 10px",
-//                         marginBottom: "24px",
-//                         boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)",
-//                     }}
-//                     onClick={() => setIsModalVisible(true)}
-//                 >
-//                     <BadgePlus strokeWidth={1.75} className="me-2" /> Thêm thể loại
-//                 </button>
-//             </div>
-
-//             <Table
-//                 columns={columns}
-//                 dataSource={filteredTypes}
-//                 rowKey="id"
-//                 loading={loading}
-//                 pagination={{ pageSize: 10, position: ["bottomCenter"] }}
-//             />
-
-//             <Modal
-//                 title={
-//                     <span className="d-flex">
-//                         <Film className="me-2" size={20} />
-//                         Thêm thể loại phim
-//                     </span>
-//                 }
-//                 open={isModalVisible}
-//                 onCancel={() => setIsModalVisible(false)}
-//                 footer={null}
-//                 destroyOnHidden
-//             >
-//                 <AddTypeForm
-//                     onTypeAdded={() => {
-//                         fetchTypes();
-//                     }}
-//                 />
-//             </Modal>
-
-//             <Modal
-//                 title="Sửa thể loại phim"
-//                 open={editModalVisible}
-//                 onCancel={() => setEditModalVisible(false)}
-//                 footer={null}
-//                 destroyOnHidden
-//             >
-//                 <EditTypeForm
-//                     typeId={editTypeId}
-//                     onSuccess={() => {
-//                         fetchTypes();
-//                         setEditModalVisible(false);
-//                     }}
-//                     onCancel={() => setEditModalVisible(false)}
-//                 />
-//             </Modal>
-//         </div>
-// >>>>>>> cf44b462e0783065fda73285d2d32e16320176b9
-//     );
-//     setFilteredTypes(filtered);
-//   };
-
-//   const columns = [
-//     {
-//       title: 'STT',
-//       dataIndex: 'index',
-//       render: (_, __, index) => index + 1,
-//     },
-//     {
-//       title: 'Tên thể loại',
-//       dataIndex: 'name',
-//     },
-//     {
-//       title: 'Hành động',
-//       align: 'center',
-//       render: (_, record) => (
-//         <Space size="middle">
-//           <button
-//             className="text-blue-600 hover:text-fuchsia-500"
-//             onClick={() => {
-//               setEditTypeId(record.id);
-//               setEditModalVisible(true);
-//             }}
-//           >
-//             <SquarePen size={16} strokeWidth={1.7} />
-//           </button>
-
-//           <Popconfirm
-//             title="Xác nhận xoá thể loại"
-//             description="Bạn có chắc muốn xoá thể loại này không?"
-//             onConfirm={() => handleDelete(record.id)}
-//             okText="Xoá"
-//             cancelText="Huỷ"
-//             placement="topLeft"
-//           >
-//             <button className="text-amber-600 hover:text-amber-700">
-//               <Trash2 size={16} strokeWidth={1.7} />
-//             </button>
-//           </Popconfirm>
-//         </Space>
-//       ),
-//     },
-//   ];
-
-//   return (
-//     <div
-//       className="container py-5"
-//       style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}
-//     >
-//       <div className="d-flex justify-content-between mb-4">
-//         <Input
-//           size="large"
-//           placeholder="Tìm theo tên thể loại..."
-//           addonAfter={<SearchOutlined />}
-//           allowClear
-//           value={searchText}
-//           onChange={(e) => handleSearchInput(e.target.value)}
-//           style={{ width: '30vw' }}
-//         />
-
-//         <button
-//           className="btn d-flex"
-//           style={{
-//             backgroundColor: '#1677ff',
-//             color: '#ffffff',
-//             fontWeight: 'bold',
-//             fontSize: '1.1rem',
-//             padding: '5px 10px',
-//             marginBottom: '24px',
-//             boxShadow: '0 4px 12px rgba(22, 119, 255, 0.3)',
-//           }}
-//           onClick={() => setIsModalVisible(true)}
-//         >
-//           <BadgePlus strokeWidth={1.75} className="me-2" /> Thêm thể loại
-//         </button>
-//       </div>
-
-//       <Table
-//         columns={columns}
-//         dataSource={filteredTypes}
-//         rowKey="id"
-//         loading={loading}
-//         pagination={{ pageSize: 10, position: ['bottomCenter'] }}
-//       />
-
-//       <Modal
-//         title={
-//           <span className="d-flex">
-//             <Film className="me-2" size={20} /> Thêm thể loại phim
-//           </span>
-//         }
-//         open={isModalVisible}
-//         onCancel={() => setIsModalVisible(false)}
-//         footer={null}
-//         destroyOnClose
-//       >
-//         <AddTypeForm
-//           onTypeAdded={fetchTypes}
-//           onSuccessClose={() => setIsModalVisible(false)}
-//         />
-//       </Modal>
-
-//       <Modal
-//         title="Sửa thể loại phim"
-//         open={editModalVisible}
-//         onCancel={() => setEditModalVisible(false)}
-//         footer={null}
-//         destroyOnClose
-//       >
-//         <EditTypeForm
-//           typeId={editTypeId}
-//           onSuccess={() => {
-//             fetchTypes();
-//             setEditModalVisible(false);
-//           }}
-//           onCancel={() => setEditModalVisible(false)}
-//         />
-//       </Modal>
-//     </div>
-//   );
-// }
-import React, { useEffect, useState, useCallback } from "react";
-import { Table, Input, Modal, Space, message } from "antd";
-import { BadgePlus, Trash2, Pencil, Film } from "lucide-react";
-import { SearchOutlined } from "@ant-design/icons";
-import EditTypeForm from "./EditTypeForm";
-import AddTypeForm from "./AddTypeForm";
-import "bootstrap/dist/css/bootstrap.min.css";
-import axiosClient from "../../../../config/axios";
-import { useLocation, useOutletContext } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  Table,
+  Input,
+  Modal,
+  Space,
+  Popconfirm,
+  notification,
+} from 'antd';
+import { BadgePlus, Trash2, SquarePen, Film } from 'lucide-react';
+import { SearchOutlined } from '@ant-design/icons';
+import EditTypeForm from './EditTypeForm';
+import AddTypeForm from './AddTypeForm';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axiosClient from '../../../../config/axios';
 
 export default function TypeList() {
-    const [types, setTypes] = useState([]);
-    const [filteredTypes, setFilteredTypes] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchText, setSearchText] = useState("");
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editModalVisible, setEditModalVisible] = useState(false);
-    const [editTypeId, setEditTypeId] = useState(null);
-    const { setBreadcrumbItems } = useOutletContext();
+  const [types, setTypes] = useState([]);
+  const [filteredTypes, setFilteredTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editTypeId, setEditTypeId] = useState(null);
 
-    const location = useLocation();
+  const fetchTypes = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await axiosClient.get('/public/types');
 
-    useEffect(() => {
-        if (location.pathname.includes("/admin/movie")) {
-            setBreadcrumbItems([
-                { title: "Trang chủ" },
-                { title: "Quản lý thể loại phim" },
-                { title: "Thể loại phim" },
-            ]);
-        }
-    }, [location.pathname, setBreadcrumbItems]);
+      // Sắp xếp theo thứ tự id tăng dần (thứ tự thêm vào)
+      const sorted = data.sort((a, b) => a.id - b.id);
 
-    const fetchTypes = useCallback(async () => {
-        try {
-            setLoading(true);
-            const data = await axiosClient.get("/public/types");
-            console.log("Thể loại:", data);
-            const sorted = data.sort((a, b) => a.name.localeCompare(b.name));
-            setTypes(sorted);
+      setTypes(sorted);
 
-            const filtered = sorted.filter((t) => t.name.toLowerCase().includes(searchText.toLowerCase()));
-            setFilteredTypes(filtered);
-        } catch (err) {
-            console.error("Lỗi khi tải thể loại:", err);
-            message.error("Không thể tải danh sách thể loại.");
-        } finally {
-            setLoading(false);
-        }
-    }, [searchText]);
+      const filtered = sorted.filter((t) =>
+        t.name.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredTypes(filtered);
+    } catch (err) {
+      console.error('Lỗi khi tải thể loại:', err);
+      notification.error({
+        message: 'TẢI DỮ LIỆU THẤT BẠI',
+        description: 'Không thể tải danh sách thể loại. Vui lòng thử lại.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [searchText]);
 
-    useEffect(() => {
-        fetchTypes();
-    }, [fetchTypes]);
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Bạn có chắc muốn xóa thể loại này?")) return;
-        try {
-            await axiosClient.delete(`/public/types/${id}`);
-            message.success("Xoá thành công.");
-            fetchTypes();
-        } catch (err) {
-            console.error("Lỗi khi xóa thể loại:", err);
-            message.error("Xoá thất bại!");
-        }
-    };
+  const handleDelete = async (id) => {
+    try {
+      await axiosClient.delete(`/public/types/${id}`);
+      notification.success({
+        message: 'XOÁ THÀNH CÔNG',
+        description: 'Thể loại đã được xoá thành công.',
+      });
+      fetchTypes();
+    } catch (err) {
+      console.error('Lỗi khi xóa thể loại:', err);
+      notification.error({
+        message: 'XOÁ THẤT BẠI',
+        description: 'Không thể xoá thể loại. Vui lòng thử lại.',
+      });
+    }
+  };
 
-    const handleSearchInput = (value) => {
-        setSearchText(value);
-        const filtered = types.filter((t) => t.name.toLowerCase().includes(value.toLowerCase()));
-        setFilteredTypes(filtered);
-    };
-
-    const columns = [
-        {
-            title: "STT",
-            dataIndex: "index",
-            render: (_, __, index) => index + 1,
-        },
-        {
-            title: "Tên thể loại",
-            dataIndex: "name",
-        },
-        {
-            title: "Hành động",
-            align: "center",
-            render: (_, record) => (
-                <Space size="middle">
-                    <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => {
-                            setEditTypeId(record.id);
-                            setEditModalVisible(true);
-                        }}
-                    >
-                        <Pencil size={16} />
-                    </button>
-                    <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(record.id)}>
-                        <Trash2 size={16} />
-                    </button>
-                </Space>
-            ),
-        },
-    ];
-
-    return (
-        <div className="container py-5" style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
-            <div className="d-flex justify-content-between mb-4">
-                <Input
-                    size="large"
-                    placeholder="Tìm theo tên thể loại..."
-                    addonAfter={<SearchOutlined />}
-                    allowClear
-                    value={searchText}
-                    onChange={(e) => handleSearchInput(e.target.value)}
-                    style={{ width: "30vw" }}
-                />
-                <button
-                    className="btn d-flex"
-                    style={{
-                        backgroundColor: "#1677ff",
-                        color: "#ffffff",
-                        fontWeight: "bold",
-                        fontSize: "1.1rem",
-                        padding: "5px 10px",
-                        marginBottom: "24px",
-                        boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)",
-                    }}
-                    onClick={() => setIsModalVisible(true)}
-                >
-                    <BadgePlus strokeWidth={1.75} className="me-2" /> Thêm thể loại
-                </button>
-            </div>
-
-            <Table
-                columns={columns}
-                dataSource={filteredTypes}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10, position: ["bottomCenter"] }}
-            />
-
-            <Modal
-                title={
-                    <span className="d-flex">
-                        <Film className="me-2" size={20} />
-                        Thêm thể loại phim
-                    </span>
-                }
-                open={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-                footer={null}
-                destroyOnHidden
-            >
-                <AddTypeForm
-                    onTypeAdded={() => {
-                        fetchTypes();
-                    }}
-                />
-            </Modal>
-
-            <Modal
-                title="Sửa thể loại phim"
-                open={editModalVisible}
-                onCancel={() => setEditModalVisible(false)}
-                footer={null}
-                destroyOnHidden
-            >
-                <EditTypeForm
-                    typeId={editTypeId}
-                    onSuccess={() => {
-                        fetchTypes();
-                        setEditModalVisible(false);
-                    }}
-                    onCancel={() => setEditModalVisible(false)}
-                />
-            </Modal>
-        </div>
+  const handleSearchInput = (value) => {
+    setSearchText(value);
+    const filtered = types.filter((t) =>
+      t.name.toLowerCase().includes(value.toLowerCase())
     );
+    setFilteredTypes(filtered);
+  };
+
+  const columns = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Tên thể loại',
+      dataIndex: 'name',
+    },
+    {
+      title: 'Hành động',
+      align: 'center',
+      render: (_, record) => (
+        <Space size="middle">
+          <button
+            className="text-blue-600 hover:text-fuchsia-500"
+            onClick={() => {
+              setEditTypeId(record.id);
+              setEditModalVisible(true);
+            }}
+          >
+            <SquarePen size={16} strokeWidth={1.7} />
+          </button>
+
+          <Popconfirm
+            title="Xác nhận xoá thể loại"
+            description="Bạn có chắc muốn xoá thể loại này không?"
+            onConfirm={() => handleDelete(record.id)}
+            okText="Xoá"
+            cancelText="Huỷ"
+            placement="topLeft"
+          >
+            <button className="text-amber-600 hover:text-amber-700">
+              <Trash2 size={16} strokeWidth={1.7} />
+            </button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      className="container py-5"
+      style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}
+    >
+      <div className="d-flex justify-content-between mb-4">
+        <Input
+          size="large"
+          placeholder="Tìm theo tên thể loại..."
+          addonAfter={<SearchOutlined />}
+          allowClear
+          value={searchText}
+          onChange={(e) => handleSearchInput(e.target.value)}
+          style={{ width: '30vw' }}
+        />
+
+        <button
+          className="btn d-flex"
+          style={{
+            backgroundColor: '#1677ff',
+            color: '#ffffff',
+            fontWeight: 'bold',
+            fontSize: '1.1rem',
+            padding: '5px 10px',
+            marginBottom: '24px',
+            boxShadow: '0 4px 12px rgba(22, 119, 255, 0.3)',
+          }}
+          onClick={() => setIsModalVisible(true)}
+        >
+          <BadgePlus strokeWidth={1.75} className="me-2" /> Thêm thể loại
+        </button>
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={filteredTypes}
+        rowKey="id"
+        loading={loading}
+        pagination={{ pageSize: 10, position: ['bottomCenter'] }}
+      />
+
+      <Modal
+        title={
+          <span className="d-flex">
+            <Film className="me-2" size={20} /> Thêm thể loại phim
+          </span>
+        }
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <AddTypeForm
+          onTypeAdded={fetchTypes}
+          onSuccessClose={() => setIsModalVisible(false)}
+        />
+      </Modal>
+
+      <Modal
+        title="Sửa thể loại phim"
+        open={editModalVisible}
+        onCancel={() => setEditModalVisible(false)}
+        footer={null}
+        destroyOnHidden
+      >
+        <EditTypeForm
+          typeId={editTypeId}
+          onSuccess={() => {
+            fetchTypes();
+            setEditModalVisible(false);
+          }}
+          onCancel={() => setEditModalVisible(false)}
+        />
+      </Modal>
+    </div>
+  );
 }

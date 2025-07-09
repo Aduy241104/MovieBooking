@@ -84,21 +84,25 @@ export default function RoomForm({ room, onBack }) {
       return false;
     }
 
-    if (!room) {
-      try {
-        const res = await axios.get("http://localhost:8081/api/public/rooms");
-        const existing = res.data.map(r => r.cinemaRoomName.toLowerCase());
-        if (existing.includes(name.trim().toLowerCase())) {
-          setError("Tên phòng đã tồn tại.");
-          return false;
-        }
-      } catch (err) {
-        notification.error({
-          message: "KIỂM TRA TÊN PHÒNG THẤT BẠI",
-          description: "Không thể kiểm tra tên phòng."
-        });
+    try {
+      const res = await axios.get("http://localhost:8081/api/public/rooms");
+      const existingRooms = res.data;
+
+      const isDuplicate = existingRooms.some(r =>
+        r.cinemaRoomName.toLowerCase() === name.trim().toLowerCase() &&
+        (!room || r.cinemaRoomId !== room.id)
+      );
+
+      if (isDuplicate) {
+        setError("Tên phòng đã tồn tại.");
         return false;
       }
+    } catch (err) {
+      notification.error({
+        message: "KIỂM TRA TÊN PHÒNG THẤT BẠI",
+        description: "Không thể kiểm tra tên phòng."
+      });
+      return false;
     }
 
     setError("");
@@ -143,20 +147,26 @@ export default function RoomForm({ room, onBack }) {
 
   return (
     <div className="p-6 min-h-screen bg-white">
-      <Card  className="rounded-xl">
+      <Card className="rounded-xl">
         <Row gutter={[24, 24]}>
           <Col xs={24} md={6} lg={6}>
             <Divider orientation="left" plain>
               {room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}
             </Divider>
             <Space direction="vertical" style={{ width: "100%" }} size="middle">
-              Tên Phòng chiếu:
-              <Input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Tên phòng"
-              />
-              {error && <div className="text-red-500 text-sm">{error}</div>}
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', marginBottom: '4px' }}>Tên Phòng chiếu:</label>
+                <Input
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  placeholder="Tên phòng"
+                />
+                {error && (
+                  <div style={{ color: 'red', fontSize: '13px', marginTop: '2px' }}>
+                    {error}
+                  </div>
+                )}
+              </div>
               <Row gutter={12}>
                 <Col span={12}>Số hàng:
                   <Input
