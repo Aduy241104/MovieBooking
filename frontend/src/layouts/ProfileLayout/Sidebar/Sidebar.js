@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import classNames from "classnames/bind";
 import styles from './Sidebar.module.scss'
 import { AuthContext } from "../../../context/AuthContext";
@@ -9,8 +9,6 @@ const cx = classNames.bind(styles);
 
 function Sidebar() {
     const { user } = useContext(AuthContext);
-    const navigate = useNavigate();
-
 
     return (
         <div className={ cx("p-3 ms-5", 'sidebar') }>
@@ -51,7 +49,7 @@ function Sidebar() {
                 </ul>
 
                 {/* User info at bottom */ }
-                <div className="mb-5 mt-5 pt-5">
+                <div className={ cx("mb-5 mt-5 pt-5", 'bottom-sidebar')}>
                     <div className={ cx("rounded-full mb-2", 'avt') }>
                         { user &&
                             <Avatar

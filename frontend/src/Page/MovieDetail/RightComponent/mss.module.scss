@@ -1,10 +1,27 @@
 .text-gray {
     color: rgb(179, 178, 178);
 }
+
 .blue {
     background-color: #3556b6;
 
     &:hover {
         background-color: #4a6dd5;
+    }
+}
+
+@media screen and (max-width: 780px) {
+    .display-type-full {
+        width: 90%;
+        border-radius: 90px;
+        margin-bottom: 15px;
+    }
+
+    .display-type-none {
+        display: none;
+    }
+
+    .flex-responsive {
+        justify-content: center !important;
     }
 }

@@ -40,7 +40,7 @@ function ChangePassword() {
 
 
     return (
-        <div className='text-light mt-4 w-50 pe-3'>
+        <div className='text-light mt-4 w-50 pe-3 change-pass-section'>
             <h5>Đổi mật khẩu</h5>
 
             <Form
@@ -103,7 +103,7 @@ function ChangePassword() {
                 </Form.Item>
 
                 <Button
-                    className='bg-red p-2 text-black'
+                    className='bg-red p-2 text-black fw-bold'
                     type="primary"
                     htmlType="submit">
                     Đổi mật khẩu
