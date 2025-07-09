@@ -153,4 +153,23 @@ public class BookingController {
                 .result(account.getScore())
                 .build();
     }
+
+    // <<< THÊM ENDPOINT MỚI NÀY >>>
+    @PostMapping("/{bookingId}/retry-payment")
+    public ApiResponse<String> retryPayment(
+            @PathVariable Integer bookingId,
+            HttpServletRequest httpServletRequest) {
+
+        String accountIdStr = SecurityUtils.getCurrentUsername();
+        Long accountId = Long.parseLong(accountIdStr);
+
+        String paymentUrl = bookingService.retryPayment(bookingId, accountId, httpServletRequest);
+
+        return ApiResponse.<String>builder()
+                .status(HttpStatus.OK.value())
+                .message("New payment URL created successfully.")
+                .result(paymentUrl)
+                .build();
+    }
+
 }
