@@ -26,7 +26,6 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const isEdit = !!movieId;
 
-  // Hàm xử lý path ảnh nếu là dạng tương đối
   const getFullImageUrl = (path) => {
     if (!path) return null;
     return path.startsWith("http") ? path : `http://localhost:8081${path}`;
@@ -155,7 +154,7 @@ export default function MovieForm({ movieId, onSuccess }) {
             <Input type="number" />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             label="Giới hạn tuổi"
             name="ageLimit"
             rules={[
@@ -169,7 +168,22 @@ export default function MovieForm({ movieId, onSuccess }) {
             ]}
           >
             <Input type="number" />
-          </Form.Item>
+          </Form.Item> */}
+          <Form.Item
+  label="Giới hạn tuổi"
+  name="ageLimit"
+  rules={[
+    { required: true, message: "Vui lòng nhập giới hạn tuổi." },
+    {
+      validator: (_, value) =>
+        value >= 0 && value <= 18
+          ? Promise.resolve()
+          : Promise.reject(new Error("Giới hạn tuổi phải từ 0 đến 18")),
+    },
+  ]}
+>
+  <Input type="number" min={0} max={18} />
+</Form.Item>
 
           <Form.Item
             label="Ngày bắt đầu chiếu"
