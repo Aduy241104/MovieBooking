@@ -1,7 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, MessageCircle, X, Bot, User } from "lucide-react";
 
+function getOrCreateSessionId() {
+    let sessionId = localStorage.getItem("moviebot_session_id");
+    if (!sessionId) {
+        sessionId = crypto.randomUUID();
+        localStorage.setItem("moviebot_session_id", sessionId);
+    }
+    return sessionId;
+}
+
 export const AIChatBox = () => {
+    const sessionId = getOrCreateSessionId();
     const [messages, setMessages] = useState([
         {
             role: "assistant",
@@ -31,26 +41,25 @@ export const AIChatBox = () => {
             let lines = buffer.split("\n");
             buffer = lines.pop();
 
+            // console.log("Received lines:", lines);
+
             for (const line of lines) {
-                if (line.startsWith("data:")) {
-                    const jsonStr = line.replace("data:", "").trim();
-                    // console.log("Received data:", jsonStr);
-                    if (jsonStr && jsonStr !== "[DONE]") {
-                        try {
-                            const json = JSON.parse(jsonStr);
-                            const delta = json.choices?.[0]?.delta;
-                            if (delta?.content) {
-                                aiMsgRef.current += delta.content;
-                                setMessages((msgs) => {
-                                    const last = msgs[msgs.length - 1];
-                                    if (last && last.role === "assistant") {
-                                        return [...msgs.slice(0, -1), { ...last, content: aiMsgRef.current }];
-                                    }
-                                    return msgs;
-                                });
-                            }
-                        } catch {}
-                    }
+                const jsonStr = line.trim();
+                if (jsonStr && jsonStr !== "[DONE]") {
+                    try {
+                        const json = JSON.parse(jsonStr);
+                        const content = json.message?.content;
+                        if (content) {
+                            aiMsgRef.current += content;
+                            setMessages((msgs) => {
+                                const last = msgs[msgs.length - 1];
+                                if (last && last.role === "assistant") {
+                                    return [...msgs.slice(0, -1), { ...last, content: aiMsgRef.current }];
+                                }
+                                return msgs;
+                            });
+                        }
+                    } catch {}
                 }
             }
         }
@@ -69,7 +78,7 @@ export const AIChatBox = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    // model: "openrouter/cypher-alpha:free",
+                    sessionId,
                     messages: [{ role: "user", content: input }],
                     stream: true,
                 }),
@@ -104,12 +113,13 @@ export const AIChatBox = () => {
     const handleQuickReply = async (item) => {
         setMessages((msgs) => [...msgs, { role: "user", content: item.text }]);
         setLoading(true);
+
         try {
             const res = await fetch("http://localhost:8081/api/public/chatbot", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "vistral-7b-chat",
+                    sessionId,
                     messages: [{ role: "user", content: item.text }],
                     stream: true,
                 }),
@@ -154,7 +164,7 @@ export const AIChatBox = () => {
     }
 
     return (
-        <div className="fixed bottom-4 right-4 z-50 w-[350px] max-w-[95vw] h-[520px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className="fixed bottom-4 right-4 z-999 w-[350px] max-w-[95vw] h-[520px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
             {/* Header */}
             <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-gray-100">
                 <div className="flex items-center space-x-2">

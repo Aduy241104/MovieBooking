@@ -1,13 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.model.*;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.request.RoomRequest;
 import com.example.demo.DTO.response.SeatResponse;
-import com.example.demo.model.CinemaRoom;
-import com.example.demo.model.Seat;
-import com.example.demo.model.SeatType;
 import com.example.demo.repository.CinemaRoomRepository;
 import com.example.demo.repository.SeatRepository;
 import com.example.demo.repository.SeatTypeRepository;
@@ -18,9 +19,18 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CinemaRoomService {
 
-    private final CinemaRoomRepository roomRepo;
-    private final SeatRepository seatRepo;
-    private final SeatTypeRepository seatTypeRepo;
+    @Autowired
+    private CinemaRoomRepository roomRepo;
+    @Autowired
+    private SeatRepository seatRepo;
+    @Autowired
+    private SeatTypeRepository seatTypeRepo;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private ActivityLogService activityLogService;
+    @Autowired
+    private NotificationService notificationService;
 
     // Lấy tất cả phòng chiếu chưa bị xóa mềm
     public List<CinemaRoom> getAllRooms() {
@@ -46,6 +56,13 @@ public class CinemaRoomService {
         List<Seat> seats = mapSeatResponsesToEntities(request.getSeats(), room);
         seatRepo.saveAll(seats);
 
+        // Ghi log hoạt động và notification tạo phòng chiếu
+
+        setLogAndNotification(room, "TẠO MỚI",
+                "Tạo phòng chiếu mới",
+                "Tạo mới phòng chiếu",
+                " đã tạo mới phòng chiếu: ");
+
         return room;
     }
 
@@ -65,6 +82,12 @@ public class CinemaRoomService {
         List<Seat> newSeats = mapSeatResponsesToEntities(request.getSeats(), room);
         seatRepo.saveAll(newSeats);
 
+        // Ghi log hoạt động và notification cập nhật phòng chiếu
+        setLogAndNotification(room, "CẬP NHẬT",
+                "Cập nhật thông tin phòng chiếu",
+                "Cập nhật thông tin phòng chiếu",
+                " đã cập nhật thông tin phòng chiếu: ");
+
         return room;
     }
 
@@ -74,6 +97,12 @@ public class CinemaRoomService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng chiếu với ID: " + id));
         room.setIsDeleted(true);
         roomRepo.save(room);
+
+        // Ghi log hoạt động và notification xoá phòng chiếu
+        setLogAndNotification(room, "XOÁ",
+                "Xoá phòng chiếu",
+                "Xoá phòng chiếu",
+                " đã xoá phòng chiếu: ");
     }
 
     // Lấy thông tin một phòng chiếu theo ID
@@ -126,9 +155,42 @@ public class CinemaRoomService {
     private String convertRowIndexToChar(int index) {
         return String.valueOf((char) ('A' + index));
 
-}
+    }
+
     public Long getTotalCinemaRoom() {
         return roomRepo.count();
     }
 
+    private void setLogAndNotification(CinemaRoom room, String action, String description,
+                                       String title, String content) {
+        String loginUserId = SecurityUtils.getCurrentUsername();
+        if(loginUserId == null || loginUserId.isEmpty()) {
+            throw new RuntimeException("Current user not found");
+        }
+        Account user = accountRepository.findById(Long.valueOf(loginUserId))
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
+        // Ghi log hoạt động
+        activityLogService.log(
+                user.getEmail(),
+                action,
+                "PHÒNG CHIẾU",
+                room.getCinemaRoomName(),
+                description
+        );
+
+        // Gửi notification cho tất cả admin còn lại
+        List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        for (Account admin : adminAccounts) {
+            if (!admin.getAccountId().equals(user.getAccountId())) {
+                notificationService.notify(
+                        admin,
+                        title,
+                        user.getFullName() + content + room.getCinemaRoomName(),
+                        "SYSTEM"
+                );
+            }
+        }
+    }
 }

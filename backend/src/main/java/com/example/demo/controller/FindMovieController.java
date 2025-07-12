@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.MetaDTO;
-import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.service.FindMovieService;
 import com.example.demo.model.Movie;
 

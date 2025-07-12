@@ -30,6 +30,7 @@ import ProfileLayout from "./layouts/ProfileLayout";
 
 import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import RequestForgotPassword from "./Page/AuthPage/RequestForgotPassword";
 import ResetPassword from "./Page/AuthPage/ResetPassword";
 import { ActivityLogPage } from "./Page/admin/ActivityLogPage";
@@ -40,6 +41,7 @@ import BookingFailurePage from "./Page/Booking/BookingFailure/BookingFailurePage
 import BookingHistoryPage from "./Page/Booking/BookingHistory/BookingHistoryPage"; // Tạo component này nếu muốn
 import BookingDetailPage from "./Page/Booking/BookingDetail/BookingDetailPage";
 import { EmployeeLayout } from "./layouts/EmployeeLayout/EmployeeLayout";
+import { Notification } from "./Page/ProfilePage/Notification/Notification";
 
 const PrivateRoute = ({ children }) => {
     const { user, isAuthLoaded } = useContext(AuthContext);
@@ -69,7 +71,7 @@ function App() {
     // useTokenCheckOnNavigation();
 
     return (
-        <>
+        <NotificationProvider>
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<SignUpPage />} />
@@ -83,6 +85,7 @@ function App() {
                     <Route index element={<Profile />} />
                     <Route path="password" element={<ChangePassword />} />
                     <Route path="transactions" element={<Profile />} />
+                    <Route path="notifications" element={<Notification />} />
                 </Route>
                 {/* muốn có profile layout thì để vào đây~~ */}
                 <Route element={<ProfileLayout />}>
@@ -183,7 +186,7 @@ function App() {
                     {/* Add more employee-specific routes here */}
                 </Route>
             </Routes>
-        </>
+        </NotificationProvider>
     );
 }
 
