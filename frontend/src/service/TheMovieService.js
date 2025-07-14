@@ -6,15 +6,12 @@ const axiosInstance = axios.create({
     baseURL: API_URL,
     headers: {
         "Content-Type": "application/json",
-
     },
 });
 
 export function getAuthHeaders() {
     const token = localStorage.getItem("token");
-    return token
-        ? { Authorization: `Bearer ${token}` }
-        : {};
+    return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export const searchMovieByName = async (keyWord, page, size) => {
@@ -31,33 +28,33 @@ export const searchMovieByName = async (keyWord, page, size) => {
 
 export const getNowShowingMovieAPI = async () => {
     try {
-        const response = await axiosInstance.get('/public/movieSchedule/now-showing');
+        const response = await axiosInstance.get("/public/movieSchedule/now-showing");
         // console.log("Now Showing", response);
         return response.data;
     } catch (error) {
-        throw new Error('Cannot connect to server!')
+        throw new Error("Cannot connect to server!");
     }
-}
+};
 
 export const getUpComingMovieAPI = async () => {
     try {
-        const response = await axiosInstance.get('/public/movieSchedule/up-coming');
+        const response = await axiosInstance.get("/public/movieSchedule/up-coming");
         // console.log("Upcomming: ", response);
         return response.data;
     } catch (error) {
-        throw new Error('Cannot connect to server!')
+        throw new Error("Cannot connect to server!");
     }
-}
+};
 
 export const getMovieDetailAPI = async (id) => {
     try {
-        const response = await axiosInstance.get(`/public/movieSchedule/${id}`)
+        const response = await axiosInstance.get(`/public/movieSchedule/${id}`);
         // console.log("The movie: ", response);
         return response.data;
     } catch (error) {
-        throw new Error('Cannot connect to server!')
+        throw new Error("Cannot connect to server!");
     }
-}
+};
 
 export const getMovieByDateAPI = async (data) => {
     try {
@@ -65,17 +62,15 @@ export const getMovieByDateAPI = async (data) => {
         // console.log(response);
         return response.data;
     } catch (error) {
-        throw new Error('Cannot connect to server!')
+        throw new Error("Cannot connect to server!");
     }
-}
-
+};
 
 export const getTopMovieAPI = async () => {
     try {
-        const response = await axiosInstance.get('/public/movieSchedule/top-booking');
+        const response = await axiosInstance.get("/public/movieSchedule/top-booking");
         return response.data;
-
     } catch (error) {
         return null;
     }
-}
+};

@@ -3,11 +3,11 @@ package com.example.demo.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.response.MovieScheduleDTO;
-import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Movie;
 import com.example.demo.repository.BookingRepository;
