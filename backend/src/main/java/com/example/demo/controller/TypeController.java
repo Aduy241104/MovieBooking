@@ -31,6 +31,7 @@ package com.example.demo.controller;
 import com.example.demo.model.Type;
 import com.example.demo.service.TypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -67,5 +68,13 @@ public class TypeController {
     @GetMapping("/{id}")
     public Optional<Type> getTypeById(@PathVariable Integer id) {
         return typeService.getTypeById(id);
+    }
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new java.util.HashMap<String, String>() {{
+                    put("message", ex.getMessage());
+                }});
     }
 }
