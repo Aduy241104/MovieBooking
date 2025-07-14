@@ -9,20 +9,31 @@
     z-index: 998; // dưới Tippy nhưng trên giao diện
 }
 
-.search-place:focus-within {
-    border: 2px solid black !important;
+.search-place {
+    font-size: 14px;
+    padding-right: 40px;
+    width: 290px;
+    background-color: rgba(202, 202, 202, 0.3);
+    padding-left: 14px !important;
 
+    input::placeholder {
+        color: rgb(246, 242, 242);
+    }
+
+    &:focus-within {
+        border: 2px solid rgb(220, 220, 220) !important;
+    }
 }
 
 .search-layout {
-    max-height: 440px;
+    max-height: 290px;
     overflow: auto;
 }
 
 .search-result-layout {
     min-width: 310px;
     max-width: 310px;
-    
+
     img {
         width: 70px;
     }
@@ -38,18 +49,12 @@
 }
 
 .arr {
-    position: relative;
+    min-width: 290px;
 }
 
-.arr::after {
-    content: "";
-    position: absolute;
-    top: -10px;
-    right: 5%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 10px solid white;
+@media screen and (max-width: 780px) {
+    .search-place {
+      width: auto;
+      flex-grow: 1;
+    }
 }

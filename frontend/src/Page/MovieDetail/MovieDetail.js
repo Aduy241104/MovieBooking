@@ -62,7 +62,7 @@ function MovieDetail() {
                         </div>
                     </div>
                     <div className={ cx('container-fluid text-light bg-midNight', 'hover-face') }>
-                        <div className=' mt-4 ps-5 pe-5' style={ { zIndex: '999' } }>
+                        <div className={ cx('mt-4 ps-5 pe-5', 'layout-general') } style={ { zIndex: '999' } }>
                             <div className='row'>
                                 <div className={ cx('col-md-4 col-12 ps-5 pt-5', 'left-box') }>
                                     <div>
@@ -76,43 +76,63 @@ function MovieDetail() {
                                             } }
                                         />
                                     </div>
-                                    <div className='mt-4 w-75'>
+                                    <div className={ cx('mt-4 w-75', 'movie-information') }>
                                         <h3>{ movie.nameVN }</h3>
-                                        <p className='text-red fs-7 mt-3 fw-bold'>{ movie.nameEN }</p>
-                                        <div className='d-flex flex-wrap gap-2 mt-4 mb-3'>
-                                            <div className='w-100 pb-2'>
-                                                <span className='p-1 pe-3 ps-3 border-1 border-gold fs-8 rounded-1'>2025</span>
-                                            </div>
-                                            { movie.types && movie.types.map((item, index) => {
-                                                return (
-                                                    <button key={ index } className={ cx('movie-genre') }>{ item }</button>
-                                                )
-                                            }) }
-                                        </div>
-                                        <div className='mt-3'>
-                                            <strong>Giới thiệu: </strong>
-                                            <p className={ cx('fs-7 mt-2', 'text-gray') }>
-                                                { movie.content }
+                                        <p className={ cx('text-red fs-7 mt-2 fw-bold', 'nameEn') }>{ movie.nameEN }</p>
+
+                                        <div className={ styles.wrapper }>
+                                            {/* Checkbox ẩn */ }
+                                            <input type="checkbox" id="toggle-info" className={ styles.toggleCheckbox } />
+
+                                            {/* Label toggle */ }
+                                            <p className='text-center text-red fs-7'>
+                                                <label htmlFor="toggle-info" className={ styles.toggleButton }>
+                                                    Thông tin phim <i className="fa-solid fa-chevron-down"></i>
+                                                </label>
                                             </p>
-                                        </div>
-                                        <div className='mt-4'>
-                                            <ul className='p-0'>
-                                                <li className='fs-7 pb-3' >
-                                                    <strong>Thời lượng: </strong>
-                                                    <span className={ cx('text-gray') }>{ movie.duration } phút</span>
-                                                </li>
-                                                <li className='fs-7 pb-3' >
-                                                    <strong>Đạo diễn: </strong>
-                                                    <span className='fw-300'>{ movie.director }</span>
-                                                </li>
-                                                <li className='fs-7 pb-3' >
-                                                    <strong>Sản xuất: </strong>
-                                                    <span className='fw-300'>{ movie.movieProductionCompany }</span>
-                                                </li>
-                                            </ul>
+
+                                            {/* Nội dung chi tiết */ }
+                                            <div className={ styles.collapseContent }>
+                                                <div className="d-flex flex-wrap gap-2 mt-4 mb-3">
+                                                    <div className="w-100 pb-2">
+                                                        <span className="p-1 pe-3 ps-3 border-1 border-gold fs-8 rounded-1">2025</span>
+                                                    </div>
+
+                                                    { movie.types &&
+                                                        movie.types.map((item, index) => (
+                                                            <button key={ index } className={ cx('movie-genre') }>
+                                                                { item }
+                                                            </button>
+                                                        )) }
+                                                </div>
+
+                                                <div className="mt-3">
+                                                    <strong>Giới thiệu: </strong>
+                                                    <p className={ cx('fs-7 mt-2', 'text-gray') }>{ movie.content }</p>
+                                                </div>
+
+                                                <div className='mt-4'>
+                                                    <ul className='p-0'>
+                                                        <li className='fs-7 pb-3' >
+                                                            <strong>Thời lượng: </strong>
+                                                            <span className={ cx('text-gray') }>{ movie.duration } phút</span>
+                                                        </li>
+                                                        <li className='fs-7 pb-3' >
+                                                            <strong>Đạo diễn: </strong>
+                                                            <span className='fw-300'>{ movie.director }</span>
+                                                        </li>
+                                                        <li className='fs-7 pb-3' >
+                                                            <strong>Sản xuất: </strong>
+                                                            <span className='fw-300'>{ movie.movieProductionCompany }</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+
+                                                <ArtistList movieName={ movie.nameEN } />
+                                            </div>
                                         </div>
 
-                                        <ArtistList movieName={ movie.nameEN } />
                                     </div>
                                 </div>
                                 <div className={ cx('col-md-8 col-12 pt-5 ps-5 pe-5', 'right-box') }>
