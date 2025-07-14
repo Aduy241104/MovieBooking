@@ -29,7 +29,8 @@ export const PaymentMethodPage = () => {
     useEffect(() => {
         setBreadcrumbItems([
             { title: 'Trang chủ', href: '/admin' },
-            { title: 'Phương thức thanh toán' },
+            { title: "Quản lí thanh toán" },
+            { title: 'Phương thức thanh toán' }
         ]);
     }, []);
 
@@ -121,20 +122,6 @@ export const PaymentMethodPage = () => {
                 }}
             />
 
-            {/* <AddPaymentMethodModal
-            open={isCreateModalOpen}
-            onClose={() => setIsCreateModalOpen(false)}
-            onSubmit={async (data) => {
-                try{ 
-                    await PaymentMethodService.add(data);
-                    setIsCreateModalOpen(false);
-                    serRefreshFlag(prev => !prev);
-                } catch (err) {
-                    console.error("Lỗi khi thêm phương thức:", err);
-                    alert("Thêm phương thức thất bại!");
-                }
-            }} 
-            /> */}
         </div>
     );
 };

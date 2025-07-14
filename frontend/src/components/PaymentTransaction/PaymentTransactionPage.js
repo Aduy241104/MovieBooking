@@ -19,7 +19,8 @@ const PaymentTransactionPage = () => {
     useEffect(() => {
         setBreadcrumbItems([
             { title: "Trang chủ", href: "/admin" },
-            { title: "Giao dịch thanh toán" }
+            { title: "Quản lí thanh toán" },
+            { title: "Giao dịch" }
         ]);
     }, []);
 
@@ -90,7 +91,31 @@ const PaymentTransactionPage = () => {
         {
             title: "Trạng thái",
             dataIndex: "bookingStatus",
-            key: "bookingStatus"
+            key: "bookingStatus",
+            render: (status) => {
+                let color = "";
+                let text = "";
+
+                switch (status) {
+                    case "PAID":
+                        color = "#389E0D";
+                        text = "Đã thanh toán";
+                        break;
+                    case "PENDING":
+                        color = "orange";
+                        text = "Chờ thanh toán";
+                        break;
+                    case "CANCELLED":
+                        color = "red";
+                        text = "Đã hủy";
+                        break;
+                    default:
+                        color = "gray";
+                        text = status;
+                }
+
+                return <span style={{ color, fontWeight: "bold" }}>{text}</span>;
+            }
         },
         {
             title: "Thời gian",
@@ -141,7 +166,7 @@ const PaymentTransactionPage = () => {
                 loading={loading}
                 rowKey="bookingId"
                 pagination={{
-                    current: currentPage , // Vì backend page = 0, còn Table bắt đầu từ 1
+                    current: currentPage, // Vì backend page = 0, còn Table bắt đầu từ 1
                     pageSize: 10,
                     total: totalPages * 10,   // tổng số dòng
                     onChange: (page) => setCurrentPage(page - 1),
