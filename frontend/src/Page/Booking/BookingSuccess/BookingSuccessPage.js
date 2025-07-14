@@ -7,6 +7,7 @@ import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import styles from './bookingSuccessPage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
 import classNames from 'classnames/bind';
+import DefaultLayout from '../../../layouts/DefaultLayout';
 
 const cx = classNames.bind(styles);
 
@@ -114,6 +115,7 @@ const BookingSuccessPage = () => {
 
     // --- HIỂN THỊ KHI THÀNH CÔNG ---
     return (
+        <DefaultLayout>
         <div className={cx('page-container')}>
             <div className={cx('content-wrapper')}>
                 <i className={cx('icon-status', 'icon-success', 'fas fa-check-circle')}></i>
@@ -146,6 +148,7 @@ const BookingSuccessPage = () => {
                 </div>
             </div>
         </div>
+        </DefaultLayout>
     );
 };
 

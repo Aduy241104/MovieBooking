@@ -1,11 +1,11 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film, Video, History } from "lucide-react";
+import { LayoutDashboard, Users } from "lucide-react";
 import { Menu } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import "./admin.scss";
+import "./employee.scss";
 
-export const AdminSidebar = (props) => {
+export const EmployeeSidebar = (props) => {
     const { collapsed, width, theme } = props;
     const { Sider } = Layout;
     const location = useLocation();
@@ -15,74 +15,15 @@ export const AdminSidebar = (props) => {
         {
             key: "dashboard",
             icon: <LayoutDashboard size={20} strokeWidth={1.5} />,
-            label: <Link to={"/admin"}>Dashboard</Link>,
-        },
-        {
-            key: "users",
-            icon: <Users size={20} strokeWidth={1.5} />,
-            label: "Người dùng",
-            children: [
-                {
-                    key: "members",
-                    label: <Link to={"users-members"}>Thành viên</Link>,
-                },
-                {
-                    key: "employees",
-                    label: <Link to={"users-employees"}>Nhân viên</Link>,
-                },
-            ],
-        },
-        {
-            key: "promotions",
-            icon: <Ticket size={20} strokeWidth={1.5} />,
-            label: <Link to={"promotions"}>Mã khuyến mãi</Link>,
-        },
-        {
-            key: "room-list",
-            icon: <Video size={20} strokeWidth={1.5} />,
-            label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>,
-        },
-        {
-            key: "movie",
-            icon: <Film size={20} strokeWidth={1.5} />,
-            label: "Quản Lý Phim",
-            children: [
-                {
-                    key: "movies",
-                    label: <Link to={"/admin/movies"}>Phim</Link>,
-                },
-                {
-                    key: "types",
-                    label: <Link to="/admin/movie-type/">Thể loại</Link>,
-                },
-            ],
-        },
-        {
-            key: "activity-logs",
-            icon: <History size={20} strokeWidth={1.5} />,
-            label: <Link to={"activity-logs"}>Lịch sử hoạt động</Link>,
+            label: <Link to={"/employee"}>Dashboard</Link>,
         },
     ];
 
     // Xác định selectedKeys dựa trên pathname
     const getSelectedKeys = () => {
         const pathname = location.pathname;
-        if (pathname === "/admin") {
+        if (pathname === "/employee") {
             return ["dashboard"];
-        } else if (pathname.includes("users-members")) {
-            return ["members"];
-        } else if (pathname.includes("users-employees")) {
-            return ["employees"];
-        } else if (pathname.includes("promotions")) {
-            return ["promotions"];
-        } else if (pathname.includes("room-list")) {
-            return ["room-list"];
-        } else if (pathname.includes("activity-logs")) {
-            return ["activity-logs"];
-        } else if (pathname.includes("movie-type")) {
-            return ["types"];
-        } else if (pathname.includes("movies")) {
-            return ["movies"];
         }
         return [];
     };
@@ -92,8 +33,6 @@ export const AdminSidebar = (props) => {
         const pathname = location.pathname;
         if (pathname.includes("users-members") || pathname.includes("users-employees")) {
             setOpenKeys(["users"]);
-        } else if (pathname.includes("movies") || pathname.includes("movie-type")) {
-            setOpenKeys(["movie"]);
         } else {
             setOpenKeys([]);
         }
@@ -146,7 +85,7 @@ export const AdminSidebar = (props) => {
                             transition: "all 0.2s",
                         }}
                     >
-                        {collapsed ? "A" : "AD"}
+                        {collapsed ? "E" : "ED"}
                     </div>
                     {!collapsed && (
                         <span
@@ -157,7 +96,7 @@ export const AdminSidebar = (props) => {
                                 whiteSpace: "nowrap",
                             }}
                         >
-                            Admin Dashboard
+                            Employee Dashboard
                         </span>
                     )}
                 </div>
