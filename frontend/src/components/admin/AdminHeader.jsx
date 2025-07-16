@@ -4,6 +4,7 @@ import { Header } from "antd/es/layout/layout";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { NotificationBell } from "../Notification/NotificationBellAdmin";
 
 export const AdminHeader = (props) => {
     const { collapsed, toggleCollapsed } = props;
@@ -49,16 +50,6 @@ export const AdminHeader = (props) => {
         {
             type: "divider",
         },
-        // {
-        //     key: '2',
-        //     label:
-        //         <>
-        //             <div className="flex gap-3">
-        //                 <UserOutlined />
-        //                 <p>Tài khoản</p>
-        //             </div>
-        //         </>,
-        // },
         {
             key: "3",
             label: (
@@ -102,7 +93,7 @@ export const AdminHeader = (props) => {
                 </div>
 
                 {/* Phần bên phải của Header */}
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="flex items-center">
                     <span
                         style={{
                             color: "#666",
@@ -113,7 +104,8 @@ export const AdminHeader = (props) => {
                         Chào mừng Admin!
                     </span>
 
-                    {/* Có thể thêm avatar, notification, logout button ở đây */}
+                    {/* Notification Bell */}
+                    <NotificationBell />
 
                     <div>
                         <Dropdown menu={{ items }} placement="bottomRight">

@@ -2,11 +2,11 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.model.Movie;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.repository.TypeRepository;

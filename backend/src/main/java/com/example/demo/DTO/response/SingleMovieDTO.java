@@ -21,7 +21,7 @@ public class SingleMovieDTO {
     private String trailer;
     private int ageLimit;
     private String director;
-     private String movieProductionCompany;
+    private String movieProductionCompany;
     private Double avgRating;
     private List<String> types; // Thêm danh sách thể loại
 }

@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.MovieScheduleDTO;
-import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.model.Account;
 import com.example.demo.model.Screening;
 import com.example.demo.repository.ScreeningRepository;

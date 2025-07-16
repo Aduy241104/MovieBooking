@@ -13,10 +13,10 @@ function RightComponent(props) {
     const { movie} = props; // <<<< NHẬN movie TỪ PROPS/locpng
    
     return (
-        <div>
-            <div className='w-100 d-flex justify-content-between'>
+        <div className='w-100'>
+            <div className={ cx('d-flex justify-content-between ps-2 pe-2', 'flex-responsive')}>
                 <CustomizeButton
-                    className={cx('fw-bold shadow-hover-gold')}
+                    className={ cx('fw-bold shadow-hover-gold', 'display-type-full')}
                     gold rounded large leftIcon={<i className="fa-regular fa-circle-play fs-5"></i>}
                     onClick={() => setOpenTrailer(true)}
                 >
@@ -31,14 +31,14 @@ function RightComponent(props) {
                 />
 
                 <CustomizeButton
-                    className={ cx('fw-bold text-light', 'blue')}
+                    className={ cx('fw-bold text-light', 'blue', 'display-type-none')}
                     roundedBig
                     large
                     leftIcon={ <i className="fa-solid fa-comment-dots"></i> }>
                     Xem đánh giá
                 </CustomizeButton>
             </div>
-            <div className='mt-3'>
+            <div className='mt-3 ps-2 pe-2'>
                 <p>Ngày chiếu: <span className={cx('text-gray')}>{props.startDate}</span></p>
 
                 <div className='mt-3'>

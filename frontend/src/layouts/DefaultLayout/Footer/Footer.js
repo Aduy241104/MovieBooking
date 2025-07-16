@@ -4,7 +4,6 @@ function Footer() {
     return (
         <div className="container-fluid" style={ { backgroundColor: "#0F111A" } }>
             <div className="row pt-5 pb-5 mt-5 ms-md-5 px-3">
-
                 <div className="col-12 col-md-6 text-light">
                     <p className="fs-1 fw-bold text-red">
                         <i className="fa-solid fa-circle-play"></i> GROUP 4

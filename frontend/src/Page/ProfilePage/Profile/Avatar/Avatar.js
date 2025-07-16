@@ -8,7 +8,7 @@ import { updateAvatarAPI } from '../../../../service/ProfileService';
 import { openNotification } from '../../../../Utils/Notification';
 const { Dragger } = Upload;
 
-function Avatar({ originalImage }) {
+function Avatar({ originalImage, gender = "Male" }) {
     const [isOpen, setOpen] = useState(false);
     const [typeUpload, setTypeUpload] = useState("upload");
     const [imageGenre, setImageGenre] = useState([]);
@@ -49,9 +49,7 @@ function Avatar({ originalImage }) {
         } finally {
             setLoading(false);
         }
-
     }
-
 
     // xử lý việc upload hình từ local, set lại state để dùng khi người dùng bấm lưu lại
     const handleUpdateFromLocal = (info) => {
@@ -195,14 +193,13 @@ function Avatar({ originalImage }) {
                                             <span className="visually-hidden">Loading...</span>
                                         </div>
                                     }
-                                </button>   
+                                </button>
                             </div>
                         </> }
                 </div>
             </Modal>
             <div
-                className='d-flex flex-column justify-content-center align-items-center cursor-pointer'
-                style={ { marginTop: '210px', marginRight: "190px" } }
+                className='d-flex flex-column justify-content-center align-items-center cursor-pointer layout-avt'
             >
                 <div
                     onClick={ () => setOpen(true) }
@@ -211,8 +208,16 @@ function Avatar({ originalImage }) {
                 >
                     <img
                         style={ { width: '100%', objectFit: 'cover', height: '100%' } }
-                        src={ originalImage } alt="Avatar"
+                        src={ originalImage + "" }
+                        alt="Avatar"
+                        onError={ (e) => {
+                            e.target.onerror = null; // Ngăn lặp vô hạn nếu ảnh fallback cũng lỗi
+                            e.target.src = (gender === "Male")
+                                ? "/img/pngegg.png"
+                                : "/img/pngegg (1).png";
+                        } }
                     />
+
                 </div>
                 <p className='mt-3 fw-bold fs-8'> Đổi ảnh đại diện</p>
             </div>
