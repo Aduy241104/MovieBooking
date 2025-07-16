@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Table, Input, Spin, Button, Pagination, message, Popconfirm, Space } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { SquarePen, Trash2 } from "lucide-react";
-import { Link, useLocation, useOutletContext, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Link,useLocation,useOutletContext } from "react-router-dom";
+import axios from "../../../config/axios";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
@@ -11,40 +11,53 @@ const MovieList = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const size = 5;
-
-  const location = useLocation();
-  const navigate = useNavigate();
+const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movies')) {
+    if (location.pathname.includes('/admin/movie-list')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
+        { title: 'Trang chủ',href: '/admin' },
         { title: 'Quản lý phim' },
         { title: 'Phim' },
+
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
-
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/public/movies");
-      if (res && Array.isArray(res.data)) {
-        const mapped = res.data.map((item) => ({
-          id: item.id,
-          poster: item.smallImageUrl || "https://via.placeholder.com/60",
-          nameVN: item.nameVN,
-          genres: item.typeNames?.join(', ') || "Đang cập nhật",
-          releaseDate: item.fromDate,
-          endDate: item.toDate,
-        }));
+      console.log("Sending request to /movies/getAll");
+      const res = await axios.get("/movies/getAll");
+      console.log("API response:", res);
+      const responseData = res.data || res;
+      console.log("Response data:", responseData);
+      console.log("Response content:", responseData.content);
+      if (responseData && responseData.content && responseData.content.length > 0) {
+        const mapped = responseData.content.map((item) => {
+          console.log("Mapping item:", item);
+          return {
+            id: item.id,
+            poster: item.smallImage,
+            nameVN: item.nameVN,
+            genres: item.genres || "Đang cập nhật",
+            releaseDate: item.fromDate,
+            endDate: item.toDate,
+          };
+        });
+        console.log("Mapped movies:", mapped);
         setMovies(mapped);
       } else {
+        console.warn("No data in response:", responseData);
         message.warning("Không có dữ liệu phim");
       }
     } catch (err) {
-      console.error("Lỗi khi gọi API:", err);
+      console.error("Error fetching movies:", {
+        message: err.message,
+        response: err.response,
+        status: err.response?.status,
+        data: err.response?.data,
+      });
       message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
@@ -56,22 +69,15 @@ const MovieList = () => {
   }, []);
 
   const handleEdit = (record) => {
-    navigate(`/admin/movies/edit/${record.id}`);
+    console.log("Sửa phim:", record);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8081/api/public/movies/${id}`);
-      message.success("Xóa phim thành công");
-      fetchMovies();
-    } catch (err) {
-      console.error("Lỗi khi xoá phim:", err);
-      message.error("Xoá phim thất bại");
-    }
+  const handleDelete = (id) => {
+    console.log("Xóa phim với ID:", id);
   };
 
   const filteredMovies = movies.filter((movie) =>
-    movie.nameVN?.toLowerCase().includes(searchText.toLowerCase())
+    movie.nameVN.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const pagedMovies = filteredMovies.slice((page - 1) * size, page * size);
@@ -80,7 +86,7 @@ const MovieList = () => {
     {
       title: "STT",
       key: "index",
-      render: (_, __, index) => (page - 1) * size + index + 1,
+      render: (text, record, index) => (page - 1) * size + index + 1,
     },
     {
       title: "Poster",
@@ -89,7 +95,7 @@ const MovieList = () => {
       render: (poster, record) => (
         <Link to={`/admin/film-detail/${record.nameVN}`}>
           <img
-            src={poster}
+            src={poster || "https://via.placeholder.com/60"}
             alt={record.nameVN}
             style={{ width: 60, borderRadius: 4 }}
           />
@@ -192,7 +198,7 @@ const MovieList = () => {
           />
         </div>
 
-        <Button type="primary" size="large" onClick={() => navigate("/admin/movies/add")}>
+        <Button type="primary" size="large">
           <PlusOutlined />
           <span>Thêm phim</span>
         </Button>

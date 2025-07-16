@@ -2,49 +2,56 @@ import React, { useEffect, useState } from "react";
 import { Table, Input, Spin, Button, Pagination, message, Popconfirm, Space } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import { SquarePen, Trash2 } from "lucide-react";
-import { Link, useLocation, useOutletContext, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { CreateFareTypeModal } from "../Modal/TicketPrice/CreateFareTypeModal";
+import { UpdateFareTypeModal } from "../Modal/TicketPrice/UpdateFareTypeModal";
+import { fetchAllActiveFareTypesAPI, deleteFareTypeAPI } from "../../../service/TicketPriceService";
+import { useLocation,useOutletContext } from "react-router-dom";
 
-const MovieList = () => {
-  const [movies, setMovies] = useState([]);
+const FareTypeList = () => {
+  const [fareTypes, setFareTypes] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [dataFareType, setDataFareType] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [refreshFlag, setRefreshFlag] = useState(false); // Add state for refresh
   const size = 5;
 
+
   const location = useLocation();
-  const navigate = useNavigate();
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movies')) {
+    if (location.pathname.includes('/admin/faretype-list')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
-        { title: 'Quản lý phim' },
-        { title: 'Phim' },
+        { title: 'Trang chủ',href: '/admin' },
+        { title: 'Quản lý vé' },
+        { title: 'Loại giá vé' },
+
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
-
-  const fetchMovies = async () => {
+  const fetchFareTypes = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/public/movies");
-      if (res && Array.isArray(res.data)) {
-        const mapped = res.data.map((item) => ({
+      const res = await fetchAllActiveFareTypesAPI();
+      const responseData = res || {};
+      if (responseData.result && responseData.result.length > 0) {
+        const mapped = responseData.result.map((item) => ({
           id: item.id,
-          poster: item.smallImageUrl || "https://via.placeholder.com/60",
-          nameVN: item.nameVN,
-          genres: item.typeNames?.join(', ') || "Đang cập nhật",
-          releaseDate: item.fromDate,
-          endDate: item.toDate,
+          name: item.name,
+          basePrice: item.basePrice,
+          dayPrice: item.dayPrice,
+          timeSlotType: item.timeSlotType,
+          movieFormat: item.movieFormat,
         }));
-        setMovies(mapped);
+        setFareTypes(mapped);
       } else {
-        message.warning("Không có dữ liệu phim");
+        message.warning("Không có dữ liệu loại giá vé");
       }
     } catch (err) {
-      console.error("Lỗi khi gọi API:", err);
+      console.error("Error fetching fare types:", err);
       message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
@@ -52,79 +59,67 @@ const MovieList = () => {
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    fetchFareTypes();
+  }, [refreshFlag]); // Add refreshFlag as dependency
 
-  const handleEdit = (record) => {
-    navigate(`/admin/movies/edit/${record.id}`);
-  };
+  const filteredFareTypes = fareTypes.filter((fare) =>
+    fare.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const pagedFareTypes = filteredFareTypes.slice((page - 1) * size, page * size);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8081/api/public/movies/${id}`);
-      message.success("Xóa phim thành công");
-      fetchMovies();
+      const res = await deleteFareTypeAPI(id);
+      if (res.status === 200) {
+        message.success(`Xóa loại giá ${res.result.name} thành công`);
+        fetchFareTypes();
+      } else {
+        message.error(res.message || "Xóa thất bại");
+      }
     } catch (err) {
-      console.error("Lỗi khi xoá phim:", err);
-      message.error("Xoá phim thất bại");
+      console.error("Error deleting fare type:", err);
+      message.error("Lỗi khi xóa: " + (err.message || "Unknown error"));
     }
   };
 
-  const filteredMovies = movies.filter((movie) =>
-    movie.nameVN?.toLowerCase().includes(searchText.toLowerCase())
-  );
-
-  const pagedMovies = filteredMovies.slice((page - 1) * size, page * size);
+  const handleEdit = (record) => {
+    setIsUpdateModalOpen(true);
+    setDataFareType(record);
+  };
 
   const columns = [
     {
       title: "STT",
       key: "index",
-      render: (_, __, index) => (page - 1) * size + index + 1,
+      render: (text, record, index) => (page - 1) * size + index + 1,
     },
     {
-      title: "Poster",
-      dataIndex: "poster",
-      key: "poster",
-      render: (poster, record) => (
-        <Link to={`/admin/film-detail/${record.nameVN}`}>
-          <img
-            src={poster}
-            alt={record.nameVN}
-            style={{ width: 60, borderRadius: 4 }}
-          />
-        </Link>
-      ),
+      title: "Lồng tiếng / Phụ đề",
+      dataIndex: "name",
+      key: "name",
     },
     {
-      title: "Tên phim",
-      dataIndex: "nameVN",
-      key: "nameVN",
-      render: (text, record) => (
-        <Link
-          to={`/admin/film-detail/${record.id}`}
-          style={{ color: "#333", textDecoration: "none" }}
-          onMouseOver={(e) => (e.target.style.color = "#1890ff")}
-          onMouseOut={(e) => (e.target.style.color = "#333")}
-        >
-          {text}
-        </Link>
-      ),
+      title: "Định dạng phim",
+      dataIndex: "movieFormat",
+      key: "movieFormat",
     },
     {
-      title: "Thể loại",
-      dataIndex: "genres",
-      key: "genres",
+      title: "Giá cơ bản",
+      dataIndex: "basePrice",
+      key: "basePrice",
+      render: (price) => `${price.toLocaleString()} VNĐ`,
     },
     {
-      title: "Ngày khởi chiếu",
-      dataIndex: "releaseDate",
-      key: "releaseDate",
+      title: "Giá theo ngày",
+      dataIndex: "dayPrice",
+      key: "dayPrice",
+      render: (price) => `${price.toLocaleString()} VNĐ`,
     },
     {
-      title: "Ngày kết thúc",
-      dataIndex: "endDate",
-      key: "endDate",
+      title: "Loại khung giờ",
+      dataIndex: "timeSlotType",
+      key: "timeSlotType",
     },
     {
       title: "Hành động",
@@ -178,7 +173,7 @@ const MovieList = () => {
           </div>
           <Input
             size="large"
-            placeholder="Tìm kiếm tên phim..."
+            placeholder="Tìm kiếm loại giá vé..."
             allowClear
             style={{
               width: "28vw",
@@ -192,9 +187,13 @@ const MovieList = () => {
           />
         </div>
 
-        <Button type="primary" size="large" onClick={() => navigate("/admin/movies/add")}>
+        <Button
+          type="primary"
+          size="large"
+          onClick={() => setIsCreateModalOpen(true)}
+        >
           <PlusOutlined />
-          <span>Thêm phim</span>
+          <span>Thêm loại giá vé</span>
         </Button>
       </div>
 
@@ -206,7 +205,7 @@ const MovieList = () => {
       ) : (
         <>
           <Table
-            dataSource={pagedMovies}
+            dataSource={pagedFareTypes} 
             columns={columns}
             rowKey="id"
             pagination={false}
@@ -218,18 +217,31 @@ const MovieList = () => {
             <Pagination
               current={page}
               pageSize={size}
-              total={filteredMovies.length}
+              total={filteredFareTypes.length}
               showSizeChanger={false}
               showTotal={(total, range) =>
-                `${range[0]}-${range[1]} trong ${total} mục`
+                total === 0 ? "0 mục" : `${range[0]}-${range[1]} trong ${total} mục`
               }
               onChange={(current) => setPage(current)}
             />
           </div>
         </>
       )}
+
+      <CreateFareTypeModal
+        isCreateModalOpen={isCreateModalOpen}
+        setIsCreateModalOpen={setIsCreateModalOpen}
+        setRefreshFlag={setRefreshFlag} // Pass setRefreshFlag
+      />
+      <UpdateFareTypeModal
+        isUpdateModalOpen={isUpdateModalOpen}
+        setIsUpdateModalOpen={setIsUpdateModalOpen}
+        dataFareType={dataFareType}
+        setDataFareType={setDataFareType}
+        setRefreshFlag={setRefreshFlag} // Pass setRefreshFlag
+      />
     </div>
   );
 };
 
-export default MovieList;
+export default FareTypeList;

@@ -1,6 +1,5 @@
 package com.example.demo.model;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +34,11 @@ public class Screening {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    // Tính thời gian kết thúc: showDateTime + thời lượng phim (phút)
+    public LocalDateTime getEndDateTime() {
+        if (movie != null && movie.getDuration() != null) {
+            return showDateTime.plusMinutes(movie.getDuration());
+        }
+        return showDateTime; // Dự phòng nếu không có thời lượng
+    }
 }
