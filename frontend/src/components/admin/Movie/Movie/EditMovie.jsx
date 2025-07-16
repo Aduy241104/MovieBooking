@@ -23,7 +23,7 @@ export default function EditMovie() {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="">
       <MovieForm movieId={id} onSuccess={handleSuccess} />
     </div>
   );

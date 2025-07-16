@@ -307,6 +307,7 @@ public class AccountService {
         }
 
         String loginUserId = SecurityUtils.getCurrentUsername();
+        System.out.println(">>> LOI SML 22: " + loginUserId);
         if (loginUserId == null || loginUserId.isEmpty()) {
             throw new RuntimeException("Current user not found");
         }
