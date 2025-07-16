@@ -42,6 +42,7 @@ export default function RoomDetail() {
           description: "Không thể tải dữ liệu phòng. Vui lòng thử lại sau.",
         });
       }
+
     };
     fetchRoom();
   }, [roomId]);

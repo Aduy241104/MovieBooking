@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Table, Input, Spin, Button, Pagination, message, Popconfirm, Space } from "antd";
-import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
-import { SquarePen, Trash2 } from "lucide-react";
-import { Link, useLocation, useOutletContext, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { Table, Input, Spin, Pagination, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { Link, useLocation, useOutletContext } from "react-router-dom";
+import { fetchBookingCountAPI } from "../../../service/TicketPriceService";
 
-const MovieList = () => {
+const BookingList = () => {
   const [movies, setMovies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
@@ -13,11 +12,10 @@ const MovieList = () => {
   const size = 5;
 
   const location = useLocation();
-  const navigate = useNavigate();
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movies')) {
+    if (location.pathname.includes('/admin/movie-list')) {
       setBreadcrumbItems([
         { title: 'Trang chủ', href: '/admin' },
         { title: 'Quản lý phim' },
@@ -29,23 +27,40 @@ const MovieList = () => {
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/public/movies");
-      if (res && Array.isArray(res.data)) {
-        const mapped = res.data.map((item) => ({
-          id: item.id,
-          poster: item.smallImageUrl || "https://via.placeholder.com/60",
-          nameVN: item.nameVN,
-          genres: item.typeNames?.join(', ') || "Đang cập nhật",
-          releaseDate: item.fromDate,
-          endDate: item.toDate,
-        }));
-        setMovies(mapped);
+      const res = await fetch("http://localhost:8081/api/public/movies");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const moviesWithBookingCount = await Promise.all(
+          data.map(async (item) => {
+            try {
+              const countResponse = await fetchBookingCountAPI(item.id);
+              const bookingCount = countResponse?.result ?? countResponse?.data?.result ?? 0;
+              return {
+                id: item.id,
+                poster: item.smallImageUrl || "https://via.placeholder.com/60",
+                nameVN: item.nameVN || `Phim ${item.id}`,
+                bookingCount,
+              };
+            } catch (error) {
+              console.error(`Lỗi khi lấy số lượng hóa đơn cho phim ${item.id}:`, error);
+              return {
+                id: item.id,
+                poster: item.smallImageUrl || "https://via.placeholder.com/60",
+                nameVN: item.nameVN || `Phim ${item.id}`,
+                bookingCount: 0,
+              };
+            }
+          })
+        );
+        setMovies(moviesWithBookingCount);
       } else {
         message.warning("Không có dữ liệu phim");
+        setMovies([]);
       }
     } catch (err) {
-      console.error("Lỗi khi gọi API:", err);
-      message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
+      console.error("Lỗi khi gọi API danh sách phim:", err);
+      message.error("Lỗi tải dữ liệu phim: " + (err.message || "Unknown error"));
+      setMovies([]);
     } finally {
       setLoading(false);
     }
@@ -54,21 +69,6 @@ const MovieList = () => {
   useEffect(() => {
     fetchMovies();
   }, []);
-
-  const handleEdit = (record) => {
-    navigate(`/admin/movies/edit/${record.id}`);
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8081/api/public/movies/${id}`);
-      message.success("Xóa phim thành công");
-      fetchMovies();
-    } catch (err) {
-      console.error("Lỗi khi xoá phim:", err);
-      message.error("Xoá phim thất bại");
-    }
-  };
 
   const filteredMovies = movies.filter((movie) =>
     movie.nameVN?.toLowerCase().includes(searchText.toLowerCase())
@@ -87,7 +87,7 @@ const MovieList = () => {
       dataIndex: "poster",
       key: "poster",
       render: (poster, record) => (
-        <Link to={`/admin/film-detail/${record.nameVN}`}>
+        <Link to={`/admin/booking-detail/${record.id}`}>
           <img
             src={poster}
             alt={record.nameVN}
@@ -102,7 +102,7 @@ const MovieList = () => {
       key: "nameVN",
       render: (text, record) => (
         <Link
-          to={`/admin/film-detail/${record.id}`}
+          to={`/admin/booking-detail/${record.id}`}
           style={{ color: "#333", textDecoration: "none" }}
           onMouseOver={(e) => (e.target.style.color = "#1890ff")}
           onMouseOut={(e) => (e.target.style.color = "#333")}
@@ -112,41 +112,10 @@ const MovieList = () => {
       ),
     },
     {
-      title: "Thể loại",
-      dataIndex: "genres",
-      key: "genres",
-    },
-    {
-      title: "Ngày khởi chiếu",
-      dataIndex: "releaseDate",
-      key: "releaseDate",
-    },
-    {
-      title: "Ngày kết thúc",
-      dataIndex: "endDate",
-      key: "endDate",
-    },
-    {
-      title: "Hành động",
-      key: "actions",
-      render: (_, record) => (
-        <Space size="large">
-          <button
-            className="text-blue-600 hover:text-fuchsia-500"
-            onClick={() => handleEdit(record)}
-          >
-            <SquarePen size={16} strokeWidth={1.7} />
-          </button>
-          <Popconfirm
-            title="Xác nhận xóa?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
-          >
-            <Button type="text" danger icon={<Trash2 size={16} strokeWidth={1.7} />} />
-          </Popconfirm>
-        </Space>
-      ),
+      title: "Tổng hóa đơn của phim",
+      dataIndex: "bookingCount",
+      key: "bookingCount",
+      render: (text) => text ?? 0,
     },
   ];
 
@@ -180,6 +149,7 @@ const MovieList = () => {
             size="large"
             placeholder="Tìm kiếm tên phim..."
             allowClear
+            value={searchText}
             style={{
               width: "28vw",
               borderTopLeftRadius: 0,
@@ -191,17 +161,16 @@ const MovieList = () => {
             }}
           />
         </div>
-
-        <Button type="primary" size="large" onClick={() => navigate("/admin/movies/add")}>
-          <PlusOutlined />
-          <span>Thêm phim</span>
-        </Button>
       </div>
 
       {loading ? (
-        <div className="flex flex-col justify-center items-center gap-3 h-screen">
+        <div style={{ textAlign: "center", padding: "50px" }}>
           <Spin size="large" />
-          <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      ) : pagedMovies.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "50px" }}>
+          <p>Không có phim nào phù hợp với tìm kiếm</p>
         </div>
       ) : (
         <>
@@ -232,4 +201,4 @@ const MovieList = () => {
   );
 };
 
-export default MovieList;
+export default BookingList;

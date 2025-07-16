@@ -1,13 +1,14 @@
 package com.example.demo.model;
 
-
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"movie_id", "account_id"}))
+@Where(clause = "is_deleted = false") // Tự động lọc bỏ bản ghi bị xóa mềm
 @Getter
 @Setter
 @NoArgsConstructor
@@ -41,6 +42,9 @@ public class Review {
 
     @Column(name = "spoiler_alert")
     private Boolean spoilerAlert = false;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false; // Cột xóa mềm
 
     @PrePersist
     public void handleBeforeCreate() {
