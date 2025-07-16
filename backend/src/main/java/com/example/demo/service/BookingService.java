@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -177,6 +178,16 @@ public class BookingService {
 
     @Transactional
     public BookingDetailResponseDTO createBooking(BookingRequestDTO request, Long accountId, HttpServletRequest httpServletRequest) {
+        // <<< THÊM KHỐI KIỂM TRA ĐẶT TRÙNG Ở ĐẦU TIÊN >>>
+        Optional<Booking> existingPendingBooking = bookingRepository.findByAccountAccountIdAndScreeningIdAndBookingStatus(accountId, request.getScreeningId(), "PENDING_PAYMENT");
+        if (existingPendingBooking.isPresent()) {
+            Booking booking = existingPendingBooking.get();
+            // Kiểm tra xem booking có thực sự còn hạn không (ví dụ 15 phút)
+            if (booking.getBookingTime().plusMinutes(15).isAfter(LocalDateTime.now())) {
+                throw new RuntimeException("PENDING_BOOKING_EXISTS:" + booking.getId());
+            }
+        }
+
         // 1. KIỂM TRA ĐẦU VÀO
         Account account = accountRepository.findWithLockingByAccountId(accountId)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
@@ -207,7 +218,7 @@ public class BookingService {
                 throw new RuntimeException("Seat " + seat.getSeatRow() + seat.getSeatCol() + " is unavailable.");
             }
         }
-
+        validateSeatSelection(screening, selectedSeats);
         // 2. TÍNH TOÁN TỔNG TIỀN GỐC
         BigDecimal originalTotalAmount = calculateOriginalTotalAmount(screening, selectedSeats);
 
@@ -289,7 +300,7 @@ public class BookingService {
                 booking.setBookingStatus("PAID");
             }
         } else {
-            throw new RuntimeException("Unsupported payment method: " + paymentMethod.getName());
+            throw new RuntimeException("Không hỗ trợ phương thức thanh toán " + paymentMethod.getName());
         }
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -697,5 +708,91 @@ private void sendBookingConfirmationEmail(Booking booking) {
         return pngOutputStream.toByteArray();
     }
 
+    // <<< PHƯƠNG THỨC KIỂM TRA GHẾ MỒ CÔI Ở BACKEND >>>
+    private void validateSeatSelection(Screening screening, List<Seat> selectedSeats) {
+        // ... (phần lấy allSeatsByRow và occupiedSeatIds giữ nguyên) ...
+        Map<String, List<Seat>> allSeatsByRow = seatRepository.findByCinemaRoom(screening.getCinemaRoom()).stream()
+                .sorted(Comparator.comparing(Seat::getSeatRow).thenComparing(s -> Integer.parseInt(s.getSeatCol())))
+                .collect(Collectors.groupingBy(Seat::getSeatRow, LinkedHashMap::new, Collectors.toList()));
+        Set<Long> occupiedSeatIds = new HashSet<>(seatRepository.findBookedSeatIdsByScreeningId(screening.getId()));
+        selectedSeats.forEach(s -> occupiedSeatIds.add(s.getSeatId()));
 
+        for (List<Seat> rowSeats : allSeatsByRow.values()) {
+            for (int i = 0; i < rowSeats.size(); i++) {
+                Seat currentSeat = rowSeats.get(i);
+
+                // Chỉ kiểm tra những ghế đang trống
+                if (!occupiedSeatIds.contains(currentSeat.getSeatId())) {
+
+                    // <<< THÊM ĐIỀU KIỆN KIỂM TRA LOẠI GHẾ Ở ĐÂY >>>
+                    // Nếu ghế trống này là ghế đôi, bỏ qua kiểm tra "mồ côi" cho nó.
+                    if (currentSeat.getSeatType() != null && "couple".equalsIgnoreCase(currentSeat.getSeatType().getSeatTypeName())) {
+                        continue; // Chuyển sang kiểm tra ghế tiếp theo
+                    }
+
+                    // Logic kiểm tra ghế mồ côi giữ nguyên
+                    boolean isLeftNeighborOccupied = (i == 0) || occupiedSeatIds.contains(rowSeats.get(i - 1).getSeatId());
+                    boolean isRightNeighborOccupied = (i == rowSeats.size() - 1) || occupiedSeatIds.contains(rowSeats.get(i + 1).getSeatId());
+
+                    if (isLeftNeighborOccupied && isRightNeighborOccupied) {
+                        logger.warn("Invalid seat selection: creates a single empty seat gap at {}{}", currentSeat.getSeatRow(), currentSeat.getSeatCol());
+                        throw new RuntimeException("INVALID_SEAT_SELECTION_SINGLE_GAP");
+                    }
+                }
+            }
+        }
+    }
+    // <<< THÊM PHƯƠNG THỨC MỚI: THANH TOÁN LẠI >>>
+    @Transactional
+    public String retryPayment(Integer bookingId, Long accountId, HttpServletRequest httpServletRequest) {
+        Booking booking = bookingRepository.findByIdAndAccountAccountId(bookingId, accountId)
+                .orElseThrow(() -> new RuntimeException("BOOKING_NOT_FOUND"));
+
+        if (!"PENDING_PAYMENT".equals(booking.getBookingStatus())) {
+            throw new RuntimeException("BOOKING_NOT_PENDING");
+        }
+
+        if (booking.getBookingTime().plusMinutes(15).isBefore(LocalDateTime.now())) {
+            booking.setBookingStatus("EXPIRED");
+            refundPoints(booking); // Hoàn điểm cho booking hết hạn
+            bookingRepository.save(booking);
+            throw new RuntimeException("BOOKING_EXPIRED");
+        }
+
+        // Tạo một vnp_TxnRef mới cho lần thử thanh toán này
+        String newVnpTxnRef = booking.getBookingCode() + "-" + System.currentTimeMillis();
+        booking.setVnpTxnRef(newVnpTxnRef);
+        bookingRepository.save(booking);
+
+        // Tạo URL VNPAY mới
+        return createVnpayPaymentUrl(
+                booking.getTotalAmount(),
+                newVnpTxnRef,
+                booking.getScreening().getMovie().getNameVN(),
+                httpServletRequest
+        );
+    }
+
+    // <<< THÊM HÀM LẬP LỊCH: DỌN DẸP BOOKING HẾT HẠN >>>
+    @Scheduled(cron = "0 */5 * * * *") // Chạy mỗi 5 phút
+    @Transactional
+    public void cancelExpiredPendingBookings() {
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+        logger.info("Running scheduled task to cancel expired bookings older than {}", expirationTime);
+
+        List<Booking> expiredBookings = bookingRepository.findAllByBookingStatusAndBookingTimeBefore("PENDING_PAYMENT", expirationTime);
+
+        if (expiredBookings.isEmpty()) {
+            logger.info("No expired pending bookings found.");
+            return;
+        }
+
+        logger.warn("Found {} expired pending bookings to cancel.", expiredBookings.size());
+        for (Booking booking : expiredBookings) {
+            booking.setBookingStatus("EXPIRED"); // Hoặc CANCELLED
+            refundPoints(booking);
+            bookingRepository.save(booking);
+            logger.warn("Expired booking with code: {}", booking.getBookingCode());
+        }
+    }
 }

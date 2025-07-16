@@ -53,11 +53,13 @@ function Profile() {
     return (
         <div className='container-fluid'>
             <div className='row pt-4'>
-                <div className='col-6'>
-                    <h5>Tài khoản</h5>
-                    <p className='text-secondary fs-6 pb-4'>Cập nhật thông tin tài khoản</p>
-                    <p className='pb-3 fs-6 fw-300'>
-                        Điểm tích lũy: <span className='text-warning'>{ accountInfor.score }</span>
+                <div className='col-md-6 col-12 order-2 order-md-1'>
+                    <div className="title-manage-profile">
+                        <h5>Tài khoản</h5>
+                        <p className='text-secondary fs-6 pb-4'>Cập nhật thông tin tài khoản</p>
+                    </div>
+                    <p className='pb-3 fs-6 score-place'>
+                        Điểm tích lũy <span className='text-warning'> 100</span>
                     </p>
 
                     <Form
@@ -116,7 +118,7 @@ function Profile() {
                     </Form>
 
                 </div>
-                <div className='col-6'>
+                <div className='col-md-6 col-12 order-1 order-md-2'>
                     <Avatar
                         originalImage={ accountInfor.avatar }
                     />
