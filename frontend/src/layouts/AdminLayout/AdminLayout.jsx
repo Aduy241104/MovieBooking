@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Breadcrumb, Layout, message } from "antd";
 import { Outlet, useLocation } from "react-router-dom";
@@ -6,8 +5,7 @@ import { AdminSidebar } from "../../components/admin/AdminSidebar";
 import { AdminHeader } from "../../components/admin/AdminHeader";
 import { AdminFooter } from "../../components/admin/AdminFooter";
 import { fetchAllAccountAPI } from "../../service/AccountService";
-import "../../components/admin/admin.scss"
-
+import "../../components/admin/admin.scss";
 
 export const AdminLayout = () => {
     const { Content } = Layout;
@@ -23,20 +21,16 @@ export const AdminLayout = () => {
     const [refreshFlag, setRefreshFlag] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-
     useEffect(() => {
-        if (location.pathname === '/admin') {
-            setBreadcrumbItems([
-                { title: 'Trang chủ' },
-                { title: 'Bảng điều khiển' },
-            ]);
+        if (location.pathname === "/admin") {
+            setBreadcrumbItems([{ title: "Trang chủ" }, { title: "Bảng điều khiển" }]);
         }
     }, [location.pathname]);
 
     useEffect(() => {
         setIsLoading(true);
         const loadAccounts = async () => {
-            if (location.pathname.includes('users-')) {
+            if (location.pathname.includes("users-")) {
                 try {
                     const res = await fetchAllAccountAPI(page, size, filter);
                     if (res && res.result) {
@@ -53,13 +47,11 @@ export const AdminLayout = () => {
                         message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
                     }
                 }
-
             }
-        }
+        };
 
         loadAccounts();
     }, [page, filter, size, refreshFlag]);
-
 
     const toggleCollapsed = () => {
         setCollapsed(!collapsed);
@@ -67,32 +59,29 @@ export const AdminLayout = () => {
 
     return (
         <>
-            <Layout style={{ minHeight: '100vh' }}>
-                <AdminSidebar
-                    collapsed={collapsed}
-                    width={256}
-                    theme={"light"}
-                />
+            <Layout style={{ minHeight: "100vh" }}>
+                <AdminSidebar collapsed={collapsed} width={256} theme={"light"} />
 
                 <Layout>
-                    <AdminHeader
-                        collapsed={collapsed}
-                        toggleCollapsed={toggleCollapsed}
-                    />
+                    <AdminHeader collapsed={collapsed} toggleCollapsed={toggleCollapsed} />
 
                     <div className="mx-4 mt-6">
-                        <Breadcrumb
-                            separator=">"
-                            items={breadcrumbItems}
-                        />
+                        <Breadcrumb separator=">" items={breadcrumbItems} />
                     </div>
 
-                    <Content style={{ margin: '24px 16px' }}>
+                    <Content style={{ margin: "24px 16px" }}>
                         <Outlet
                             context={{
-                                dataUsers, isLoading, setIsLoading,
-                                page, setPage, size, total,
-                                setFilter, setBreadcrumbItems, setRefreshFlag
+                                dataUsers,
+                                isLoading,
+                                setIsLoading,
+                                page,
+                                setPage,
+                                size,
+                                total,
+                                setFilter,
+                                setBreadcrumbItems,
+                                setRefreshFlag,
                             }}
                         />
                     </Content>
@@ -102,4 +91,4 @@ export const AdminLayout = () => {
             </Layout>
         </>
     );
-}
+};

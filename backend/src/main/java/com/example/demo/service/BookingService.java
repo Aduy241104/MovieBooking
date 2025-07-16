@@ -137,6 +137,8 @@ public class BookingService {
         List<Object[]> stats = bookingRepository.getBookingTicketRecently(limit);
         List<BookingTicketRecentlyResponse> result = new ArrayList<>();
         for (Object[] row : stats) {
+//            System.out.println("Row data: " + Arrays.toString(row));
+            Long bookingId = ((Number) row[0]).longValue();
             String fullName = (String) row[1];
             String email = (String) row[2];
             String movieTitle = (String) row[3];
@@ -148,6 +150,7 @@ public class BookingService {
             String paymentStatus = (String) row[9];
 
             result.add(new BookingTicketRecentlyResponse(
+                    bookingId,
                     fullName,
                     email,
                     movieTitle,

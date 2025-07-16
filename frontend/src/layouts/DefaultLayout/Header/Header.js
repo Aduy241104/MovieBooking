@@ -67,7 +67,7 @@ function Header({ user }) {
                             {user ? (
                                 <>
                                     <div className="d-flex align-items-center gap-1">
-                                        <NotificationBell accountId={user?.accountID} />
+                                        {user && <NotificationBell accountId={user.accountID} />}
                                         <Dropdown menu={{ items }} trigger={["click"]} placement="bottomRight">
                                             <span className="d-flex" style={{ cursor: "pointer", marginLeft: 16 }}>
                                                 <Avatar
