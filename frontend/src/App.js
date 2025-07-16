@@ -103,7 +103,10 @@ function App() {
           <Route path="transactions" element={<Profile />} />
           <Route path="notifications" element={<Notification />} />
         </Route>
-
+        <Route element={<ProfileLayout />}>
+          <Route path="/booking/history" element={<BookingHistoryPage />} />
+          <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
+        </Route>
         {/* Booking */}
         <Route
           path="/booking"
