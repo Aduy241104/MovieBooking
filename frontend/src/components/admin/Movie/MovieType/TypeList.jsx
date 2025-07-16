@@ -122,7 +122,13 @@ export default function TypeList() {
   return (
     <div
       className="container py-5"
-      style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}
+      style={{
+        backgroundColor: '#ffffff',
+        minHeight: '100vh',
+        borderRadius: '16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+      }}
     >
       <div className="d-flex justify-content-between mb-4">
         <Input
