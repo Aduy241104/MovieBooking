@@ -34,8 +34,15 @@ const deleteFareTypeAPI = (id) => {
   return axios.put(URL_BACKEND);
 };
 
+// Lấy tất cả hóa đơn theo movieId
 const fetchAllBookingsAPI = (movieId) => {
-  const URL_BACKEND = `/public/bookings/by-movie/${movieId}`;
+  const URL_BACKEND = `/bookings/movie/${movieId}`;
+  return axios.get(URL_BACKEND);
+};
+
+// Đếm tổng số hóa đơn theo movieId
+const fetchBookingCountAPI = (movieId) => {
+  const URL_BACKEND = `/bookings/movie/${movieId}/count`;
   return axios.get(URL_BACKEND);
 };
 
@@ -46,4 +53,5 @@ export {
   updateFareTypeAPI,
   deleteFareTypeAPI,
   fetchAllBookingsAPI,
+  fetchBookingCountAPI,
 };

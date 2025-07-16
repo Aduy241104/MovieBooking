@@ -2,11 +2,6 @@ import { Modal, Button } from "antd";
 import dayjs from "dayjs";
 
 const BookingDetailModal = ({ visible, booking, onClose }) => {
-  // Log chi tiết để kiểm tra dữ liệu booking
-  console.log("Booking data in BookingDetailModal:", booking);
-  console.log("Promotion Code Applied:", booking?.promotionCodeApplied ?? "Không có dữ liệu");
-  console.log("Payment Method:", booking?.paymentMethod?.name ?? "Không có dữ liệu");
-
   return (
     <Modal
       title="HÓA ĐƠN ĐẶT VÉ"
@@ -32,25 +27,39 @@ const BookingDetailModal = ({ visible, booking, onClose }) => {
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Tên phim</label>
               <p className="text-gray-600">
-                {booking.movieName || booking.screening?.movie?.nameVN || booking.screening?.movie?.nameEN || "Không xác định"}
+                {booking.screening?.movieNameVn ||
+                  booking.screening?.movieNameEn ||
+                  booking.screening?.movie?.nameVN ||
+                  booking.screening?.movie?.nameEN ||
+                  "Không xác định"}
               </p>
             </div>
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Khách hàng</label>
-              <p className="text-gray-600">{booking.fullName || booking.account?.fullName || "Không xác định"}</p>
+              <p className="text-gray-600">
+                {booking.account?.fullName || booking.fullName || "Không xác định"}
+              </p>
             </div>
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Tài khoản</label>
-              <p className="text-gray-600">{booking.email || booking.account?.email || "Không xác định"}</p>
+              <p className="text-gray-600">
+                {booking.account?.email || booking.email || "Không xác định"}
+              </p>
             </div>
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Phòng chiếu</label>
-              <p className="text-gray-600">{booking.cinemaRoomName || booking.screening?.cinemaRoom?.cinemaRoomName || "Không xác định"}</p>
+              <p className="text-gray-600">
+                {booking.screening?.cinemaRoomName || "Không xác định"}
+              </p>
             </div>
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Ghế</label>
               <p className="text-gray-600">
-                {booking.seatCount ? `Số ghế: ${booking.seatCount}` : "Không có dữ liệu"}
+                {booking.bookedSeats?.length
+                  ? booking.bookedSeats
+                      .map((seat) => `${seat.seatCol}${seat.seatRow}`)
+                      .join(", ")
+                  : "Chưa chọn ghế"}
               </p>
             </div>
             <div className="flex justify-between">
@@ -64,7 +73,7 @@ const BookingDetailModal = ({ visible, booking, onClose }) => {
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Mã giảm giá</label>
               <p className="text-gray-600">
-                {booking.promotionCodeApplied ?? "Không có mã giảm giá"}
+                {booking.promotionCodeApplied || "Không có mã giảm giá"}
                 {booking.discountApplied
                   ? ` (-${booking.discountApplied.toLocaleString("vi-VN")} VNĐ)`
                   : ""}
@@ -73,7 +82,9 @@ const BookingDetailModal = ({ visible, booking, onClose }) => {
             <div className="flex justify-between">
               <label className="font-medium text-gray-700">Phương thức thanh toán</label>
               <p className="text-gray-600">
-                {booking.paymentMethod?.name ?? "Không có dữ liệu"}
+                {booking.paymentMethod?.methodName ||
+                  booking.paymentMethod ||
+                  "Không có dữ liệu"}
               </p>
             </div>
             <hr className="border-t border-dashed border-gray-300 my-4" />

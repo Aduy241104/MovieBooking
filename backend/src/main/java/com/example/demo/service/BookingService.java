@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// mail confim
+// mail confirm
 import org.thymeleaf.context.Context;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -289,10 +289,10 @@ public class BookingService {
         String paymentUrl = null;
         if ("VNPAY".equalsIgnoreCase(paymentMethod.getName())) {
             booking.setBookingStatus("PENDING_PAYMENT");
-            String vnp_TxnRef = booking.getBookingCode() + "-" + System.currentTimeMillis();
-            booking.setVnpTxnRef(vnp_TxnRef);
+            String vnpTxnRef = booking.getBookingCode() + "-" + System.currentTimeMillis();
+            booking.setVnpTxnRef(vnpTxnRef);
             if (finalAmountToPay.compareTo(BigDecimal.ZERO) > 0) {
-                paymentUrl = createVnpayPaymentUrl(finalAmountToPay, vnp_TxnRef, screening.getMovie().getNameVN(), httpServletRequest);
+                paymentUrl = createVnpayPaymentUrl(finalAmountToPay, vnpTxnRef, screening.getMovie().getNameVN(), httpServletRequest);
             } else {
                 booking.setBookingStatus("PAID");
             }
@@ -530,7 +530,6 @@ public class BookingService {
     }
 
     @Transactional
-
     public List<BookingDetailResponseDTO> getUserBookingHistory(Long accountId) {
         List<Booking> bookings = bookingRepository.findByAccountAccountIdOrderByBookingTimeDesc(accountId);
         return bookings.stream()
@@ -544,7 +543,6 @@ public class BookingService {
         return convertToBookingDetailResponseDTO(booking, null, calculateOriginalAmount(booking));
     }
 
-
     private BigDecimal calculateOriginalAmount(Booking booking) {
         // Tổng tiền gốc = tiền thanh toán + tổng giảm giá
         BigDecimal totalDiscount = BigDecimal.ZERO;
@@ -556,7 +554,6 @@ public class BookingService {
         }
         return booking.getTotalAmount().add(totalDiscount);
     }
-
 
     private BookingDetailResponseDTO convertToBookingDetailResponseDTO(Booking booking, String paymentUrl, BigDecimal originalAmount) {
         if (booking == null) return null;
@@ -595,14 +592,13 @@ public class BookingService {
         }
 
         BookingDetailResponseDTO.PaymentMethodInfoDTO paymentMethodInfo = null;
-        if(booking.getPaymentMethod() != null){
+        if (booking.getPaymentMethod() != null) {
             PaymentMethod pm = booking.getPaymentMethod();
             paymentMethodInfo = BookingDetailResponseDTO.PaymentMethodInfoDTO.builder()
                     .paymentMethodId(pm.getId())
                     .methodName(pm.getName())
                     .build();
         }
-
 
         List<BookingDetailResponseDTO.BookedSeatInfoDTO> bookedSeatInfoList = Collections.emptyList();
         if (booking.getBookedSeats() != null && !booking.getBookedSeats().isEmpty()) {
@@ -640,8 +636,9 @@ public class BookingService {
                 .paymentUrl(paymentUrl) // Thêm paymentUrl vào response
                 .build();
     }
+
     //send confirm email:
-// <<< THÊM PHƯƠNG THỨC GỬI EMAIL MỚI VÀO BOOKINGSERVICE >>>
+    // <<< THÊM PHƯƠNG THỨC GỬI EMAIL MỚI VÀO BOOKINGSERVICE >>>
     private void sendBookingConfirmationEmail(Booking booking) {
         if (booking == null || booking.getAccount() == null) {
             logger.warn("Cannot send confirmation email. Booking or account is null.");
@@ -739,6 +736,7 @@ public class BookingService {
             }
         }
     }
+
     // <<< THÊM PHƯƠNG THỨC MỚI: THANH TOÁN LẠI >>>
     @Transactional
     public String retryPayment(Integer bookingId, Long accountId, HttpServletRequest httpServletRequest) {
@@ -791,5 +789,18 @@ public class BookingService {
             bookingRepository.save(booking);
             logger.warn("Expired booking with code: {}", booking.getBookingCode());
         }
+    }
+
+    // <<< THÊM PHƯƠNG THỨC LẤY TẤT CẢ HÓA ĐƠN THEO ID PHIM >>>
+    public List<BookingDetailResponseDTO> getAllBookingsByMovieId(Long movieId) {
+        List<Booking> bookings = bookingRepository.findAllByMovieId(movieId);
+        return bookings.stream()
+                .map(b -> convertToBookingDetailResponseDTO(b, null, calculateOriginalAmount(b)))
+                .collect(Collectors.toList());
+    }
+
+    // <<< THÊM PHƯƠNG THỨC LẤY TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
+    public Long getTotalBookingsByMovieId(Long movieId) {
+        return bookingRepository.countBookingsByMovieId(movieId);
     }
 }

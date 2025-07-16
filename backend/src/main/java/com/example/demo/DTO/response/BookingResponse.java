@@ -10,21 +10,23 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingResponse {
-    private Integer id; // Changed from bookingId to match the "id" field in the example
-    private Account account; // Nested Account object
-    private Screening screening; // Nested Screening object
-    private PaymentMethod paymentMethod; // Nested PaymentMethod object
+    private Integer id;
+    private Account account;
+    private Screening screening;
+    private PaymentMethod paymentMethod;
     private String promotionCodeApplied;
     private String discountTypeApplied;
     private BigDecimal discountApplied;
-    private LocalDateTime bookingTime; // Changed from bookingDate to match the example
+    private LocalDateTime bookingTime;
     private BigDecimal totalAmount;
     private String bookingStatus;
     private Integer seatCount;
+    private List<BookedSeatResponse> bookedSeats; // Thêm để trả về thông tin ghế
 }

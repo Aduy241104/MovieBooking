@@ -1,6 +1,17 @@
-import { message, Pagination, Space, Table, Spin, Button, Input } from "antd";
+import {
+  message,
+  Pagination,
+  Space,
+  Table,
+  Spin,
+  Button,
+  Input,
+} from "antd";
 import dayjs from "dayjs";
-import { InfoCircleOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllBookingsAPI } from "../../../service/TicketPriceService";
@@ -27,58 +38,29 @@ export const BookingDetail = () => {
         return;
       }
       setLoading(true);
-      console.log(`Bắt đầu gọi API với movieId: ${movieId}`);
       try {
         const res = await fetchAllBookingsAPI(movieId);
-        console.log("Phản hồi đầy đủ từ API:", JSON.stringify(res, null, 2));
-        if (res.status && res.status !== 1000) {
-          console.error("API trả về lỗi:", res);
+        if (res.status && res.status >= 400) {
           message.error(res.message || "Lỗi khi tải danh sách bookings");
           return;
         }
-        if (res.result && res.result.length > 0) {
-          const list = res.result.map((booking) => {
-            if (!booking.account || !booking.screening || !booking.screening.cinemaRoom) {
-              console.warn("Booking thiếu dữ liệu:", booking);
-              return null;
-            }
-            return {
-              bookingId: booking.id || `BK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
-              accountId: booking.account?.accountId,
-              fullName: booking.account?.fullName,
-              email: booking.account?.email,
-              seatCount: booking.seatCount,
-              cinemaRoomName: booking.screening.cinemaRoom?.cinemaRoomName,
-              bookingTime: booking.bookingTime,
-              totalAmount: booking.totalAmount,
-              movieName: booking.screening.movie?.nameVN || booking.screening.movie?.nameEN || "Không xác định",
-              seats: booking.seats || [],
-              promotionCodeApplied: booking.promotionCodeApplied || "Không áp dụng",
-              paymentMethod: booking.paymentMethod || null,
-              discountApplied: booking.discountApplied || 0,
-            };
-          }).filter((item) => item !== null);
-          console.log("Dữ liệu sau khi xử lý:", list);
+
+        if (Array.isArray(res.result) && res.result.length > 0) {
+          const list = res.result; // ⚠️ Dữ liệu gốc từ API
           setDataUsers(list);
           setFilteredDataUsers(list);
-          setTotal(list.length); // Không có res.totalElements, sử dụng list.length
+          setTotal(list.length);
         } else {
-          console.warn("Phản hồi API không có result:", res);
           setDataUsers([]);
           setFilteredDataUsers([]);
           setTotal(0);
-          message.warning("Không có dữ liệu ");
+          message.warning("Không có dữ liệu bookings");
         }
       } catch (error) {
         if (retries > 0) {
-          console.warn(`Thử lại... (${retries} lần còn lại)`);
           return fetchData(retries - 1);
         }
-        console.error("Lỗi trong fetchData:", {
-          message: error.message,
-          status: error.status,
-          data: error.data,
-        });
+        console.error("Lỗi trong fetchData:", error);
         message.error("Lỗi khi tải danh sách bookings");
       } finally {
         setLoading(false);
@@ -89,21 +71,20 @@ export const BookingDetail = () => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, page]);
+  }, [fetchData]);
 
   const handleSearch = (value) => {
     setSearchText(value);
     const filtered = dataUsers.filter(
       (user) =>
-        user.fullName?.toLowerCase().includes(value.toLowerCase()) ||
-        user.email?.toLowerCase().includes(value.toLowerCase())
+        user.account?.fullName?.toLowerCase().includes(value.toLowerCase()) ||
+        user.account?.email?.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredDataUsers(filtered);
     setPage(1);
   };
 
   const handleTableChange = (current) => {
-    console.log("Thay đổi phân trang:", current);
     setPage(current);
   };
 
@@ -116,14 +97,13 @@ export const BookingDetail = () => {
   };
 
   const handleViewBookingDetail = (booking) => {
-    console.log("Dữ liệu booking trước khi mở modal:", booking);
     setSelectedBooking(booking);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    // Không đặt setSelectedBooking(null) ngay lập tức để tránh mất dữ liệu
+    setSelectedBooking(null);
   };
 
   const columns = [
@@ -133,34 +113,34 @@ export const BookingDetail = () => {
     },
     {
       title: "Tài khoản",
-      dataIndex: "fullName",
-      render: (text, record) => (
+      render: (_, record) => (
         <div className="flex flex-col">
           <p
             className="font-medium text-gray-500 hover:text-blue-600 cursor-pointer hover:underline transition duration-200"
-            onClick={() => handleViewUserDetail(record.accountId)}
+            onClick={() => handleViewUserDetail(record.account?.accountId)}
           >
-            {text || "Không xác định"}
+            {record.account?.fullName || "Không xác định"}
           </p>
-          <p className="text-gray-600">{record.email || "Không xác định"}</p>
+          <p className="text-gray-600">{record.account?.email || "Không xác định"}</p>
         </div>
       ),
     },
     {
       title: "Tổng số ghế",
-      dataIndex: "seatCount",
-      render: (text) => text ?? "Không có dữ liệu",
+      render: (_, record) =>
+        record.bookedSeats?.length ?? "Không có dữ liệu",
     },
     {
       title: "Phòng chiếu",
-      dataIndex: "cinemaRoomName",
-      render: (text) => text || "Không xác định",
+      render: (_, record) =>
+        record.screening?.cinemaRoomName || "Không xác định",
     },
     {
       title: "Ngày Đặt",
-      dataIndex: "bookingTime",
-      render: (text) =>
-        text ? dayjs(text).format("DD/MM/YYYY HH:mm") : "Không có dữ liệu",
+      render: (_, record) =>
+        record.bookingTime
+          ? dayjs(record.bookingTime).format("DD/MM/YYYY HH:mm")
+          : "Không có dữ liệu",
     },
     {
       title: "Tổng tiền",
@@ -184,7 +164,10 @@ export const BookingDetail = () => {
     },
   ];
 
-  const pagedDataUsers = filteredDataUsers.slice((page - 1) * size, page * size);
+  const pagedDataUsers = filteredDataUsers.slice(
+    (page - 1) * size,
+    page * size
+  );
 
   return (
     <div
@@ -238,7 +221,9 @@ export const BookingDetail = () => {
           <Table
             columns={columns}
             dataSource={pagedDataUsers}
-            rowKey="bookingId"
+            rowKey={(record) =>
+              record.bookingId || `BK-${record.account?.accountId}-${Math.random()}`
+            }
             pagination={false}
             bordered={false}
             style={{ backgroundColor: "#fff", border: "none" }}
@@ -258,6 +243,7 @@ export const BookingDetail = () => {
           </div>
         </>
       )}
+
       <BookingDetailModal
         visible={isModalOpen}
         booking={selectedBooking}

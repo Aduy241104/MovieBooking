@@ -1,108 +1,97 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Input, Spin, Pagination, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { Link, useLocation, useOutletContext } from "react-router-dom";
-import { debounce } from "lodash";
-import axios from "../../../config/axios";
+import { fetchBookingCountAPI } from "../../../service/TicketPriceService";
 
 const BookingList = () => {
   const [movies, setMovies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
-  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
   const size = 5;
+
   const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/booking-list')) {
+    if (location.pathname.includes('/admin/movie-list')) {
       setBreadcrumbItems([
         { title: 'Trang chủ', href: '/admin' },
-        { title: 'Quản lý vé' },
-        { title: 'Lịch sử đặt vé' },
+        { title: 'Quản lý phim' },
+        { title: 'Phim' },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
 
-  // Hàm gọi API với retry
-  const fetchMovies = useCallback(
-    async (retries = 3) => {
-      setLoading(true);
-      try {
-        const res = await axios.get("/movies/getAll", {
-          params: {
-            search: searchText,
-            page: page - 1, // API thường bắt đầu từ page 0
-            size,
-          },
-        });
-        const responseData = res.data || res;
-        console.log("Phản hồi API /movies/getAll:", responseData); // Log để debug
-        if (responseData && responseData.content && responseData.content.length > 0) {
-          const mapped = responseData.content.map((item) => ({
-            id: item.id,
-            poster: item.smallImage,
-            nameVN: item.nameVN,
-          }));
-          console.log("Dữ liệu phim đã ánh xạ:", mapped); // Log để debug
-          setMovies(mapped);
-          setTotalElements(responseData.totalElements || mapped.length);
-        } else {
-          setMovies([]);
-          setTotalElements(0);
-          message.warning("Không có dữ liệu lịch sử đặt vé");
-        }
-      } catch (err) {
-        if (retries > 0) {
-          console.warn(`Thử lại... (${retries} lần còn lại)`);
-          return fetchMovies(retries - 1);
-        }
-        message.error("Lỗi tải dữ liệu: " + (err.message || "Unknown error"));
-        console.error("Lỗi API /movies/getAll:", err);
-      } finally {
-        setLoading(false);
+  const fetchMovies = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:8081/api/public/movies");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        const moviesWithBookingCount = await Promise.all(
+          data.map(async (item) => {
+            try {
+              const countResponse = await fetchBookingCountAPI(item.id);
+              const bookingCount = countResponse?.result ?? countResponse?.data?.result ?? 0;
+              return {
+                id: item.id,
+                poster: item.smallImageUrl || "https://via.placeholder.com/60",
+                nameVN: item.nameVN || `Phim ${item.id}`,
+                bookingCount,
+              };
+            } catch (error) {
+              console.error(`Lỗi khi lấy số lượng hóa đơn cho phim ${item.id}:`, error);
+              return {
+                id: item.id,
+                poster: item.smallImageUrl || "https://via.placeholder.com/60",
+                nameVN: item.nameVN || `Phim ${item.id}`,
+                bookingCount: 0,
+              };
+            }
+          })
+        );
+        setMovies(moviesWithBookingCount);
+      } else {
+        message.warning("Không có dữ liệu phim");
+        setMovies([]);
       }
-    },
-    [searchText, page]
-  );
+    } catch (err) {
+      console.error("Lỗi khi gọi API danh sách phim:", err);
+      message.error("Lỗi tải dữ liệu phim: " + (err.message || "Unknown error"));
+      setMovies([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Debounce tìm kiếm để tránh gọi API quá nhiều
-  const debouncedSearch = useCallback(
-    debounce((value) => {
-      setSearchText(value);
-      setPage(1); // Reset về trang 1 khi tìm kiếm
-    }, 300),
-    []
-  );
-
-  // Gọi API khi searchText hoặc page thay đổi
   useEffect(() => {
     fetchMovies();
-  }, [fetchMovies]);
+  }, []);
+
+  const filteredMovies = movies.filter((movie) =>
+    movie.nameVN?.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const pagedMovies = filteredMovies.slice((page - 1) * size, page * size);
 
   const columns = [
     {
       title: "STT",
       key: "index",
-      render: (text, record, index) => (page - 1) * size + index + 1,
+      render: (_, __, index) => (page - 1) * size + index + 1,
     },
     {
       title: "Poster",
       dataIndex: "poster",
       key: "poster",
       render: (poster, record) => (
-        <Link
-          to={`/admin/booking-detail/${record.id}`}
-          onClick={() => console.log("Chuyển hướng với movieId:", record.id)} // Log để debug
-        >
+        <Link to={`/admin/booking-detail/${record.id}`}>
           <img
-            src={poster || "https://via.placeholder.com/60"}
+            src={poster}
             alt={record.nameVN}
             style={{ width: 60, borderRadius: 4 }}
-            onError={(e) => {
-              e.target.src = "https://via.placeholder.com/60"; // Fallback nếu ảnh lỗi
-            }}
           />
         </Link>
       ),
@@ -117,11 +106,16 @@ const BookingList = () => {
           style={{ color: "#333", textDecoration: "none" }}
           onMouseOver={(e) => (e.target.style.color = "#1890ff")}
           onMouseOut={(e) => (e.target.style.color = "#333")}
-          onClick={() => console.log("Chuyển hướng với movieId:", record.id)} // Log để debug
         >
           {text}
         </Link>
       ),
+    },
+    {
+      title: "Tổng hóa đơn của phim",
+      dataIndex: "bookingCount",
+      key: "bookingCount",
+      render: (text) => text ?? 0,
     },
   ];
 
@@ -155,25 +149,33 @@ const BookingList = () => {
             size="large"
             placeholder="Tìm kiếm tên phim..."
             allowClear
+            value={searchText}
             style={{
               width: "28vw",
               borderTopLeftRadius: 0,
               borderBottomLeftRadius: 0,
             }}
-            onChange={(e) => debouncedSearch(e.target.value)}
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
       {loading ? (
-             <div className="flex flex-col justify-center items-center gap-3 h-screen">
-               <Spin size="large" />
-               <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
-             </div>
-           ) : (
+        <div style={{ textAlign: "center", padding: "50px" }}>
+          <Spin size="large" />
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      ) : pagedMovies.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "50px" }}>
+          <p>Không có phim nào phù hợp với tìm kiếm</p>
+        </div>
+      ) : (
         <>
           <Table
-            dataSource={movies}
+            dataSource={pagedMovies}
             columns={columns}
             rowKey="id"
             pagination={false}
@@ -185,7 +187,7 @@ const BookingList = () => {
             <Pagination
               current={page}
               pageSize={size}
-              total={totalElements}
+              total={filteredMovies.length}
               showSizeChanger={false}
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} trong ${total} mục`
