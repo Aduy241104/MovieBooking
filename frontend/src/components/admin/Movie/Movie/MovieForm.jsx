@@ -112,7 +112,7 @@ export default function MovieForm({ movieId, onSuccess }) {
       });
 
       if (onSuccess) onSuccess();
-      navigate("/admin/movie-list");
+      navigate("/admin/movies");
     } catch (err) {
       const msg = err.response?.data?.message || "Lỗi khi gửi dữ liệu phim.";
       notification.error({ message: "Thất bại", description: msg });
@@ -291,7 +291,7 @@ export default function MovieForm({ movieId, onSuccess }) {
             </Button>
           </Col>
           <Col>
-            <Button icon={<CloseOutlined />} onClick={() => navigate("/admin/movie-list")}>
+            <Button icon={<CloseOutlined />} onClick={() => navigate("/admin/movies")}>
               Hủy
             </Button>
           </Col>

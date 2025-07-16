@@ -56,8 +56,8 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
       label: "Quản lý phim",
       children: [
         {
-          key: "movie-list",
-          label: <Link to="/admin/movie-list">Phim</Link>,
+          key: "movies",
+          label: <Link to="/admin/movies">Phim</Link>,
         },
         {
           key: "movie-type",
@@ -104,7 +104,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
     if (path.includes("users-employees")) return ["employees"];
     if (path.includes("promotions")) return ["promotions"];
     if (path.includes("room-list")) return ["room-list"];
-    if (path.includes("movie-list")) return ["movie-list"];
+    if (path.includes("movies")) return ["movies"];
     if (path.includes("movie-type")) return ["movie-type"];
     if (path.includes("showtime-list")) return ["showtime-list"];
     if (path.includes("faretype-list")) return ["faretype-list"];
@@ -118,7 +118,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
     const path = location.pathname;
     if (path.includes("users-members") || path.includes("users-employees")) {
       setOpenKeys(["users"]);
-    } else if (path.includes("movie-list") || path.includes("movie-type")) {
+    } else if (path.includes("movies") || path.includes("movie-type")) {
       setOpenKeys(["movie"]);
     } else if (path.includes("faretype-list") || path.includes("booking-list")) {
       setOpenKeys(["faretype"]);

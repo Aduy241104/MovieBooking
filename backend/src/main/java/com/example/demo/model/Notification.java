@@ -24,5 +24,10 @@ public class Notification {
     private String content;
     private String type; // MOVIE, SYSTEM, REVIEW, ...
     private Boolean isRead = false;
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void handleAfterCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

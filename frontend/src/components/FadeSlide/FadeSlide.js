@@ -8,9 +8,6 @@ import "./SlideShow.scss"; // chứa style custom
 import CustomizeButton from "../CustomeButton";
 import { useNavigate } from "react-router-dom";
 
-
-
-
 const data = [
     {
         id: 1,
@@ -68,7 +65,6 @@ function FadeSlide() {
         }
         fetchData();
     }, [])
-
 
     return (
         <div className="hero-slider">

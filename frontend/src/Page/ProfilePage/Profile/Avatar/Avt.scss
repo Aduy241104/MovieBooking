@@ -8,6 +8,11 @@
     background-size: cover;
 }
 
+.layout-avt {
+    margin-top: 210px;
+    margin-right: 190px;
+}
+
 .oppa {
     background-color: rgba(0, 0, 0, 0.4);
 
@@ -19,4 +24,42 @@
 .avt-active {
     border: 2px solid white !important;
     background-color: transparent;
+}
+
+@media screen and (max-width: 780px) {
+    .layout-avt {
+        margin-top: 16px;
+        margin-right: unset;
+    }
+
+    .title-manage-profile {
+        display: none;
+    }
+
+    .score-place {
+        width: 100%;
+        padding: 10px 0px !important;
+        border-radius: 12px;
+        background: linear-gradient(to right,
+                    #a80fb9,
+                    #871ec8,
+                    #5016cc, );
+        color: white;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px !important;
+
+        span {
+            font-weight: 700;
+            margin-left: 7px;
+            display: inline-block;
+        }
+    }
+
+    .change-pass-section  {
+        width: 100% !important;
+    }
 }

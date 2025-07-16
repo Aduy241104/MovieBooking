@@ -17,7 +17,7 @@ const MovieList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movie-list')) {
+    if (location.pathname.includes('/admin/movies')) {
       setBreadcrumbItems([
         { title: 'Trang chủ', href: '/admin' },
         { title: 'Quản lý phim' },
