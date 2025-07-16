@@ -16,6 +16,9 @@ const MovieList = () => {
   const navigate = useNavigate();
   const { setBreadcrumbItems } = useOutletContext();
 
+  const token = localStorage.getItem('token')
+  console.log(">>> Token: " + token)
+
   useEffect(() => {
     if (location.pathname.includes('/admin/movies')) {
       setBreadcrumbItems([
@@ -29,7 +32,12 @@ const MovieList = () => {
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/public/movies");
+      const res = await axios.get("http://localhost:8081/api/movies", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      });
       if (res && Array.isArray(res.data)) {
         const mapped = res.data.map((item) => ({
           id: item.id,
@@ -61,7 +69,12 @@ const MovieList = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8081/api/public/movies/${id}`);
+      await axios.delete(`http://localhost:8081/api/movies/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      });
       message.success("Xóa phim thành công");
       fetchMovies();
     } catch (err) {

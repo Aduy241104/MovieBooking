@@ -17,7 +17,7 @@ import com.example.demo.service.CinemaRoomService;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/public/rooms")
+@RequestMapping("/api/rooms")
 @CrossOrigin
 @RequiredArgsConstructor
 public class CinemaRoomController {

@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Input,
-  Button,
-  Card,
-  Row,
-  Col,
-  Divider,
-  Tooltip,
-  Space,
-  Tag,
-  notification,
-} from "antd";
+import { Input, Button, Card, Row, Col, Divider, Tooltip, Space, Tag, notification } from "antd";
 import { SquarePen, X } from "lucide-react";
 
 const seatColors = ["#e0e0e0", "#f74551", "#f536db"];
@@ -23,16 +12,24 @@ export default function RoomForm({ room, onBack }) {
   const [seatTypes, setSeatTypes] = useState({});
   const [error, setError] = useState("");
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     if (room) {
-      axios.get(`http://localhost:8081/api/public/rooms/${room.id}`)
-        .then(res => {
+      axios
+        .get(`http://localhost:8081/api/rooms/${room.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+        .then((res) => {
           const data = res.data;
           const rowCount = data.rows;
           const colCount = data.cols;
           const seatsFromAPI = {};
 
-          data.seats.forEach(seat => {
+          data.seats.forEach((seat) => {
             const rowChar = seat.seatRow;
             const colNumber = parseInt(seat.seatCol) + 1;
             const code = rowChar + colNumber;
@@ -53,15 +50,15 @@ export default function RoomForm({ room, onBack }) {
           setCols(colCount);
           setSeatTypes(completeSeats);
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Lỗi khi load phòng:", err);
           notification.error({
             message: "TẢI DỮ LIỆU THẤT BẠI",
-            description: "Không thể tải dữ liệu phòng."
+            description: "Không thể tải dữ liệu phòng.",
           });
         });
     }
-  }, [room]);
+  }, [room, token]);
 
   const generateSeats = () => {
     const seats = {};
@@ -75,7 +72,7 @@ export default function RoomForm({ room, onBack }) {
   };
 
   const toggleSeatType = (code) => {
-    setSeatTypes(prev => ({ ...prev, [code]: (prev[code] + 1) % 3 }));
+    setSeatTypes((prev) => ({ ...prev, [code]: (prev[code] + 1) % 3 }));
   };
 
   const validateName = async () => {
@@ -85,12 +82,18 @@ export default function RoomForm({ room, onBack }) {
     }
 
     try {
-      const res = await axios.get("http://localhost:8081/api/public/rooms");
+      const res = await axios.get("http://localhost:8081/api/rooms", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       const existingRooms = res.data;
 
-      const isDuplicate = existingRooms.some(r =>
-        r.cinemaRoomName.toLowerCase() === name.trim().toLowerCase() &&
-        (!room || r.cinemaRoomId !== room.id)
+      const isDuplicate = existingRooms.some(
+        (r) =>
+          r.cinemaRoomName.toLowerCase() === name.trim().toLowerCase() &&
+          (!room || r.cinemaRoomId !== room.id)
       );
 
       if (isDuplicate) {
@@ -100,7 +103,7 @@ export default function RoomForm({ room, onBack }) {
     } catch (err) {
       notification.error({
         message: "KIỂM TRA TÊN PHÒNG THẤT BẠI",
-        description: "Không thể kiểm tra tên phòng."
+        description: "Không thể kiểm tra tên phòng.",
       });
       return false;
     }
@@ -113,7 +116,7 @@ export default function RoomForm({ room, onBack }) {
     const isValid = await validateName();
     if (!isValid) return;
 
-    const seats = Object.keys(seatTypes).map(code => ({
+    const seats = Object.keys(seatTypes).map((code) => ({
       seatRow: code.charCodeAt(0) - 65,
       seatCol: parseInt(code.slice(1)) - 1,
       seatType: seatTypes[code] === 0 ? "regular" : seatTypes[code] === 1 ? "vip" : "couple",
@@ -123,16 +126,26 @@ export default function RoomForm({ room, onBack }) {
 
     try {
       if (room) {
-        await axios.put(`http://localhost:8081/api/public/rooms/${room.id}`, payload);
+        await axios.put(`http://localhost:8081/api/rooms/${room.id}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         notification.success({
           message: "CẬP NHẬT THÀNH CÔNG",
-          description: "Cập nhật phòng chiếu thành công."
+          description: "Cập nhật phòng chiếu thành công.",
         });
       } else {
-        await axios.post("http://localhost:8081/api/public/rooms", payload);
+        await axios.post("http://localhost:8081/api/rooms", payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         notification.success({
           message: "THÊM PHÒNG THÀNH CÔNG",
-          description: "Thêm phòng chiếu mới thành công."
+          description: "Thêm phòng chiếu mới thành công.",
         });
       }
       onBack();
@@ -140,7 +153,7 @@ export default function RoomForm({ room, onBack }) {
       console.error("Lỗi khi lưu:", err);
       notification.error({
         message: "LỖI KHI LƯU",
-        description: "Đã xảy ra lỗi khi lưu phòng chiếu."
+        description: "Đã xảy ra lỗi khi lưu phòng chiếu.",
       });
     }
   };
@@ -154,33 +167,33 @@ export default function RoomForm({ room, onBack }) {
               {room ? "Sửa phòng chiếu" : "Tạo phòng chiếu"}
             </Divider>
             <Space direction="vertical" style={{ width: "100%" }} size="middle">
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ display: 'block', marginBottom: '4px' }}>Tên Phòng chiếu:</label>
+              <div style={{ marginBottom: "12px" }}>
+                <label style={{ display: "block", marginBottom: "4px" }}>Tên Phòng chiếu:</label>
                 <Input
                   value={name}
-                  onChange={e => setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Tên phòng"
                 />
                 {error && (
-                  <div style={{ color: 'red', fontSize: '13px', marginTop: '2px' }}>
-                    {error}
-                  </div>
+                  <div style={{ color: "red", fontSize: "13px", marginTop: "2px" }}>{error}</div>
                 )}
               </div>
               <Row gutter={12}>
-                <Col span={12}>Số hàng:
+                <Col span={12}>
+                  Số hàng:
                   <Input
                     type="number"
                     value={rows}
-                    onChange={e => setRows(Math.min(+e.target.value, 15))}
+                    onChange={(e) => setRows(Math.min(+e.target.value, 15))}
                     placeholder="Số hàng (tối đa 15)"
                   />
                 </Col>
-                <Col span={12}> Số cột:
+                <Col span={12}>
+                  Số cột:
                   <Input
                     type="number"
                     value={cols}
-                    onChange={e => setCols(Math.min(+e.target.value, 15))}
+                    onChange={(e) => setCols(Math.min(+e.target.value, 15))}
                     placeholder="Số cột (tối đa 15)"
                   />
                 </Col>
@@ -228,7 +241,7 @@ export default function RoomForm({ room, onBack }) {
                   minWidth: `${cols * 40 + (cols - 1) * 6}px`,
                 }}
               >
-                {Object.keys(seatTypes).map(code => (
+                {Object.keys(seatTypes).map((code) => (
                   <Tooltip
                     key={code}
                     title={`Ghế ${code} (${["Thường", "VIP", "Đôi"][seatTypes[code]]})`}

@@ -9,7 +9,8 @@ export default function AddTypeForm({ onTypeAdded, onSuccessClose }) {
     success: null,
     submitting: false
   });
-
+  const token = localStorage.getItem('token')
+  console.log(">>> Token: " + token)
   const handleAdd = async (shouldClose = false) => {
     if (!form.name.trim()) {
       return setForm((f) => ({
@@ -22,7 +23,12 @@ export default function AddTypeForm({ onTypeAdded, onSuccessClose }) {
     setForm((f) => ({ ...f, submitting: true }));
 
     try {
-      await axios.post("http://localhost:8081/api/public/types", { name: form.name });
+      await axios.post("http://localhost:8081/api/types", { name: form.name },{
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+      });
       setForm({
         name: "",
         message: "Thêm thể loại thành công!",
@@ -34,7 +40,7 @@ export default function AddTypeForm({ onTypeAdded, onSuccessClose }) {
         onSuccessClose?.();
       }
     } catch (err) {
-       setForm((f) => ({
+      setForm((f) => ({
         ...f,
         message:
           "Thêm thất bại: " +

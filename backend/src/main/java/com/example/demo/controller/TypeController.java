@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/public/types")
+@RequestMapping("/api/types")
 @CrossOrigin(origins = "*")
 public class TypeController {
 

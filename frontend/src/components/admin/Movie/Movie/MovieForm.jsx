@@ -26,18 +26,31 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const isEdit = !!movieId;
 
+  const token = localStorage.getItem('token')
+  console.log(">>> Token: " + token)
+
   const getFullImageUrl = (path) => {
     if (!path) return null;
     return path.startsWith("http") ? path : `http://localhost:8081${path}`;
   };
 
   useEffect(() => {
-    axios.get("http://localhost:8081/api/public/types").then((res) => {
+    axios.get("http://localhost:8081/api/types", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      },
+    }).then((res) => {
       setTypes(res.data);
     });
 
     if (isEdit) {
-      axios.get(`http://localhost:8081/api/public/movies/${movieId}`).then((r) => {
+      axios.get(`http://localhost:8081/api/movies/${movieId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      }).then((r) => {
         const m = r.data;
         form.setFieldsValue({
           nameVN: m.nameVN,
@@ -96,12 +109,16 @@ export default function MovieForm({ movieId, onSuccess }) {
     if (largeImageFile) data.append("largeImage", largeImageFile);
 
     const url = isEdit
-      ? `http://localhost:8081/api/public/movies/${movieId}`
-      : "http://localhost:8081/api/public/movies";
+      ? `http://localhost:8081/api/movies/${movieId}`
+      : "http://localhost:8081/api/movies";
 
     try {
+
       await axios.post(url, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
       });
 
       notification.success({
