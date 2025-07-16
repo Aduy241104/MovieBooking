@@ -195,7 +195,7 @@ export default function RoomForm({ room, onBack }) {
                     value={cols}
                     onChange={(e) => setCols(Math.min(+e.target.value, 15))}
                     placeholder="Số cột (tối đa 15)"
-                  />
+                  /> 
                 </Col>
               </Row>
               <Button type="primary" onClick={generateSeats} block>
