@@ -8,7 +8,7 @@ import Avatar from "../../../components/Avatar/Avatar";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import menu from "./MenuItem/menu";
-// import { NotificationBell } from "../../../components/Notification/NotificationBell";
+ import { NotificationBell } from "../../../components/Notification/NotificationBell";
 
 const cx = classNames.bind(styles);
 
