@@ -14,6 +14,9 @@ export default function RoomDetail() {
   const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
 
+  const token = localStorage.getItem('token');
+  console.log(">>> Token: " + token);
+
   useEffect(() => {
     if (location.pathname.includes("/admin/room-list/room")) {
       setBreadcrumbItems([
@@ -33,7 +36,12 @@ export default function RoomDetail() {
   useEffect(() => {
     const fetchRoom = async () => {
       try {
-        const data = await axios.get(`http://localhost:8081/api/public/rooms/${roomId}`);
+        const data = await axios.get(`http://localhost:8081/api/rooms/${roomId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
         setRoom(data.data);
       } catch (err) {
         console.error("Lỗi khi lấy chi tiết phòng:", err);
@@ -44,11 +52,16 @@ export default function RoomDetail() {
       }
     };
     fetchRoom();
-  }, [roomId]);
+  }, [roomId, token]);
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8081/api/public/rooms/${roomId}`);
+      await axios.delete(`http://localhost:8081/api/rooms/${roomId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       notification.success({
         message: "XOÁ THÀNH CÔNG",
         description: "Phòng đã được xoá thành công.",

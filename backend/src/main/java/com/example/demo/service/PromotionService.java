@@ -208,7 +208,7 @@ public class PromotionService {
      *------------------------------------------------*/
     private static String formatDiscount(BigDecimal level) {
         String suffix = (level.compareTo(BigDecimal.ONE) >= 0 &&
-                         level.compareTo(BigDecimal.valueOf(99)) <= 0)
+                level.compareTo(BigDecimal.valueOf(99)) <= 0)
                 ? "%"
                 : "đ";
         return level.stripTrailingZeros().toPlainString() + suffix;
