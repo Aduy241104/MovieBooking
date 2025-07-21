@@ -9,6 +9,7 @@ import {
   Receipt,
   MessageSquareText,
   History,
+  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -95,6 +96,11 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
       icon: <History size={20} strokeWidth={1.5} />,
       label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
     },
+     {
+      key: "export-reports",
+      icon: <FileText size={20} strokeWidth={1.5} />,
+      label: <Link to="/admin/export-reports">Báo cáo & Xuất file</Link>,
+    },
   ];
 
   const getSelectedKeys = () => {
@@ -111,6 +117,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
     if (path.includes("booking-list")) return ["booking-list"];
     if (path.includes("review-list")) return ["review-list"];
     if (path.includes("activity-logs")) return ["activity-logs"];
+    if (path.includes("export-reports")) return ["export-reports"];
     return [];
   };
 
