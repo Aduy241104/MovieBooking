@@ -89,12 +89,12 @@ export const ActivityLogPage = ({ logsText }) => {
                                 ),
                             },
                             {
-                                value: "THÊM",
+                                value: "TẠO MỚI",
                                 label: (
                                     <>
                                         <div className="flex items-center gap-1">
                                             <CirclePlus size={20} strokeWidth={1.5} color="#22a220" />
-                                            <span style={{ marginLeft: 8 }}>THÊM</span>
+                                            <span style={{ marginLeft: 8 }}>TẠO MỚI</span>
                                         </div>
                                     </>
                                 ),

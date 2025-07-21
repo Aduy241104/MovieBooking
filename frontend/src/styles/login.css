@@ -4,17 +4,11 @@
     background-repeat: no-repeat;
     background-size: cover;
     height: 100vh;
-
-}
-
-.lz {
-    color: white;
 }
 
 .btn-gardient {
     background-color: var(--red);
 }
-
 
 .form-input input:focus-visible {
     outline-width: 0;
@@ -32,43 +26,3 @@
     display: none;
 }
 
-.logo-ticket {
-    width: 45px;
-    height: 45px;
-}
-
-.right-content {
-    background: black;
-    overflow: hidden;
-}
-
-.logo-cinema {
-    position: absolute;
-    width: 20%;
-    height: auto;
-    bottom: -8%;
-    left: -15px;
-    z-index: 0;
-    transform: rotate(30deg);
-}
-
-.logo-cinema-2 {
-    position: absolute;
-    width: 160px;
-    height: 160px;
-    top: -10%;
-    right: -10%;
-    transform: rotate(-220deg);
-}
-
-.register {
-    font-size: 2vh;
-}
-
-.registers::-webkit-scrollbar {
-    display: none !important;
-}
-
-.ss {
-    position: relative;
-}

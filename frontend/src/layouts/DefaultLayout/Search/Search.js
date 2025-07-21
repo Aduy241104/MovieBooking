@@ -6,7 +6,7 @@ import classNames from 'classnames/bind'
 import useDebounce from '../../../hooks/useDebounce'
 import { searchMovieByName } from '../../../service/TheMovieService'
 import { useNavigate } from 'react-router-dom'
-
+import SearchHistoryList from './SearchHistoryList/SearchHistoryList'
 
 const cx = classNames.bind(styles);
 
@@ -16,6 +16,7 @@ function Search() {
     const [searchValue, setSearchValue] = useState("");
     const [isCleared, setIsCleared] = useState(false);
     const [searchResult, setSearchResult] = useState([]);
+    const [showHistorySearch, setShowHistorySearch] = useState(false);
     const [page, setPage] = useState({
         currentPage: 0,
         totalPage: 0
@@ -27,13 +28,17 @@ function Search() {
     const debounceValue = useDebounce(searchValue, 700);
 
     //update stata for search value
-    const handleChangeSearchValue = (e) => {
-        const value = e.target.value;
+    const handleChangeSearchValue = (keyword) => {
+        const value = keyword;
         if (value.length > 0 && value.trim() === "") {
             return;
         } else if (value === "") {
             setSearchResult([])
             setShow(false)
+        }
+
+        if (showHistorySearch) {
+            setShowHistorySearch(false)
         }
         setLoading(true);
         setSearchValue(value);
@@ -51,6 +56,9 @@ function Search() {
     const handleShowResult = () => {
         if (searchValue) {
             setShow(true);
+        } else {
+            setShow(true)
+            setShowHistorySearch(true);
         }
     }
 
@@ -61,9 +69,29 @@ function Search() {
         }
     }
 
+    const saveSearchKeyword = (keyword) => {
+        if (!keyword.trim()) {
+            return;
+        }
+        const key = 'searchHistory';
+        let currentHistory = JSON.parse(localStorage.getItem(key)) || [];
+        // Xoá trùng nếu đã tồn tại
+        currentHistory = currentHistory.filter(item => item !== keyword);
+        // Thêm vào đầu
+        currentHistory.unshift(keyword);
+        if (currentHistory.length > 12) {
+            currentHistory = currentHistory.slice(0, 12);
+        }
+        localStorage.setItem(key, JSON.stringify(currentHistory));
+    }
+
+    const handleChangePage = (movieId) => {
+        saveSearchKeyword(searchValue);
+        naviagate(`/movie-detail/${movieId}`);
+    }
+
     // fetch data from server using axios 
     const fetchData = async () => {
-        
         setShow(true)
         try {
             const response = await searchMovieByName(searchValue, page.currentPage, 4);
@@ -110,23 +138,27 @@ function Search() {
                     interactive={ true }
                     visible={ isShow }
                     placement="top-end"
-                    offset={ [2, 10] }
-                    onClickOutside={ () => { setShow(false) } }
+                    offset={ [1, 6] }
+                    onClickOutside={ () => { setShow(false); setShowHistorySearch(false) } }
                     render={ attrs => (
                         <div
-                            className={ cx("bg-light p-4 rounded-1 cursor-pointer", 'arr') }
+                            className={ cx("bg-dark p-3 rounded-1 cursor-pointer", 'arr') }
                             tabIndex="-1"
                             { ...attrs }
                         >
+
+                            { showHistorySearch && <SearchHistoryList changeSearchValue={ handleChangeSearchValue } /> }
+
                             {/* result search */ }
-                            { (!isLoading) ? (
-                                <div className={ cx('search-layout', 'custome-scroll-bar', 'mt-3 d-flex flex-column align-items-center') }>
-                                    { searchResult.map((item) => {
-                                        return (
+                            { searchValue.trim() && !showHistorySearch && (
+                                !isLoading ? (
+                                    <div className={ cx('search-layout', 'custome-scroll-bar', 'd-flex flex-column align-items-center text-light') }>
+
+                                        { searchResult.map((item) => (
                                             <div
-                                                className={ cx('search-result-layout', 'gray-hover', 'd-flex mt-3 border-bottom border-lightGray pb-2') }
+                                                className={ cx('search-result-layout', 'gray-hover', 'd-flex mt-3 border-bottom border-black pb-2') }
                                                 key={ item.id }
-                                                onClick={ () => naviagate(`/movie-detail/${item.id}`) }
+                                                onClick={ () => handleChangePage(item.id) }
                                             >
                                                 <div className='w-25'>
                                                     <img
@@ -134,8 +166,8 @@ function Search() {
                                                         alt=""
                                                         loading="lazy"
                                                         onError={ (e) => {
-                                                            e.target.onerror = null; // Ngăn lặp vô hạn nếu ảnh fallback cũng lỗi
-                                                            e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg"; // Đường dẫn ảnh mặc định
+                                                            e.target.onerror = null;
+                                                            e.target.src = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
                                                         } }
                                                     />
                                                 </div>
@@ -145,23 +177,24 @@ function Search() {
                                                     <p className='fs-7'><i className="fa-regular fa-clock"></i> { item.duration }m</p>
                                                 </div>
                                             </div>
-                                        )
-                                    }) }
+                                        )) }
 
-                                    { !!searchResult.length &&
-                                        <button className='mt-3 text-black fw-bold' onClick={ () => handleShowMore() }>
-                                            <i className="fa-solid fa-chevron-down me-1"></i>
-                                            Xem thêm
-                                        </button>
-                                    }
-                                </div>
-                            ) : (
-                                <div className='w-100 d-flex justify-content-center p-5'>
-                                    {/* <div className="spinner-border text-danger" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div> */}
-                                        <img src="/img/Animation - 1752043529548.gif" alt="" style={{width:'60px'}}  />
-                                </div>
+                                        { !!searchResult.length && (
+                                            <button className='mt-3 fw-bold fs-7 text-start w-100' onClick={ handleShowMore }>
+                                                <i className="fa-solid fa-chevron-down me-1"></i>
+                                                Xem thêm
+                                            </button>
+                                        ) }
+
+                                        { !searchResult.length > 0 && (
+                                            <p className='text-center'>Không tìm thấy kết quả nào 🙄</p>
+                                        ) }
+                                    </div>
+                                ) : (
+                                    <div className='w-100 d-flex justify-content-center p-5'>
+                                        <img src="/img/Animation - 1752043529548.gif" alt="" style={ { width: '60px' } } />
+                                    </div>
+                                )
                             ) }
                         </div>
                     ) }
@@ -176,7 +209,7 @@ function Search() {
                             ref={ inputRef }
                             className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill text-light') }
                             value={ searchValue }
-                            onChange={ (e) => handleChangeSearchValue(e) }
+                            onChange={ (e) => handleChangeSearchValue(e.target.value) }
                             onFocus={ () => handleShowResult() }
                         />
                         { (searchValue !== "") ? (

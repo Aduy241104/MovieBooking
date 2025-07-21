@@ -5,23 +5,23 @@ import java.util.regex.Pattern;
 
 /**
  * QuestionAnalyzer - Phân tích câu hỏi của người dùng để xác định intent
- * 
+ * <p>
  * Chức năng:
  * - Nhận diện intent/chủ đề từ câu hỏi của người dùng
  * - Trích xuất thông tin cơ bản: tên phim, thể loại, thời gian, ngày
  * - Sử dụng 20 intent chuẩn hóa theo mức độ ưu tiên
- * 
+ * <p>
  * Cách thêm intent mới:
  * 1. Thêm biến boolean mới vào class QueryInfo
  * 2. Cập nhật hàm hasAnyIntent() để bao gồm intent mới
  * 3. Thêm logic nhận diện từ khóa trong hàm analyze()
  * 4. Đảm bảo thứ tự ưu tiên phù hợp
- * 
+ * <p>
  * Cách cập nhật logic nhận diện:
  * - Thêm từ khóa mới vào các điều kiện if
  * - Sử dụng regex cho pattern phức tạp
  * - Test kỹ để tránh conflict giữa các intent
- * 
+ *
  * @author MovieTheater Team
  * @version 2.0 - Refactored và chuẩn hóa intent
  */
@@ -32,7 +32,7 @@ public class QuestionAnalyzer {
         public String genre; // Thể loại phim
         public String time; // Thời gian cụ thể (ví dụ: "19:00", "09:00")
         public String date; // Ngày cụ thể (ví dụ: "2023-10-01", "01/10/2023", "next_week", "today",
-                            // "tomorrow")
+        // "tomorrow")
         public String movieName; // Tên phim nếu có
 
         // Intent chuẩn hóa - Sắp xếp theo mức độ quan trọng
@@ -124,34 +124,37 @@ public class QuestionAnalyzer {
         }
 
         // ====== THÔNG TIN CƠ BẢN ======
-        // Thể loại phim
-        if (q.contains("hoạt hình") || q.contains("animation"))
-            info.genre = "Hoạt hình";
-        else if (q.contains("hành động") || q.contains("action"))
-            info.genre = "Hành động";
-        else if (q.contains("tình cảm") || q.contains("romance"))
-            info.genre = "Tình cảm";
-        else if (q.contains("kinh dị") || q.contains("horror"))
-            info.genre = "Kinh dị";
-        else if (q.contains("hài") || q.contains("comedy"))
-            info.genre = "Hài";
-        else if (q.contains("phiêu lưu") || q.contains("adventure"))
-            info.genre = "Phiêu lưu";
-        else if (q.contains("khoa học viễn tưởng") || q.contains("sci-fi") || q.contains("siêu anh hùng")
-                || q.contains("marvel") || q.contains("dc"))
-            info.genre = "Khoa học viễn tưởng";
-        else if (q.contains("lịch sử") || q.contains("history"))
-            info.genre = "Lịch sử";
-        else if (q.contains("chiến tranh") || q.contains("war"))
-            info.genre = "Chiến tranh";
-        else if (q.contains("âm nhạc") || q.contains("musical"))
-            info.genre = "Âm nhạc";
-        else if (q.contains("gia đình") || q.contains("family"))
-            info.genre = "Gia đình";
-        else if (q.contains("thể thao") || q.contains("sport"))
-            info.genre = "Thể thao";
-        else if (q.contains("tài liệu") || q.contains("documentary"))
-            info.genre = "Tài liệu";
+        // Thể loại phim: cải thiện nhận diện chính xác
+        // Pattern 1: "thể loại [tên thể loại]" hoặc "genre [tên thể loại]" - cải thiện
+        // chính xác hơn
+        Pattern genrePatternFull = Pattern.compile("(?:thể loại|genre)\\s*(?:là)?\\s*([a-zA-ZÀ-ỹ ]{4,30})",
+                Pattern.UNICODE_CASE);
+        Matcher genreMatcherFull = genrePatternFull.matcher(q);
+        if (genreMatcherFull.find()) {
+            String genreCandidate = genreMatcherFull.group(1).trim();
+            System.out.println(">>> Genre candidate from pattern full: " + genreCandidate);
+            if (genreCandidate.length() >= 4 && !genreCandidate.matches("^(gì|nào|của|cho|về|trong|nào)$")) {
+                info.genre = genreCandidate;
+            }
+        }
+
+        // Pattern 2: "phim [thể loại]" - chỉ áp dụng cho các thể loại phổ biến
+        if (info.genre == null) {
+            if (q.matches(".*\\b(hoạt hình|animation)\\b.*"))
+                info.genre = "Hoạt hình";
+            else if (q.matches(".*\\b(hành động|action)\\b.*"))
+                info.genre = "Hành động";
+            else if (q.matches(".*\\b(tình cảm|romance)\\b.*"))
+                info.genre = "Tình cảm";
+            else if (q.matches(".*\\b(kinh dị|horror)\\b.*"))
+                info.genre = "Kinh dị";
+            else if (q.matches(".*\\b(hài|comedy)\\b.*"))
+                info.genre = "Hài";
+            else if (q.matches(".*\\b(phiêu lưu|adventure)\\b.*"))
+                info.genre = "Phiêu lưu";
+            else if (q.matches(".*\\b(khoa học viễn tưởng|sci-fi|siêu anh hùng|marvel|dc)\\b.*"))
+                info.genre = "Khoa học viễn tưởng";
+        }
 
         // Thời gian cụ thể
         if (q.contains("tối nay"))
@@ -168,20 +171,6 @@ public class QuestionAnalyzer {
         // Ngày cụ thể
         if (q.contains("cuối tuần"))
             info.date = "weekend";
-        else if (q.contains("thứ 7") || q.contains("thứ bảy"))
-            info.date = "saturday";
-        else if (q.contains("chủ nhật"))
-            info.date = "sunday";
-        else if (q.contains("ngày mai"))
-            info.date = "tomorrow";
-        else if (q.contains("hôm nay"))
-            info.date = "today";
-        else if (q.contains("hôm qua"))
-            info.date = "yesterday";
-        else if (q.contains("tuần sau"))
-            info.date = "next_week";
-        else if (q.contains("tháng sau"))
-            info.date = "next_month";
 
         // Ngày (regex pattern)
         Pattern datePattern = Pattern.compile("(\\d{1,2}[-/\\.]\\d{1,2}[-/\\.]\\d{2,4})");
@@ -201,28 +190,39 @@ public class QuestionAnalyzer {
             info.time = String.format("%02d:%02s", Integer.parseInt(hour), minute);
         }
 
-        // Tên phim (nhiều pattern)
-        // Pattern 1 cải tiến: "phim [tên phim]" - lấy tên phim đến các từ kết thúc
+        // Tên phim (nhiều pattern) - Cải thiện để tránh lấy nhầm câu hỏi
+        // Pattern 1 cải tiến: "phim [tên phim]" - chỉ lấy tên phim thật, tránh các câu
+        // hỏi về danh sách
         Pattern moviePattern1 = Pattern.compile(
-                "phim ([a-zA-Z0-9\u00C0-\u1EF9\\s:&'\"!.,-]+?)(?:\\s(?:là|có|được|bao|khi|nào|gì)|\\?|\\.|,|$)");
+                "phim ([a-zA-Z0-9\u00C0-\u1EF9\s:&'\"!.,-]+?)(?:\\s(?:là|có|được|bao|khi|nào|gì|đang chiếu|sắp chiếu|mới|hot|hay|top|trending|nay|hôm|hôm nay|hôm qua|mai|ngày mai|tuần|tháng|làm sao để|cách|hướng dẫn|bạn có thể|cung cấp|như thế nào|không|bạn|có thể loại|nào sắp|phim nào|phim có)|\\?|\\.|,|$)");
         Matcher movieMatcher1 = moviePattern1.matcher(q);
         if (movieMatcher1.find()) {
             String candidate = movieMatcher1.group(1).trim();
-            // Loại trừ các từ khóa không phải tên phim
-            if (!candidate.matches(
-                    "^(đang|sắp|mới|hot|hay|nào|chiếu|là|này|gì|top|trending|sắp chiếu|nay|hôm|hôm nay|hôm qua|mai|ngày mai|tuần|tháng)$")) {
+            System.out.println(">>> Candidate movie name from pattern 1: " + candidate);
+            // Loại trừ các câu hỏi về danh sách phim và thể loại
+            if (candidate.length() > 3 &&
+                    !candidate.matches(
+                            "^(đang|sắp|mới|hot|hay|nào|chiếu|là|này|gì|top|trending|sắp chiếu|nay|hôm|hôm nay|hôm qua|mai|ngày mai|tuần|tháng|làm sao để|cách|hướng dẫn|bạn có thể|cung cấp|như thế nào|đang chiếu|đang chiếu không|phim gì đang chiếu|phim đang chiếu|phim sắp chiếu|phim mới|bạn|có thể loại|nào sắp|phim nào|phim có|hãy cho tôi biết những bộ|hãy cho tôi biết|cho tôi biết những bộ|cho tôi biết).*$")
+                    &&
+                    !q.contains("những bộ phim") && !q.contains("phim nào") && !q.contains("danh sách")) {
                 info.movieName = candidate;
             }
         }
 
         // Pattern 2: "[tên phim] có/được/là" - cải tiến cho các câu hỏi khác
-        Pattern moviePattern2 = Pattern.compile("([a-zA-Z0-9\u00C0-\u1EF9\s:&'\"!.,-]+?)\\s+(?:có|được|là)\\s");
+        Pattern moviePattern2 = Pattern.compile("([a-zA-Z0-9\u00C0-\u1EF9\s:&'\"!.,-]{4,25})\\s+(?:có|được|là)\\s");
         Matcher movieMatcher2 = moviePattern2.matcher(q);
         if (movieMatcher2.find() && info.movieName == null) {
             String candidate = movieMatcher2.group(1).trim();
-            // Loại bỏ các từ đầu không phải tên phim
-            candidate = candidate.replaceFirst("^(?:thông tin|ngày khởi chiếu|lịch chiếu|suất chiếu|giá vé)\\s+", "");
-            if (!candidate.matches(".*(thể loại|rạp|cinema|theater).*") && candidate.length() > 1) {
+            System.out.println(">>> Candidate movie name from pattern 2: " + candidate);
+            // Loại trừ các từ hỏi và câu về danh sách
+            if (!candidate.matches(
+                    "^(đang|sắp|mới|hot|hay|nào|chiếu|là|này|gì|top|trending|sắp chiếu|nay|hôm|hôm nay|hôm qua|mai|ngày mai|tuần|tháng|làm sao để|cách|hướng dẫn|bạn có thể|cung cấp|như thế nào|đang chiếu|đang chiếu không|phim gì đang chiếu|phim đang chiếu|phim sắp chiếu|phim mới|bạn|những bộ phim|hãy cho tôi biết|cho tôi biết).*$")
+                    &&
+                    !q.contains("những bộ phim") && !q.contains("phim nào") && !q.contains("danh sách")) {
+                // Loại bỏ các từ đầu không phải tên phim
+                candidate = candidate
+                        .replaceFirst("^(?:thông tin|ngày khởi chiếu|lịch chiếu|suất chiếu|giá vé|bạn|tôi)\\s+", "");
                 info.movieName = candidate;
             }
         }
@@ -231,7 +231,22 @@ public class QuestionAnalyzer {
         Pattern moviePattern3 = Pattern.compile("\"([^\"]+)\"");
         Matcher movieMatcher3 = moviePattern3.matcher(q);
         if (movieMatcher3.find() && info.movieName == null) {
+            System.out.println(">>> Found movie name in quotes: " + movieMatcher3.group(1));
             info.movieName = movieMatcher3.group(1).trim();
+        }
+
+        // Pattern 4: "[tên phim] khi nào chiếu" - cho trường hợp câu hỏi về lịch chiếu
+        Pattern moviePattern4 = Pattern.compile("^([a-zA-Z0-9\u00C0-\u1EF9\s:&'\"!.,-]+?)\\s+khi\\s+nào\\s+chiếu");
+        Matcher movieMatcher4 = moviePattern4.matcher(q);
+        if (movieMatcher4.find() && info.movieName == null) {
+            String candidate = movieMatcher4.group(1).trim();
+            System.out.println(">>> Candidate movie name from pattern 4 (khi nào chiếu): " + candidate);
+            // Nếu candidate là 1 từ ngắn (<=3 ký tự) hoặc nằm trong danh sách loại trừ thì
+            // bỏ qua
+            if (candidate.length() > 3 && !candidate.matches(
+                    "^(đang|sắp|mới|hot|hay|nào|chiếu|là|này|gì|top|trending|sắp chiếu|nay|hôm|hôm nay|hôm qua|mai|ngày mai|tuần|tháng|làm sao để|cách|hướng dẫn|bạn có thể|cung cấp|như thế nào|đang chiếu|đang chiếu không|phim gì đang chiếu|phim đang chiếu|phim sắp chiếu|phim mới|bạn|phim)$")) {
+                info.movieName = candidate;
+            }
         }
 
         // ====== INTENT RECOGNITION (Theo thứ tự ưu tiên) ======
@@ -239,7 +254,7 @@ public class QuestionAnalyzer {
         // 1. MOVIE_SHOWTIMES - Lịch chiếu, suất chiếu
         if (q.contains("suất chiếu") || q.contains("giờ chiếu") || q.contains("chiếu lúc mấy giờ") ||
                 q.contains("lịch chiếu") || q.contains("thời gian chiếu") || q.contains("chiếu vào") ||
-                q.contains("showtime") || q.contains("schedule"))
+                q.contains("showtime") || q.contains("schedule") || q.contains("khi nào chiếu"))
             info.movie_showtimes = true;
 
         // 2. MOVIE_NOW_SHOWING - Phim đang chiếu (gộp askNowShowing, askTop, askNew)
@@ -247,12 +262,28 @@ public class QuestionAnalyzer {
                 q.contains("phim hot") || q.contains("phim top") || q.contains("phim trending") ||
                 q.contains("phim mới") || q.contains("phim nào hay") || q.contains("đang được chiếu"))
             info.movie_now_showing = true;
+        // Nếu câu hỏi có từ 'thông tin' và 'phim đang chiếu' thì bật luôn movie_info
+        if ((q.contains("thông tin") || q.contains("chi tiết") || q.contains("cung cấp thông tin")) &&
+                (q.contains("phim đang chiếu") || q.contains("phim gì đang chiếu") || q.contains("now showing"))) {
+            info.movie_info = true;
+        }
 
-        // 3. MOVIE_BOOKING - Đặt vé, booking
-        if (q.contains("đặt vé") || q.contains("book") || q.contains("booking") ||
-                q.contains("mua vé") || q.contains("đặt chỗ") || q.contains("reserv") ||
-                q.contains("purchase ticket"))
+        // 3. MOVIE_BOOKING - Đặt vé, booking (mở rộng nhận diện)
+        if (q.matches(".*(đặt|mua)\\s*(vé|ve).*") ||
+                q.contains("booking") ||
+                q.contains("đặt chỗ") ||
+                q.contains("reserv") ||
+                q.matches(".*(làm sao|cách|hướng dẫn|làm thế nào|như thế nào|muốn|có thể).*(đặt|mua|book)\\s*(vé|ve).*")
+                ||
+                q.matches(".*(đặt|mua|book)\\s*(vé|ve).*(như thế nào|làm sao|cách|hướng dẫn|làm thế nào|có thể).*") ||
+                q.contains("hướng dẫn đặt vé") ||
+                q.contains("cách đặt vé") ||
+                q.contains("muốn đặt vé") ||
+                q.contains("đặt vé như thế nào") ||
+                q.contains("làm sao để đặt vé") ||
+                q.contains("làm sao để có thể đặt được vé")) {
             info.movie_booking = true;
+        }
 
         // 4. MOVIE_PRICING - Giá vé (gộp askPrice)
         if (q.contains("giá vé") || q.contains("bao nhiêu tiền") || q.contains("mắc không") ||
@@ -269,12 +300,15 @@ public class QuestionAnalyzer {
                 q.contains("nội dung") || q.contains("tóm tắt") || q.contains("content") || q.contains("plot") ||
                 q.contains("trailer") || q.contains("xem thử") ||
                 q.contains("giới hạn tuổi") || q.contains("độ tuổi") || q.contains("age limit") ||
-                q.contains("thông tin phim") || q.contains("movie info"))
+                q.matches(".*(thông tin|chi tiết).*(phim|phim này).*") || q.contains("thông tin của"))
             info.movie_info = true;
 
-        // 6. MOVIE_COMING_SOON - Phim sắp chiếu (gộp askComingSoon)
+        // 6. MOVIE_COMING_SOON - Phim sắp chiếu (mở rộng nhận diện)
         if (q.contains("phim sắp chiếu") || q.contains("sắp ra mắt") || q.contains("coming soon") ||
-                q.contains("phim mới sắp") || q.contains("sắp ra rạp") || q.contains("upcoming"))
+                q.contains("phim mới sắp") || q.contains("sắp ra rạp") || q.contains("upcoming") ||
+                q.contains("sắp được chiếu") || q.contains("phim nào sắp") ||
+                q.matches(".*phim\\s+nào\\s+sắp.*") || q.contains("thời gian tới") ||
+                q.contains("sắp có phim") || q.contains("trong thời gian tới"))
             info.movie_coming_soon = true;
 
         // 7. SEAT_SELECTION - Chọn ghế (gộp askSeatSelection)
@@ -288,21 +322,40 @@ public class QuestionAnalyzer {
                 q.contains("loại phim") || q.contains("category"))
             info.movie_genre = true;
 
-        // 9. PROMOTION_DISCOUNT - Khuyến mãi (gộp askPromotion, askGroupDiscount,
-        // askStudentDiscount)
-        if (q.contains("khuyến mãi") || q.contains("ưu đãi") || q.contains("giảm giá") ||
+        // 9. PROMOTION_DISCOUNT - Khuyến mãi (mở rộng nhận diện)
+        if (q.contains("khuyến mãi") || q.contains("khuyến mãi gì") || q.contains("khuyến mãi nào")
+                || q.contains("ưu đãi") || q.contains("giảm giá") ||
                 q.contains("promotion") || q.contains("discount") || q.contains("voucher") ||
                 q.contains("giảm giá nhóm") || q.contains("group discount") ||
                 q.contains("giảm giá học sinh") || q.contains("student discount") ||
-                q.contains("mã giảm giá") || q.contains("coupon"))
+                q.contains("mã giảm giá") || q.contains("coupon") ||
+                q.contains("chương trình khuyến mãi") || q.contains("chương trình ưu đãi") ||
+                q.contains("có khuyến mãi") || q.contains("có ưu đãi") ||
+                q.contains("những chương trình khuyến mãi") || q.contains("các chương trình khuyến mãi") ||
+                q.contains("chương trình khuyến mãi hiện tại") || q.contains("chương trình khuyến mãi đang có") ||
+                q.matches(".*(?:có|đang có|hiện tại|bây giờ|rạp).*chương trình.*khuyến mãi.*") ||
+                q.matches(".*chương trình khuyến mãi gì.*") ||
+                q.matches(".*chương trình gì.*khuyến mãi.*") ||
+                q.matches(".*có chương trình.*khuyến mãi.*") ||
+                q.matches(".*(những|các) chương trình khuyến mãi.*") ||
+                q.matches(".*chương trình khuyến mãi (hiện tại|đang có).*") ||
+                q.contains("chương trình gì") || q.contains("có chương trình nào"))
             info.promotion_discount = true;
 
         // 10. PAYMENT_METHODS - Phương thức thanh toán (gộp askPayment)
-        if (q.contains("thanh toán") || q.contains("payment") || q.contains("ví điện tử") ||
-                q.contains("momo") || q.contains("zalopay") || q.contains("thẻ") ||
+        // Chỉ nhận diện 'thẻ' tiếng Việt, không nhận diện 'the' trong tên phim tiếng
+        // Anh
+        // Sử dụng regex chặt chẽ hơn để tránh nhầm lẫn với "the" tiếng Anh
+        boolean hasTheVietnamese = Pattern.compile("(?<![a-zA-Z])thẻ(?![a-zA-Z])", Pattern.UNICODE_CASE).matcher(q)
+                .find();
+        if ((q.contains("thanh toán") || q.contains("payment") || q.contains("ví điện tử") ||
+                q.contains("momo") || q.contains("zalopay") || hasTheVietnamese ||
                 q.contains("visa") || q.contains("mastercard") || q.contains("atm") ||
-                q.contains("tiền mặt") || q.contains("cash") || q.contains("chuyển khoản"))
+                q.contains("tiền mặt") || q.contains("cash") || q.contains("chuyển khoản")) &&
+                !(q.contains("suất chiếu") || q.contains("lịch chiếu") || q.contains("giờ chiếu")
+                        || q.contains("phim"))) {
             info.payment_methods = true;
+        }
 
         // 11. CINEMA_INFO - Thông tin rạp (gộp askCinemaInfo)
         if (q.contains("thông tin rạp") || q.contains("rạp") || q.contains("cinema") || q.contains("theater") ||
@@ -336,9 +389,9 @@ public class QuestionAnalyzer {
             info.operating_hours = true;
 
         // 16. MOVIE_REVIEWS - Đánh giá phim (gộp askReview)
-        if (q.contains("đánh giá") || q.contains("review") || q.contains("rating") ||
-                q.contains("sao") || q.contains("hay không") || q.contains("có hay") ||
-                q.contains("nhận xét") || q.contains("feedback"))
+        if ((q.contains("đánh giá") || q.contains("review") || q.contains("rating") ||
+                q.contains("nhận xét") || q.contains("feedback")) ||
+                (q.contains("phim") && (q.contains("hay không") || q.contains("có hay không"))))
             info.movie_reviews = true;
 
         // 17. CONTACT_SUPPORT - Liên hệ hỗ trợ (gộp askContact)
@@ -347,16 +400,22 @@ public class QuestionAnalyzer {
                 q.contains("facebook") || q.contains("website"))
             info.contact_support = true;
 
-        // 18. ACCOUNT_MANAGEMENT - Quản lý tài khoản (gộp askForgotPassword,
-        // askRegister, askUpdateProfile)
-        if (q.contains("quên mật khẩu") || q.contains("quên password") || q.contains("forgot password") ||
+        // 18. ACCOUNT_MANAGEMENT - Quản lý tài khoản (cải thiện nhận diện chính xác)
+        if ((q.contains("quên mật khẩu") || q.contains("quên password") || q.contains("forgot password") ||
                 q.contains("reset password") || q.contains("đặt lại mật khẩu") || q.contains("lấy lại mật khẩu") ||
                 q.contains("đăng ký") || q.contains("đăng kí") || q.contains("tạo tài khoản") ||
                 q.contains("register") || q.contains("sign up") || q.contains("tài khoản mới") ||
-                q.contains("cập nhật thông tin") || q.contains("chỉnh sửa thông tin")
-                || q.contains("thay đổi thông tin") ||
-                q.contains("update profile") || q.contains("edit profile") || q.contains("sửa hồ sơ"))
+                q.contains("cập nhật thông tin") || q.contains("chỉnh sửa thông tin") ||
+                q.contains("thay đổi thông tin") || q.contains("update profile") || q.contains("edit profile") ||
+                q.contains("sửa hồ sơ") || q.contains("chỉnh lại thông tin cá nhân")
+                || q.contains("cập nhật thông tin cá nhân") ||
+                q.contains("đăng ký tài khoản mới") || q.contains("đăng ký mới") || q.contains("đăng kí mới") ||
+                q.contains("tạo tài khoản mới") || q.contains("làm sao để đăng ký tài khoản")
+                || q.contains("làm sao để lấy lại mật khẩu"))
+                && !q.contains("phim") && !q.contains("vé") && !q.contains("lịch chiếu") // Loại trừ context về phim
+        ) {
             info.account_management = true;
+        }
 
         // 19. TICKET_POLICY - Chính sách vé (gộp askChangeTicket, askRefund)
         if (q.contains("đổi vé") || q.contains("đổi suất") || q.contains("thay đổi suất") ||
@@ -375,7 +434,8 @@ public class QuestionAnalyzer {
 
         // 19. MOVIE_RELEASE_DATE - Ngày khởi chiếu phim
         if (q.contains("khởi chiếu") || q.contains("ra mắt") || q.contains("bắt đầu chiếu")
-                || q.contains("release date") || q.contains("ngày chiếu") || q.contains("chiếu từ ngày")) {
+                || q.contains("release date") || q.contains("ngày chiếu") || q.contains("chiếu từ ngày") ||
+                (q.contains("khi nào chiếu") && info.movieName != null)) {
             info.movie_release_date = true;
         }
 
@@ -384,25 +444,25 @@ public class QuestionAnalyzer {
 
     /*
      * ====== HƯỚNG DẪN BẢO TRÌ VÀ MỞ RỘNG ======
-     * 
+     *
      * 1. Thêm Intent mới:
      * - Bước 1: Thêm biến boolean vào QueryInfo class
      * - Bước 2: Cập nhật hasAnyIntent() method
      * - Bước 3: Thêm logic nhận diện trong analyze() method
      * - Bước 4: Test kỹ để đảm bảo không conflict
-     * 
+     *
      * 2. Cập nhật từ khóa:
      * - Thêm từ khóa mới vào điều kiện if tương ứng
      * - Sử dụng || để nối các điều kiện
      * - Ưu tiên từ khóa tiếng Việt trước, tiếng Anh sau
-     * 
+     *
      * 3. Thứ tự ưu tiên Intent:
      * Core Business > Hỗ trợ quyết định > Thông tin dịch vụ > Hỗ trợ kỹ thuật
-     * 
+     *
      * 4. Pattern phức tạp:
      * - Sử dụng regex Pattern và Matcher cho trường hợp phức tạp
      * - Đặt pattern matching sau basic string matching
-     * 
+     *
      * 5. Testing:
      * - Test với các câu hỏi thực tế từ người dùng
      * - Đảm bảo intent được nhận diện chính xác

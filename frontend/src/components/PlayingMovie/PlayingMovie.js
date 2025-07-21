@@ -4,25 +4,35 @@ import SwiperSlides from "../SwiperSlide/SwiperSlides";
 import { SwiperSlide } from 'swiper/react';
 import MovieComp from "../MovieComp";
 import { useEffect, useState } from "react";
-import { getNowShowingMovieAPI } from "../../service/TheMovieService";
+// import { getNowShowingMovieAPI } from "../../service/TheMovieService";
 import { memo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchNowPlaying } from '../../redux/slices/movieSlice'
 
 const cx = classNames.bind(styles);
 
 function PlayingMovie() {
-    const [listMovie, setListMovie] = useState([]);
+    // const [listMovie, setListMovie] = useState([]);
+    const dispatch = useDispatch();
+    const nowPlaying = useSelector(state => state.movie.nowPlaying);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getNowShowingMovieAPI();
-                setListMovie(response.result);
-            } catch (error) {
-                console.log(error.message);
-            }
+        if (nowPlaying.status === "idle") {
+            dispatch(fetchNowPlaying())
         }
-        fetchData();
-    }, []);
+    }, [dispatch, nowPlaying.status])
+
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             const response = await getNowShowingMovieAPI();
+    //             setListMovie(response.result);
+    //         } catch (error) {
+    //             console.log(error.message);
+    //         }
+    //     }
+    //     fetchData();
+    // }, []);
 
     return (
         <div className="pt-5 mt-3">
@@ -31,7 +41,7 @@ function PlayingMovie() {
                     <h2 className={ cx('pb-5', 'bg-text') }>Phim đang chiếu</h2>
                     <div className={ cx('w-responsive', 'pb-5') }>
                         <SwiperSlides>
-                            { listMovie.map((item, index) => {
+                            { nowPlaying.movies.map((item, index) => {
                                 return (
                                     <SwiperSlide key={ index }>
                                         <MovieComp

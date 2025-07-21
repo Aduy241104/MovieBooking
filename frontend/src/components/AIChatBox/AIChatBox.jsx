@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
+import Markdown from "react-markdown";
 import { Send, MessageCircle, X, Bot, User } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 function getOrCreateSessionId() {
     let sessionId = localStorage.getItem("moviebot_session_id");
     if (!sessionId) {
-        sessionId = crypto.randomUUID();
+        sessionId = uuidv4();
         localStorage.setItem("moviebot_session_id", sessionId);
     }
     return sessionId;
@@ -213,7 +215,13 @@ export const AIChatBox = () => {
                                         : "bg-white text-gray-800 shadow-sm"
                                 }`}
                             >
-                                <p className="text-sm">{message.content}</p>
+                                {message.role === "assistant" ? (
+                                    <div className="text-sm">
+                                        <Markdown>{message.content}</Markdown>
+                                    </div>
+                                ) : (
+                                    <p className="text-sm">{message.content}</p>
+                                )}
                             </div>
                         </div>
                     </div>

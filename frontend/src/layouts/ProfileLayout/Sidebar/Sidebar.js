@@ -60,10 +60,10 @@ function Sidebar() {
                     </li>
                 </ul>
 
-                {/* User info at bottom */ }
-                <div className={ cx("mb-5 mt-5 pt-5", 'bottom-sidebar')}>
-                    <div className={ cx("rounded-full mb-2", 'avt') }>
-                        { user && (
+                {/* User info at bottom */}
+                <div className={cx("mb-5 mt-5 pt-5", "bottom-sidebar")}>
+                    <div className={cx("rounded-full mb-2", "avt")}>
+                        {user && (
                             <Avatar
                                 className={cx("avt")}
                                 src={user.avatar + ""}
