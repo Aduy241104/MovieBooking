@@ -26,7 +26,7 @@ import MovieList from "./components/admin/Movie/Movie/MovieList";
 import AddMovie from "./components/admin/Movie/Movie/AddMovie";
 import EditMovie from "./components/admin/Movie/Movie/EditMovie";
 import TypeList from "./components/admin/Movie/MovieType/TypeList";
-import FilmDetail from "./components/admin/Movie/Movie/FilmDetail";
+import FilmDetail from "./components/admin/Movie/FilmDetail";
 
 // Admin: Room
 import RoomList from "./components/admin/Room/RoomList";
