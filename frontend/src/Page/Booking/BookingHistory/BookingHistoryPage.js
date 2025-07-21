@@ -104,7 +104,7 @@ const BookingHistoryPage = () => {
         const statusInfo = getStatusInfo(booking.bookingStatus, isExpired);
 
         return (
-            <Link to={`/booking/details/${booking.bookingId}`} key={booking.bookingId} className={cx('booking-item')}>
+            <Link to={`/profile/booking-details/${booking.bookingId}`} key={booking.bookingId} className={cx('booking-item')}>
                 <div className={cx('item-header')}>
                    <h5 className={cx('movie-title')}>{booking.screening?.movieNameVn || 'N/A'}</h5>
                    <span className={cx('booking-code')}>Mã vé: <strong>{booking.bookingCode}</strong></span>
