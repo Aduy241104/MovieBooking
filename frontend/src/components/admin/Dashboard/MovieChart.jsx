@@ -1,18 +1,18 @@
-import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export const MovieChart = ({ data }) => {
     const formatCurrency = (value) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
+        return new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
         }).format(value);
     };
 
     return (
-        <div style={{ width: '100%', height: 300 }}>
+        <div style={{ width: "100%", height: 300 }}>
             <ResponsiveContainer>
                 <PieChart>
                     <Pie
@@ -32,7 +32,7 @@ export const MovieChart = ({ data }) => {
                     <Tooltip
                         formatter={(value, name, props) => [
                             `${formatCurrency(props.payload.revenue)} (${value} vé)`,
-                            name
+                            name,
                         ]}
                     />
                     <Legend />

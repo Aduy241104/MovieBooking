@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class BookingTicketRecentlyResponse {
+    private Long bookingId;
     private String fullName;
     private String email;
     private String movieTitle;

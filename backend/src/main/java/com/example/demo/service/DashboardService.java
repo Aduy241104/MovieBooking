@@ -98,9 +98,7 @@ public class DashboardService {
         // Lấy dữ liệu doanh thu theo loại phim
         MovieTypeRevenueResponse movieTypeRevenueResponse = getMovieTypeRevenue();
         // Lấy dữ liệu người dùng đăng ký theo tháng
-        UserRegistrationsResponse userRegistrationsResponse = accountService.getUserRegistrationsDTO(6);
-        // Định dạng ngày tháng
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM");
+        List<UserRegistrationsResponse> userRegistrationsResponse = accountService.getUserRegistrationsDTO(3);
 
         // Tạo danh sách revenue cho từng loại (day, week, month)
         List<Map<String, Object>> dayRevenue = dailyRevenueList.stream()
@@ -139,7 +137,7 @@ public class DashboardService {
                 }).toList();
 
         // Tạo danh sách người dùng đăng ký theo tháng
-        List<Map<String, Object>> userRegistrations = userRegistrationsResponse.getData().stream()
+        List<Map<String, Object>> userRegistrations = userRegistrationsResponse.stream()
                 .map(i -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("name", i.getDate().format(DateTimeFormatter.ofPattern("MM/yyyy")));
