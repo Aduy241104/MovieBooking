@@ -15,7 +15,8 @@ const MovieList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { setBreadcrumbItems } = useOutletContext();
-
+  
+  //khai báo truyền token
   const token = localStorage.getItem('token')
   console.log(">>> Token: " + token)
 
@@ -33,6 +34,7 @@ const MovieList = () => {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:8081/api/movies", {
+        //lấy và truyền token
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -70,6 +72,7 @@ const MovieList = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:8081/api/movies/${id}`, {
+        //truyền token theo id phim
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"

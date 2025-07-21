@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/public/fare-types")
+@RequestMapping("/api/fare-types")
 public class FareTypeController {
 
     private static final Logger logger = LoggerFactory.getLogger(FareTypeController.class);

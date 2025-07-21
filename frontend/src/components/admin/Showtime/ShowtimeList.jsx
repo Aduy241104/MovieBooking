@@ -3,10 +3,15 @@ import { Table, Input, Spin, Button, Popconfirm, Pagination, message } from "ant
 import { SearchOutlined } from "@ant-design/icons";
 import { CalendarPlus, Edit, Trash2, Info } from "lucide-react";
 import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
-import axiosInstance from "../../../config/axios";
+
 import { CreateShowtimeModal } from "../../../components/admin/Modal/showtimes/CreateShowTimeModal";
 import { UpdateShowtimeModal } from "../../../components/admin/Modal/showtimes/UpdateShowtimeModal";
 import InfoShowTimeModal from "../../../components/admin/Modal/showtimes/InfoShowTimeModal";
+
+import {
+  fetchAllActiveShowtimesAPI,
+  deleteShowtimeAPI,
+} from "../../../service/ShowtimeService";
 
 const ShowtimeList = () => {
   const [showtimes, setShowtimes] = useState([]);
@@ -24,28 +29,23 @@ const ShowtimeList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/showtime-list')) {
+    if (location.pathname.includes("/admin/showtime-list")) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
-        { title: 'Quản lý lịch chiếu' },
+        { title: "Trang chủ", href: "/admin" },
+        { title: "Quản lý lịch chiếu" },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
 
   useEffect(() => {
-    console.log("Fetching showtimes, refreshFlag:", refreshFlag);
     fetchShowtimes();
   }, [refreshFlag]);
 
   const fetchShowtimes = async () => {
     setLoading(true);
     try {
-      console.log("Sending request to /public/movieSchedule/admin/all-active");
-      const response = await axiosInstance.get("/public/movieSchedule/admin/all-active");
-      console.log("Showtimes API response:", response);
+      const response = await fetchAllActiveShowtimesAPI();
       const data = response.data || response;
-      console.log("Showtimes response data:", data);
-
       if (data.status === 1000 || data.status === 200) {
         const mappedData = data.result.map((item) => ({
           id: item.id,
@@ -53,30 +53,47 @@ const ShowtimeList = () => {
           roomName: item.cinemaRoom.cinemaRoomName,
           showDate: item.showDateTime.slice(0, 10),
           startTime: item.showDateTime.slice(11, 16),
-          endTime: item.endDateTime.slice(11, 16), // Thêm endTime
+          endTime: item.endDateTime.slice(11, 16),
           movieId: item.movie.id,
           cinemaRoomId: item.cinemaRoom.cinemaRoomId,
           fareTypeId: item.fareType.id,
           showDateTime: item.showDateTime,
-          endDateTime: item.endDateTime, // Thêm endDateTime
+          endDateTime: item.endDateTime,
         }));
-        console.log("Mapped showtimes:", mappedData);
         setShowtimes(mappedData);
       } else {
-        console.warn("Fetch showtimes failed:", data.message);
         message.error(data.message || "Lỗi lấy dữ liệu lịch chiếu");
       }
     } catch (error) {
-      console.error("Error fetching showtimes:", {
-        message: error.message,
-        response: error.response,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
       message.error("Lỗi kết nối API");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async (record) => {
+    try {
+      const res = await deleteShowtimeAPI(record.id);
+      const data = res.data || res;
+      if (data.status === 1000 || data.status === 200) {
+        message.success(`Đã xóa lịch chiếu: ${record.movieName}`);
+        setRefreshFlag((prev) => !prev);
+      } else {
+        message.error(data.message || "Xóa thất bại");
+      }
+    } catch (error) {
+      message.error("Lỗi kết nối khi xóa");
+    }
+  };
+
+  const handleEdit = (record) => {
+    setCurrentShowtime(record);
+    setIsUpdateModalOpen(true);
+  };
+
+  const handleInfo = (record) => {
+    setCurrentShowtime(record);
+    setIsInfoModalOpen(true);
   };
 
   const filteredShowtimes = showtimes.filter((item) =>
@@ -84,46 +101,6 @@ const ShowtimeList = () => {
   );
 
   const pagedShowtimes = filteredShowtimes.slice((page - 1) * size, page * size);
-
-  const handlePageChange = (current) => {
-    setPage(current);
-  };
-
-  const handleEdit = (record) => {
-    console.log("Editing showtime:", record);
-    setCurrentShowtime(record);
-    setIsUpdateModalOpen(true);
-  };
-
-  const handleDelete = async (record) => {
-    try {
-      console.log("Deleting showtime with id:", record.id);
-      const res = await axiosInstance.delete(`/public/movieSchedule/admin/delete-time/${record.id}`);
-      console.log("Delete showtime response:", res);
-      const data = res.data || res;
-      if (data.status === 1000 || data.status === 200) {
-        message.success(`Đã xóa lịch chiếu: ${record.movieName}`);
-        setRefreshFlag((prev) => !prev);
-      } else {
-        console.warn("Delete showtime failed:", data.message);
-        message.error(data.message || "Xóa thất bại");
-      }
-    } catch (error) {
-      console.error("Error deleting showtime:", {
-        message: error.message,
-        response: error.response,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      message.error("Lỗi kết nối khi xóa");
-    }
-  };
-
-  const handleInfo = (record) => {
-    console.log("Viewing showtime info:", record);
-    setCurrentShowtime(record);
-    setIsInfoModalOpen(true);
-  };
 
   const columns = [
     {
@@ -149,7 +126,7 @@ const ShowtimeList = () => {
     { title: "Phòng chiếu", dataIndex: "roomName", key: "roomName" },
     { title: "Ngày chiếu", dataIndex: "showDate", key: "showDate" },
     { title: "Giờ bắt đầu", dataIndex: "startTime", key: "startTime" },
-    { title: "Giờ kết thúc", dataIndex: "endTime", key: "endTime" }, // Thêm cột giờ kết thúc
+    { title: "Giờ kết thúc", dataIndex: "endTime", key: "endTime" },
     {
       title: "Hành động",
       key: "actions",
@@ -252,7 +229,7 @@ const ShowtimeList = () => {
               showTotal={(total, range) =>
                 `${range[0]}-${range[1]} trong ${total} mục`
               }
-              onChange={handlePageChange}
+              onChange={setPage}
             />
           </div>
         </>

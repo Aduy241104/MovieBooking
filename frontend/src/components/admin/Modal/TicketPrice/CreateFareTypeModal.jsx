@@ -7,6 +7,7 @@ export const CreateFareTypeModal = (props) => {
   const { isCreateModalOpen, setIsCreateModalOpen, setRefreshFlag } = props;
   const [form] = Form.useForm();
   const [timeSlotType, setTimeSlotType] = useState("");
+  
 
   const handleSubmit = async (values) => {
     try {

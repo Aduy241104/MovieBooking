@@ -16,13 +16,14 @@ const genreMenu = {
     items: [
         {
             key: "All",
-            label: <div onClick={ () => setGenre("All") }>Tất cả</div>,
+            label: <div onClick={ () => console.log("hello") }>Tất cả</div>,
         },
         ...GENRES.map((genre) => ({
             key: genre,
-            label: <div onClick={ () => setGenre(genre) }>{ genre }</div>,
+            label: <div onClick={ () => console.log("hello") }>{ genre }</div>,
         })),
     ],
 };
 
 export default genreMenu;
+

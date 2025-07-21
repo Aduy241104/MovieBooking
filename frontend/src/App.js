@@ -20,14 +20,14 @@ import ProfileLayout from "./layouts/ProfileLayout";
 // Public pages
 import HomePage from "./Page/Home/HomePage";
 import MovieDetail from "./Page/MovieDetail/MovieDetail";
-import MovieListPage from "./Page/MovieListPage";
+import MovieListPage from "./Page/MovieListPage/MovieListPage";
 
 // Admin: Movie
 import MovieList from "./components/admin/Movie/Movie/MovieList";
 import AddMovie from "./components/admin/Movie/Movie/AddMovie";
 import EditMovie from "./components/admin/Movie/Movie/EditMovie";
 import TypeList from "./components/admin/Movie/MovieType/TypeList";
-import FilmDetail from "./components/admin/Movie/FilmDetail";
+import FilmDetail from "./components/admin/Movie/Movie/FilmDetail";
 
 // Admin: Room
 import RoomList from "./components/admin/Room/RoomList";

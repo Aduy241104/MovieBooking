@@ -172,7 +172,7 @@ public class BookingController {
                 .build();
     }
 
-    // <<< THÊM ENDPOINT XEM TẤT CẢ HÓA ĐƠN THEO ID PHIM >>>
+    // ADMIN : THÊM ENDPOINT XEM TẤT CẢ HÓA ĐƠN THEO ID PHIM
     @GetMapping("/movie/{movieId}")
     public ApiResponse<List<BookingDetailResponseDTO>> getAllBookingsByMovieId(@PathVariable Long movieId) {
         List<BookingDetailResponseDTO> bookings = bookingService.getAllBookingsByMovieId(movieId);
@@ -183,7 +183,7 @@ public class BookingController {
                 .build();
     }
 
-    // <<< THÊM ENDPOINT LẤY TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
+    // ADMIN : THÊM ENDPOINT LẤY TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
     @GetMapping("/movie/{movieId}/count")
     public ApiResponse<Long> getTotalBookingsByMovieId(@PathVariable Long movieId) {
         Long totalBookings = bookingService.getTotalBookingsByMovieId(movieId);
