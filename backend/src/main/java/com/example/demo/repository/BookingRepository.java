@@ -156,4 +156,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE s.movie.id = :movieId
             """)
     Long countBookingsByMovieId(@Param("movieId") Long movieId);
+
+
+    List<Booking> findByBookingStatusInAndBookingTimeBetweenOrderByBookingTimeAsc( // xuất excel
+            List<String> statuses,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
 }
