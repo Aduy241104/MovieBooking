@@ -1,108 +1,141 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import { SquarePlus } from "lucide-react";
-import { Table, Input, Button, Card, message } from "antd";
+import { Table, Input, Button, notification } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const RoomList = () => {
-    const [rooms, setRooms] = useState([]);
-    const [filteredRooms, setFilteredRooms] = useState([]);
-    const [searchValue, setSearchValue] = useState("");
+  const [rooms, setRooms] = useState([]);
+  const [filteredRooms, setFilteredRooms] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { setBreadcrumbItems } = useOutletContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setBreadcrumbItems } = useOutletContext();
+  const token = localStorage.getItem("token");
 
-    useEffect(() => {
-        if (location.pathname === '/admin/room-list') {
-            setBreadcrumbItems([
-                { title: 'Trang chủ', href:"/admin"  },
-                { title: 'Phòng chiếu' },
-            ]);
-        }
-    }, [location.pathname, setBreadcrumbItems]);
-    const fetchRooms = useCallback(async () => {
-        try {
-            const res = await axios.get("http://localhost:8081/api/public/rooms");
-            console.log("Dữ liệu phòng:", res.data); // kiểm tra seats có tồn tại không
-            setRooms(res.data);
-            setFilteredRooms(res.data);
-        } catch (err) {
-            console.error("Lỗi khi load danh sách phòng:", err);
-            message.error("Không thể tải danh sách phòng.");
-        }
-    }, []);
+  useEffect(() => {
+    if (location.pathname === "/admin/room-list") {
+      setBreadcrumbItems([
+        { title: "Trang chủ", href: "/admin" },
+        { title: "Phòng chiếu" },
+      ]);
+    }
+  }, [location.pathname, setBreadcrumbItems]);
 
-    useEffect(() => {
-        fetchRooms();
-    }, [fetchRooms]);
-
-    const handleSearch = (value) => {
-        setSearchValue(value);
-        const filtered = rooms.filter(room =>
-            room.cinemaRoomName.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredRooms(filtered);
-    };
-
-    const columns = [
-        {
-            title: "STT",
-            render: (_, __, index) => <>{index + 1}</>,
-            width: 80,
+  const fetchRooms = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("http://localhost:8081/api/rooms", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-        {
-            title: "Tên phòng chiếu",
-            dataIndex: "cinemaRoomName",
-            render: (text, record) => (
-                <span
-                    className=" cursor-pointer hover:underline"
-                    onClick={() => navigate(`/admin/room-list/room/${record.cinemaRoomId}`)}
-                >
-                    {text}
-                </span>
-            ),
-        },
+      });
+      const sortedRooms = res.data.sort((a, b) => a.cinemaRoomId - b.cinemaRoomId);
+      setRooms(sortedRooms);
+      setFilteredRooms(
+        sortedRooms.filter((room) =>
+          room.cinemaRoomName.toLowerCase().includes(searchValue.toLowerCase())
+        )
+      );
+    } catch (err) {
+      console.error("Lỗi khi load danh sách phòng:", err);
+      notification.error({
+        message: "TẢI DỮ LIỆU THẤT BẠI",
+        description: "Không thể tải danh sách phòng. Vui lòng thử lại.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [token, searchValue]);
 
-    ];
+  useEffect(() => {
+    fetchRooms();
+  }, [fetchRooms]);
 
-    return (
-        <div className="p-4 bg-white min-h-screen  shadow-sm" style={{borderRadius:"16px"}}>
-            <Card className="">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                   
-                    <Input style={{ width: "30vw" }}
-                            size='large'
-                            addonBefore={<SearchOutlined />}
-                            placeholder="Tìm kiếm tài khoản..."
-                            allowClear
-                            value={searchValue}
-                            onChange={(value) => handleSearch(value.target.value)}
-                        />
-                    <Button
-                        type="primary"
-                        icon={<SquarePlus size={18} strokeWidth={1.7} />}
-                        onClick={() => navigate("/admin/room-list/add-room")}
-                        style={{ fontWeight: "bold", padding: "6px 20px" }}
-                    >
-                        Thêm phòng
-                    </Button>
-                </div>
-
-                <Table
-                    columns={columns}
-                    dataSource={filteredRooms}
-                    rowKey="cinemaRoomId"
-                    pagination={false}
-                    rowClassName="hover:bg-gray-50 cursor-pointer"
-                    onRow={(record) => ({
-                        onClick: () => navigate(`/admin/room-list/room/${record.cinemaRoomId}`),
-                    })}
-                />
-            </Card>
-        </div>
+  const handleSearch = (value) => {
+    setSearchValue(value);
+    const filtered = rooms.filter((room) =>
+      room.cinemaRoomName.toLowerCase().includes(value.toLowerCase())
     );
+    setFilteredRooms(filtered);
+  };
+
+  const columns = [
+    {
+      title: "STT",
+      render: (_, __, index) => index + 1,
+      width: 80,
+    },
+    {
+      title: "Tên phòng chiếu",
+      dataIndex: "cinemaRoomName",
+      render: (text, record) => (
+        <span
+          className="cursor-pointer hover:underline"
+          onClick={() => navigate(`/admin/room-list/room/${record.cinemaRoomId}`)}
+        >
+          {text}
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      className="container py-5"
+      style={{
+        backgroundColor: "#ffffff",
+        minHeight: "100vh",
+        borderRadius: "16px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        overflow: "hidden",
+      }}
+    >
+      <div className="d-flex justify-content-between mb-4">
+        <Input
+          size="large"
+          placeholder="Tìm kiếm phòng chiếu..."
+          addonAfter={<SearchOutlined />}
+          allowClear
+          value={searchValue}
+          onChange={(e) => handleSearch(e.target.value)}
+          style={{ width: "30vw" }}
+        />
+
+        <button
+          className="btn d-flex"
+          style={{
+            backgroundColor: "#1677ff",
+            color: "#ffffff",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            padding: "5px 10px",
+            marginBottom: "24px",
+            boxShadow: "0 4px 12px rgba(22, 119, 255, 0.3)",
+          }}
+          onClick={() => navigate("/admin/room-list/add-room")}
+        >
+          <SquarePlus strokeWidth={1.75} className="me-2" /> Thêm phòng
+        </button>
+      </div>
+
+      <Table
+        columns={columns}
+        dataSource={filteredRooms}
+        rowKey="cinemaRoomId"
+        loading={loading}
+        pagination={{ pageSize: 10, position: ["bottomCenter"] }}
+        onRow={(record) => ({
+          onClick: () => navigate(`/admin/room-list/room/${record.cinemaRoomId}`),
+        })}
+      />
+    </div>
+  );
 };
 
 export default RoomList;

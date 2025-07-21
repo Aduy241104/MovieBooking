@@ -26,7 +26,7 @@ export default function TypeList() {
   const fetchTypes = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await axiosClient.get('/public/types');
+      const data = await axiosClient.get('/types');
 
       // Sắp xếp theo thứ tự id tăng dần (thứ tự thêm vào)
       const sorted = data.sort((a, b) => a.id - b.id);
@@ -54,7 +54,7 @@ export default function TypeList() {
 
   const handleDelete = async (id) => {
     try {
-      await axiosClient.delete(`/public/types/${id}`);
+      await axiosClient.delete(`/types/${id}`);
       notification.success({
         message: 'XOÁ THÀNH CÔNG',
         description: 'Thể loại đã được xoá thành công.',
@@ -122,7 +122,13 @@ export default function TypeList() {
   return (
     <div
       className="container py-5"
-      style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}
+      style={{
+        backgroundColor: '#ffffff',
+        minHeight: '100vh',
+        borderRadius: '16px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+      }}
     >
       <div className="d-flex justify-content-between mb-4">
         <Input

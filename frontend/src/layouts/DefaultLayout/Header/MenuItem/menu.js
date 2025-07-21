@@ -1,12 +1,10 @@
-import React, { useContext } from 'react'
+import React, { useContext } from 'react';
 import { AuthContext } from '../../../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 function Menu() {
     const { logout, user } = useContext(AuthContext);
     const navigate = useNavigate();
-
-
     const items = [
         {
             key: 'welcome',
@@ -70,4 +68,6 @@ function Menu() {
     return items;
 }
 
+
 export default Menu
+

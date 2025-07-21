@@ -20,6 +20,7 @@ import ProfileLayout from "./layouts/ProfileLayout";
 // Public pages
 import HomePage from "./Page/Home/HomePage";
 import MovieDetail from "./Page/MovieDetail/MovieDetail";
+import MovieListPage from "./Page/MovieListPage";
 
 // Admin: Movie
 import MovieList from "./components/admin/Movie/Movie/MovieList";
@@ -95,6 +96,7 @@ function App() {
                 {/* Public */ }
                 <Route path="/" element={ <HomePage /> } />
                 <Route path="/movie-detail/:id" element={ <MovieDetail /> } />
+                <Route path="/movies/:type" element={ <MovieListPage /> } />
 
                 {/* Profile routes */ }
                 <Route path="/profile" element={ <ProfileLayout /> }>

@@ -1,32 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams,useLocation, useOutletContext } from "react-router-dom";
+import { useNavigate, useParams, useLocation, useOutletContext } from "react-router-dom";
 import RoomForm from "./RoomForm";
 import axios from "axios";
+import React, { useEffect, useState } from "react";
+
+
 export default function EditRoom() {
   const { id } = useParams();
   const [room, setRoom] = useState(null);
   const navigate = useNavigate();
-const location = useLocation();
+  const location = useLocation();
+  const token = localStorage.getItem('token');
+  console.log(">>> Token: " + token);
   const { setBreadcrumbItems } = useOutletContext();
+
   useEffect(() => {
     if (location.pathname.includes('/admin/room-list/room/edit')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href:"/admin"  },
+        { title: 'Trang chủ', href: "/admin" },
         { title: 'Phòng chiếu' },
         { title: 'Chi tiết phòng chiếu' },
         { title: 'Chỉnh sửa phòng chiếu' },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
+
   useEffect(() => {
-    axios.get(`http://localhost:8081/api/public/rooms/${id}`)
+    axios.get(`http://localhost:8081/api/rooms/${id}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
       .then(res => setRoom(res.data))
       .catch(err => {
         console.error("Không thể tải phòng:", err);
         alert("Không thể tải phòng.");
         navigate("/admin/room-list");
       });
-  }, [id, navigate]);
+  }, [id, navigate, token]);
 
   const handleBack = () => {
     navigate(`/admin/room-list/room/${id}`);

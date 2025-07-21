@@ -1,5 +1,5 @@
-import Sidebar from './Sidebar'
-import DefaultLayout from '../DefaultLayout'
+import Sidebar from "./Sidebar";
+import DefaultLayout from "../DefaultLayout";
 import { Outlet } from "react-router-dom";
 
 function ProfileLayout() {
@@ -14,6 +14,6 @@ function ProfileLayout() {
                 </div>
             </div>
         </DefaultLayout>
-    )
+    );
 }
-export default ProfileLayout
+export default ProfileLayout;

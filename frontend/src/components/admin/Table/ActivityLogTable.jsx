@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { LoadingOutlined } from '@ant-design/icons';
+import { LoadingOutlined } from "@ant-design/icons";
 import { message, Pagination, Spin, Table, Tag } from "antd";
 import { fetchActivityLogsAPI } from "../../../service/ActivityLogService";
 import dayjs from "dayjs";
-
 
 export const ActivityLogTable = ({ filter }) => {
     const [logs, setLogs] = useState([]);
@@ -15,39 +14,33 @@ export const ActivityLogTable = ({ filter }) => {
     useEffect(() => {
         setLoading(true);
         fetchActivityLogsAPI(page, size, filter)
-            .then(res => {
+            .then((res) => {
                 setLogs(res.result.data);
                 setTotal(res.result.meta.total);
                 setLoading(false);
             })
-            .catch(error => {
+            .catch((error) => {
                 if (error.message === "Network Error") {
                     message.error("Không thể kết nối tới máy chủ. Vui lòng kiểm tra lại kết nối hoặc thử lại sau!");
                 } else {
                     message.error(`Đã xảy ra lỗi: ${error.message}. Vui lòng thử lại sau!`);
                 }
-            })
-
+            });
     }, [page, size, filter]);
 
     const handleTableChange = (pagination) => {
-        if (pagination)
-            setPage(pagination)
+        if (pagination) setPage(pagination);
     };
 
     const columns = [
         {
             title: "STT",
             width: 60,
-            render: (text, render, index) => (
-                <>
-                    {(page - 1) * size + index + 1}
-                </>
-            ),
+            render: (text, render, index) => <>{(page - 1) * size + index + 1}</>,
         },
         {
             title: "Người thao tác",
-            dataIndex: "updatedBy"
+            dataIndex: "updatedBy",
         },
         {
             title: "Đối tượng",
@@ -55,19 +48,19 @@ export const ActivityLogTable = ({ filter }) => {
             width: 140,
             render: (text) => (
                 <>
-                    <Tag color={text === "NHÂN VIÊN" ? "#607D8B" : "#2196F3"}>
+                    <Tag color={text === "NHÂN VIÊN" ? "#607D8B" : text === "THÀNH VIÊN" ? "#2196F3" : "pink"}>
                         {text}
                     </Tag>
                 </>
-            )
+            ),
         },
         {
-            title: "Người ảnh hưởng",
-            dataIndex: "userUpdated"
+            title: "Ảnh hưởng",
+            dataIndex: "userUpdated",
         },
         {
             title: "Mô tả",
-            dataIndex: "description"
+            dataIndex: "description",
         },
         {
             title: "Hành động",
@@ -79,26 +72,22 @@ export const ActivityLogTable = ({ filter }) => {
                         {text === "XOÁ" ? "XOÁ" : text === "CẬP NHẬT" ? "CẬP NHẬT" : "THÊM"}
                     </Tag>
                 </>
-            )
+            ),
         },
         {
             title: "Thời gian",
             dataIndex: "createdAt",
             width: 160,
-            render: (text) => (
-                <>
-                    {text ? dayjs(text).format("DD/MM/YYYY HH:mm") : "N/A"}
-                </>
-            ),
+            render: (text) => <>{text ? dayjs(text).format("DD/MM/YYYY HH:mm") : "N/A"}</>,
         },
     ];
 
     return (
         <>
             {loading ? (
-                <div className='flex flex-col justify-center items-center gap-3 h-screen'>
+                <div className="flex flex-col justify-center items-center gap-3 h-screen">
                     <Spin indicator={<LoadingOutlined spin />} size="large" />
-                    <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
+                    <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
                 </div>
             ) : (
                 <>
@@ -121,8 +110,6 @@ export const ActivityLogTable = ({ filter }) => {
                     </div>
                 </>
             )}
-
-
         </>
     );
 };

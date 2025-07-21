@@ -1,195 +1,110 @@
 package com.example.demo.service;
 
 import com.example.demo.DTO.request.ChatRequest;
-import com.example.demo.DTO.response.ChatResponse;
-import com.example.demo.utils.QuestionAnalyzer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * Service chính cho chatbot
+ * Điều phối giữa context service và AI model service
+ */
 @Service
 public class ChatService {
+
     @Autowired
-    private ChatbotDataService chatbotDataService;
+    private ChatContextService chatContextService;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private final String API_KEY = "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";
+    @Autowired
+    private AIModelService aiModelService;
 
-    public String chat(String userContent) {
-        QuestionAnalyzer.QueryInfo info = QuestionAnalyzer.analyze(userContent);
-        StringBuilder context = new StringBuilder();
+    @Autowired
+    private ChatSessionContextService chatSessionContextService;
 
-        // Kiểm tra nếu là chào hỏi chung hoặc không có intent cụ thể
-        boolean hasSpecificIntent = info.hasAnyIntent();
-
-        if (!hasSpecificIntent) {
-            // Chào hỏi chung, không cần context phim
-            context.append(
-                    "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                    .append("Hãy trả lời ngắn gọn, tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
-                    .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
-        } else {
-            // Có intent cụ thể về phim hoặc dịch vụ
-            context.append(
-                    "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                    .append("QUAN TRỌNG 1: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
-                    .append("QUAN TRỌNG 2: Sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, họ có thể chuyển vé cho người khác sử dụng.\n")
-                    .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
-                    .append("Nếu có lịch chiếu cụ thể, hãy trả lời theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
-                    .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
-                    .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
-                    .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
-
-            // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
-            String additionalContext = chatbotDataService.buildContextForIntent(info);
-            if (additionalContext.trim().startsWith("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này")) {
-                return additionalContext.trim();
-            }
-            // ...existing code...
-        }
-
-        String prompt = context + "Người dùng hỏi: " + userContent;
-
-        ChatRequest request = new ChatRequest();
-        request.setModel("deepseek/deepseek-r1-0528-qwen3-8b:free");
-
-        ChatRequest.Message systemMsg = new ChatRequest.Message();
-        systemMsg.setRole("system");
-        systemMsg.setContent(prompt);
-
-        ChatRequest.Message userMsg = new ChatRequest.Message();
-        userMsg.setRole("user");
-        userMsg.setContent(userContent);
-
-        request.setMessages(List.of(systemMsg, userMsg));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(API_KEY);
-
-        HttpEntity<ChatRequest> entity = new HttpEntity<>(request, headers);
-
-        ResponseEntity<ChatResponse> response = restTemplate.postForEntity(API_URL, entity, ChatResponse.class);
-        System.out.println("OpenRouter response: " + response.getStatusCode() + " - " + response.getBody());
-
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            return response.getBody().getChoices().get(0).getMessage().getContent();
-        } else {
-            System.err.println("OpenRouter error: " + response.getStatusCode() + " - " + response.getBody());
-        }
-        return "Xin lỗi, tôi không thể trả lời lúc này.";
-    }
-
+    /**
+     * Xử lý chat request với streaming response
+     * 
+     * @param request       Chat request từ client
+     * @param chunkConsumer Consumer để xử lý từng chunk response
+     */
     public void chatStream(ChatRequest request, Consumer<String> chunkConsumer) {
         try {
-            String userContent = null;
-            if (request.getMessages() != null && !request.getMessages().isEmpty()) {
-                for (ChatRequest.Message msg : request.getMessages()) {
-                    if ("user".equalsIgnoreCase(msg.getRole())) {
-                        userContent = msg.getContent();
-                        break;
-                    }
-                }
+            // Lấy user content từ request
+            String userContent = extractUserContent(request);
+            if (userContent == null || userContent.trim().isEmpty()) {
+                chunkConsumer.accept("Xin lỗi, tôi không nhận được câu hỏi của bạn.");
+                return;
             }
-            if (userContent == null)
-                userContent = "";
-            QuestionAnalyzer.QueryInfo info = QuestionAnalyzer.analyze(userContent);
-            StringBuilder context = new StringBuilder();
 
-            // Kiểm tra nếu là chào hỏi chung hoặc không có intent cụ thể
-            boolean hasSpecificIntent = info.hasAnyIntent();
+            // Lấy sessionId (tạm thời random UUID nếu chưa có)
+            String sessionId = getSessionIdFromRequest(request);
 
-            if (!hasSpecificIntent) {
-                // Chào hỏi chung, không cần context phim
-                context.append(
-                        "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                        .append("Hãy trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
-                        .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
-            } else {
-                // Có intent cụ thể về phim hoặc dịch vụ
-                context.append(
-                        "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                        .append("QUAN TRỌNG 1: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
-                        .append("QUAN TRỌNG 2: Sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, họ có thể chuyển vé cho người khác sử dụng.\n")
-                        .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
-                        .append("Nếu có lịch chiếu cụ thể, hãy trả lời theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
-                        .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
-                        .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
-                        .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
-
-                // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
-                String additionalContext = chatbotDataService.buildContextForIntent(info);
-                if (additionalContext.trim().startsWith("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này")) {
-                    chunkConsumer.accept(additionalContext.trim());
-                    return;
-                }
-                if (!additionalContext.isEmpty()) {
-                    context.append("\n").append(additionalContext);
-                } else if (info.movieName != null) {
-                    // Nếu hỏi về phim cụ thể nhưng không có dữ liệu trong database
-                    context.append("\nKhông tìm thấy thông tin phim '").append(info.movieName)
-                            .append("' trong hệ thống.\n");
-                }
+            // Lấy context cũ
+            com.example.demo.utils.QuestionAnalyzer.QueryInfo oldInfo = chatSessionContextService.getContext(sessionId);
+            // Phân tích câu hỏi mới
+            com.example.demo.utils.QuestionAnalyzer.QueryInfo newInfo = com.example.demo.utils.QuestionAnalyzer
+                    .analyze(userContent);
+            // Merge context: nếu thiếu thông tin, lấy từ context cũ
+            if (oldInfo != null) {
+                if (newInfo.movieName == null)
+                    newInfo.movieName = oldInfo.movieName;
+                if (newInfo.genre == null)
+                    newInfo.genre = oldInfo.genre;
+                if (newInfo.date == null)
+                    newInfo.date = oldInfo.date;
+                if (newInfo.time == null)
+                    newInfo.time = oldInfo.time;
+                // ... mở rộng cho các trường khác nếu cần ...
             }
-            String prompt = context + "Người dùng hỏi: " + userContent;
+            // Lưu lại context mới
+            chatSessionContextService.updateContext(sessionId, newInfo);
 
-            // Build request body đúng chuẩn OpenAI API
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> bodyMap = new HashMap<>();
-            bodyMap.put("model", "deepseek/deepseek-r1-0528-qwen3-8b:free");
+            // Xây dựng context tối ưu (truyền QueryInfo vào ChatContextService)
+            String optimizedContext = chatContextService.buildOptimizedContext(userContent, newInfo);
+            System.out.println(">>> Optimized context for user: " + optimizedContext);
 
-            List<Map<String, String>> messages = new ArrayList<>();
-            Map<String, String> sysMsg = new HashMap<>();
-            sysMsg.put("role", "system");
-            sysMsg.put("content", prompt);
-            messages.add(sysMsg);
-
-            Map<String, String> userMsg = new HashMap<>();
-            userMsg.put("role", "user");
-            userMsg.put("content", userContent);
-            messages.add(userMsg);
-            bodyMap.put("messages", messages);
-            bodyMap.put("stream", true);
-
-            String body = mapper.writeValueAsString(bodyMap);
-            // System.out.println("[DEBUG] LM Studio request body: " + body);
-            URI uri = URI.create(API_URL);
-            URL url = uri.toURL();
-
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + API_KEY);
-            conn.setDoOutput(true);
-            conn.getOutputStream().write(body.getBytes());
-
-            InputStream is = conn.getInputStream();
-            byte[] buffer = new byte[4096];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                String chunk = new String(buffer, 0, len);
-                // System.out.println("[DEBUG] LM Studio chunk: " + chunk);
-                chunkConsumer.accept(chunk);
+            // Kiểm tra nếu có thể trả lời trực tiếp (không cần gọi AI)
+            if (optimizedContext.startsWith("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này") ||
+                    optimizedContext.startsWith("Hiện tại chưa có thông tin phù hợp trong hệ thống")) {
+                chunkConsumer.accept(optimizedContext);
+                return;
             }
-            is.close();
-            conn.disconnect();
+
+            // Gọi AI model với streaming
+            aiModelService.callAIStream(optimizedContext, userContent, chunkConsumer);
+
         } catch (Exception e) {
-            chunkConsumer.accept("[ERROR]" + e.getMessage());
+            System.err.println("Error in chatStream: " + e.getMessage());
+            chunkConsumer.accept("Xin lỗi, đã xảy ra lỗi kỹ thuật. Vui lòng thử lại sau.");
         }
     }
 
+    // Lấy sessionId từ request
+    private String getSessionIdFromRequest(ChatRequest request) {
+        // Ưu tiên lấy từ request (header, cookie, hoặc trường sessionId trong
+        // ChatRequest)
+        if (request.getSessionId() != null && !request.getSessionId().isEmpty()) {
+            return request.getSessionId();
+        }
+        // Nếu không có thì mới random (chỉ nên random ở lần đầu)
+        return java.util.UUID.randomUUID().toString();
+    }
+
+    /**
+     * Trích xuất user content từ chat request
+     * 
+     * @param request Chat request
+     * @return User content hoặc null nếu không tìm thấy
+     */
+    private String extractUserContent(ChatRequest request) {
+        if (request.getMessages() != null && !request.getMessages().isEmpty()) {
+            for (ChatRequest.Message msg : request.getMessages()) {
+                if ("user".equalsIgnoreCase(msg.getRole())) {
+                    return msg.getContent();
+                }
+            }
+        }
+        return null;
+    }
 }

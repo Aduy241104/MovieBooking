@@ -26,6 +26,8 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     long countByRole(Role role);
 
+    List<Account> findByRole_RoleName(String roleName);
+
     @Query(value = """
             SELECT
                 DATE_TRUNC('month', register_date) AS month,

@@ -4,32 +4,39 @@ import { Header } from "antd/es/layout/layout";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
+import { NotificationBell } from "../Notification/NotificationBellAdmin";
 
-export const AdminHeader = (props) => {
-    const { collapsed, toggleCollapsed } = props;
+export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
     const location = useLocation();
     const [title, setTitle] = useState("");
     const { logout, user } = useContext(AuthContext);
 
-    // console.log("AdminHeader rendered", user);
-
     useEffect(() => {
-        if (location.pathname === "/admin") {
+        const path = location.pathname;
+        if (path === "/admin") {
             setTitle("BẢNG ĐIỀU KHIỂN");
-        } else if (location.pathname.includes("users-members")) {
+        } else if (path.includes("users-members")) {
             setTitle("QUẢN LÝ THÀNH VIÊN");
-        } else if (location.pathname.includes("users-employees")) {
+        } else if (path.includes("users-employees")) {
             setTitle("QUẢN LÝ NHÂN VIÊN");
-        } else if (location.pathname.includes("promotions")) {
+        } else if (path.includes("promotions")) {
             setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
-        } else if (location.pathname.includes("room-list")) {
+        } else if (path.includes("room-list")) {
             setTitle("QUẢN LÝ PHÒNG CHIẾU");
-        } else if (location.pathname.includes("activity-logs")) {
-            setTitle("LỊCH SỬ HOẠT ĐỘNG");
-        } else if (location.pathname.includes("movie-type")) {
+        } else if (path.includes("movie-type")) {
             setTitle("QUẢN LÝ THỂ LOẠI PHIM");
-        } else if (location.pathname.includes("movies")) {
+        } else if (path.includes("movies") || path.includes("movies")) {
             setTitle("QUẢN LÝ PHIM");
+        } else if (path.includes("faretype-list")) {
+            setTitle("QUẢN LÝ LOẠI VÉ");
+        } else if (path.includes("booking-list")) {
+            setTitle("QUẢN LÝ LỊCH SỬ ĐẶT VÉ");
+        } else if (path.includes("review-list")) {
+            setTitle("QUẢN LÝ BÌNH LUẬN");
+        } else if (path.includes("activity-logs")) {
+            setTitle("LỊCH SỬ HOẠT ĐỘNG");
+        } else {
+            setTitle("");
         }
     }, [location.pathname]);
 
@@ -49,16 +56,6 @@ export const AdminHeader = (props) => {
         {
             type: "divider",
         },
-        // {
-        //     key: '2',
-        //     label:
-        //         <>
-        //             <div className="flex gap-3">
-        //                 <UserOutlined />
-        //                 <p>Tài khoản</p>
-        //             </div>
-        //         </>,
-        // },
         {
             key: "3",
             label: (
@@ -85,8 +82,8 @@ export const AdminHeader = (props) => {
                     zIndex: 1,
                 }}
             >
+                {/* Bên trái - Toggle & Title */}
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    {/* Nút toggle navbar */}
                     <Button
                         type="text"
                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -102,7 +99,7 @@ export const AdminHeader = (props) => {
                 </div>
 
                 {/* Phần bên phải của Header */}
-                <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="flex items-center">
                     <span
                         style={{
                             color: "#666",
@@ -113,7 +110,8 @@ export const AdminHeader = (props) => {
                         Chào mừng Admin!
                     </span>
 
-                    {/* Có thể thêm avatar, notification, logout button ở đây */}
+                    {/* Notification Bell */}
+                    <NotificationBell />
 
                     <div>
                         <Dropdown menu={{ items }} placement="bottomRight">

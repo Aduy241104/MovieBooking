@@ -49,3 +49,4 @@ backend/*.sqlite
 Thumbs.db
 *.log
 logs/
+documentation/
