@@ -3,13 +3,17 @@ package com.example.demo.service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
 import com.example.demo.model.Role;
 import com.example.demo.repository.RoleRepository;
@@ -273,30 +277,28 @@ public class AccountService {
      * @param monthCount the number of months to look back
      * @return a DTO containing user registration statistics
      */
-    public UserRegistrationsResponse getUserRegistrationsDTO(int monthCount) {
+    public List<UserRegistrationsResponse> getUserRegistrationsDTO(int monthCount) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fromDate = now.minusMonths(monthCount - 1).withDayOfMonth(1).toLocalDate().atStartOfDay();
-        LocalDateTime toDate = now.plusDays(1).toLocalDate().atStartOfDay();
-
-        List<UserRegistrationsResponse.UserRegistrations> userRegistrationsList = new ArrayList<>();
+        LocalDateTime fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate().atStartOfDay();
+        LocalDateTime toDate = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
         List<Object[]> stats = accountRepository.getUserRegistrationsByMonth(fromDate, toDate);
+
+        Map<LocalDate, UserRegistrationsResponse> map = new HashMap<>();
         for (Object[] row : stats) {
-            Object dateObj = row[0];
-            LocalDate monthStart = switch (dateObj) {
-                case java.sql.Timestamp ts -> ts.toLocalDateTime().toLocalDate();
-                case java.time.Instant instant -> instant.atZone(ZoneId.systemDefault()).toLocalDate();
-                case LocalDateTime ldt -> ldt.toLocalDate();
-                case LocalDate ld -> ld;
-                default -> throw new RuntimeException("Unknown date type: " + dateObj.getClass());
-            };
+            LocalDate monthStart = ((Instant) row[0]).atZone(ZoneId.systemDefault()).toLocalDate();
             Long newUsers = ((Number) row[1]).longValue();
             Long totalUsers = ((Number) row[2]).longValue();
-            userRegistrationsList
-                    .add(new UserRegistrationsResponse.UserRegistrations(monthStart, newUsers, totalUsers));
+            map.put(monthStart, new UserRegistrationsResponse(monthStart, newUsers, totalUsers));
         }
-        return UserRegistrationsResponse.builder()
-                .data(userRegistrationsList)
-                .build();
+        List<UserRegistrationsResponse> result = new ArrayList<>();
+        for (int i = 0; i < monthCount; i++) {
+            LocalDate monthStart = fromDate.plusMonths(i).withDayOfMonth(1).toLocalDate();
+            UserRegistrationsResponse resp = map.getOrDefault(
+                    monthStart,
+                    new UserRegistrationsResponse(monthStart, 0L, 0L));
+            result.add(resp);
+        }
+        return result;
     }
 
     private void setLogAndNotification(Long accountId, String action, String description,
@@ -307,6 +309,7 @@ public class AccountService {
         }
 
         String loginUserId = SecurityUtils.getCurrentUsername();
+        System.out.println(">>> LOI SML 22: " + loginUserId);
         if (loginUserId == null || loginUserId.isEmpty()) {
             throw new RuntimeException("Current user not found");
         }

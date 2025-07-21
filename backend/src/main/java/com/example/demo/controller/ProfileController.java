@@ -36,7 +36,6 @@ public class ProfileController {
                 .message("account found")
                 .result(profileDTO)
                 .build();
-
     }
 
     @PutMapping("/update-profile")
@@ -101,5 +100,4 @@ public class ProfileController {
                 .result(accountRespond)
                 .build();
     }
-
 }

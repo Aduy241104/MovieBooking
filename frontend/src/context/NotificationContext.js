@@ -21,11 +21,8 @@ export const NotificationProvider = ({ children }) => {
 
     // Fetch notifications and update unread count
     const fetchNotifications = useCallback(async () => {
-        if (!localStorage.getItem("token")) {
-            setNotifications([]);
-            setUnreadCount(0);
-            return;
-        }
+        const token = localStorage.getItem("token");
+        if (!token) return;
         try {
             setIsLoading(true);
             const res = await fetchNotificationsAPI();

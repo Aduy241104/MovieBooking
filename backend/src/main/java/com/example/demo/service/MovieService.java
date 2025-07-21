@@ -218,8 +218,10 @@ public class MovieService {
     private void setLogAndNotification(Movie movie, String action, String description,
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();
+        System.out.println(">>> LOI SML 1: " + loginUserId);
         if(loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+//            throw new RuntimeException("Current user not found");
+            System.out.println(">>> LOI SML 2");
         }
         Account user = accountRepository.findById(Long.valueOf(loginUserId))
                 .orElseThrow(() -> new RuntimeException("Current user not found"));

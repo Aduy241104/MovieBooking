@@ -19,6 +19,8 @@ import com.example.demo.model.Account;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
@@ -135,9 +137,9 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/accounts/customers-registrations")
-    public UserRegistrationsResponse getUserRegistrations() {
-        return accountService.getUserRegistrationsDTO(6);
-    }
+//    @GetMapping("/accounts/customers-registrations")
+//    public List<UserRegistrationsResponse> getUserRegistrations() {
+//        return accountService.getUserRegistrationsDTO(6);
+//    }
 
 }

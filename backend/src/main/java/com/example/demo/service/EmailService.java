@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
@@ -31,7 +30,7 @@ public class EmailService {
      * và "tiêm" chúng vào đây khi khởi tạo EmailService.
      * Annotation @Autowired ở đây là không bắt buộc nếu class chỉ có 1 constructor.
      */
-    @Autowired
+
     public EmailService(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
         this.javaMailSender = javaMailSender; // Gán giá trị cho javaMailSender
         this.templateEngine = templateEngine; // Gán giá trị cho templateEngine

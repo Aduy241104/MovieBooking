@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "../../../config/axios";
+import axios from "../../../../config/axios";
 import { Spin, message, Button, Modal } from "antd";
 import { useParams } from "react-router-dom";
 import { PlayCircleOutlined, StarFilled } from "@ant-design/icons";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { fetchArtistAPI, findMovieByNameAPI } from "../../../service/TmdbService";
-import { getAverageRatingAndCountByMovieId } from "../../../service/ReviewService";
+import { fetchArtistAPI, findMovieByNameAPI } from "../../../../service/TmdbService";
+import { getAverageRatingAndCountByMovieId } from "../../../../service/ReviewService";
 
 const FilmDetail = () => {
   const { id } = useParams();

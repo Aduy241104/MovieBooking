@@ -55,9 +55,7 @@ public class ProfileService {
         account.setFullName(profileRequest.getFullName());
         account.setGender(profileRequest.getGender());
         account.setPhoneNumber(profileRequest.getPhoneNumber());
-        // account.setIdentityCard(profileRequest.getIdentityCard());
         account.setDateOfBirth(profileRequest.getDateOfBirth());
-        // account.setAvatar(profileRequest.getAvatar());
 
         accountRepository.save(account);
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);

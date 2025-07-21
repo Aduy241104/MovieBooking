@@ -3,10 +3,8 @@
     top: 56px;
     left: 0;
     width: 100vw;
-    height: 93vh;
-    backdrop-filter: blur(8px);
+    height: 930px;
     background-color: rgba(0, 0, 0, 0.3); // làm tối nhẹ
-    z-index: 998; // dưới Tippy nhưng trên giao diện
 }
 
 .search-place {
@@ -15,6 +13,7 @@
     width: 290px;
     background-color: rgba(202, 202, 202, 0.3);
     padding-left: 14px !important;
+    padding-top: 7px !important;
 
     input::placeholder {
         color: rgb(246, 242, 242);

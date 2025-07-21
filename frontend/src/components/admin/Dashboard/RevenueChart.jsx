@@ -1,23 +1,13 @@
-import React from 'react';
-import { Button, Space } from 'antd';
-import {
-    ComposedChart,
-    Line,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer
-} from 'recharts';
-import dayjs from 'dayjs';
+import React from "react";
+import { Button, Space } from "antd";
+import { ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import dayjs from "dayjs";
 
 export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
     const formatCurrency = (value) => {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
+        return new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
         }).format(value);
     };
 
@@ -32,9 +22,9 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
     };
 
     const timeRangeOptions = [
-        { key: 'day', label: 'Theo ngày', icon: '📅' },
-        { key: 'week', label: 'Theo tuần', icon: '📊' },
-        { key: 'month', label: 'Theo tháng', icon: '📈' }
+        { key: "day", label: "Theo ngày", icon: "📅" },
+        { key: "week", label: "Theo tuần", icon: "📊" },
+        { key: "month", label: "Theo tháng", icon: "📈" },
     ];
 
     return (
@@ -45,7 +35,7 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                     {timeRangeOptions.map((option) => (
                         <Button
                             key={option.key}
-                            type={timeRange === option.key ? 'primary' : 'default'}
+                            type={timeRange === option.key ? "primary" : "default"}
                             size="small"
                             onClick={() => onTimeRangeChange(option.key)}
                             className="flex items-center gap-1"
@@ -56,82 +46,66 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                     ))}
                 </Space>
                 <div className="text-sm text-gray-500">
-                    {timeRange === 'day' && 'Doanh thu 7 ngày gần nhất'}
-                    {timeRange === 'week' && 'Doanh thu 6 tuần gần nhất'}
-                    {timeRange === 'month' && 'Doanh thu 6 tháng gần nhất'}
+                    {timeRange === "day" && "Doanh thu 7 ngày gần nhất"}
+                    {timeRange === "week" && "Doanh thu 6 tuần gần nhất"}
+                    {timeRange === "month" && "Doanh thu 6 tháng gần nhất"}
                 </div>
             </div>
 
             {/* Chart */}
-            <div style={{ width: '100%', height: 400 }}>
+            <div style={{ width: "100%", height: 400 }}>
                 <ResponsiveContainer>
-                    <ComposedChart
-                        data={data}
-                        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
+                    <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
                             dataKey="name"
                             fontSize={12}
-                            tickFormatter={value => {
-                                if (timeRange === 'day') {
-                                    return dayjs(value).format('DD/MM');
+                            tickFormatter={(value) => {
+                                if (timeRange === "day") {
+                                    return dayjs(value).format("DD/MM");
                                 }
-                                if (timeRange === 'week') {
+                                if (timeRange === "week") {
                                     const startOfWeek = dayjs(value);
-                                    return `${startOfWeek.format('DD/MM')} - ${startOfWeek.add(6, 'day').format('DD/MM')}`;
+                                    return `${startOfWeek.format("DD/MM")} - ${startOfWeek
+                                        .add(6, "day")
+                                        .format("DD/MM")}`;
                                 }
-                                if (timeRange === 'month') {
-                                    return dayjs(value).format('MM/YYYY');
+                                if (timeRange === "month") {
+                                    return dayjs(value).format("MM/YYYY");
                                 }
                             }}
                         />
-                        <YAxis
-                            yAxisId="left"
-                            orientation="left"
-                            tickFormatter={formatYAxis}
-                            fontSize={12}
-                        />
-                        <YAxis
-                            yAxisId="right"
-                            orientation="right"
-                            fontSize={12}
-                        />
+                        <YAxis yAxisId="left" orientation="left" tickFormatter={formatYAxis} fontSize={12} />
+                        <YAxis yAxisId="right" orientation="right" fontSize={12} allowDecimals={false} />
                         <Tooltip
                             formatter={(value, name) => {
-                                if (name === 'Doanh thu') {
-                                    return [formatCurrency(value), 'Doanh thu'];
+                                if (name === "Doanh thu") {
+                                    return [formatCurrency(value), "Doanh thu"];
                                 }
-                                return [value, 'Số vé'];
+                                return [value, "Số vé"];
                             }}
-                            labelFormatter={label => {
-                                if (timeRange === 'day') {
-                                    return `${dayjs(label).format('DD/MM/YYYY')}`;
+                            labelFormatter={(label) => {
+                                if (timeRange === "day") {
+                                    return `${dayjs(label).format("DD/MM/YYYY")}`;
                                 }
-                                if (timeRange === 'week') {
+                                if (timeRange === "week") {
                                     const startOfWeek = dayjs(label);
-                                    const endOfWeek = startOfWeek.add(6, 'day');
-                                    return `${startOfWeek.format('DD/MM/YYYY')} - ${endOfWeek.format('DD/MM/YYYY')}`;
+                                    const endOfWeek = startOfWeek.add(6, "day");
+                                    return `${startOfWeek.format("DD/MM/YYYY")} - ${endOfWeek.format("DD/MM/YYYY")}`;
                                 }
-                                if (timeRange === 'month') {
-                                    return `${dayjs(label).format('MM/YYYY')}`;
+                                if (timeRange === "month") {
+                                    return `${dayjs(label).format("MM/YYYY")}`;
                                 }
                             }}
-                            labelStyle={{ color: '#000' }}
+                            labelStyle={{ color: "#000" }}
                             contentStyle={{
-                                backgroundColor: '#fff',
-                                border: '1px solid #ccc',
-                                borderRadius: '6px'
+                                backgroundColor: "#fff",
+                                border: "1px solid #ccc",
+                                borderRadius: "6px",
                             }}
                         />
                         <Legend />
-                        <Bar
-                            yAxisId="left"
-                            dataKey="revenue"
-                            fill="#8884d8"
-                            name="Doanh thu"
-                            radius={[4, 4, 0, 0]}
-                        />
+                        <Bar yAxisId="left" dataKey="revenue" fill="#8884d8" name="Doanh thu" radius={[4, 4, 0, 0]} />
                         <Line
                             yAxisId="right"
                             type="monotone"
@@ -139,8 +113,8 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                             stroke="#82ca9d"
                             strokeWidth={3}
                             name="Số vé"
-                            dot={{ fill: '#82ca9d', strokeWidth: 2, r: 4 }}
-                            activeDot={{ r: 6, stroke: '#82ca9d', strokeWidth: 2 }}
+                            dot={{ fill: "#82ca9d", strokeWidth: 2, r: 4 }}
+                            activeDot={{ r: 6, stroke: "#82ca9d", strokeWidth: 2 }}
                         />
                     </ComposedChart>
                 </ResponsiveContainer>

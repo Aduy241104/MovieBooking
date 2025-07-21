@@ -11,11 +11,12 @@ export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
     success: null,
     submitting: false,
   });
-
+const token = localStorage.getItem('token')
+  console.log(">>> Token: " + token)
   useEffect(() => {
     const fetchType = async () => {
       try {
-        const data = await axiosClient.get(`/public/types/${typeId}`);
+        const data = await axiosClient.get(`/types/${typeId}`);
         setForm((f) => ({ ...f, name: data.name, loading: false }));
       } catch {
         setForm((f) => ({
@@ -41,10 +42,13 @@ export default function EditTypeForm({ typeId, onSuccess, onCancel }) {
     setForm((f) => ({ ...f, submitting: true }));
 
     try {
-      await axios.put(`http://localhost:8081/api/public/types/${typeId}`, {
+      await axios.put(`http://localhost:8081/api/types/${typeId}`, {
         id: typeId,
         name: form.name,
-      });
+      }, {headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }});
 
       setForm((f) => ({
         ...f,
