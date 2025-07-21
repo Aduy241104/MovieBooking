@@ -84,6 +84,7 @@ function FadeSlide() {
                             } }
                         >
                             <div className='opacit'>
+                                <div className="none-display" onClick={ () => navigate(`/movie-detail/${item.id}`) } ></div>
                                 <div className="dot-grid">
                                     <div className='content-slide'>
                                         <div className='infor-movie'>

@@ -8,6 +8,27 @@
     overflow: hidden;
 }
 
+.warpperSmall {
+    height: 280px;
+    font-size: 14px;
+    width: auto;
+    background-color: rgb(46, 46, 46);
+    border-radius: 7px;
+    color: black !important;
+    display: flex;
+    align-items: center;
+
+    .poster {
+        height: 70%;
+        width: 90%; 
+        border-radius: 6px !important; 
+    }
+
+    .nameVN {
+        padding: 5px 2px;
+    }
+}
+
 .poster {
     height: 80%;
     width: 100%;
