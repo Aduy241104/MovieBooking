@@ -45,17 +45,37 @@ public class ChatService {
             // Phân tích câu hỏi mới
             com.example.demo.utils.QuestionAnalyzer.QueryInfo newInfo = com.example.demo.utils.QuestionAnalyzer
                     .analyze(userContent);
-            // Merge context: nếu thiếu thông tin, lấy từ context cũ
-            if (oldInfo != null) {
-                if (newInfo.movieName == null)
+            // Merge context: chỉ merge khi thật sự phù hợp và liên quan
+            if (oldInfo != null && shouldMergeContext(userContent, newInfo, oldInfo)) {
+                // Chỉ merge movieName khi:
+                // 1. Câu hỏi mới không có tên phim (newInfo.movieName == null)
+                // 2. Câu hỏi mới liên quan đến phim (có intent về phim)
+                // 3. Câu hỏi mới KHÔNG phải là câu hỏi về tên phim cụ thể mới
+                // 4. Câu hỏi mới KHÔNG phải là câu hỏi chung chung về phim (như "phim gì",
+                // "phim nào")
+                if (newInfo.movieName == null &&
+                        (newInfo.movie_showtimes || newInfo.movie_info || newInfo.movie_pricing ||
+                                newInfo.movie_booking || newInfo.movie_release_date)
+                        &&
+                        !userContent.toLowerCase().matches(
+                                ".*phim\\s+[a-zA-Z0-9\u00C0-\u1EF9\\s:&'\"!.,-]+\\s+(khi nào chiếu|có|được|là).*")
+                        &&
+                        !userContent.toLowerCase().matches(".*(phim gì|phim nào|những bộ phim|các bộ phim).*")) {
                     newInfo.movieName = oldInfo.movieName;
-                if (newInfo.genre == null)
+                }
+
+                // Không merge genre trừ khi câu hỏi thực sự liên quan đến thể loại
+                if (newInfo.genre == null && newInfo.movie_genre && oldInfo.genre != null) {
                     newInfo.genre = oldInfo.genre;
-                if (newInfo.date == null)
+                }
+
+                // Chỉ merge date/time khi câu hỏi về lịch chiếu
+                if (newInfo.date == null && newInfo.movie_showtimes && oldInfo.date != null) {
                     newInfo.date = oldInfo.date;
-                if (newInfo.time == null)
+                }
+                if (newInfo.time == null && newInfo.movie_showtimes && oldInfo.time != null) {
                     newInfo.time = oldInfo.time;
-                // ... mở rộng cho các trường khác nếu cần ...
+                }
             }
             // Lưu lại context mới
             chatSessionContextService.updateContext(sessionId, newInfo);
@@ -89,6 +109,34 @@ public class ChatService {
         }
         // Nếu không có thì mới random (chỉ nên random ở lần đầu)
         return java.util.UUID.randomUUID().toString();
+    }
+
+    /**
+     * Kiểm tra xem có nên merge context hay không
+     */
+    private boolean shouldMergeContext(String userContent,
+            com.example.demo.utils.QuestionAnalyzer.QueryInfo newInfo,
+            com.example.demo.utils.QuestionAnalyzer.QueryInfo oldInfo) {
+        String lowerContent = userContent.toLowerCase();
+
+        // Không merge nếu câu hỏi mới có intent hoàn toàn khác biệt
+        if (newInfo.account_management || newInfo.contact_support ||
+                newInfo.cinema_location || newInfo.promotion_discount ||
+                newInfo.technical_support || newInfo.ticket_policy) {
+            return false;
+        }
+
+        // Không merge nếu câu hỏi hỏi về thể loại mới
+        if (lowerContent.contains("thể loại") || lowerContent.contains("genre")) {
+            return false;
+        }
+
+        // Không merge nếu câu hỏi hỏi về danh sách phim chung
+        if (lowerContent.matches(".*(phim gì|phim nào|những bộ phim|các bộ phim|danh sách phim).*")) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -8,7 +8,7 @@ import Avatar from "../../../components/Avatar/Avatar";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import menu from "./MenuItem/menu";
-// import { NotificationBell } from "../../../components/Notification/NotificationBell";
+import { NotificationBell } from "../../../components/Notification/NotificationBell";
 
 const cx = classNames.bind(styles);
 
@@ -43,10 +43,10 @@ function Header({ user }) {
                         <CustomizeText level={"h4"}>G4</CustomizeText>
                     </div>
 
-                    {/* Menu Toggle - Mobile only */ }
-                    <button className="d-lg-none bg-transparent border-0 text-white d-flex align-items-center" >
+                    {/* Menu Toggle - Mobile only */}
+                    <button className="d-lg-none bg-transparent border-0 text-white d-flex align-items-center">
                         <Search />
-                        <i onClick={ toggleMenu } className="fa-solid fa-bars fa-xl"></i>
+                        <i onClick={toggleMenu} className="fa-solid fa-bars fa-xl"></i>
                     </button>
 
                     {/* Navigation & Actions - Desktop */}
@@ -96,13 +96,13 @@ function Header({ user }) {
             {isMenuOpen && (
                 <div className={cx("mobileMenu")}>
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CustomizeText level={ 'h4' }>MENU</CustomizeText>
-                   
-                        <button className="bg-transparent border-0 text-white" onClick={ closeMenu }>
+                        <CustomizeText level={"h4"}>MENU</CustomizeText>
+
+                        <button className="bg-transparent border-0 text-white" onClick={closeMenu}>
                             <i className="fa-solid fa-xmark fa-xl"></i>
                         </button>
                     </div>
-                    
+
                     <ul className="list-unstyled text-light fw-bold mb-4">
                         <li className="py-2 border-bottom border-dark">Lịch chiếu</li>
                         <li className="py-2 border-bottom border-dark">Phim Chiếu</li>
