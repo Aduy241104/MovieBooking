@@ -17,7 +17,7 @@ function CustomizeButton({ to, href, onClick, className, children, gold, primary
         large,
         rounded,
         roundedBig
-    })
+    }) 
 
     const props = {
         onClick,

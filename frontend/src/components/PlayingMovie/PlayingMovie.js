@@ -16,16 +16,11 @@ function PlayingMovie() {
     const dispatch = useDispatch();
     const nowPlaying = useSelector(state => state.movie.nowPlaying);
 
-
     useEffect(() => {
         if (nowPlaying.status === "idle") {
             dispatch(fetchNowPlaying())
         }
     }, [dispatch, nowPlaying.status])
-
-
-    console.log("test data from redux: ", nowPlaying);
-
 
     // useEffect(() => {
     //     const fetchData = async () => {

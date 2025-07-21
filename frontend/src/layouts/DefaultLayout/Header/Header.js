@@ -56,7 +56,7 @@ function Header({ user }) {
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
                                 <li className="fs-7" onClick={ () => navigate('/') }>Trang chủ</li>
-                                <li className="fs-7">Lịch chiếu</li>
+                                <li className="fs-7" onClick={() => navigate('/movies/now-playing')}>Lịch chiếu</li>
                                 <li className="fs-7">Sắp Chiếu</li>
                                 <li className="fs-7">Top Phim</li>
                             </ul>

@@ -5,24 +5,24 @@ import "./styles/login.css";
 import LoginPage from "./Page/AuthPage/LoginPage";
 import SignUpPage from "./Page/AuthPage/SignUpPage";
 
-import { AdminLayout } from "./layouts/AdminLayout/AdminLayout";
+// import { AdminLayout } from "./layouts/AdminLayout/AdminLayout";
 
-import RoomList from "./components/admin/Room/RoomList";
-import CreateRoom from "./components/admin/Room/CreateRoom";
-import RoomDetail from "./components/admin/Room/RoomDetail";
-import EditRoom from "./components/admin/Room/EditRoom";
-import TypeList from "./components/admin/Movie/MovieType/TypeList";
+// import RoomList from "./components/admin/Room/RoomList";
+// import CreateRoom from "./components/admin/Room/CreateRoom";
+// import RoomDetail from "./components/admin/Room/RoomDetail";
+// import EditRoom from "./components/admin/Room/EditRoom";
+// import TypeList from "./components/admin/Movie/MovieType/TypeList";
 
-import { UserPage } from "./Page/admin/UserPage";
-import { UserDetailPage } from "./Page/admin/UserDetailPage";
-import { PromotionPage } from "./Page/admin/PromotionPage";
-import { DashboardPage } from "./Page/admin/DashboardPage";
+// import { UserPage } from "./Page/admin/UserPage";
+// import { UserDetailPage } from "./Page/admin/UserDetailPage";
+// import { PromotionPage } from "./Page/admin/PromotionPage";
+// import { DashboardPage } from "./Page/admin/DashboardPage";
 import HomePage from "./Page/Home/HomePage";
 import MovieDetail from "./Page/MovieDetail/MovieDetail";
 
-import MovieList from "./components/admin/Movie/Movie/MovieList";
-import AddMovie from "./components/admin/Movie/Movie/AddMovie";
-import EditMovie from "./components/admin/Movie/Movie/EditMovie";
+// import MovieList from "./components/admin/Movie/Movie/MovieList";
+// import AddMovie from "./components/admin/Movie/Movie/AddMovie";
+// import EditMovie from "./components/admin/Movie/Movie/EditMovie";
 
 import Profile from "./Page/ProfilePage/Profile/Profile";
 import ChangePassword from "./Page/ProfilePage/ChangePassword/ChangePassword";
@@ -32,14 +32,15 @@ import { useContext } from "react";
 import { AuthContext } from "./context/AuthContext";
 import RequestForgotPassword from "./Page/AuthPage/RequestForgotPassword";
 import ResetPassword from "./Page/AuthPage/ResetPassword";
-import { ActivityLogPage } from "./Page/admin/ActivityLogPage";
+// import { ActivityLogPage } from "./Page/admin/ActivityLogPage";
 
-import BookingPage from "./Page/Booking/BookingPage";
-import BookingSuccessPage from "./Page/Booking/BookingSuccess/BookingSuccessPage";
-import BookingFailurePage from "./Page/Booking/BookingFailure/BookingFailurePage";
+// import BookingPage from "./Page/Booking/BookingPage";
+// import BookingSuccessPage from "./Page/Booking/BookingSuccess/BookingSuccessPage";
+// import BookingFailurePage from "./Page/Booking/BookingFailure/BookingFailurePage";
 import BookingHistoryPage from "./Page/Booking/BookingHistory/BookingHistoryPage"; // Tạo component này nếu muốn
 import BookingDetailPage from "./Page/Booking/BookingDetail/BookingDetailPage";
-import { EmployeeLayout } from "./layouts/EmployeeLayout/EmployeeLayout";
+import MovieListPage from "./Page/MovieListPage";
+// import { EmployeeLayout } from "./layouts/EmployeeLayout/EmployeeLayout";
 
 const PrivateRoute = ({ children }) => {
     const { user, isAuthLoaded } = useContext(AuthContext);
@@ -60,7 +61,7 @@ const ProtectedRoute = ({ children }) => {
     if (!user) {
         // Sau khi auth đã load xong, nếu không có user thì redirect
         console.log("ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login");
-        return <Navigate to="/login" state={{ from: location }} replace />;
+        return <Navigate to="/login" state={ { from: location } } replace />;
     }
     return children;
 };
@@ -71,26 +72,27 @@ function App() {
     return (
         <>
             <Routes>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<SignUpPage />} />
-                <Route path="/" element={<HomePage />} />
-                <Route path="/movie-detail/:id" element={<MovieDetail />} />
-                <Route path="/forgot-password" element={<RequestForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/login" element={ <LoginPage /> } />
+                <Route path="/register" element={ <SignUpPage /> } />
+                <Route path="/" element={ <HomePage /> } />
+                <Route path="/movie-detail/:id" element={ <MovieDetail /> } />
+                <Route path="/forgot-password" element={ <RequestForgotPassword /> } />
+                <Route path="/reset-password" element={ <ResetPassword /> } />
+                <Route path="/movies/:type" element={ <MovieListPage /> } />
 
-                {/* Profile routes */}
-                <Route path="/profile" element={<ProfileLayout />}>
-                    <Route index element={<Profile />} />
-                    <Route path="password" element={<ChangePassword />} />
-                    <Route path="transactions" element={<Profile />} />
+                {/* Profile routes */ }
+                <Route path="/profile" element={ <ProfileLayout /> }>
+                    <Route index element={ <Profile /> } />
+                    <Route path="password" element={ <ChangePassword /> } />
+                    <Route path="transactions" element={ <Profile /> } />
                 </Route>
-                {/* muốn có profile layout thì để vào đây~~ */}
-                <Route element={<ProfileLayout />}>
-                    <Route path="/booking/history" element={<BookingHistoryPage />} />
-                    <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
+                {/* muốn có profile layout thì để vào đây~~ */ }
+                <Route element={ <ProfileLayout /> }>
+                    <Route path="/booking/history" element={ <BookingHistoryPage /> } />
+                    <Route path="/booking/details/:bookingId" element={ <BookingDetailPage /> } />
                 </Route>
 
-                <Route
+                {/* <Route
                     path="/booking"
                     element={
                         <ProtectedRoute>
@@ -123,55 +125,55 @@ function App() {
                             <BookingDetailPage />
                         </ProtectedRoute>
                     }
-                />
+                /> */}
 
-                {/* Admin routes */}
-                <Route
+                {/* Admin routes */ }
+                {/* <Route
                     path="/admin"
                     element={
                         <PrivateRoute>
                             <AdminLayout />
                         </PrivateRoute>
                     }
-                >
-                    {/* Dashboard */}
-                    <Route index element={<DashboardPage />} />
-                    {/* Room routes */}
-                    <Route path="room-list" element={<RoomList />} />
+                > */}
+                {/* Dashboard */ }
+                {/* <Route index element={<DashboardPage />} /> */ }
+                {/* Room routes */ }
+                {/* <Route path="room-list" element={<RoomList />} />
                     <Route path="room-list/add-room" element={<CreateRoom />} />
                     <Route path="room-list/room/:id" element={<RoomDetail />} />
-                    <Route path="room-list/room/edit/:id" element={<EditRoom />} />
-                    {/* Movie routes */}
-                    <Route path="movie-type" element={<TypeList />} />
+                    <Route path="room-list/room/edit/:id" element={<EditRoom />} /> */}
+                {/* Movie routes */ }
+                {/* <Route path="movie-type" element={<TypeList />} />
                     <Route path="movies" element={<MovieList />} />
                     <Route path="movies/add" element={<AddMovie />} />
-                    <Route path="movies/edit/:id" element={<EditMovie />} />
-                    {/* Customer routes */}
-                    <Route
+                    <Route path="movies/edit/:id" element={<EditMovie />} /> */}
+                {/* Customer routes */ }
+                {/* <Route
                         path="users-members"
                         element={<UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />}
                     />
                     <Route
                         path="users-members/:accountId"
                         element={<UserDetailPage key="members-detail" userText="Thành viên" />}
-                    />
-                    {/* Employee routes */}
-                    <Route
+                    /> */}
+                {/* Employee routes */ }
+                {/* <Route
                         path="users-employees"
                         element={<UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" />}
                     />
                     <Route
                         path="users-employees/:accountId"
                         element={<UserDetailPage key="employees-detail" userText="Nhân viên" />}
-                    />
-                    {/* Promotion routes */}
-                    <Route path="promotions" element={<PromotionPage promotionText="Mã khuyến mãi" />} />
-                    {/* Activity log routes */}
-                    <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
-                </Route>
+                    /> */}
+                {/* Promotion routes */ }
+                {/* <Route path="promotions" element={<PromotionPage promotionText="Mã khuyến mãi" />} /> */ }
+                {/* Activity log routes */ }
+                {/* <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+                </Route> */}
 
-                {/* Employee routes */}
-                <Route
+                {/* Employee routes */ }
+                {/* <Route
                     path="/employee"
                     element={
                         <PrivateRoute>
@@ -179,9 +181,9 @@ function App() {
                         </PrivateRoute>
                     }
                 >
-                    <Route index element={<h1>Employee Dashboard</h1>} />
-                    {/* Add more employee-specific routes here */}
-                </Route>
+                    <Route index element={<h1>Employee Dashboard</h1>} /> */}
+                {/* Add more employee-specific routes here */ }
+                {/* </Route> */ }
             </Routes>
         </>
     );
