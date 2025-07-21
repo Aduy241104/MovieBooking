@@ -21,6 +21,7 @@ const genreMenu = {
         ...GENRES.map((genre) => ({
             key: genre,
             label: <div onClick={ () => console.log("hello") }>{ genre }</div>,
+
         })),
     ],
 };
