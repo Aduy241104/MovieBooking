@@ -104,11 +104,10 @@ function App() {
                     <Route path="password" element={ <ChangePassword /> } />
                     <Route path="transactions" element={ <Profile /> } />
                     <Route path="notifications" element={ <Notification /> } />
+                    <Route path="booking-history" element={<BookingHistoryPage />} />
+                       <Route path="booking-details/:bookingId" element={<BookingDetailPage />} />
                 </Route>
-                <Route element={ <ProfileLayout /> }>
-                    <Route path="/booking/history" element={ <BookingHistoryPage /> } />
-                    <Route path="/booking/details/:bookingId" element={ <BookingDetailPage /> } />
-                </Route>
+                
                 {/* Booking */ }
                 <Route
                     path="/booking"
