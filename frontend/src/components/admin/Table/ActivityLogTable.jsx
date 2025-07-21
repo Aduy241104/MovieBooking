@@ -69,7 +69,7 @@ export const ActivityLogTable = ({ filter }) => {
             render: (text) => (
                 <>
                     <Tag color={text === "XOÁ" ? "volcano" : text === "CẬP NHẬT" ? "blue" : "green"}>
-                        {text === "XOÁ" ? "XOÁ" : text === "CẬP NHẬT" ? "CẬP NHẬT" : "THÊM"}
+                        {text === "XOÁ" ? "XOÁ" : text === "CẬP NHẬT" ? "CẬP NHẬT" : "TẠO MỚI"}
                     </Tag>
                 </>
             ),

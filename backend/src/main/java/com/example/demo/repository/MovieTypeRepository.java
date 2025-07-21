@@ -16,7 +16,7 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
     @Query(value = """
             SELECT
                 t.type_name AS name,
-                COUNT(DISTINCT m.movie_id) AS count,
+                COUNT(bs.booked_seat_id) AS count,
                 COALESCE(SUM(bs.price_paid), 0) AS revenue
             FROM type t
             JOIN movie_type mt ON t.type_id = mt.type_id
@@ -28,7 +28,10 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
             ORDER BY revenue DESC
             """, nativeQuery = true)
     List<Object[]> getMoviesByTypeRevenue();
+
     List<MovieType> findByMovie(Movie movie);
+
     void deleteByMovieId(Long movieId);
+
     List<MovieType> findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(String typeName);
 }
