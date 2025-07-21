@@ -52,7 +52,7 @@ export const PaymentMethodPage = () => {
 
     const filteredMethods = paymentMethods.filter((pm) => {
         const matchSearch = pm.name.toLowerCase().includes(search.toLowerCase());
-        const matchStatus = statusFilter === null || pm.active === statusFilter;
+        const matchStatus = statusFilter === undefined || pm.active === statusFilter || statusFilter === null;
         return matchSearch && matchStatus;
     });
 

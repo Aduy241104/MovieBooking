@@ -61,7 +61,7 @@ const PaymentTransactionPage = () => {
             (t.accountName && t.accountName.toLowerCase().includes(searchLower)) ||
             (t.paymentMethod && t.paymentMethod.toLowerCase().includes(searchLower));
 
-        const matchStatus = statusFilter === null || t.bookingStatus === statusFilter;
+        const matchStatus = statusFilter === null || t.bookingStatus === statusFilter || statusFilter === undefined;
 
         return matchSearch && matchStatus;
     });
@@ -104,10 +104,6 @@ const PaymentTransactionPage = () => {
                     case "PENDING":
                         color = "orange";
                         text = "Chờ thanh toán";
-                        break;
-                    case "CANCELLED":
-                        color = "red";
-                        text = "Đã hủy";
                         break;
                     default:
                         color = "gray";
@@ -153,8 +149,7 @@ const PaymentTransactionPage = () => {
                         onChange={(value) => setStatusFilter(value)}
                         options={[
                             { value: "PAID", label: "Đã thanh toán" },
-                            { value: "PENDING", label: "Chờ thanh toán" },
-                            { value: "CANCELLED", label: "Đã hủy" }
+                            { value: "PENDING", label: "Chờ thanh toán" }
                         ]}
                     />
                 </div>

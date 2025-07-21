@@ -101,10 +101,12 @@
 }
 
 .avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    margin-right: 10px;
+    margin-right: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .commentContent {

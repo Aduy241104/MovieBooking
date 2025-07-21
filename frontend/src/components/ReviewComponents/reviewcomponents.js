@@ -220,10 +220,6 @@ const ReviewBox = () => {
     };
 
 
-    // Gọi loadReviews khi component mount
-    // useEffect(() => {
-    //     loadReviews();
-    // }, [movieId]);
 
     console.log("test2: ", reviews);
     
@@ -328,7 +324,7 @@ const ReviewBox = () => {
                     />
                 </div>
 
-                <div className={styles.checkboxWrapper} style={{ padding: "10px 16px 0 16px" }} >
+                {/* <div className={styles.checkboxWrapper} style={{ padding: "10px 16px 0 16px" }} >
                     <label className={styles.checkbox}>
                         <input
                             type="checkbox"
@@ -338,7 +334,7 @@ const ReviewBox = () => {
                         />
                         Cảnh báo spoiler
                     </label>
-                </div>
+                </div> */}
                 <div className={styles.submitWrapper} >
                     <button type="submit" className={styles.button} disabled={submitting} style={{
                         backgroundColor: "#22222B", // nền vàng
@@ -375,13 +371,13 @@ const ReviewBox = () => {
                         <div className="card mb-3  text-light" key={r.id} style={{ backgroundColor: "#22222B", borderColor: "#2A2A2A" }}>
                             <div className="card-body d-flex">
                                 <img
-                                    src={r.avatar || "https://tse4.mm.bing.net/th/id/OIP.Kv5Yubx4NNPg5fVApv23wQHaLB?rs=1&pid=ImgDetMain&o=7&rm=3"}
+                                    src={r.avatar || "https://i.pinimg.com/originals/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg"}
                                     alt="avatar"
                                     className="rounded-circle me-3"
                                     style={{ width: "50px", height: "50px", objectFit: "cover" }}
                                     onError={(e) => {
                                         e.target.onerror = null; // tránh lặp vô hạn nếu ảnh fallback cũng lỗi
-                                        e.target.src = "https://tse4.mm.bing.net/th/id/OIP.Kv5Yubx4NNPg5fVApv23wQHaLB?rs=1&pid=ImgDetMain&o=7&rm=3";
+                                        e.target.src = "https://i.pinimg.com/originals/c6/e5/65/c6e56503cfdd87da299f72dc416023d4.jpg";
                                     }}
                                 />
 
@@ -436,9 +432,9 @@ const ReviewBox = () => {
                                         <span className="text-warning fw-bold">★</span> {r.rating}/10
                                     </div>
                                     <p className="mb-0">
-                                        {r.spoilerAlert && (
+                                        {/* {r.spoilerAlert && (
                                             <span className="badge bg-danger me-1">[Spoiler]</span>
-                                        )}
+                                        )} */}
                                         {r.comment}
                                     </p>
                                 </div>
