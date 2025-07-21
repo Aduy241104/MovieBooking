@@ -7,12 +7,14 @@ import useDebounce from '../../../hooks/useDebounce'
 import { searchMovieByName } from '../../../service/TheMovieService'
 import { useNavigate } from 'react-router-dom'
 
+
 const cx = classNames.bind(styles);
 
 function Search() {
     const [isShow, setShow] = useState(false);
     const [isLoading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
+    const [isCleared, setIsCleared] = useState(false);
     const [searchResult, setSearchResult] = useState([]);
     const [page, setPage] = useState({
         currentPage: 0,
@@ -22,7 +24,7 @@ function Search() {
     const inputRef = useRef(null);
 
     // debounce hook to delay API
-    const debounceValue = useDebounce(searchValue, 1000);
+    const debounceValue = useDebounce(searchValue, 700);
 
     //update stata for search value
     const handleChangeSearchValue = (e) => {
@@ -31,7 +33,9 @@ function Search() {
             return;
         } else if (value === "") {
             setSearchResult([])
+            setShow(false)
         }
+        setLoading(true);
         setSearchValue(value);
     }
 
@@ -39,6 +43,15 @@ function Search() {
     const handleClearSearchValue = () => {
         setSearchValue("");
         setSearchResult([]);
+        setShow(false);
+        // isCleared is a flag to control focus to input after clear search keyword
+        setIsCleared(true);
+    }
+
+    const handleShowResult = () => {
+        if (searchValue) {
+            setShow(true);
+        }
     }
 
     // use to load more search result
@@ -50,7 +63,8 @@ function Search() {
 
     // fetch data from server using axios 
     const fetchData = async () => {
-        setLoading(true);
+        
+        setShow(true)
         try {
             const response = await searchMovieByName(searchValue, page.currentPage, 4);
             const { Movie } = response.result;
@@ -81,12 +95,12 @@ function Search() {
         }
     }, [page.currentPage])
 
-    //focus input when open
     useEffect(() => {
-        if (isShow && inputRef.current) {
-            inputRef.current.focus();
+        if (searchValue === "" && isCleared) {
+            inputRef.current?.focus();
+            setIsCleared(false); // reset flag
         }
-    }, [isShow]);
+    }, [searchValue, isCleared]);
 
     return (
         <>
@@ -96,30 +110,14 @@ function Search() {
                     interactive={ true }
                     visible={ isShow }
                     placement="top-end"
-                    offset={ [24, 20] }
-                    onClickOutside={ () => { setShow(false); handleClearSearchValue() } }
+                    offset={ [2, 10] }
+                    onClickOutside={ () => { setShow(false) } }
                     render={ attrs => (
                         <div
-                            className={ cx("bg-light p-4 rounded-2 cursor-pointer", 'arr') }
+                            className={ cx("bg-light p-4 rounded-1 cursor-pointer", 'arr') }
                             tabIndex="-1"
                             { ...attrs }
                         >
-                            {/* header search layout */ }
-                            <div className={ cx('d-flex align-items-center p-2 border border-2 border-secondary rounded-2', 'search-place') }>
-                                <i className="fa-solid fa-magnifying-glass text-secondary"></i>
-                                <input
-                                    type="text"
-                                    placeholder='Kiếm gì đê'
-                                    ref={ inputRef }
-                                    className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill') }
-                                    value={ searchValue }
-                                    onChange={ (e) => handleChangeSearchValue(e) }
-                                />
-                                { (searchValue !== "") ? (
-                                    <i className="fa-solid fa-circle-xmark text-secondary" onClick={ () => handleClearSearchValue() }></i>
-                                ) : ("") }
-                            </div>
-
                             {/* result search */ }
                             { (!isLoading) ? (
                                 <div className={ cx('search-layout', 'custome-scroll-bar', 'mt-3 d-flex flex-column align-items-center') }>
@@ -159,17 +157,32 @@ function Search() {
                                 </div>
                             ) : (
                                 <div className='w-100 d-flex justify-content-center p-5'>
-                                    <div className="spinner-border text-danger" role="status">
+                                    {/* <div className="spinner-border text-danger" role="status">
                                         <span className="visually-hidden">Loading...</span>
-                                    </div>
+                                    </div> */}
+                                        <img src="/img/Animation - 1752043529548.gif" alt="" style={{width:'60px'}}  />
                                 </div>
                             ) }
                         </div>
                     ) }
                 >
-                    <button onClick={ () => setShow(true) } className="bg-transparent me-4 border-0">
+
+                    <div className={ cx('d-flex align-items-center p-2 rounded-3 me-3', 'search-place') }>
                         <i className="fa-solid fa-magnifying-glass text-light"></i>
-                    </button>
+                        <input
+                            type="text"
+                            placeholder='Kiếm gì đê'
+                            spellCheck={ false }
+                            ref={ inputRef }
+                            className={ cx('search-input', 'pe-2 ps-2 border-0 flex-fill text-light') }
+                            value={ searchValue }
+                            onChange={ (e) => handleChangeSearchValue(e) }
+                            onFocus={ () => handleShowResult() }
+                        />
+                        { (searchValue !== "") ? (
+                            <i className="fa-solid fa-circle-xmark text-light cursor-pointer" onClick={ () => handleClearSearchValue() }></i>
+                        ) : ("") }
+                    </div>
                 </Tippy>
             </div>
         </>

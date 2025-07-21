@@ -4,7 +4,7 @@ import { Send, MessageCircle, X, Bot, User } from "lucide-react";
 export const AIChatBox = () => {
     const [messages, setMessages] = useState([
         {
-            role: "ai",
+            role: "assistant",
             content: "Xin chào! Tôi là MovieBot Tôi có thể giúp gì cho bạn hôm nay?",
         },
     ]);
@@ -22,7 +22,7 @@ export const AIChatBox = () => {
         const decoder = new TextDecoder();
         let buffer = "";
         aiMsgRef.current = "";
-        setMessages((msgs) => [...msgs, { role: "ai", content: "" }]);
+        setMessages((msgs) => [...msgs, { role: "assistant", content: "" }]);
 
         while (true) {
             const { value, done } = await reader.read();
@@ -34,6 +34,7 @@ export const AIChatBox = () => {
             for (const line of lines) {
                 if (line.startsWith("data:")) {
                     const jsonStr = line.replace("data:", "").trim();
+                    // console.log("Received data:", jsonStr);
                     if (jsonStr && jsonStr !== "[DONE]") {
                         try {
                             const json = JSON.parse(jsonStr);
@@ -42,7 +43,7 @@ export const AIChatBox = () => {
                                 aiMsgRef.current += delta.content;
                                 setMessages((msgs) => {
                                     const last = msgs[msgs.length - 1];
-                                    if (last && last.role === "ai") {
+                                    if (last && last.role === "assistant") {
                                         return [...msgs.slice(0, -1), { ...last, content: aiMsgRef.current }];
                                     }
                                     return msgs;
@@ -68,7 +69,7 @@ export const AIChatBox = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    model: "vistral-7b-chat",
+                    // model: "openrouter/cypher-alpha:free",
                     messages: [{ role: "user", content: input }],
                     stream: true,
                 }),
@@ -79,21 +80,24 @@ export const AIChatBox = () => {
             } else {
                 const data = await res.json();
                 const aiMsg = data.result?.choices?.[0]?.message?.content || "Không có phản hồi từ AI.";
-                setMessages((msgs) => [...msgs, { role: "ai", content: aiMsg }]);
+                setMessages((msgs) => [...msgs, { role: "assistant", content: aiMsg }]);
             }
         } catch (e) {
-            setMessages((msgs) => [...msgs, { role: "ai", content: "Xin lỗi, hệ thống đang bận." }]);
+            setMessages((msgs) => [...msgs, { role: "assistant", content: "Xin lỗi, hệ thống đang bận." }]);
         }
 
         setLoading(false);
     };
 
     const quickReplies = [
-        { icon: "🎬", text: "Phim chiếu" },
-        { icon: "📅", text: "Lịch chiếu" },
+        // { icon: "🎬", text: "Phim chiếu" },
+        { icon: "📅", text: "Lịch chiếu phim hôm nay" },
+        { icon: "🔥", text: "Phim Hot" },
         { icon: "🎫", text: "Đặt vé" },
-        { icon: "🔥", text: "Hot" },
-        { icon: "💰", text: "Khuyến mãi" },
+        { icon: "💸", text: "Ưu đãi" },
+        { icon: "🔑", text: "Quên mật khẩu" },
+        { icon: "✏️", text: "Đăng ký tài khoản" },
+        // { icon: "👤", text: "Cập nhật thông tin cá nhân" },
     ];
 
     // Quick reply handler
@@ -115,10 +119,10 @@ export const AIChatBox = () => {
             } else {
                 const data = await res.json();
                 const aiMsg = data.result?.choices?.[0]?.message?.content || "Không có phản hồi từ AI.";
-                setMessages((msgs) => [...msgs, { role: "ai", content: aiMsg }]);
+                setMessages((msgs) => [...msgs, { role: "assistant", content: aiMsg }]);
             }
         } catch (e) {
-            setMessages((msgs) => [...msgs, { role: "ai", content: "Xin lỗi, hệ thống đang bận." }]);
+            setMessages((msgs) => [...msgs, { role: "assistant", content: "Xin lỗi, hệ thống đang bận." }]);
         }
         setLoading(false);
     };

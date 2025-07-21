@@ -138,5 +138,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<SingleMovieDTO> getTopBookedCurrentMovies(@Param("currentDate") LocalDate currentDate);
 
     boolean existsByBookingCode(String bookingCode); // code
+
+
+
+   //Tìm booking đang chờ thanh toán của một user cho một suất chiếu cụ thể.
+
+    Optional<Booking> findByAccountAccountIdAndScreeningIdAndBookingStatus(Long accountId, Long screeningId, String status);
+
+    /**
+     * Tìm tất cả các booking đang chờ và được tạo trước một thời điểm nhất định (đã hết hạn).
+     */
+    List<Booking> findAllByBookingStatusAndBookingTimeBefore(String status, LocalDateTime expirationTime);
+
 }
 

@@ -5,7 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 
-export const AdminHeader = (props) => {
+export const EmployeeHeader = (props) => {
     const { collapsed, toggleCollapsed } = props;
     const location = useLocation();
     const [title, setTitle] = useState("");
@@ -14,22 +14,10 @@ export const AdminHeader = (props) => {
     // console.log("AdminHeader rendered", user);
 
     useEffect(() => {
-        if (location.pathname === "/admin") {
+        if (location.pathname === "/employee") {
             setTitle("BẢNG ĐIỀU KHIỂN");
         } else if (location.pathname.includes("users-members")) {
             setTitle("QUẢN LÝ THÀNH VIÊN");
-        } else if (location.pathname.includes("users-employees")) {
-            setTitle("QUẢN LÝ NHÂN VIÊN");
-        } else if (location.pathname.includes("promotions")) {
-            setTitle("QUẢN LÝ MÃ GIẢM GIÁ");
-        } else if (location.pathname.includes("room-list")) {
-            setTitle("QUẢN LÝ PHÒNG CHIẾU");
-        } else if (location.pathname.includes("activity-logs")) {
-            setTitle("LỊCH SỬ HOẠT ĐỘNG");
-        } else if (location.pathname.includes("movie-type")) {
-            setTitle("QUẢN LÝ THỂ LOẠI PHIM");
-        } else if (location.pathname.includes("movies")) {
-            setTitle("QUẢN LÝ PHIM");
         }
     }, [location.pathname]);
 
@@ -41,7 +29,7 @@ export const AdminHeader = (props) => {
                 <>
                     <div className="flex flex-col">
                         <p className="text-black">{user?.email}</p>
-                        <p className="text-gray-500">Administrator</p>
+                        <p className="text-gray-500">Employee</p>
                     </div>
                 </>
             ),
@@ -110,7 +98,7 @@ export const AdminHeader = (props) => {
                             fontSize: "14px",
                         }}
                     >
-                        Chào mừng Admin!
+                        Chào mừng Employee!
                     </span>
 
                     {/* Có thể thêm avatar, notification, logout button ở đây */}

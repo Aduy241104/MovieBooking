@@ -1,10 +1,10 @@
 import { Layout } from "antd";
-import { LayoutDashboard, Ticket, Users, Film, Video, HandCoins, History } from 'lucide-react'
-
+import { LayoutDashboard, Ticket, Users, Film, Video, HandCoins, History } from "lucide-react";
 import { Menu } from 'antd'
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import './admin.scss'
+
 
 
 export const AdminSidebar = (props) => {
@@ -15,49 +15,49 @@ export const AdminSidebar = (props) => {
 
     const items = [
         {
-            key: 'dashboard',
+            key: "dashboard",
             icon: <LayoutDashboard size={20} strokeWidth={1.5} />,
-            label: <Link to={"/admin"}>Dashboard</Link>
+            label: <Link to={"/admin"}>Dashboard</Link>,
         },
         {
-            key: 'users',
+            key: "users",
             icon: <Users size={20} strokeWidth={1.5} />,
-            label: 'Người dùng',
+            label: "Người dùng",
             children: [
                 {
-                    key: 'members',
-                    label: <Link to={"users-members"}>Thành viên</Link>
+                    key: "members",
+                    label: <Link to={"users-members"}>Thành viên</Link>,
                 },
                 {
-                    key: 'employees',
-                    label: <Link to={"users-employees"}>Nhân viên</Link>
+                    key: "employees",
+                    label: <Link to={"users-employees"}>Nhân viên</Link>,
                 },
-            ]
+            ],
         },
         {
-            key: 'promotions',
+            key: "promotions",
             icon: <Ticket size={20} strokeWidth={1.5} />,
-            label: <Link to={"promotions"}>Mã khuyến mãi</Link>
+            label: <Link to={"promotions"}>Mã khuyến mãi</Link>,
         },
         {
-            key: 'room-list',
-            icon: <Video size={20} strokeWidth={1.5}/>,
-            label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>
+            key: "room-list",
+            icon: <Video size={20} strokeWidth={1.5} />,
+            label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>,
         },
         {
-            key: 'movie',
-            icon: <Film size={20} strokeWidth={1.5}/>,
-            label: 'Quản Lý Phim',
+            key: "movie",
+            icon: <Film size={20} strokeWidth={1.5} />,
+            label: "Quản Lý Phim",
             children: [
                 {
-                    key: 'movie',
-                    label: <Link to={"/admin/movies"}>Phim</Link>
+                    key: "movies",
+                    label: <Link to={"/admin/movies"}>Phim</Link>,
                 },
                 {
-                    key: 'type',
-                    label: <Link to="/admin/movie-type/">Thể loại</Link>
+                    key: "types",
+                    label: <Link to="/admin/movie-type/">Thể loại</Link>,
                 },
-            ]
+            ],
         },
         // {
 
@@ -66,6 +66,7 @@ export const AdminSidebar = (props) => {
         //     label: <Link to={"paymentmethod"}>Phương thức thanh toán</Link>
         // },
         {
+
             key: 'payment-management',
             icon: <HandCoins size={20} strokeWidth={1.5} />,
             label: 'Quản lí thanh toán',
@@ -84,11 +85,11 @@ export const AdminSidebar = (props) => {
         {
 
             key: 'activity-logs',
+
             icon: <History size={20} strokeWidth={1.5} />,
-            label: <Link to={"activity-logs"}>Lịch sử hoạt động</Link>
+            label: <Link to={"activity-logs"}>Lịch sử hoạt động</Link>,
         },
     ];
-
 
     // Xác định selectedKeys dựa trên pathname
     const getSelectedKeys = () => {
@@ -109,6 +110,10 @@ export const AdminSidebar = (props) => {
             return ['paymentmethod'];
         } else if (pathname.includes('payment-transactions')) {
             return ['paymenttransactions'];
+        } else if (pathname.includes("movie-type")) {
+            return ["types"];
+        } else if (pathname.includes("movies")) {
+            return ["movies"];
         }
         return [];
     };
@@ -116,6 +121,7 @@ export const AdminSidebar = (props) => {
     // Cập nhật openKeys khi pathname thay đổi
     useEffect(() => {
         const pathname = location.pathname;
+
         if (pathname.includes('users-members') || pathname.includes('users-employees')) {
             setOpenKeys(['users']);
 
@@ -127,12 +133,13 @@ export const AdminSidebar = (props) => {
         }
         else {
 
+
             setOpenKeys([]);
         }
         // Không reset openKeys khi ở dashboard để menu vẫn có thể mở được
     }, [location.pathname]);
 
-    // Đóng mở menu (Người dùng) 
+    // Đóng mở menu (Người dùng)
     const handleOpenChange = (keys) => {
         // console.log('Open keys changed:', keys);
         setOpenKeys(keys);
@@ -147,46 +154,46 @@ export const AdminSidebar = (props) => {
                 theme={theme}
                 width={width}
                 style={{
-                    boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)',
+                    boxShadow: "2px 0 8px 0 rgba(29,35,41,.05)",
                 }}
             >
                 <div
                     style={{
-                        height: '64px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: collapsed ? 'center' : 'flex-start',
-                        padding: collapsed ? '0' : '0 24px',
-                        borderBottom: '1px solid #f0f0f0',
-                        background: '#fff',
-                        transition: 'all 0.2s',
+                        height: "64px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: collapsed ? "center" : "flex-start",
+                        padding: collapsed ? "0" : "0 24px",
+                        borderBottom: "1px solid #f0f0f0",
+                        background: "#fff",
+                        transition: "all 0.2s",
                     }}
                 >
                     <div
                         style={{
-                            width: collapsed ? '32px' : 'auto',
-                            height: '32px',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            borderRadius: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontWeight: 'bold',
-                            fontSize: collapsed ? '14px' : '16px',
-                            marginRight: collapsed ? '0' : '12px',
-                            transition: 'all 0.2s',
+                            width: collapsed ? "32px" : "auto",
+                            height: "32px",
+                            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#fff",
+                            fontWeight: "bold",
+                            fontSize: collapsed ? "14px" : "16px",
+                            marginRight: collapsed ? "0" : "12px",
+                            transition: "all 0.2s",
                         }}
                     >
-                        {collapsed ? 'A' : 'AD'}
+                        {collapsed ? "A" : "AD"}
                     </div>
                     {!collapsed && (
                         <span
                             style={{
-                                color: '#333',
-                                fontWeight: '600',
-                                fontSize: '16px',
-                                whiteSpace: 'nowrap',
+                                color: "#333",
+                                fontWeight: "600",
+                                fontSize: "16px",
+                                whiteSpace: "nowrap",
                             }}
                         >
                             Admin Dashboard
@@ -203,7 +210,6 @@ export const AdminSidebar = (props) => {
                     inlineCollapsed={collapsed}
                     items={items}
                 />
-
             </Sider>
         </>
     );

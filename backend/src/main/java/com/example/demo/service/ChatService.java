@@ -26,8 +26,8 @@ public class ChatService {
     private ChatbotDataService chatbotDataService;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String API_URL = "http://localhost:1234/v1/chat/completions";
-    // private final String API_KEY = "lm-studio";
+    private final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    private final String API_KEY = "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";
 
     public String chat(String userContent) {
         QuestionAnalyzer.QueryInfo info = QuestionAnalyzer.analyze(userContent);
@@ -40,34 +40,32 @@ public class ChatService {
             // Chào hỏi chung, không cần context phim
             context.append(
                     "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                    .append("Hãy trả lời tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
+                    .append("Hãy trả lời ngắn gọn, tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
                     .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
         } else {
             // Có intent cụ thể về phim hoặc dịch vụ
             context.append(
                     "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                    .append("QUAN TRỌNG: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                    .append("QUAN TRỌNG 1: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                    .append("QUAN TRỌNG 2: Sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, họ có thể chuyển vé cho người khác sử dụng.\n")
                     .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
-                    .append("Nếu có lịch chiếu cụ thể, hãy trả lời thân thiện, có chủ-vị, theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
+                    .append("Nếu có lịch chiếu cụ thể, hãy trả lời theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
                     .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
                     .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
                     .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
 
             // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
             String additionalContext = chatbotDataService.buildContextForIntent(info);
-            if (!additionalContext.isEmpty()) {
-                context.append("\n").append(additionalContext);
-            } else if (info.movieName != null) {
-                // Nếu hỏi về phim cụ thể nhưng không có dữ liệu trong database
-                context.append("\nKhông tìm thấy thông tin phim '").append(info.movieName)
-                        .append("' trong hệ thống.\n");
+            if (additionalContext.trim().startsWith("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này")) {
+                return additionalContext.trim();
             }
+            // ...existing code...
         }
 
         String prompt = context + "Người dùng hỏi: " + userContent;
 
         ChatRequest request = new ChatRequest();
-        request.setModel("vistral-7b-chat");
+        request.setModel("deepseek/deepseek-r1-0528-qwen3-8b:free");
 
         ChatRequest.Message systemMsg = new ChatRequest.Message();
         systemMsg.setRole("system");
@@ -81,14 +79,17 @@ public class ChatService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // headers.setBearerAuth(API_KEY);
+        headers.setBearerAuth(API_KEY);
 
         HttpEntity<ChatRequest> entity = new HttpEntity<>(request, headers);
 
         ResponseEntity<ChatResponse> response = restTemplate.postForEntity(API_URL, entity, ChatResponse.class);
+        System.out.println("OpenRouter response: " + response.getStatusCode() + " - " + response.getBody());
 
         if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
             return response.getBody().getChoices().get(0).getMessage().getContent();
+        } else {
+            System.err.println("OpenRouter error: " + response.getStatusCode() + " - " + response.getBody());
         }
         return "Xin lỗi, tôi không thể trả lời lúc này.";
     }
@@ -116,21 +117,26 @@ public class ChatService {
                 // Chào hỏi chung, không cần context phim
                 context.append(
                         "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                        .append("Hãy trả lời tự nhiên, thân thiện, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
+                        .append("Hãy trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n")
                         .append("Nếu người dùng cần hỗ trợ, hãy hỏi lại để làm rõ nhu cầu.\n");
             } else {
                 // Có intent cụ thể về phim hoặc dịch vụ
                 context.append(
                         "Bạn là trợ lý AI tiếng Việt thân thiện của hệ thống MovieTheater (rạp chiếu phim, đặt vé xem phim...).\n")
-                        .append("QUAN TRỌNG: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                        .append("QUAN TRỌNG 1: Chỉ trả lời dựa trên dữ liệu thực tế bên dưới, KHÔNG được sử dụng kiến thức chung.\n")
+                        .append("QUAN TRỌNG 2: Sau khi đặt vé thành công, khách hàng KHÔNG thể đổi suất chiếu hoặc hủy/hoàn vé. Tuy nhiên, họ có thể chuyển vé cho người khác sử dụng.\n")
                         .append("Nếu có thông tin phim từ database, trả lời chính xác theo dữ liệu đó.\n")
-                        .append("Nếu có lịch chiếu cụ thể, hãy trả lời thân thiện, có chủ-vị, theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
+                        .append("Nếu có lịch chiếu cụ thể, hãy trả lời theo mẫu: 'Phim ... sẽ được chiếu vào các suất sau: ...', hoặc 'Lịch chiếu phim ...: ...'. Có thể gợi ý khách kiểm tra thêm suất khác hoặc đặt vé.\n")
                         .append("Nếu có danh sách phim đang chiếu, HÃY LIỆT KÊ ĐẦY ĐỦ TẤT CẢ các phim, KHÔNG ĐƯỢC bỏ sót phim nào. KHÔNG ĐƯỢC tự ý thêm, bớt, hoặc sáng tạo tên phim ngoài danh sách context. KHÔNG ĐƯỢC trả lời các phim không có trong context.\n")
                         .append("Nếu không có dữ liệu phù hợp trong database, trả lời: 'Hiện tại chưa có thông tin/lịch chiếu cho phim này trong hệ thống.'\n")
                         .append("Trả lời ngắn gọn, tự nhiên, có chủ-vị rõ ràng, đúng ngữ cảnh hội thoại.\n");
 
                 // Sử dụng ChatbotDataService để xây dựng context cho các intent khác
                 String additionalContext = chatbotDataService.buildContextForIntent(info);
+                if (additionalContext.trim().startsWith("Xin lỗi, hiện tại hệ thống chưa có thông tin về phim này")) {
+                    chunkConsumer.accept(additionalContext.trim());
+                    return;
+                }
                 if (!additionalContext.isEmpty()) {
                     context.append("\n").append(additionalContext);
                 } else if (info.movieName != null) {
@@ -144,7 +150,7 @@ public class ChatService {
             // Build request body đúng chuẩn OpenAI API
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> bodyMap = new HashMap<>();
-            bodyMap.put("model", "vistral-7b-chat");
+            bodyMap.put("model", "deepseek/deepseek-r1-0528-qwen3-8b:free");
 
             List<Map<String, String>> messages = new ArrayList<>();
             Map<String, String> sysMsg = new HashMap<>();
@@ -167,11 +173,12 @@ public class ChatService {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + API_KEY);
             conn.setDoOutput(true);
             conn.getOutputStream().write(body.getBytes());
 
             InputStream is = conn.getInputStream();
-            byte[] buffer = new byte[2048];
+            byte[] buffer = new byte[4096];
             int len;
             while ((len = is.read(buffer)) != -1) {
                 String chunk = new String(buffer, 0, len);
