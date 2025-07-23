@@ -81,24 +81,28 @@ function FadeSlide() {
                             className="hero-slide"
                             style={ {
                                 backgroundImage: `url(${item.largeImage})`,
+                                cursor: 'grab'
                             } }
                         >
                             <div className='opacit'>
                                 <div className="none-display" onClick={ () => navigate(`/movie-detail/${item.id}`) } ></div>
                                 <div className="dot-grid">
-                                    <div className='content-slide'>
-                                        <div className='infor-movie'>
-                                            <strong className='text-red'>Sắp Chiếu</strong>
-                                            <p className='genre-text'>Hành động, Trinh thám</p>
+                                    <div className='content-slide' >
+                                        <div style={ { cursor: 'pointer' } } onClick={ () => navigate(`/movie-detail/${item.id}`) }>
+                                            <div className='infor-movie'>
+                                                <strong className='text-red'>Sắp Chiếu</strong>
+                                                <p className='genre-text'>Hành động, Trinh thám</p>
+                                            </div>
+                                            <div className='name-slide'>{ item.nameVN }</div>
                                         </div>
-                                        <div className='name-slide'>{ item.nameVN }</div>
-                                        <p className="text-red pb-2 fs-7">{ item.nameEN || "Avenger" }</p>
-                                        <div className='d-flex align-items-center detail'>
-                                            <p className="border-1 border-light rounded-1 bg-light text-black fw-bold">{ item.ageLimit }+</p>
-                                            <p className='btn btn-sm text-light border border-1 border-gold pe-3 ps-3'>2025</p>
-                                            <p className="btn btn-sm text-light border-1 bg-light text-black pe-3 ps-3"><i className="fa-regular fa-clock"></i> { item.duration } phút</p>
-                                        </div>
-                                        <div className='des line-clamp'>{ item.content }</div>
+                                            <p className="text-red pb-2 fs-7">{ item.nameEN || "Avenger" }</p>
+                                            <div className='d-flex align-items-center detail'>
+                                                <p className="border-1 border-light rounded-1 bg-light text-black fw-bold">{ item.ageLimit }+</p>
+                                                <p className='btn btn-sm text-light border border-1 border-gold pe-3 ps-3'>2025</p>
+                                                <p className="btn btn-sm text-light border-1 bg-light text-black pe-3 ps-3"><i className="fa-regular fa-clock"></i> { item.duration } phút</p>
+                                            </div>
+                                            <div className='des line-clamp'>{ item.content }</div>
+                                       
                                         <div className='d-flex align-items-center'>
                                             <CustomizeButton
                                                 className="login-btn kj shadow-hover-gold"
@@ -134,7 +138,6 @@ function FadeSlide() {
                         alt={ item.nameVN }
                         onClick={ () => swiperRef.current.slideTo(index) }
                         className={ `thumbnail ${index === activeIndex ? "border-2 border-light" : ""}` }
-
                     />
                 )) }
             </div>

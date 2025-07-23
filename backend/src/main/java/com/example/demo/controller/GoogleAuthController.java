@@ -1,8 +1,6 @@
 package com.example.demo.controller;
 
 import java.io.IOException;
-
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +115,6 @@ public void redirectToGoogle(HttpServletResponse response) throws IOException {
         // result.put("name", name);
         // result.put("picture", picture);
 
-        return ResponseEntity.ok(userInfo); // ✅ Trả JSON object
+        return ResponseEntity.ok(userInfo); 
     }
-
 }

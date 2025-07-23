@@ -8,7 +8,7 @@ import Avatar from "../../../components/Avatar/Avatar";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import menu from "./MenuItem/menu";
-import { NotificationBell } from "../../../components/Notification/NotificationBell";
+// import { NotificationBell } from "../../../components/Notification/NotificationBell";
 
 const cx = classNames.bind(styles);
 
@@ -54,9 +54,9 @@ function Header({ user }) {
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
                                 <li className="fs-7" onClick={ () => navigate('/') }>Trang chủ</li>
-                                <li className="fs-7" onClick={() => navigate('/movies/now-playing')}>Lịch chiếu</li>
+                                <li className="fs-7" onClick={() => navigate('/movies/now-playing')}>Đang chiếu</li>
 
-                                <li className="fs-7">Sắp Chiếu</li>
+                                <li className="fs-7" onClick={ () => navigate('/movies/coming-soon') }>Sắp Chiếu</li>
                                 <li className="fs-7">Top Phim</li>
                             </ul>
                         </nav>
@@ -67,7 +67,7 @@ function Header({ user }) {
                             {user ? (
                                 <>
                                     <div className="d-flex align-items-center gap-1">
-                                        {user && <NotificationBell accountId={user.accountID} />}
+                                        {/* {user && <NotificationBell accountId={user.accountID} />} */}
                                         <Dropdown menu={{ items }} trigger={["click"]} placement="bottomRight">
                                             <span className="d-flex" style={{ cursor: "pointer", marginLeft: 16 }}>
                                                 <Avatar

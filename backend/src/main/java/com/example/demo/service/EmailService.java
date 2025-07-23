@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.example.demo.exception.OtpSendingException;
+
 import java.nio.charset.StandardCharsets;
 
 @Service
@@ -39,33 +41,41 @@ public class EmailService {
     }
 
     public void sendOtpEmail(String toEmail, String otp) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(toEmail);
-        message.setSubject("Xác thực tài khoản");
-        message.setText("Mã OTP xác thực của bạn là: " + otp);
-        javaMailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Xác thực tài khoản");
+            message.setText("Mã OTP xác thực của bạn là: " + otp);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new OtpSendingException("OTP email failed to send. Please try again later");
+        }
     }
 
     public void sendForgotPasswordLink(String toEmail, String otp) {
-        String link = "http://localhost:3000/reset-password?email=" + toEmail + "&otp=" + otp;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(toEmail);
-        message.setSubject("Reset Password");
-        message.setText("Click the link to reset password: " + link);
-        javaMailSender.send(message);
+        try {
+            String link = "http://localhost:3000/reset-password?email=" + toEmail + "&otp=" + otp;
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Reset Password");
+            message.setText("Click the link to reset password: " + link);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new OtpSendingException("OTP email failed to send. Please try again later");
+        }
     }
 
     @Async
-    public void sendHtmlEmailWithInlineImage(String to, String subject, String templateName, Context context, String imageCid, byte[] imageBytes, String imageContentType) {
+    public void sendHtmlEmailWithInlineImage(String to, String subject, String templateName, Context context,
+            String imageCid, byte[] imageBytes, String imageContentType) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
                     mimeMessage,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
-            );
+                    StandardCharsets.UTF_8.name());
 
             String htmlContent = templateEngine.process(templateName, context);
 
