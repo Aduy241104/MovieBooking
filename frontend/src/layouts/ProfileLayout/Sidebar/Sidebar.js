@@ -71,7 +71,7 @@ function Sidebar() {
                             />
                         )}
                     </div>
-                    <p>music app</p>
+                    <p>{user.fullName}</p>
                     <p className="text-secondary fs-7">duya15914@gmail.com</p>
 
                     <button className="mt-3 fs-6">

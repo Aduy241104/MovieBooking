@@ -12,17 +12,21 @@ const GENRES = [
 ];
 
 
-const genreMenu = {
-    items: [
-        {
-            key: "All",
-            label: <div onClick={ () => setGenre("All") }>Tất cả</div>,
-        },
-        ...GENRES.map((genre) => ({
-            key: genre,
-            label: <div onClick={ () => setGenre(genre) }>{ genre }</div>,
-        })),
-    ],
-};
+const getGenreList = (setGenre) => {
+    const genreMenu = {
+        items: [
+            {
+                key: "All",
+                label: <div onClick={ () => setGenre("Tất cả") }>Tất cả</div>,
+            },
+            ...GENRES.map((genre) => ({
+                key: genre,
+                label: <div onClick={ () => setGenre(genre) }>{ genre }</div>,
+            })),
+        ],
+    };
 
-export default genreMenu;
+    return genreMenu;
+}
+
+export default getGenreList;
