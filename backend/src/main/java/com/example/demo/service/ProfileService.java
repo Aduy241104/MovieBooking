@@ -13,6 +13,7 @@ import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.mapper.AccountMapper;
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
+import com.example.demo.utils.SecurityUtils;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,9 @@ public class ProfileService {
 
     @Autowired
     AuthenticationService authService;
+
+    @Autowired
+    SecurityUtils securityUtils;
 
     public ProfileDTO getProfile(Long id) {
         Account account = accountRepository.findById(id)
@@ -71,7 +75,7 @@ public class ProfileService {
         }
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account);
-        String newToken = authService.generateToken(account);
+        String newToken = securityUtils.generateToken(account);
         return newToken;
 
     }

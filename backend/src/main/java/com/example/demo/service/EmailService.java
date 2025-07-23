@@ -12,31 +12,23 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import com.example.demo.exception.OtpSendingException;
+
 import java.nio.charset.StandardCharsets;
 
 @Service
 public class EmailService {
 
-    // Khai báo các dependency là final
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    /**
-     * Sử dụng Constructor Injection.
-     * Spring sẽ tự động tìm các bean JavaMailSender và TemplateEngine
-     * và "tiêm" chúng vào đây khi khởi tạo EmailService.
-     * Annotation @Autowired ở đây là không bắt buộc nếu class chỉ có 1 constructor.
-     */
-
     public EmailService(JavaMailSender javaMailSender, TemplateEngine templateEngine) {
-        this.javaMailSender = javaMailSender; // Gán giá trị cho javaMailSender
-        this.templateEngine = templateEngine; // Gán giá trị cho templateEngine
+        this.javaMailSender = javaMailSender;
+        this.templateEngine = templateEngine;
     }
-
-    // --- CÁC PHƯƠNG THỨC CŨ CỦA BẠN (GIỮ NGUYÊN) ---
 
     public void sendSimpleEmail(String toEmail, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -48,12 +40,16 @@ public class EmailService {
     }
 
     public void sendOtpEmail(String toEmail, String otp) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(toEmail);
-        message.setSubject("Xác thực tài khoản");
-        message.setText("Mã OTP xác thực của bạn là: " + otp);
-        javaMailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Xác thực tài khoản");
+            message.setText("Mã OTP xác thực của bạn là: " + otp);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new OtpSendingException("OTP email failed to send. Please try again later");
+        }
     }
 
     public void sendForgotPasswordLink(String toEmail, String otp) {
@@ -66,17 +62,17 @@ public class EmailService {
         javaMailSender.send(message);
     }
 
-    // --- PHƯƠNG THỨC MỚI ĐỂ GỬI EMAIL HTML ---
+    // PHƯƠNG THỨC MỚI ĐỂ GỬI EMAIL HTML
 
     @Async
-    public void sendHtmlEmailWithInlineImage(String to, String subject, String templateName, Context context, String imageCid, byte[] imageBytes, String imageContentType) {
+    public void sendHtmlEmailWithInlineImage(String to, String subject, String templateName, Context context,
+            String imageCid, byte[] imageBytes, String imageContentType) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
                     mimeMessage,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
-            );
+                    StandardCharsets.UTF_8.name());
 
             String htmlContent = templateEngine.process(templateName, context);
 

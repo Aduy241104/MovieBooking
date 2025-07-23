@@ -17,8 +17,10 @@ import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.AuthRespond;
 import com.example.demo.DTO.response.IntrospectRespond;
+import com.example.demo.enums.RoleTypes;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.RoleNotFoundException;
 import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.mapper.AccountMapper;
 import com.example.demo.model.Account;
@@ -101,10 +103,9 @@ public class AuthenticationService {
                 .build();
     }
 
-    // register phien ban moi nhat
     public void handleSendOtp(RegisterRequest registerRequest) {
         if (accountRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new EmailAlreadyExistsException("Email đã tồn tại");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
         otpService.sendOtp(registerRequest.getEmail());
     }
@@ -115,12 +116,13 @@ public class AuthenticationService {
                 accountWithOtp.getVerifyOtp());
 
         if (!isOtpValid) {
-            throw new UnauthorizedException("OTP không hợp lệ hoặc đã hết hạn.");
+            throw new UnauthorizedException("OTP is invalid or expired");
         }
 
         RegisterRequest registerRequest = accountWithOtp.getRegisterRequest();
-        Role defaultRole = roleRepository.findByRoleName("CUSTOMER")
-                .orElseThrow(() -> new RuntimeException("Role Customer không tồn tại"));
+
+        Role defaultRole = roleRepository.findByRoleName(RoleTypes.CUSTOMER.name())
+                .orElseThrow(() -> new RoleNotFoundException("Role Customer does not exist"));
 
         Account account = accountMapper.toAccount(registerRequest, defaultRole);
         account.setSocialAccountType("LOCAL");
@@ -142,7 +144,7 @@ public class AuthenticationService {
         boolean isOtpValid = otpService.verifyOtp(email, otp);
 
         if (!isOtpValid) {
-            throw new UnauthorizedException("Invalid or incorrect OTP.");
+            throw new UnauthorizedException("OTP is invalid or expired");
         }
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("account not found"));
@@ -175,8 +177,8 @@ public class AuthenticationService {
             }
 
         } else {
-            Role defaultRole = roleRepository.findByRoleName("CUSTOMER")
-                    .orElseThrow(() -> new RuntimeException("Role Customer không tồn tại"));
+            Role defaultRole = roleRepository.findByRoleName(RoleTypes.CUSTOMER.name())
+                    .orElseThrow(() -> new RoleNotFoundException("Role Customer does not exist"));
             account = Account.builder()
                     .email(email)
                     .fullName(name)
@@ -202,31 +204,31 @@ public class AuthenticationService {
                 .build();
     }
 
-    // method to generate token
-    public String generateToken(Account account) {
+    // // method to generate token
+    // public String generateToken(Account account) {
 
-        JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
+    //     JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject(String.valueOf(account.getAccountId()))
-                .issuer("anhduy.com")
-                .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
-                .claim("scope", account.getRole().getRoleName())
-                .build();
+    //     JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+    //             .subject(String.valueOf(account.getAccountId()))
+    //             .issuer("anhduy.com")
+    //             .issueTime(new Date())
+    //             .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+    //             .claim("scope", account.getRole().getRoleName())
+    //             .build();
 
-        Payload payload = new Payload(claimsSet.toJSONObject());
+    //     Payload payload = new Payload(claimsSet.toJSONObject());
 
-        JWSObject jwsObject = new JWSObject(jwsHeader, payload);
+    //     JWSObject jwsObject = new JWSObject(jwsHeader, payload);
 
-        try {
-            jwsObject.sign(new MACSigner(SIGNER_KEY));
-            return jwsObject.serialize();
-        } catch (JOSEException e) {
-            log.error("cannot create token", e);
-            throw new RuntimeException(e);
-        }
-    }
+    //     try {
+    //         jwsObject.sign(new MACSigner(SIGNER_KEY));
+    //         return jwsObject.serialize();
+    //     } catch (JOSEException e) {
+    //         log.error("cannot create token", e);
+    //         throw new RuntimeException(e);
+    //     }
+    // }
 
     // check valid token
     public IntrospectRespond introspect(IntrospectRequest request) throws JOSEException, ParseException {
