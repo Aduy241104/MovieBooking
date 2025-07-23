@@ -360,7 +360,7 @@ const BookingPage = () => {
         if (rawMessage.startsWith('PENDING_BOOKING_EXISTS')) {
             // Hỏi người dùng có muốn đến trang lịch sử để thanh toán không
             if (window.confirm('Bạn đã có một đặt vé cho suất chiếu này đang chờ thanh toán. Bạn có muốn đi đến trang Lịch sử đặt vé để hoàn tất không?')) {
-                navigate('/booking/history');
+                navigate('/profile/booking-history');
             }
         } 
         // --- XỬ LÝ CÁC LỖI KHÁC ---
@@ -380,6 +380,18 @@ const BookingPage = () => {
         setIsSubmitting(false);
     }
 };
+
+   const handleSeatExpire = () => {
+        console.log("A seat has expired. Refetching seat status...");
+        // Tải lại chỉ sơ đồ ghế
+        getSeatStatus(screeningInfo.screeningId)
+            .then(response => {
+                if (response.data && response.data.result) {
+                    setSeats(response.data.result);
+                }
+            })
+            .catch(err => console.error("Error refetching seats after expiration:", err));
+    };
 
     const canApplyDiscount = selectedSeats.length > 0;
     // --- HIỂN THỊ TRẠNG THÁI LOADING/ERROR TRONG LAYOUT ---
@@ -422,6 +434,7 @@ const BookingPage = () => {
                                 selectedSeats={selectedSeats}
                                 onSeatSelect={handleSeatSelect}
                                 screeningInfo={screeningInfo}
+                                 onSeatExpire={handleSeatExpire} 
                             />
                         </div>
                     </div>

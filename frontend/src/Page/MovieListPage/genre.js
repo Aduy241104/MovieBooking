@@ -11,7 +11,8 @@ const GENRES = [
     // ... thêm hoặc xóa dễ dàng
 ];
 
-
+const getGenreList = (setGenre) => {
+    
 const genreMenu = {
     items: [
         {
@@ -25,4 +26,8 @@ const genreMenu = {
     ],
 };
 
-export default genreMenu;
+
+    return genreMenu;
+}
+
+export default getGenreList;

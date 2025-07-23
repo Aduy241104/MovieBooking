@@ -38,7 +38,7 @@ function Sidebar() {
                     </li>
                     <li className={cx("mb-4", "link-layout")}>
                         <NavLink
-                            to="/booking/history"
+                            to="/profile/booking-history"
                             className={({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
@@ -71,7 +71,7 @@ function Sidebar() {
                             />
                         )}
                     </div>
-                    <p>music app</p>
+                    <p>{user.fullName}</p>
                     <p className="text-secondary fs-7">duya15914@gmail.com</p>
 
                     <button className="mt-3 fs-6">

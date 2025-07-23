@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -7,19 +8,16 @@ import java.util.stream.Collectors;
 
 import com.example.demo.DTO.response.booking.ScreeningScheduleResponseDTO;
 import com.example.demo.DTO.response.booking.SeatStatusDTO;
+import com.example.demo.exception.InternalServerException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.*;
-import com.example.demo.repository.MovieRepository;
-import com.example.demo.repository.SeatRepository;
+import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.request.ScreeningRequest;
 import com.example.demo.DTO.response.MovieScheduleDTO;
 import com.example.demo.DTO.response.ShowTimeDTO;
-import com.example.demo.repository.CinemaRoomRepository;
-import com.example.demo.repository.FareTypeRepository;
-import com.example.demo.repository.MovieTypeRepository;
-import com.example.demo.repository.ScreeningRepository;
 
 @Service
 public class ScreeningService {
@@ -44,6 +42,10 @@ public class ScreeningService {
     @Autowired
     private FareTypeRepository fareTypeRepository;
 
+    @Autowired
+    private BookedSeatRepository bookedSeatRepository;
+
+    private static final int EXPIRATION_MINUTES = 15;
     public List<MovieScheduleDTO> getAllMovieScheduleByDate(LocalDate date) {
         List<Screening> listScreening = screeningRepository.findScreeningsByDate(date);
 
@@ -80,7 +82,7 @@ public class ScreeningService {
     //Booking
     public ScreeningScheduleResponseDTO getSchedulesForMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + movieId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + movieId));
 
         List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(15)); // Cho phép trễ 15p
 
@@ -104,33 +106,74 @@ public class ScreeningService {
 
     public List<SeatStatusDTO> getSeatStatusForScreening(Long screeningId) {
         Screening screening = screeningRepository.findById(screeningId)
-                .orElseThrow(() -> new RuntimeException("Screening not found with id: " + screeningId));
-
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu với ID: " + screeningId));
         CinemaRoom cinemaRoom = screening.getCinemaRoom();
         if (cinemaRoom == null) {
-            throw new RuntimeException("Cinema room not found for screening: " + screeningId);
+            throw new InternalServerException("Lỗi dữ liệu hệ thống: Suất chiếu không có thông tin phòng.", null);
         }
 
         List<Seat> allSeatsInRoom = seatRepository.findByCinemaRoom(cinemaRoom);
-        Set<Long> bookedSeatIds = seatRepository.findBookedSeatIdsByScreeningId(screeningId);
+        List<BookedSeat> bookedSeats = bookedSeatRepository.findByScreeningId(screeningId);
+
+        Map<Long, Booking> seatBookingMap = bookedSeats.stream()
+                .filter(bs -> bs.getSeat() != null && bs.getBooking() != null)
+                .collect(Collectors.toMap(
+                        bs -> bs.getSeat().getSeatId(),
+                        BookedSeat::getBooking,
+                        (existingBooking, newBooking) -> {
+                            // Merge function: Prioritize the "stronger" state
+                            if ("PAID".equals(existingBooking.getBookingStatus())) return existingBooking;
+                            if ("PAID".equals(newBooking.getBookingStatus())) return newBooking;
+
+                            if ("RESERVED".equals(existingBooking.getBookingStatus())) return existingBooking;
+                            if ("RESERVED".equals(newBooking.getBookingStatus())) return newBooking;
+
+                            if ("PENDING_PAYMENT".equals(existingBooking.getBookingStatus())) return existingBooking;
+                            if ("PENDING_PAYMENT".equals(newBooking.getBookingStatus())) return newBooking;
+                            return existingBooking;
+                        }
+                ));
 
         return allSeatsInRoom.stream().map(seat -> {
-            String status = bookedSeatIds.contains(seat.getSeatId()) ? "Booked" : "Available";
-            if (seat.getSeatStatus() != null && seat.getSeatStatus().equalsIgnoreCase("Unavailable")) {
+            String status = "Available";
+            LocalDateTime expiresAt = null;
+
+            Booking booking = seatBookingMap.get(seat.getSeatId());
+            if (booking != null) {
+                switch (booking.getBookingStatus()) {
+                    case "PAID":
+                    case "RESERVED":
+                        status = "Booked";
+                        break;
+                    case "PENDING_PAYMENT":
+                        status = "Pending";
+                        expiresAt = booking.getBookingTime().plusMinutes(EXPIRATION_MINUTES);
+                        break;
+                    default: // EXPIRED, FAILED, CANCELLED
+                        status = "Available";
+                        break;
+                }
+            }
+
+            if ("Unavailable".equalsIgnoreCase(seat.getSeatStatus())) {
                 status = "Unavailable";
             }
+
             SeatType seatType = seat.getSeatType();
             return new SeatStatusDTO(
                     seat.getSeatId(),
                     seat.getSeatRow(),
                     seat.getSeatCol(),
                     seatType != null ? seatType.getSeatTypeName() : "Standard",
-                    seatType != null ? seatType.getSeatTypePrice() : java.math.BigDecimal.ZERO,
+                    seatType != null ? seatType.getSeatTypePrice() : BigDecimal.ZERO,
                     status,
-                    seatType != null ? seatType.getSeatTypeId() : null
+                    seatType != null ? seatType.getSeatTypeId() : null,
+                    expiresAt
             );
         }).collect(Collectors.toList());
     }
+
+
 
     //  Thêm lịch chiếu mới
     public Screening addScreening(ScreeningRequest request) {
