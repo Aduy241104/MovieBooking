@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.example.demo.DTO.response.ResPagination;
-import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
 import com.example.demo.model.Role;
 import com.example.demo.repository.RoleRepository;
