@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface BookedSeatRepository extends JpaRepository<BookedSeat, Long> {
 
-    // lấy tất cả BookedSeat của một suất chiếu để hiển thị thời gian ở chọn ghế
+    // get all BookedSeat of a show to display time in seat selection
     @Query("SELECT bs FROM BookedSeat bs JOIN bs.booking b WHERE b.screening.id = :screeningId")
     List<BookedSeat> findByScreeningId(@Param("screeningId") Long screeningId);
 }

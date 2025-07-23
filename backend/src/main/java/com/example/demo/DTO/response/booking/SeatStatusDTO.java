@@ -15,8 +15,8 @@ public class SeatStatusDTO {
     private String seatRow;
     private String seatCol;
     private String seatTypeName;
-    private BigDecimal seatTypePrice; // Phụ thu của loại ghế
-    private String status; // "Available", "Booked", "Selecting" (tùy chọn)
+    private BigDecimal seatTypePrice;
+    private String status;
     private Long seatTypeId;
-    private LocalDateTime expiresAt; //đếm ngược tg ở chọn ghế
+    private LocalDateTime expiresAt;
 }
