@@ -53,13 +53,17 @@ public class EmailService {
     }
 
     public void sendForgotPasswordLink(String toEmail, String otp) {
-        String link = "http://localhost:3000/reset-password?email=" + toEmail + "&otp=" + otp;
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(toEmail);
-        message.setSubject("Reset Password");
-        message.setText("Click the link to reset password: " + link);
-        javaMailSender.send(message);
+        try {
+            String link = "http://localhost:3000/reset-password?email=" + toEmail + "&otp=" + otp;
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Reset Password");
+            message.setText("Click the link to reset password: " + link);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new OtpSendingException("OTP email failed to send. Please try again later");
+        }
     }
 
     // PHƯƠNG THỨC MỚI ĐỂ GỬI EMAIL HTML

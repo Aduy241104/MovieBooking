@@ -17,6 +17,9 @@ import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OtpService;
 import com.example.demo.service.RefreshTokenService;
 import com.example.demo.utils.SecurityUtils;
+
+import jakarta.validation.Valid;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.RefreshToken;
 import com.example.demo.path.AuthenticationPath;
@@ -46,7 +49,7 @@ public class AuthenticationController {
 
 
     @PostMapping(AuthenticationPath.LOGIN_OAUTH)
-    public ApiResponse<AuthRespond> loginMethod(@RequestBody AuthenticationRequest request) {
+    public ApiResponse<AuthRespond> loginMethod(@Valid @RequestBody AuthenticationRequest request) {
         AuthRespond authRespond = authService.auth(request);
         return ApiResponse.<AuthRespond>builder()
                 .message("success")
@@ -55,7 +58,7 @@ public class AuthenticationController {
     }
 
     @PostMapping(AuthenticationPath.REGISTER)
-    public ApiResponse<String> registerMethod(@RequestBody RegisterRequest request) {
+    public ApiResponse<String> registerMethod(@RequestBody @Valid RegisterRequest request) {
         authService.handleSendOtp(request);
         return ApiResponse.<String>builder()
                 .result("Email send")
