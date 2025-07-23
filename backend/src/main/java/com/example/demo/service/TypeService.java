@@ -1,7 +1,9 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.DuplicateNameException;
+import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.Account;
-import com.example.demo.model.Movie;
 import com.example.demo.model.Type;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.TypeRepository;
@@ -26,9 +28,9 @@ public class TypeService {
 
     public Type addType(Type type) {
         if (typeRepository.existsByName(type.getName())) {
-            throw new RuntimeException("Thể loại đã tồn tại!");
+            throw new DuplicateNameException("Thể loại đã tồn tại!");
         }
-        // Log activity and notification
+
         setLogAndNotification(type, "TẠO MỚI",
                 "Tạo mới thể loại phim",
                 "Tạo mới thể loại phim",
@@ -43,14 +45,12 @@ public class TypeService {
 
     public Type updateType(Integer id, Type updatedType) {
         Type existing = typeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thể loại"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thể loại"));
 
-        // Kiểm tra tên trùng với thể loại khác
         if (typeRepository.existsByNameAndIdNot(updatedType.getName(), id)) {
-            throw new RuntimeException("Tên thể loại đã tồn tại!");
+            throw new DuplicateNameException("Tên thể loại đã tồn tại!");
         }
 
-        // Log activity and notification
         setLogAndNotification(existing, "CẬP NHẬT",
                 "Cập nhật thể loại phim",
                 "Cập nhật thể loại phim",
@@ -61,15 +61,12 @@ public class TypeService {
     }
 
     public void deleteType(Integer id) {
-        Optional<Type> typeOpt = typeRepository.findById(id);
-        if (typeOpt.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy thể loại để xóa!");
-        }
-        Type type = typeOpt.get();
+        Type type = typeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thể loại để xóa!"));
+
         type.setIsDeleted(true);
         typeRepository.save(type);
 
-        // Log activity and notification
         setLogAndNotification(type, "XOÁ",
                 "Xoá thể loại phim",
                 "Xoá thể loại phim",
@@ -84,13 +81,12 @@ public class TypeService {
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();
         if (loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+            throw new UnauthorizedException("Không tìm thấy người dùng hiện tại");
         }
-        Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
 
-        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
-        // Ghi log hoạt động
+        Account user = accountRepository.findById(Long.valueOf(loginUserId))
+                .orElseThrow(() -> new UnauthorizedException("Không tìm thấy người dùng hiện tại"));
+
         activityLogService.log(
                 user.getEmail(),
                 action,
@@ -99,7 +95,6 @@ public class TypeService {
                 description
         );
 
-        // Gửi notification cho tất cả admin còn lại
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(user.getAccountId())) {

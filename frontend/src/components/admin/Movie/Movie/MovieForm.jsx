@@ -129,8 +129,24 @@ export default function MovieForm({ movieId, onSuccess }) {
       if (onSuccess) onSuccess();
       navigate("/admin/movies");
     } catch (err) {
-      const msg = err.response?.data?.message || "Lỗi khi gửi dữ liệu phim.";
-      notification.error({ message: "Thất bại", description: msg });
+      const resData = err.response?.data;
+      const msg = resData?.message || "Lỗi khi gửi dữ liệu phim.";
+
+      if (msg.includes("Tên phim (VN) đã tồn tại")) {
+        form.setFields([
+          { name: "nameVN", errors: ["Tên phim (VN) đã tồn tại"] }
+        ]);
+      } else if (msg.includes("Tên phim (EN) đã tồn tại")) {
+        form.setFields([
+          { name: "nameEN", errors: ["Tên phim (EN) đã tồn tại"] }
+        ]);
+      } else {
+        // Nếu không phải lỗi tên trùng thì hiển thị thông báo chung
+        notification.error({
+          message: "Thất bại",
+          description: msg,
+        });
+      }
     }
   };
 

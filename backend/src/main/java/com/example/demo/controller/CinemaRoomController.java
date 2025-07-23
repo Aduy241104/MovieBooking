@@ -130,3 +130,10 @@ public class CinemaRoomController {
         return ResponseEntity.ok(room);
     }
 }
+
+
+
+
+
+
+
