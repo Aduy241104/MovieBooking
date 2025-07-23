@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.InternalServerException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,8 +67,6 @@ public class EmailService {
         }
     }
 
-    // PHƯƠNG THỨC MỚI ĐỂ GỬI EMAIL HTML
-
     @Async
     public void sendHtmlEmailWithInlineImage(String to, String subject, String templateName, Context context,
             String imageCid, byte[] imageBytes, String imageContentType) {
@@ -91,7 +90,7 @@ public class EmailService {
 
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email with inline image", e);
+            throw new InternalServerException("Không thể gửi email xác nhận. Vui lòng thử lại sau.", e);
         }
     }
 }

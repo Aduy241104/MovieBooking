@@ -9,7 +9,12 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.DTO.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
+
+import com.example.demo.exception.booking.*;
+import java.util.Map;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -80,6 +85,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
+
     @ExceptionHandler(RoleNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleRoleNotFound(RoleNotFoundException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -103,6 +109,35 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
+    //Exception of booking
+    @ExceptionHandler({
+            SeatAlreadyBookedException.class,
+            InvalidPromotionException.class,
+            InsufficientPointsException.class,
+            BookingValidationException.class,
+            PendingBookingExistsException.class
+    })
+    public ResponseEntity<ApiResponse<Object>> handleBookingExceptions(RuntimeException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST; // 400
+        Object resultData = null;
+        if (ex instanceof SeatAlreadyBookedException || ex instanceof PendingBookingExistsException) {
+            status = HttpStatus.CONFLICT; // 409
+            if (ex instanceof PendingBookingExistsException) {
+                // Returns the ID of the pending booking
+                resultData = Map.of("existingBookingId", ((PendingBookingExistsException) ex).getExistingBookingId());
+            }
+        }
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .status(status.value())
+                .message(ex.getMessage())
+                .result(resultData)
+                .build();
+        return new ResponseEntity<>(apiResponse, status);
+    }
+
+    // Handle general Runtime errors (placed at the end)
 
     @ExceptionHandler(value = {
             RuntimeException.class,
