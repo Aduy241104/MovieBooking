@@ -11,7 +11,6 @@ const GENRES = [
     // ... thêm hoặc xóa dễ dàng
 ];
 
-
 const getGenreList = (setGenre) => {
     const genreMenu = {
         items: [
@@ -25,6 +24,7 @@ const getGenreList = (setGenre) => {
             })),
         ],
     };
+
 
     return genreMenu;
 }

@@ -139,7 +139,7 @@ const BookingSuccessPage = () => {
                 </div>
 
                 <div className={cx('actions-container')}>
-                    <Link to="/booking/history">
+                    <Link to="/profile/booking-history">
                         <button className={cx('btn', 'btn-secondary')}>Xem Lịch Sử Đặt Vé</button>
                     </Link>
                     <Link to="/">

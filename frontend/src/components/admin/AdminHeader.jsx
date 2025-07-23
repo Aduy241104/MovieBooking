@@ -35,6 +35,8 @@ export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
             setTitle("QUẢN LÝ BÌNH LUẬN");
         } else if (path.includes("activity-logs")) {
             setTitle("LỊCH SỬ HOẠT ĐỘNG");
+        } else if (path.includes("export-reports")) {
+            setTitle("XUẤT FILE");
         } else {
             setTitle("");
         }
