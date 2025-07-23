@@ -8,7 +8,7 @@ import java.util.List;
 public class BookingRequestDTO {
     private Long screeningId;
     private List<Long> seatIds;
-    private String promotionCode; // Optional
-    private Long paymentMethodId; // ID của phương thức thanh toán
+    private String promotionCode;
+    private Long paymentMethodId;
     private int pointsToUse;
 }
