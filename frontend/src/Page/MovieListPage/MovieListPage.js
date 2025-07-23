@@ -5,8 +5,7 @@ import { Dropdown, Button } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import MovieComp from "../../components/MovieComp/MovieComp";
 import { useEffect, useState } from "react";
-import { filter } from "lodash";
-import menu from './genre'
+import getGenreList from './genre'
 import { fetchComingSoon, fetchNowPlaying } from "../../redux/slices/movieSlice";
 
 
@@ -14,8 +13,8 @@ import { fetchComingSoon, fetchNowPlaying } from "../../redux/slices/movieSlice"
 function MovieListPage() {
 
     const { type } = useParams();
-    const [genre, setGenre] = useState("All");
-    const [ageLimit, setAgeLimit] = useState("All");
+    const [genre, setGenre] = useState("Tất cả");
+    const [ageLimit, setAgeLimit] = useState("Tất cả");
     const listMovie = useSelector((state) => {
         return type === "now-playing" ? state.movie.nowPlaying : state.movie.comingSoon;
     });
@@ -23,17 +22,21 @@ function MovieListPage() {
 
     const filterMovies = (movieList, filters) => {
         return movieList.filter(movie => {
-            const isMatchedGenre = filters.genre === "All" || movie.types.includes(filters.genre);
-            const isMatchedAgeLimit = filters.ageLimit === "All" || movie.ageLimit <= parseInt(filters.ageLimit);
+            const isMatchedGenre = filters.genre === "Tất cả" || movie.types.includes(filters.genre);
+            const isMatchedAgeLimit = filters.ageLimit === "Tất cả" || movie.ageLimit <= parseInt(filters.ageLimit);
 
             return isMatchedAgeLimit && isMatchedGenre;
         })
     }
 
 
+    const hanleChangeGenreFilter = (typeFilter) => {
+        setGenre(typeFilter);
+    }
+
     useEffect(() => {
         if (listMovie.status === "idle") {
-           dispatch(type === "now-playing" ? fetchNowPlaying() : fetchComingSoon());
+            dispatch(type === "now-playing" ? fetchNowPlaying() : fetchComingSoon());
         }
     }, [listMovie.status])
 
@@ -45,18 +48,18 @@ function MovieListPage() {
                     className="mt-3 d-flex flex-column justify-content-center align-items-center"
                     style={ { backgroundImage: 'url("/img/tix-banner.ed8b6071.png")', height: "140px" } }
                 >
-                    <h4>{ "phim đang chiếu" }</h4>
+                    <h4>{ type == "now-playing" ? "Đang chiếu" : "Sắp chiếu" }</h4>
                     <p className="pt-2">
-                        Danh sách các phim hiện đang chiếu rạp trên toàn quốc { new Date().toLocaleDateString('vi-VN') } — Xem lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!
+                        Danh sách các phim hiện { type == "now-playing" ? "đang chiếu" : "sắp chiếu"} rạp trên toàn quốc { new Date().toLocaleDateString('vi-VN') } — Xem lịch chiếu phim, giá vé tiện lợi, đặt vé nhanh chỉ với 1 bước!
                     </p>
 
                 </div>
                 <div className="container p-5">
                     <div className="row pe-5 ps-5">
                         <div className="col-md-3 col-12">
-                            <Dropdown menu={ menu } trigger={ ['click'] }>
-                                <Button className="p-4 ps-5 pe-5 fw-bold fs-6">
-                                    Thể loại
+                            <Dropdown menu={ getGenreList(hanleChangeGenreFilter) } trigger={ ['click'] }>
+                                <Button style={ { width: '185px' } } className="p-4 ps-5 pe-5 fw-bold fs-6">
+                                    { genre }
                                     <DownOutlined />
                                 </Button>
                             </Dropdown>
