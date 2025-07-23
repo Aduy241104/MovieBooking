@@ -10,11 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.DTO.request.AccountWithOtp;
 import com.example.demo.DTO.request.AuthenticationRequest;
-import com.example.demo.DTO.request.IntrospectRequest;
 import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.AuthRespond;
-import com.example.demo.DTO.response.IntrospectRespond;
 import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OtpService;
 import com.example.demo.service.RefreshTokenService;
@@ -23,7 +21,6 @@ import com.example.demo.model.Account;
 import com.example.demo.model.RefreshToken;
 import com.example.demo.path.AuthenticationPath;
 import com.example.demo.repository.RefreshTokenRepository;
-import com.nimbusds.jose.JOSEException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -47,15 +44,6 @@ public class AuthenticationController {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
 
-    // @PostMapping("/introspect")
-    // public ApiResponse<IntrospectRespond> postMethodName(@RequestBody IntrospectRequest request)
-    //         throws JOSEException, ParseException {
-    //     var response = authService.introspect(request);
-    //     return ApiResponse.<IntrospectRespond>builder()
-    //             .message("success")
-    //             .result(response)
-    //             .build();
-    // }
 
     @PostMapping(AuthenticationPath.LOGIN_OAUTH)
     public ApiResponse<AuthRespond> loginMethod(@RequestBody AuthenticationRequest request) {

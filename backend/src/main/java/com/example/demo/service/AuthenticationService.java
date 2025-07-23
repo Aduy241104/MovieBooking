@@ -1,9 +1,5 @@
 package com.example.demo.service;
 
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +8,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.demo.DTO.request.AccountWithOtp;
 import com.example.demo.DTO.request.AuthenticationRequest;
-import com.example.demo.DTO.request.IntrospectRequest;
 import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.AuthRespond;
-import com.example.demo.DTO.response.IntrospectRespond;
 import com.example.demo.enums.RoleTypes;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
@@ -30,16 +24,7 @@ import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.utils.GoogleTokenVerifier;
 import com.example.demo.utils.SecurityUtils;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
+
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -201,47 +186,6 @@ public class AuthenticationService {
                 .account(accountRespond)
                 .token(token)
                 .refresToken(refreshToken.getToken())
-                .build();
-    }
-
-    // // method to generate token
-    // public String generateToken(Account account) {
-
-    //     JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
-
-    //     JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-    //             .subject(String.valueOf(account.getAccountId()))
-    //             .issuer("anhduy.com")
-    //             .issueTime(new Date())
-    //             .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
-    //             .claim("scope", account.getRole().getRoleName())
-    //             .build();
-
-    //     Payload payload = new Payload(claimsSet.toJSONObject());
-
-    //     JWSObject jwsObject = new JWSObject(jwsHeader, payload);
-
-    //     try {
-    //         jwsObject.sign(new MACSigner(SIGNER_KEY));
-    //         return jwsObject.serialize();
-    //     } catch (JOSEException e) {
-    //         log.error("cannot create token", e);
-    //         throw new RuntimeException(e);
-    //     }
-    // }
-
-    // check valid token
-    public IntrospectRespond introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        var token = request.getToken();
-
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-        boolean verified = signedJWT.verify(verifier);
-
-        return IntrospectRespond.builder()
-                .valid(verified && expiryTime.after(new Date()))
                 .build();
     }
 }
