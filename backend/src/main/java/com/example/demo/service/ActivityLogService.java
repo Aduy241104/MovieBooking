@@ -18,6 +18,15 @@ public class ActivityLogService {
     @Autowired
     private ActivityLogRepository activityLogRepository;
 
+    /**
+     * Logs an activity with the specified details.
+     *
+     * @param updatedBy    The user who performed the action.
+     * @param action       The action performed (e.g., "CREATE", "UPDATE", "DELETE").
+     * @param entityType   The type of entity affected (e.g., "Account", "Movie").
+     * @param userUpdated  The user affected by the action.
+     * @param description  A description of the action.
+     */
     public void log(String updatedBy, String action, String entityType, String userUpdated, String description) {
         ActivityLog log = ActivityLog.builder()
                 .updatedBy(updatedBy)
@@ -30,6 +39,13 @@ public class ActivityLogService {
         activityLogRepository.save(log);
     }
 
+    /**
+     * Fetches all activity logs with pagination and filtering.
+     *
+     * @param specification The specification for filtering logs.
+     * @param pageable      The pagination information.
+     * @return A paginated response containing the activity logs.
+     */
     public ResPagination fetchAllLogs(Specification<ActivityLog> specification, Pageable pageable) {
         Page<ActivityLog> activityLogPage = activityLogRepository.findAll(specification, pageable);
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()

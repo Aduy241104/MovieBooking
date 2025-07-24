@@ -1,6 +1,5 @@
 package com.example.demo.exception;
 
-import com.example.demo.DTO.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,14 +46,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = {
-            RuntimeException.class,
-            IllegalArgumentException.class,
+            AppException.class,
     })
-    public ResponseEntity<ApiResponse<Object>> handleApiResponseException(Exception ex) {
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
+    public ResponseEntity<ErrorResponse> handleResponseException(Exception ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
+                .error("An error occurred in the system!")
                 .message(ex.getMessage())
+                .path(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }

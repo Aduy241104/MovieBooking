@@ -92,7 +92,7 @@ export const UpdatePromotionModal = (props) => {
                             { min: 3, message: "Mã khuyến mãi phải có ít nhất 3 ký tự!" },
                             { max: 20, message: "Mã khuyến mãi không được quá 20 ký tự!" },
                             {
-                                pattern: /^[a-z0-9]+$/,
+                                pattern: /^[a-zA-Z0-9]+$/,
                                 message: "Mã khuyến mãi chỉ được chứa chữ hoa và số!",
                             },
                         ]}
@@ -165,9 +165,9 @@ export const UpdatePromotionModal = (props) => {
                                                     );
                                                 }
                                             } else if (discountType === "amount") {
-                                                if (num > 5000000) {
+                                                if (num > 9999000) {
                                                     return Promise.reject(
-                                                        new Error("Số tiền giảm không được quá 5,000,000 VNĐ!")
+                                                        new Error("Số tiền giảm không được quá 9,999,000 VNĐ!")
                                                     );
                                                 }
                                             }
@@ -180,7 +180,7 @@ export const UpdatePromotionModal = (props) => {
                                 <Input
                                     type="number"
                                     min={0}
-                                    max={discountType === "percent" ? 100 : 10000000}
+                                    max={discountType === "percent" ? 99 : 9999000}
                                     addonAfter={discountType === "percent" ? "%" : "VNĐ"}
                                     placeholder={discountType === "percent" ? "VD: 15" : "VD: 50000"}
                                 />
@@ -216,9 +216,9 @@ export const UpdatePromotionModal = (props) => {
                                             return Promise.reject(new Error("Giảm tối đa phải lớn hơn 0!"));
                                         }
 
-                                        if (num > 5000000) {
+                                        if (num > 9999000) {
                                             return Promise.reject(
-                                                new Error("Giảm tối đa không được quá 5,000,000 VNĐ!")
+                                                new Error("Giảm tối đa không được quá 9,999,000 VNĐ!")
                                             );
                                         }
                                     }
@@ -259,9 +259,9 @@ export const UpdatePromotionModal = (props) => {
                                         return Promise.reject(new Error("Ngưỡng áp dụng không được âm!"));
                                     }
 
-                                    if (num > 100000000) {
+                                    if (num > 9999000) {
                                         return Promise.reject(
-                                            new Error("Ngưỡng áp dụng không được quá 100,000,000 VNĐ!")
+                                            new Error("Ngưỡng áp dụng không được quá 9,999,000 VNĐ!")
                                         );
                                     }
 
@@ -272,13 +272,19 @@ export const UpdatePromotionModal = (props) => {
                                             new Error("Ngưỡng áp dụng phải lớn hơn hoặc bằng giảm tối đa!")
                                         );
                                     }
+                                    const discountLevel = form.getFieldValue("discountLevel");
+                                    if (discountLevel && num < Number(discountLevel)) {
+                                        return Promise.reject(
+                                            new Error("Ngưỡng áp dụng phải lớn hơn hoặc bằng giá trị giảm!")
+                                        );
+                                    }
 
                                     return Promise.resolve();
                                 },
                             },
                         ]}
                     >
-                        <Input type="number" min={0} max={100000000} addonAfter="VNĐ" placeholder="VD: 200000" />
+                        <Input type="number" min={0} max={9999000} addonAfter="VNĐ" placeholder="VD: 200000" />
                     </Form.Item>
 
                     <Form.Item

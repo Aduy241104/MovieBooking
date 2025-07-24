@@ -1,14 +1,12 @@
 package com.example.demo.controller;
 
-
 import com.example.demo.DTO.response.ResPagination;
-import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
-import com.example.demo.model.Role;
-import com.example.demo.service.RoleService;
 import com.turkraft.springfilter.boot.Filter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,24 +17,16 @@ import com.example.demo.model.Account;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 @RequestMapping("/api/admin")
 public class AccountController {
 
-    private final AccountService accountService;
-    private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
-
-    public AccountController(AccountService accountService, RoleService roleService, PasswordEncoder passwordEncoder) {
-        this.accountService = accountService;
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
-    }
-
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/accounts")
     public ApiResponse<ResPagination> getAllAccount(
@@ -50,96 +40,93 @@ public class AccountController {
     }
 
     @GetMapping("/accounts/{id}")
-    public ApiResponse<Account> getAccount(@PathVariable Long id) {
-        return ApiResponse.<Account>builder()
+    public ResponseEntity<ApiResponse<Account>> getAccount(@PathVariable Long id) {
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
                 .message("Fetch a account")
                 .result(accountService.fetchAccountById(id))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/accounts/total-customer")
-    public ApiResponse<Long> totalCustomerAccount() {
-        Role role = roleService.findRoleByName("CUSTOMER");
-        if(role == null) {
-            throw new RuntimeException("Role not found");
-        }
-        return ApiResponse.<Long>builder()
+    public ResponseEntity<ApiResponse<Long>> totalCustomerAccount() {
+        ApiResponse<Long> response = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
-                .message("Count customer account")
-                .result(accountService.getTotalAccountByRole(role))
+                .message("Count customer account successfully")
+                .result(accountService.getTotalAccountByRole("CUSTOMER"))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/accounts")
-    public ApiResponse<Account> createAccount(@RequestBody Account account) {
-        if (roleService.findRoleById(account.getRole().getRoleId()) == null) {
-            throw new RuntimeException("Role not found");
-        }
-        if (accountService.findAccountByEmail(account.getEmail()) != null) {
-            throw new RuntimeException("Account already exists");
-        }
-
+    public ResponseEntity<ApiResponse<Account>> createAccount(@RequestBody Account account) {
         String passwordEncoded = passwordEncoder.encode(account.getPassword());
         account.setPassword(passwordEncoded);
 
-        return ApiResponse.<Account>builder()
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.CREATED.value())
-                .message("Create account")
+                .message("Create account successfully")
                 .result(accountService.handleCreateAccount(account))
                 .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/accounts")
-    public ApiResponse<Account> updateAccountQuick(@RequestBody Account account) {
-        return ApiResponse.<Account>builder()
+    public ResponseEntity<ApiResponse<Account>> updateAccountQuick(@RequestBody Account account) {
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Update a account in list user")
+                .message("Update account successfully in list user")
                 .result(accountService.handleUpdateAccountQuick(account))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/accounts/{id}")
-    public ApiResponse<Account> updateAccountInfo(@PathVariable Long id, @RequestBody Account account) {
-        return ApiResponse.<Account>builder()
+    public ResponseEntity<ApiResponse<Account>> updateAccountInfo(@PathVariable Long id, @RequestBody Account account) {
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Update a account in list user")
+                .message("Update account successfully in detail user")
                 .result(accountService.handleUpdateAccountInfo(id, account))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/accounts/status")
-    public ApiResponse<Account> updateAccountStatus(@RequestBody Account account) {
-        return ApiResponse.<Account>builder()
+    public ResponseEntity<ApiResponse<Account>> updateAccountStatus(@RequestBody Account account) {
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Update status account")
+                .message("Update status account successfully")
                 .result(accountService.handleUpdateStatusAccount(account))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/accounts/is-deleted")
-    public ApiResponse<Account> deleteAccount(@RequestBody Account account) {
-        return ApiResponse.<Account>builder()
+    public ResponseEntity<ApiResponse<Account>> deleteAccount(@RequestBody Account account) {
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Delete account")
+                .message("Delete account successfully")
                 .result(accountService.handleDeleteAccount(account))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/accounts/{id}/avatar")
-    public ApiResponse<Account> uploadAvatar(
+    public ResponseEntity<ApiResponse<Account>> uploadAvatar(
             @PathVariable Long id,
             @RequestParam("avatar") MultipartFile avatarFile) {
-        return ApiResponse.<Account>builder()
+        ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
-                .message("Upload avatar")
+                .message("Upload avatar successfully")
                 .result(accountService.handleUploadAvatar(id, avatarFile))
                 .build();
+        return ResponseEntity.ok(response);
     }
 
-//    @GetMapping("/accounts/customers-registrations")
-//    public List<UserRegistrationsResponse> getUserRegistrations() {
-//        return accountService.getUserRegistrationsDTO(6);
-//    }
+    // @GetMapping("/accounts/customers-registrations")
+    // public List<UserRegistrationsResponse> getUserRegistrations() {
+    // return accountService.getUserRegistrationsDTO(6);
+    // }
 
 }
