@@ -58,7 +58,7 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                     <ComposedChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
-                            dataKey="name"
+                            dataKey="date"
                             fontSize={12}
                             tickFormatter={(value) => {
                                 if (timeRange === "day") {
@@ -109,7 +109,7 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                         <Line
                             yAxisId="right"
                             type="monotone"
-                            dataKey="bookings"
+                            dataKey="tickets"
                             stroke="#82ca9d"
                             strokeWidth={3}
                             name="Số vé"
@@ -130,7 +130,7 @@ export const RevenueChart = ({ data, timeRange, onTimeRangeChange }) => {
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                     <div className="text-lg font-semibold text-green-600">
-                        {data.reduce((sum, item) => sum + item.bookings, 0).toLocaleString()}
+                        {data.reduce((sum, item) => sum + item.tickets, 0).toLocaleString()}
                     </div>
                     <div className="text-sm text-gray-600">Tổng vé bán</div>
                 </div>

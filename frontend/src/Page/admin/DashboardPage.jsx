@@ -66,21 +66,23 @@ export const DashboardPage = () => {
                     },
                     moviesByType: dashboardSummary.data.charts.moviesByType,
                     userRegistrations: dashboardSummary.data.charts.userRegistrations,
-                    bookingsByPaymentMethod: [
-                        { name: "VNPAY", count: 45, revenue: 55000000 },
-                        { name: "Momo", count: 35, revenue: 42000000 },
-                        { name: "ZaloPay", count: 20, revenue: 28000000 },
-                    ],
+                    // bookingsByPaymentMethod: [
+                    //     { name: "VNPAY", count: 45, revenue: 55000000 },
+                    //     { name: "Momo", count: 35, revenue: 42000000 },
+                    //     { name: "ZaloPay", count: 20, revenue: 28000000 },
+                    // ],
                 },
                 tables: {
                     topMovies: dashboardSummary.data.tables.topMovies.map((movie, index) => ({
                         id: index + 1,
-                        title: movie.title,
-                        genre: movie.genre,
-                        rating: movie.rating,
-                        totalBookings: movie.totalBookings,
+                        title: movie.movieTitle,
+                        genre: movie.movieGenre,
+                        rating: movie.avgRating,
+                        totalBookings: movie.ticketSold,
                         revenue: movie.revenue,
-                        poster: "https://cdn-icons-png.flaticon.com/512/4831/4831192.png",
+                        poster: movie.posterUrl
+                            ? movie.posterUrl
+                            : "https://cdn-icons-png.flaticon.com/512/4831/4831192.png",
                     })),
                     recentBookings: dashboardSummary.data.tables.recentBookings.map((booking, index) => ({
                         id: index + 1,

@@ -1,15 +1,18 @@
 package com.example.demo.repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
 import com.example.demo.model.Role;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Account;
@@ -24,27 +27,38 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     boolean existsByEmail(String email);
 
-    long countByRole(Role role);
+    boolean existsByPhoneNumber(String phoneNumber);
+
+    boolean existsByPhoneNumberAndAccountIdNot(String phoneNumber, Long accountId);
+
+    long countByRole_RoleName(String roleName);
 
     List<Account> findByRole_RoleName(String roleName);
 
-    @Query(value = """
-            SELECT
-                DATE_TRUNC('month', register_date) AS month,
-                COUNT(*) AS new_users,
-                SUM(COUNT(*)) OVER (ORDER BY DATE_TRUNC('month', register_date)) AS total_users
-            FROM account
-            WHERE role_id = 3
-                AND register_date >= :fromDate
-                AND register_date < :toDate
-            GROUP BY month
-            ORDER BY month
-            """, nativeQuery = true)
-    List<Object[]> getUserRegistrationsByMonth(LocalDateTime fromDate, LocalDateTime toDate);
+    @Query("""
+                SELECT new com.example.demo.DTO.response.dashboard.UserRegistrationsResponse(
+                    DATE_TRUNC('month', a.registerDate),
+                    COUNT(a.accountId),
+                    0L
+                )
+                FROM Account a
+                WHERE a.role.roleId = 3
+                  AND a.registerDate >= :fromDate
+                  AND a.registerDate < :toDate
+                GROUP BY DATE_TRUNC('month', a.registerDate)
+                ORDER BY DATE_TRUNC('month', a.registerDate)
+            """)
+    List<UserRegistrationsResponse> getUserRegistrationsByMonth(@Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate);
+
+    // Count users by role and register date before a specific date
+    Long countByRoleRoleIdAndRegisterDateBefore(Long roleId, LocalDate beforeDate);
 
     /**
-     * Tìm tài khoản theo ID và khóa dòng đó lại để ghi (sử dụng cho việc cập nhật điểm).
+     * Tìm tài khoản theo ID và khóa dòng đó lại để ghi (sử dụng cho việc cập nhật
+     * điểm).
      * Điều này ngăn chặn các giao dịch khác sửa đổi tài khoản cùng một lúc.
+     *
      * @param accountId ID của tài khoản.
      * @return Optional chứa tài khoản nếu tìm thấy.
      */

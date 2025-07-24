@@ -5,6 +5,7 @@ import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.BookingTicketRecentlyResponse;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
 import com.example.demo.configuration.VnpayConfig;
+import com.example.demo.exception.AppException;
 import com.example.demo.exception.InternalServerException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.booking.*;
@@ -23,9 +24,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,31 +57,25 @@ public class BookingService {
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
     public static final int BOOKING_EXPIRATION_MINUTES = 15;
     public Long getTotalRevenueByStatus(String status) {
-        return bookingRepository.getTotalRevenueByStatus(status);
+        return bookingRepository.getTotalRevenueByStatus(status)
+                .orElseThrow(() -> new AppException("No revenue data found for status: " + status));
     }
 
     public List<DailyTicketRevenueResponse> getDailyTicketRevenue(int dailyCount) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fromDate = now.minusDays(dailyCount).toLocalDate().atStartOfDay();
         LocalDateTime toDate = now.toLocalDate().atStartOfDay();
-
-        List<Object[]> stats = bookingRepository.getDailyTicketRevenue(fromDate, toDate);
-
-        // Map ngày -> dữ liệu
-        Map<LocalDate, DailyTicketRevenueResponse> map = new HashMap<>();
-        for (Object[] row : stats) {
-            LocalDate date = ((java.sql.Timestamp) row[0]).toLocalDateTime().toLocalDate();
-            Long revenue = ((Number) row[1]).longValue();
-            Long tickets = ((Number) row[2]).longValue();
-            map.put(date, new DailyTicketRevenueResponse(date, revenue, tickets));
-        }
-        // Fill đủ 7 ngày
+        List<DailyTicketRevenueResponse> stats = bookingRepository.getDailyTicketRevenue(fromDate, toDate);
+        // Map day -> data
+        Map<LocalDateTime, DailyTicketRevenueResponse> map = stats.stream()
+                .collect(Collectors.toMap(DailyTicketRevenueResponse::getDate, dto -> dto));
+        // Fill in the full date if there is no revenue on that date (revenue = 0)
         List<DailyTicketRevenueResponse> result = new ArrayList<>();
         for (int i = 0; i < dailyCount; i++) {
-            LocalDate date = fromDate.plusDays(i).toLocalDate();
+            LocalDateTime date = fromDate.plusDays(i).toLocalDate().atStartOfDay();
             DailyTicketRevenueResponse resp = map.getOrDefault(
                     date,
-                    new DailyTicketRevenueResponse(date, 0L, 0L));
+                    new DailyTicketRevenueResponse(Timestamp.valueOf(date), BigDecimal.ZERO, 0L));
             result.add(resp);
         }
         return result;
@@ -88,25 +83,19 @@ public class BookingService {
 
     public List<DailyTicketRevenueResponse> getWeeklyTicketRevenue(int weekCount) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fromDate = now.minusWeeks(weekCount).with(java.time.DayOfWeek.MONDAY).toLocalDate()
-                .atStartOfDay();
+        LocalDateTime fromDate = now.minusWeeks(weekCount).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
         LocalDateTime toDate = now.with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
-
-        List<Object[]> stats = bookingRepository.getWeeklyRevenueAndTickets(fromDate, toDate);
-
-        Map<LocalDate, DailyTicketRevenueResponse> map = new HashMap<>();
-        for (Object[] row : stats) {
-            LocalDate weekStart = ((java.sql.Timestamp) row[0]).toLocalDateTime().toLocalDate();
-            Long revenue = ((Number) row[1]).longValue();
-            Long tickets = ((Number) row[2]).longValue();
-            map.put(weekStart, new DailyTicketRevenueResponse(weekStart, revenue, tickets));
-        }
+        List<DailyTicketRevenueResponse> stats = bookingRepository.getWeeklyRevenueAndTickets(fromDate, toDate);
+        // Map week -> data
+        Map<LocalDateTime, DailyTicketRevenueResponse> map = stats.stream()
+                .collect(Collectors.toMap(DailyTicketRevenueResponse::getDate, dto -> dto));
+        // Fill in the full week if there is no revenue on that week (revenue = 0)
         List<DailyTicketRevenueResponse> result = new ArrayList<>();
         for (int i = 0; i < weekCount; i++) {
-            LocalDate weekStart = fromDate.plusWeeks(i).with(DayOfWeek.MONDAY).toLocalDate();
+            LocalDateTime weekStart = fromDate.plusWeeks(i).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
             DailyTicketRevenueResponse resp = map.getOrDefault(
                     weekStart,
-                    new DailyTicketRevenueResponse(weekStart, 0L, 0L));
+                    new DailyTicketRevenueResponse(Timestamp.valueOf(weekStart), BigDecimal.ZERO, 0L));
             result.add(resp);
         }
         return result;
@@ -116,57 +105,26 @@ public class BookingService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate().atStartOfDay();
         LocalDateTime toDate = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
-
-        List<Object[]> stats = bookingRepository.getMonthlyRevenueAndTickets(fromDate, toDate);
-
-        Map<LocalDate, DailyTicketRevenueResponse> map = new HashMap<>();
-        for (Object[] row : stats) {
-            LocalDate monthStart = ((java.sql.Timestamp) row[0]).toLocalDateTime().toLocalDate();
-            Long revenue = ((Number) row[1]).longValue();
-            Long tickets = ((Number) row[2]).longValue();
-            map.put(monthStart, new DailyTicketRevenueResponse(monthStart, revenue, tickets));
-        }
+        List<DailyTicketRevenueResponse> stats = bookingRepository.getMonthlyRevenueAndTickets(fromDate, toDate);
+        // Map month -> data
+        Map<LocalDateTime, DailyTicketRevenueResponse> map = stats.stream()
+                .collect(Collectors.toMap(DailyTicketRevenueResponse::getDate, dto -> dto));
+        // Fill in the full month if there is no revenue on that month (revenue = 0)
         List<DailyTicketRevenueResponse> result = new ArrayList<>();
         for (int i = 0; i < monthCount; i++) {
-            LocalDate monthStart = fromDate.plusMonths(i).withDayOfMonth(1).toLocalDate();
+            LocalDateTime monthStart = fromDate.plusMonths(i).withDayOfMonth(1).toLocalDate().atStartOfDay();
             DailyTicketRevenueResponse resp = map.getOrDefault(
                     monthStart,
-                    new DailyTicketRevenueResponse(monthStart, 0L, 0L));
+                    new DailyTicketRevenueResponse(Timestamp.valueOf(monthStart), BigDecimal.ZERO, 0L));
             result.add(resp);
         }
         return result;
     }
 
     public List<BookingTicketRecentlyResponse> getRecentlyBookedTickets(int limit) {
-        List<Object[]> stats = bookingRepository.getBookingTicketRecently(limit);
-        List<BookingTicketRecentlyResponse> result = new ArrayList<>();
-        for (Object[] row : stats) {
-//            System.out.println("Row data: " + Arrays.toString(row));
-            Long bookingId = ((Number) row[0]).longValue();
-            String fullName = (String) row[1];
-            String email = (String) row[2];
-            String movieTitle = (String) row[3];
-            String cinemaRoomName = (String) row[4];
-            LocalDateTime bookingDate = ((java.sql.Timestamp) row[5]).toLocalDateTime();
-            int seatCount = ((Number) row[6]).intValue();
-            long totalPrice = ((Number) row[7]).longValue();
-            String paymentMethod = (String) row[8];
-            String paymentStatus = (String) row[9];
-
-            result.add(new BookingTicketRecentlyResponse(
-                    bookingId,
-                    fullName,
-                    email,
-                    movieTitle,
-                    cinemaRoomName,
-                    bookingDate,
-                    seatCount,
-                    totalPrice,
-                    paymentMethod,
-                    paymentStatus));
-        }
-        return result;
+        return bookingRepository.getBookingTicketRecently(limit);
     }
+
     //-------------------booking
 
     private String generateUniqueBookingCode() {
@@ -237,7 +195,8 @@ public class BookingService {
             promotionCodeApplied = promotion.getCode();
             discountTypeApplied = promotion.getDiscountType();
             if ("PERCENT".equalsIgnoreCase(promotion.getDiscountType())) {
-                discountAmount = originalTotalAmount.multiply(promotion.getDiscountLevel().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
+                discountAmount = originalTotalAmount
+                        .multiply(promotion.getDiscountLevel().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
                 if (promotion.getMaxDiscount() != null && discountAmount.compareTo(promotion.getMaxDiscount()) > 0) {
                     discountAmount = promotion.getMaxDiscount();
                 }
@@ -290,7 +249,8 @@ public class BookingService {
             String vnpTxnRef = booking.getBookingCode() + "-" + System.currentTimeMillis();
             booking.setVnpTxnRef(vnpTxnRef);
             if (finalAmountToPay.compareTo(BigDecimal.ZERO) > 0) {
-                paymentUrl = createVnpayPaymentUrl(finalAmountToPay, vnpTxnRef, screening.getMovie().getNameVN(), httpServletRequest);
+                paymentUrl = createVnpayPaymentUrl(finalAmountToPay, vnpTxnRef, screening.getMovie().getNameVN(),
+                        httpServletRequest);
             } else {
                 booking.setBookingStatus("PAID");
             }
@@ -330,13 +290,16 @@ public class BookingService {
         }
 
         Booking booking = bookingOptional.get();
-        String movieIdParam = (booking.getScreening() != null && booking.getScreening().getMovie() != null) ? "&movieId=" + booking.getScreening().getMovie().getId() : "";
+        String movieIdParam = (booking.getScreening() != null && booking.getScreening().getMovie() != null)
+                ? "&movieId=" + booking.getScreening().getMovie().getId()
+                : "";
 
         if (!"PENDING_PAYMENT".equals(booking.getBookingStatus())) {
             if ("PAID".equals(booking.getBookingStatus())) {
                 return vnpayConfig.getFrontendSuccessUrl() + "?bookingId=" + booking.getId() + movieIdParam;
             }
-            return vnpayConfig.getFrontendFailureUrl() + "?reason=booking_already_processed&bookingId=" + booking.getId() + movieIdParam;
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=booking_already_processed&bookingId="
+                    + booking.getId() + movieIdParam;
         }
 
         if (calculatedSecureHash.equals(vnp_SecureHash_FromVNPay)) {
@@ -356,14 +319,16 @@ public class BookingService {
             if ("PAID".equals(booking.getBookingStatus())) {
                 return vnpayConfig.getFrontendSuccessUrl() + "?bookingId=" + booking.getId() + movieIdParam;
             } else {
-                return vnpayConfig.getFrontendFailureUrl() + "?reason=payment_declined&bookingId=" + booking.getId() + "&vnp_ResponseCode=" + vnp_ResponseCode + movieIdParam;
+                return vnpayConfig.getFrontendFailureUrl() + "?reason=payment_declined&bookingId=" + booking.getId()
+                        + "&vnp_ResponseCode=" + vnp_ResponseCode + movieIdParam;
             }
         } else {
             logger.error("SecureHash Mismatch for Booking ID: {}", booking.getId());
             booking.setBookingStatus("PAYMENT_FAILED");
             refundPoints(booking);
             bookingRepository.save(booking);
-            return vnpayConfig.getFrontendFailureUrl() + "?reason=invalid_signature&bookingId=" + booking.getId() + movieIdParam;
+            return vnpayConfig.getFrontendFailureUrl() + "?reason=invalid_signature&bookingId=" + booking.getId()
+                    + movieIdParam;
         }
     }
 
@@ -386,13 +351,15 @@ public class BookingService {
         return totalAmount;
     }
 
-    private void saveBookedSeats(Booking booking, List<Seat> selectedSeats, Screening screening, BigDecimal promotionDiscount, BigDecimal pointsDiscount) {
+    private void saveBookedSeats(Booking booking, List<Seat> selectedSeats, Screening screening,
+            BigDecimal promotionDiscount, BigDecimal pointsDiscount) {
         FareType fareType = screening.getFareType();
         BigDecimal basePrice = fareType.getBasePrice();
         BigDecimal movieFormatSurcharge = getMovieFormatSurcharge(fareType.getMovieFormat());
         BigDecimal timeSlotSurcharge = getTimeSlotSurcharge(fareType.getTimeSlotType());
         BigDecimal totalDiscount = promotionDiscount.add(pointsDiscount);
-        BigDecimal discountPerSeat = (selectedSeats.isEmpty()) ? BigDecimal.ZERO : totalDiscount.divide(new BigDecimal(selectedSeats.size()), 2, RoundingMode.HALF_UP);
+        BigDecimal discountPerSeat = (selectedSeats.isEmpty()) ? BigDecimal.ZERO
+                : totalDiscount.divide(new BigDecimal(selectedSeats.size()), 2, RoundingMode.HALF_UP);
 
         List<BookedSeat> bookedSeatEntities = new ArrayList<>();
         for (Seat seat : selectedSeats) {
@@ -416,8 +383,10 @@ public class BookingService {
     }
 
     private void addPointsToAccount(Booking booking) {
-        if (booking == null || !"PAID".equals(booking.getBookingStatus())) return;
-        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId()).orElse(null);
+        if (booking == null || !"PAID".equals(booking.getBookingStatus()))
+            return;
+        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId())
+                .orElse(null);
         if (account == null) {
             logger.warn("Account not found for adding points. Booking ID: {}", booking.getId());
             return;
@@ -426,7 +395,8 @@ public class BookingService {
         if (amountPaid != null && amountPaid.compareTo(BigDecimal.ZERO) > 0) {
             int pointsEarned = amountPaid.multiply(POINTS_EARNING_RATE).intValue();
             account.setScore(account.getScore() + pointsEarned);
-            logger.info("Added {} points to account ID {}. New score: {}", pointsEarned, account.getAccountId(), account.getScore());
+            logger.info("Added {} points to account ID {}. New score: {}", pointsEarned, account.getAccountId(),
+                    account.getScore());
         }
     }
 
@@ -434,28 +404,35 @@ public class BookingService {
         if (booking == null || booking.getPointsUsed() == null || booking.getPointsUsed() <= 0) {
             return;
         }
-        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId()).orElse(null);
+        Account account = accountRepository.findWithLockingByAccountId(booking.getAccount().getAccountId())
+                .orElse(null);
         if (account == null) {
             logger.warn("Account not found for refunding points. Booking ID: {}", booking.getId());
             return;
         }
         account.setScore(account.getScore() + booking.getPointsUsed());
-        logger.info("Refunded {} points to account ID {} due to failed/cancelled payment.", booking.getPointsUsed(), account.getAccountId());
+        logger.info("Refunded {} points to account ID {} due to failed/cancelled payment.", booking.getPointsUsed(),
+                account.getAccountId());
     }
 
     private BigDecimal getMovieFormatSurcharge(String movieFormat) {
-        if ("3D".equalsIgnoreCase(movieFormat)) return new BigDecimal("20000");
-        if ("IMAX".equalsIgnoreCase(movieFormat)) return new BigDecimal("35000");
+        if ("3D".equalsIgnoreCase(movieFormat))
+            return new BigDecimal("20000");
+        if ("IMAX".equalsIgnoreCase(movieFormat))
+            return new BigDecimal("35000");
         return BigDecimal.ZERO;
     }
 
     private BigDecimal getTimeSlotSurcharge(String timeSlotType) {
-        if ("Cuối Tuần".equalsIgnoreCase(timeSlotType)) return new BigDecimal("10000");
-        if ("Ngày Lễ".equalsIgnoreCase(timeSlotType)) return new BigDecimal("15000");
+        if ("Cuối Tuần".equalsIgnoreCase(timeSlotType))
+            return new BigDecimal("10000");
+        if ("Ngày Lễ".equalsIgnoreCase(timeSlotType))
+            return new BigDecimal("15000");
         return BigDecimal.ZERO;
     }
 
-    private String createVnpayPaymentUrl(BigDecimal amount, String vnpTxnRef, String orderInfoDesc, HttpServletRequest req) {
+    private String createVnpayPaymentUrl(BigDecimal amount, String vnpTxnRef, String orderInfoDesc,
+            HttpServletRequest req) {
         long amountLong = amount.multiply(BigDecimal.valueOf(100)).longValue();
 
         Map<String, String> vnp_Params = new TreeMap<>();
@@ -546,8 +523,10 @@ public class BookingService {
         return booking.getTotalAmount().add(totalDiscount);
     }
 
-    private BookingDetailResponseDTO convertToBookingDetailResponseDTO(Booking booking, String paymentUrl, BigDecimal originalAmount) {
-        if (booking == null) return null;
+    private BookingDetailResponseDTO convertToBookingDetailResponseDTO(Booking booking, String paymentUrl,
+            BigDecimal originalAmount) {
+        if (booking == null)
+            return null;
 
         BookingDetailResponseDTO.AccountInfoDTO accountInfo = null;
         if (booking.getAccount() != null) {
@@ -639,14 +618,14 @@ public class BookingService {
             context.setVariable("bookingCode", booking.getBookingCode());
             context.setVariable("movieName", booking.getScreening().getMovie().getNameVN());
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm - EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm - EEEE, dd/MM/yyyy",
+                    Locale.forLanguageTag("vi-VN"));
             context.setVariable("showTime", booking.getScreening().getShowDateTime().format(formatter));
 
             context.setVariable("roomAndFormat",
                     String.format("%s / %s",
                             booking.getScreening().getCinemaRoom().getCinemaRoomName(),
-                            booking.getScreening().getFareType().getMovieFormat())
-            );
+                            booking.getScreening().getFareType().getMovieFormat()));
 
             String seats = booking.getBookedSeats().stream()
                     .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
@@ -666,12 +645,12 @@ public class BookingService {
                     context,
                     qrCodeImageCid,
                     qrCodeBytes,
-                    "image/png"
-            );
+                    "image/png");
 
             logger.info("Successfully sent booking confirmation email for booking code: {}", booking.getBookingCode());
         } catch (Exception e) {
-            logger.error("Failed to send booking confirmation email for booking code: {}. Error: {}", booking.getBookingCode(), e.getMessage());
+            logger.error("Failed to send booking confirmation email for booking code: {}. Error: {}",
+                    booking.getBookingCode(), e.getMessage());
         }
     }
 
@@ -735,8 +714,7 @@ public class BookingService {
                 booking.getTotalAmount(),
                 newVnpTxnRef,
                 booking.getScreening().getMovie().getNameVN(),
-                httpServletRequest
-        );
+                httpServletRequest);
     }
 
     @Scheduled(cron = "0 */5 * * * *") //5 minute
@@ -745,7 +723,8 @@ public class BookingService {
         LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
         logger.info("Running scheduled task to cancel expired bookings older than {}", expirationTime);
 
-        List<Booking> expiredBookings = bookingRepository.findAllByBookingStatusAndBookingTimeBefore("PENDING_PAYMENT", expirationTime);
+        List<Booking> expiredBookings = bookingRepository.findAllByBookingStatusAndBookingTimeBefore("PENDING_PAYMENT",
+                expirationTime);
 
         if (expiredBookings.isEmpty()) {
             logger.info("No expired pending bookings found.");
