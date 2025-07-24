@@ -7,12 +7,16 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.DTO.request.ChangePasswordRequest;
 import com.example.demo.DTO.request.ProfileRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ProfileDTO;
+import com.example.demo.path.UserProfilePath;
 import com.example.demo.service.ProfileService;
 import com.example.demo.utils.SecurityUtils;
+
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,7 +31,7 @@ public class ProfileController {
     @Autowired
     ProfileService profileService;
 
-    @GetMapping("/profile")
+    @GetMapping(UserProfilePath.PROFILE)
     public ApiResponse<ProfileDTO> getMethodName() {
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
@@ -36,11 +40,10 @@ public class ProfileController {
                 .message("account found")
                 .result(profileDTO)
                 .build();
-
     }
 
-    @PutMapping("/update-profile")
-    public ApiResponse<AccountRespond> putMethodName(@RequestBody ProfileRequest profileRequest) {
+    @PutMapping(UserProfilePath.UPDATE_PROFILE)
+    public ApiResponse<AccountRespond> putMethodName(@Valid @RequestBody ProfileRequest profileRequest) {
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
         AccountRespond profile = profileService.updateProfile(accountId, profileRequest);
@@ -50,14 +53,13 @@ public class ProfileController {
                 .build();
     }
 
-    @PutMapping("/change-password")
-    public ApiResponse<String> putMethodName(@RequestBody Map<String, String> payload) {
-        String oldPassword = payload.get("oldPassword");
-        String newPassword = payload.get("newPassword");
+    @PutMapping(UserProfilePath.CHANGE_PASSWORD)
+    public ApiResponse<String> putMethodName(@RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+       
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
 
-        String newToken = profileService.changePassword(accountId, oldPassword, newPassword);
+        String newToken = profileService.changePassword(accountId, changePasswordRequest);
 
         return ApiResponse.<String>builder()
                 .message("Password changed successful")
@@ -65,7 +67,7 @@ public class ProfileController {
                 .build();
     }
 
-    @PostMapping("/request-change-email")
+    @PostMapping(UserProfilePath.REQUEST_CHANGE_EMAIL)
     public ApiResponse<String> postMethodName(@RequestBody Map<String, String> payload) {
         String newEmail = payload.get("newEmail");
         profileService.requestChangeEmail(newEmail);
@@ -75,7 +77,7 @@ public class ProfileController {
                 .build();
     }
 
-    @PutMapping("/confirm-change-email")
+    @PutMapping(UserProfilePath.CONFIRM_CHANGE_EMAIL)
     public ApiResponse<AccountRespond> confirmChangePassword(@RequestBody Map<String, String> payload) {
         String newEmail = payload.get("newEmail");
         String otp = payload.get("otp");
@@ -90,7 +92,7 @@ public class ProfileController {
                 .build();
     }
 
-    @PutMapping("/change-avatar")
+    @PutMapping(UserProfilePath.CHANGE_AVATAR)
     public ApiResponse<AccountRespond> changeAvatar(@RequestBody Map<String, String> payload) {
         String avatarUrl = payload.get("avatar");
         String currentUsername = SecurityUtils.getCurrentUsername();
@@ -101,5 +103,4 @@ public class ProfileController {
                 .result(accountRespond)
                 .build();
     }
-
 }

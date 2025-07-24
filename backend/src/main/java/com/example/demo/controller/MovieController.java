@@ -6,7 +6,6 @@ import com.example.demo.DTO.response.MovieResponse;
 import com.example.demo.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.http.*;
 
 import java.io.IOException;

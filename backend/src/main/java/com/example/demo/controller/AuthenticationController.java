@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import java.text.ParseException;
+
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,18 +10,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.DTO.request.AccountWithOtp;
 import com.example.demo.DTO.request.AuthenticationRequest;
-import com.example.demo.DTO.request.IntrospectRequest;
 import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.AuthRespond;
-import com.example.demo.DTO.response.IntrospectRespond;
 import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OtpService;
 import com.example.demo.service.RefreshTokenService;
+import com.example.demo.utils.SecurityUtils;
+
+import jakarta.validation.Valid;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.RefreshToken;
+import com.example.demo.path.AuthenticationPath;
 import com.example.demo.repository.RefreshTokenRepository;
-import com.nimbusds.jose.JOSEException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,6 +36,9 @@ public class AuthenticationController {
     AuthenticationService authService;
 
     @Autowired
+    SecurityUtils securityUtils;
+
+    @Autowired
     OtpService otpService;
 
     @Autowired
@@ -42,18 +47,9 @@ public class AuthenticationController {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
 
-    @PostMapping("/introspect")
-    public ApiResponse<IntrospectRespond> postMethodName(@RequestBody IntrospectRequest request)
-            throws JOSEException, ParseException {
-        var response = authService.introspect(request);
-        return ApiResponse.<IntrospectRespond>builder()
-                .message("success")
-                .result(response)
-                .build();
-    }
 
-    @PostMapping("/login-oauth")
-    public ApiResponse<AuthRespond> loginMethod(@RequestBody AuthenticationRequest request) {
+    @PostMapping(AuthenticationPath.LOGIN_OAUTH)
+    public ApiResponse<AuthRespond> loginMethod(@Valid @RequestBody AuthenticationRequest request) {
         AuthRespond authRespond = authService.auth(request);
         return ApiResponse.<AuthRespond>builder()
                 .message("success")
@@ -61,15 +57,15 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/register-2")
-    public ApiResponse<String> postMethodNames(@RequestBody RegisterRequest request) {
+    @PostMapping(AuthenticationPath.REGISTER)
+    public ApiResponse<String> registerMethod(@RequestBody @Valid RegisterRequest request) {
         authService.handleSendOtp(request);
         return ApiResponse.<String>builder()
                 .result("Email send")
                 .build();
     }
 
-    @PostMapping("/verify-otp")
+    @PostMapping(AuthenticationPath.VERIFY_OTP)
     public ApiResponse<Account> verifyOtpAndCreatAccount(@RequestBody AccountWithOtp accountWithOtp) {
         Account account = authService.createAccount(accountWithOtp);
         return ApiResponse.<Account>builder()
@@ -78,7 +74,7 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/resendOtp")
+    @PostMapping(AuthenticationPath.RESEND_OTP)
     public ApiResponse<String> postMethodResendOtp(@RequestBody RegisterRequest request) {
         authService.handleSendOtp(request);
         return ApiResponse.<String>builder()
@@ -86,7 +82,7 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping(AuthenticationPath.FORGOT_PASSWORD)
     public ApiResponse<String> postMethodName(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
         authService.handleForgotPassword(email);
@@ -96,7 +92,7 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping(AuthenticationPath.RESET_PASSWORD)
     public ApiResponse<String> resetPassword(@RequestBody Map<String, String> payload) {
         String otp = payload.get("otp");
         String email = payload.get("email");
@@ -110,7 +106,7 @@ public class AuthenticationController {
                 .build();
     }
 
-    @PostMapping("/refresh")
+    @PostMapping(AuthenticationPath.REFRESH_TOKEN)
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String requestToken = request.get("refreshToken");
 
@@ -119,8 +115,8 @@ public class AuthenticationController {
                 .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
 
         Account account = token.getAccount();
-        String newAccessToken = authService.generateToken(account);
+        String newAccessToken = securityUtils.generateToken(account);
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
-    }    
+    }
 
 }

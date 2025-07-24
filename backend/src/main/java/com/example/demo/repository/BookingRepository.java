@@ -98,11 +98,38 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Booking
     List<Booking> findByAccountAccountIdOrderByBookingTimeDesc(Long accountId);
-
     Optional<Booking> findByIdAndAccountAccountId(Integer bookingId, Long accountId);
+    Optional<Booking> findByVnpTxnRef(String vnpTxnRef);
+    boolean existsByBookingCode(String bookingCode);
+    //Find a user's pending booking for a specific showtime.
+    Optional<Booking> findByAccountAccountIdAndScreeningIdAndBookingStatus(Long accountId, Long screeningId, String status);
 
-    Optional<Booking> findByVnpTxnRef(String vnpTxnRef); // Thêm findByVnpTxnRef
+    //Find all bookings that are pending and created before a certain time (expired).
+    List<Booking> findAllByBookingStatusAndBookingTimeBefore(String status, LocalDateTime expirationTime);
 
+    @Query("""
+            SELECT b
+            FROM Booking b
+            JOIN b.screening s
+            WHERE s.movie.id = :movieId
+            ORDER BY b.bookingTime DESC
+            """)
+    List<Booking> findAllByMovieId(@Param("movieId") Long movieId);
+
+    @Query("""
+            SELECT COUNT(b)
+            FROM Booking b
+            JOIN b.screening s
+            WHERE s.movie.id = :movieId
+            """)
+    Long countBookingsByMovieId(@Param("movieId") Long movieId);
+
+    List<Booking> findByBookingStatusInAndBookingTimeBetweenOrderByBookingTimeAsc(
+            List<String> statuses,
+            LocalDateTime startTime,
+            LocalDateTime endTime
+    );
+    //Booking-end
     @Query("""
                 SELECT new com.example.demo.DTO.response.SingleMovieDTO(
                     m.id,
@@ -133,34 +160,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     List<SingleMovieDTO> getTopBookedCurrentMovies(@Param("currentDate") LocalDate currentDate);
 
-    boolean existsByBookingCode(String bookingCode); // code
 
-    // Tìm booking đang chờ thanh toán của một user cho một suất chiếu cụ thể.
-    Optional<Booking> findByAccountAccountIdAndScreeningIdAndBookingStatus(Long accountId, Long screeningId,
-            String status);
 
-    /**
-     * Tìm tất cả các booking đang chờ và được tạo trước một thời điểm nhất định (đã
-     * hết hạn).
-     */
-    List<Booking> findAllByBookingStatusAndBookingTimeBefore(String status, LocalDateTime expirationTime);
 
-    // <<< THÊM PHƯƠNG THỨC LẤY TẤT CẢ HÓA ĐƠN THEO ID PHIM >>>
-    @Query("""
-            SELECT b
-            FROM Booking b
-            JOIN b.screening s
-            WHERE s.movie.id = :movieId
-            ORDER BY b.bookingTime DESC
-            """)
-    List<Booking> findAllByMovieId(@Param("movieId") Long movieId);
 
-    // <<< THÊM PHƯƠNG THỨC ĐẾM TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
-    @Query("""
-            SELECT COUNT(b)
-            FROM Booking b
-            JOIN b.screening s
-            WHERE s.movie.id = :movieId
-            """)
-    Long countBookingsByMovieId(@Param("movieId") Long movieId);
 }

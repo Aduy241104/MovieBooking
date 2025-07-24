@@ -4,8 +4,12 @@ import { useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 
-function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
+function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0, warpperSmall = false }) {
     const navigate = useNavigate();
+
+    let classes = cx('wrapper', 'w-responsive', {
+        warpperSmall
+    })
 
     const checkAgeLimit = (age) => {
         if (age >= 18) {
@@ -16,7 +20,7 @@ function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
     }
 
     return (
-        <div className={ cx('wrapper', 'w-responsive') } onClick={ () => navigate(`/movie-detail/${id}`) }>
+        <div className={ classes } onClick={ () => navigate(`/movie-detail/${id}`) }>
             <div className={ cx('poster', 'rounded-3') }>
                 <img
                     src={ imglink }
@@ -35,7 +39,7 @@ function MovieComp({ imglink, types = [], nameVN, index, id, ageLimit = 0 }) {
             <div className="text-light d-flex mt-1">
                 <div className={ cx("number-rank") }>{ index }</div>
                 <div>
-                    <p className={ cx('line-clamp-1 fw-medium fs-6', 'nameVN')}>{ nameVN }</p>
+                    <p className={ cx('line-clamp-1 fw-medium fs-6', 'nameVN') }>{ nameVN }</p>
                     <p className={ cx('genre', 'text-secondary fs-7 line-clamp-1') }>{ types.join(', ') }</p>
                 </div>
             </div>

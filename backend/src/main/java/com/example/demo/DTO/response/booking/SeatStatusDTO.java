@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -14,7 +15,8 @@ public class SeatStatusDTO {
     private String seatRow;
     private String seatCol;
     private String seatTypeName;
-    private BigDecimal seatTypePrice; // Phụ thu của loại ghế
-    private String status; // "Available", "Booked", "Selecting" (tùy chọn)
+    private BigDecimal seatTypePrice;
+    private String status;
     private Long seatTypeId;
+    private LocalDateTime expiresAt;
 }

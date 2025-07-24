@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/public/screenings")
-@CrossOrigin // Cho phép CORS
+@CrossOrigin
 @RequiredArgsConstructor
 public class ScreeningController {
 

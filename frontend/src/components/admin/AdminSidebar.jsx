@@ -1,14 +1,15 @@
 import { Layout, Menu } from "antd";
 import {
-    LayoutDashboard,
-    Ticket,
-    Users,
-    Film,
-    Video,
-    CalendarDays,
-    Receipt,
-    MessageSquareText,
-    History,
+  LayoutDashboard,
+  Ticket,
+  Users,
+  Film,
+  Video,
+  CalendarDays,
+  Receipt,
+  MessageSquareText,
+  History,
+  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -50,69 +51,42 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
             icon: <Video size={20} strokeWidth={1.5} />,
             label: <Link to="/admin/room-list">Danh sách phòng chiếu</Link>,
         },
-        {
-            key: "movie",
-            icon: <Film size={20} strokeWidth={1.5} />,
-            label: "Quản lý phim",
-            children: [
-                {
-                    key: "movies",
-                    label: <Link to="/admin/movies">Phim</Link>,
-                },
-                {
-                    key: "movie-type",
-                    label: <Link to="/admin/movie-type">Thể loại</Link>,
-                },
-            ],
-        },
-        {
-            key: "showtime-list",
-            icon: <CalendarDays size={20} strokeWidth={1.5} />,
-            label: <Link to="/admin/showtime-list">Quản lý lịch chiếu</Link>,
-        },
-        {
-            key: "faretype",
-            icon: <Receipt size={20} strokeWidth={1.5} />,
-            label: "Quản lý giá vé",
-            children: [
-                {
-                    key: "faretype-list",
-                    label: <Link to="/admin/faretype-list">Loại giá vé</Link>,
-                },
-                {
-                    key: "booking-list",
-                    label: <Link to="/admin/booking-list">Lịch sử đặt vé</Link>,
-                },
-            ],
-        },
-        {
-            key: "review-list",
-            icon: <MessageSquareText size={20} strokeWidth={1.5} />,
-            label: <Link to="/admin/review-list">Quản lý bình luận</Link>,
-        },
-        {
-            key: "activity-logs",
-            icon: <History size={20} strokeWidth={1.5} />,
-            label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
-        },
-    ];
+      ],
+    },
+    {
+      key: "review-list",
+      icon: <MessageSquareText size={20} strokeWidth={1.5} />,
+      label: <Link to="/admin/review-list">Quản lý bình luận</Link>,
+    },
+    {
+      key: "activity-logs",
+      icon: <History size={20} strokeWidth={1.5} />,
+      label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
+    },
+     {
+      key: "export-reports",
+      icon: <FileText size={20} strokeWidth={1.5} />,
+      label: <Link to="/admin/export-reports">Báo cáo & Xuất file</Link>,
+    },
+  ];
 
-    const getSelectedKeys = () => {
-        const path = location.pathname;
-        if (path === "/admin") return ["dashboard"];
-        if (path.includes("users-members")) return ["members"];
-        if (path.includes("users-employees")) return ["employees"];
-        if (path.includes("promotions")) return ["promotions"];
-        if (path.includes("room-list")) return ["room-list"];
-        if (path.includes("movies")) return ["movies"];
-        if (path.includes("movie-type")) return ["movie-type"];
-        if (path.includes("showtime-list")) return ["showtime-list"];
-        if (path.includes("faretype-list")) return ["faretype-list"];
-        if (path.includes("booking-list")) return ["booking-list"];
-        if (path.includes("review-list")) return ["review-list"];
-        if (path.includes("activity-logs")) return ["activity-logs"];
-        return [];
-    };
+  const getSelectedKeys = () => {
+    const path = location.pathname;
+    if (path === "/admin") return ["dashboard"];
+    if (path.includes("users-members")) return ["members"];
+    if (path.includes("users-employees")) return ["employees"];
+    if (path.includes("promotions")) return ["promotions"];
+    if (path.includes("room-list")) return ["room-list"];
+    if (path.includes("movies")) return ["movies"];
+    if (path.includes("movie-type")) return ["movie-type"];
+    if (path.includes("showtime-list")) return ["showtime-list"];
+    if (path.includes("faretype-list")) return ["faretype-list"];
+    if (path.includes("booking-list")) return ["booking-list"];
+    if (path.includes("review-list")) return ["review-list"];
+    if (path.includes("activity-logs")) return ["activity-logs"];
+    if (path.includes("export-reports")) return ["export-reports"];
+    return [];
+  };
 
     useEffect(() => {
         const path = location.pathname;
