@@ -562,8 +562,12 @@ public class MovieService {
 
         mapRequestToEntity(movie, request);
 
-        movie.setSmallImage(saveFile(request.getSmallImage(), "images"));
-        movie.setLargeImage(saveFile(request.getLargeImage(), "images"));
+        if (request.getSmallImage() != null && !request.getSmallImage().isEmpty()) {
+            movie.setSmallImage(saveFile(request.getSmallImage(), "images"));
+        }
+        if (request.getLargeImage() != null && !request.getLargeImage().isEmpty()) {
+            movie.setLargeImage(saveFile(request.getLargeImage(), "images"));
+        }
 
         if (request.getTrailerLink() != null && !request.getTrailerLink().isBlank())
             movie.setTrailer(request.getTrailerLink());
@@ -619,10 +623,8 @@ public class MovieService {
     }
 
     private MovieResponse mapEntityToResponse(Movie movie) {
-        List<MovieType> movieTypes = movieTypeRepository.findAll()
-                .stream()
-                .filter(mt -> mt.getMovie().getId().equals(movie.getId()))
-                .collect(Collectors.toList());
+        List<MovieType> movieTypes = movieTypeRepository.findByMovie_Id(movie.getId());
+
 
         List<String> typeNames = movieTypes.stream()
                 .map(mt -> mt.getType().getName())

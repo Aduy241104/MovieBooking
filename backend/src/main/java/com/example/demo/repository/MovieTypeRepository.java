@@ -13,7 +13,7 @@ import com.example.demo.model.MovieType;
 public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
     @Query("SELECT mt.type.name FROM MovieType mt WHERE mt.movie.id = :movieId")
     List<String> findTypeNamesByMovieId(@Param("movieId") Long movieId);
-
+    List<MovieType> findByMovie_Id(Long movieId);
     @Query(value = """
             SELECT
 
