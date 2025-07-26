@@ -462,6 +462,7 @@ import com.example.demo.DTO.response.MovieResponse;
 import com.example.demo.exception.DuplicateNameException;
 import com.example.demo.exception.FileStorageException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.AppException;
 import com.example.demo.model.*;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.MovieRepository;
@@ -655,13 +656,12 @@ public class MovieService {
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();
 
-        if (loginUserId == null || loginUserId.isEmpty()) {
-            return; // hoặc log warning
+        if(loginUserId == null || loginUserId.isEmpty()) {
+            throw new AppException("User not logged in");
         }
-
         Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy người dùng hiện tại"));
-
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+        // Log activity
         activityLogService.log(
                 user.getEmail(),
                 action,
@@ -670,7 +670,11 @@ public class MovieService {
                 description
         );
 
+        // Notify admins
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if(adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found");
+        }
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(user.getAccountId())) {
                 notificationService.notify(

@@ -140,15 +140,16 @@ public class GlobalExceptionHandler {
     // Handle general Runtime errors (placed at the end)
 
     @ExceptionHandler(value = {
-            RuntimeException.class,
-            IllegalArgumentException.class,
+            AppException.class,
     })
-    public ResponseEntity<ApiResponse<Object>> handleApiResponseException(Exception ex) {
-        ApiResponse<Object> apiResponse = ApiResponse.builder()
+    public ResponseEntity<ErrorResponse> handleResponseException(Exception ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
+                .error("An error occurred in the system!")
                 .message(ex.getMessage())
+                .path(request.getRequestURI())
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(DuplicateNameException.class)

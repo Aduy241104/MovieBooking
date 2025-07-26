@@ -7,6 +7,7 @@ import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -92,7 +93,7 @@ public class MovieScheduleController {
         return ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
                 .message("Get total now showing movie")
-                .result(response)
+                .result(movieScheduleService.getTotalNowShowingMovie())
                 .build();
     }
 

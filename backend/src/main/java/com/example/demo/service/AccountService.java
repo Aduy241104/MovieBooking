@@ -3,17 +3,16 @@ package com.example.demo.service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
+import com.example.demo.exception.AppException;
 import com.example.demo.model.Role;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.utils.SecurityUtils;
@@ -36,97 +35,61 @@ public class AccountService {
     private RoleRepository roleRepository;
     @Autowired
     private ActivityLogService activityLogService;
+    @Autowired
+    private NotificationService notificationService;
 
     public List<Account> getAllAccount() {
-        List<Account> accounts = accountRepository.findAll();
-        return accounts;
+        return accountRepository.findAll();
     }
 
-    /**
-     * Fetch all accounts with pagination and specification.
-     *
-     * @param spec     the specification to filter accounts
-     * @param pageable the pagination information
-     * @return a paginated response containing accounts
-     */
     public ResPagination fetchAllAccountPagination(Specification<Account> spec, Pageable pageable) {
-
         Specification<Account> finalSpec = Specification.where(spec)
-                .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false));
+                .and((root, query, criteriaBuilder)
+                        -> criteriaBuilder.equal(root.get("isDeleted"), false));
 
         Page<Account> accountPage = accountRepository.findAll(finalSpec, pageable);
-
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
                 .page(pageable.getPageNumber() + 1)
                 .pageSize(pageable.getPageSize())
                 .pages(accountPage.getTotalPages())
                 .total(accountPage.getTotalElements())
                 .build();
-
         return ResPagination.builder()
                 .meta(metaDTO)
                 .data(accountPage.getContent())
                 .build();
     }
 
-    /**
-     * Fetch an account by its ID.
-     *
-     * @param id the ID of the account
-     * @return the account if found
-     * @throws RuntimeException if the account is not found
-     */
-    public Account fetchAccountById(Long id) {
-        Account currentAccount = accountRepository.findById(id).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
-        return currentAccount;
+    public Account fetchAccountById(Long accountId) {
+        // If accountId is null, throw an exception
+        return getAccountOrThrow(accountId);
     }
 
-    /**
-     * Create a new account.
-     *
-     * @param account the account to create
-     * @return the created account
-     * @throws RuntimeException if the role is not found or phone number is already
-     *                          in use
-     */
     public Account handleCreateAccount(Account account) {
-        Role role = roleRepository.findById(account.getRole().getRoleId()).orElse(null);
-        if (role == null) {
-            throw new RuntimeException("Role not found");
-        }
-        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
-        if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
-            throw new RuntimeException("Phone already in use");
-        }
+        Role role = roleRepository.findById(account.getRole().getRoleId())
+                .orElseThrow(() -> new AppException("Role not found"));
         account.setRole(role);
-
+        // Check if email already exists
+        isAccountExist(account.getEmail());
+        // Check phone number
+        assertPhoneNotInUse(account.getPhoneNumber(), null);
+        // Save the account in database
+        Account savedAccount = accountRepository.save(account);
         // Set log and notification for account deletion
-        setLogAndNotification(account.getAccountId(), "TẠO MỚI", "Tạo mới tài khoản (" + role.getRoleName() + ")",
-                "Tạo mới tài khoản", " vừa tạo mới tài khoản: ");
-
-        return accountRepository.save(account);
+        setLogAndNotification(
+                savedAccount.getAccountId(),
+                "TẠO MỚI",
+                "Tạo mới tài khoản (" + role.getRoleName() + ")",
+                "Tạo mới tài khoản",
+                " vừa tạo mới tài khoản: ");
+        return savedAccount;
     }
 
-    /**
-     * Update an existing account.
-     *
-     * @param account the account to update
-     * @return the updated account
-     * @throws RuntimeException if the account is not found or phone number is
-     *                          already in use
-     */
     public Account handleUpdateAccountQuick(Account account) {
-        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
-        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
-        if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
-            throw new RuntimeException("Phone already in use");
-        }
+        // Check if account exists
+        Account currentAccount = getAccountOrThrow(account.getAccountId());
+        // Check phone if it is already in use by another account
+        assertPhoneNotInUse(account.getPhoneNumber(), currentAccount.getAccountId());
 
         currentAccount.setFullName(account.getFullName());
         currentAccount.setGender(account.getGender());
@@ -134,30 +97,21 @@ public class AccountService {
         currentAccount.setPhoneNumber(account.getPhoneNumber());
 
         // Set log and notification for account deletion
-        setLogAndNotification(account.getAccountId(), "CẬP NHẬT", "Cập nhật thông tin tài khoản",
-                "Cập nhật tài khoản", " vừa cập nhật thông tin tài khoản: ");
-
+        setLogAndNotification(
+                currentAccount.getAccountId(),
+                "CẬP NHẬT",
+                "Cập nhật thông tin tài khoản",
+                "Cập nhật tài khoản",
+                " vừa cập nhật thông tin tài khoản: ");
         return accountRepository.save(currentAccount);
     }
 
-    /**
-     * Update account information.
-     *
-     * @param id      the ID of the account to update
-     * @param account the account information to update
-     * @return the updated account
-     * @throws RuntimeException if the account is not found or phone number is
-     *                          already in use
-     */
-    public Account handleUpdateAccountInfo(Long id, Account account) {
-        Account currentAccount = accountRepository.findById(id).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
-        Account currentPhoneAccount = accountRepository.findByPhoneNumber(account.getPhoneNumber());
-        if (currentPhoneAccount != null && !(currentPhoneAccount.getAccountId().equals(account.getAccountId()))) {
-            throw new RuntimeException("Phone already in use");
-        }
+    public Account handleUpdateAccountInfo(Long accountId, Account account) {
+        // Check if account exists
+        Account currentAccount = getAccountOrThrow(accountId);
+        // Check phone if it is already in use by another account
+        assertPhoneNotInUse(account.getPhoneNumber(), currentAccount.getAccountId());
+
         currentAccount.setFullName(account.getFullName());
         currentAccount.setGender(account.getGender());
         currentAccount.setDateOfBirth(account.getDateOfBirth());
@@ -166,190 +120,185 @@ public class AccountService {
         currentAccount.setScore(account.getScore());
 
         // Set log and notification for account deletion
-        setLogAndNotification(account.getAccountId(), "CẬP NHẬT", "Cập nhật thông tin tài khoản",
-                "Cập nhật tài khoản", " vừa cập nhật thông tin tài khoản: ");
-
+        setLogAndNotification(
+                currentAccount.getAccountId(),
+                "CẬP NHẬT",
+                "Cập nhật thông tin tài khoản",
+                "Cập nhật tài khoản",
+                " vừa cập nhật thông tin tài khoản: ");
         return accountRepository.save(currentAccount);
     }
 
-    /**
-     * Update the status of an account.
-     *
-     * @param account the account with updated status
-     * @return the updated account
-     * @throws RuntimeException if the account is not found
-     */
     public Account handleUpdateStatusAccount(Account account) {
-        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
+        // Check if account exists
+        Account currentAccount = getAccountOrThrow(account.getAccountId());
+        // Set new status for account
         currentAccount.setStatus(account.getStatus());
-
         return accountRepository.save(currentAccount);
     }
 
-    /**
-     * Delete an account by marking it as deleted.
-     *
-     * @param account the account to delete
-     * @return the updated account with isDeleted set to true
-     * @throws RuntimeException if the account is not found
-     */
     public Account handleDeleteAccount(@RequestBody Account account) {
-        Account currentAccount = accountRepository.findById(account.getAccountId()).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
+        // Check if account exists
+        Account currentAccount = getAccountOrThrow(account.getAccountId());
+        // Set account as deleted
         currentAccount.setIsDeleted(true);
-
         // Set log and notification for account deletion
-        setLogAndNotification(account.getAccountId(), "XÓA", "Xóa tài khoản",
-                "Xóa tài khoản", " đã xóa tài khoản: ");
-
+        setLogAndNotification(
+                currentAccount.getAccountId(),
+                "XÓA",
+                "Xóa tài khoản",
+                "Xóa tài khoản",
+                " đã xóa tài khoản: ");
         return accountRepository.save(currentAccount);
     }
 
-    /**
-     * Find an account by email.
-     *
-     * @param email the email to search for
-     * @return the account if found, null otherwise
-     */
-    public Account findAccountByEmail(String email) {
-        return accountRepository.findByEmail(email).orElse(null);
-    }
-
-    /**
-     * Handle the upload of an avatar for an account.
-     *
-     * @param id         the ID of the account
-     * @param avatarFile the file to upload as avatar
-     * @return the updated account with the new avatar
-     * @throws RuntimeException if the account is not found or no file is uploaded
-     */
-    public Account handleUploadAvatar(Long id, MultipartFile avatarFile) {
-        Account currentAccount = accountRepository.findById(id).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
+    public Account handleUploadAvatar(Long accountId, MultipartFile avatarFile) {
+        Account currentAccount = getAccountOrThrow(accountId);
         if (avatarFile == null || avatarFile.isEmpty()) {
-            throw new RuntimeException("No file uploaded");
+            throw new AppException("No file uploaded");
         }
-
         try {
-            // Đường dẫn lưu file, ex: src/main/resources/static/avatars/
+            // File save path, ex: src/main/resources/static/avatars/
             String uploadDir = "uploads/avatars/";
-            // Tạo thư mục nếu chưa tồn tại
+            // Create directory if it does not exist
             Files.createDirectories(Paths.get(uploadDir));
-
-            String fileName = "avatar_" + id + "_" + System.currentTimeMillis() + "_"
+            // Create unique file names to avoid duplicates
+            String fileName = "avatar_" + currentAccount.getAccountId() + "_" + System.currentTimeMillis() + "_"
                     + avatarFile.getOriginalFilename();
             Path filePath = Paths.get(uploadDir + fileName);
             Files.write(filePath, avatarFile.getBytes());
-
+            // Update avatar field in account
             currentAccount.setAvatar(fileName);
-
             // Set log and notification for account deletion
-            setLogAndNotification(id, "CẬP NHẬT", "Cập nhật avatar tài khoản",
-                    "Cập nhật avatar tài khoản", " vừa cập nhật avatar tài khoản: ");
-
+            setLogAndNotification(
+                    currentAccount.getAccountId(),
+                    "CẬP NHẬT",
+                    "Cập nhật avatar tài khoản",
+                    "Cập nhật avatar tài khoản",
+                    " vừa cập nhật avatar tài khoản: ");
             return accountRepository.save(currentAccount);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to upload avatar: " + e.getMessage());
+            throw new AppException("Failed to upload avatar: " + e.getMessage());
         }
     }
 
-    /**
-     * Get the total number of accounts by role.
-     *
-     * @param role the role to filter accounts
-     * @return the total number of accounts with the specified role
-     */
-    public long getTotalAccountByRole(Role role) {
-        return accountRepository.countByRole(role);
+    public long getTotalAccountByRole(String roleName) {
+        boolean isRoleExist = roleRepository.existsByRoleName(roleName);
+        if (!isRoleExist) {
+            throw new AppException("Role not found");
+        }
+        return accountRepository.countByRole_RoleName(roleName);
     }
 
-    /**
-     * Get user registrations statistics for the last 'monthCount' months.
-     *
-     * @param monthCount the number of months to look back
-     * @return a DTO containing user registration statistics
-     */
     public List<UserRegistrationsResponse> getUserRegistrationsDTO(int monthCount) {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate().atStartOfDay();
-        LocalDateTime toDate = now.withDayOfMonth(1).toLocalDate().atStartOfDay();
-        List<Object[]> stats = accountRepository.getUserRegistrationsByMonth(fromDate, toDate);
-
-        Map<LocalDate, UserRegistrationsResponse> map = new HashMap<>();
-        for (Object[] row : stats) {
-            LocalDate monthStart = ((Instant) row[0]).atZone(ZoneId.systemDefault()).toLocalDate();
-            Long newUsers = ((Number) row[1]).longValue();
-            Long totalUsers = ((Number) row[2]).longValue();
-            map.put(monthStart, new UserRegistrationsResponse(monthStart, newUsers, totalUsers));
-        }
+        LocalDate fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate();
+        LocalDate toDate = now.withDayOfMonth(1).toLocalDate();
+        // Get monthly registered user statistics
+        List<UserRegistrationsResponse> stats = accountRepository.getUserRegistrationsByMonth(fromDate, toDate);
+        // Convert list to Map for easy lookup by date
+        Map<LocalDate, UserRegistrationsResponse> map = stats.stream()
+                .collect(Collectors.toMap(UserRegistrationsResponse::getDate, dto -> dto));
+        // Fill in monthCount and calculate totalUsers
         List<UserRegistrationsResponse> result = new ArrayList<>();
+        // Calculate total users before fromDate to use as baseline
+        long runningTotal = accountRepository.countByRoleRoleIdAndRegisterDateBefore(3L, fromDate);
+        // Loop through each month from fromDate to toDate
         for (int i = 0; i < monthCount; i++) {
-            LocalDate monthStart = fromDate.plusMonths(i).withDayOfMonth(1).toLocalDate();
+            LocalDate monthStart = fromDate.plusMonths(i).withDayOfMonth(1);
             UserRegistrationsResponse resp = map.getOrDefault(
                     monthStart,
                     new UserRegistrationsResponse(monthStart, 0L, 0L));
+            // Update running total
+            runningTotal += resp.getNewUsers();
+            resp.setTotalUsers(runningTotal);
             result.add(resp);
         }
         return result;
     }
 
+    /**
+     * Sets log and sends notification for account actions.
+     */
     private void setLogAndNotification(Long accountId, String action, String description,
-            String title, String content) {
-        Account currentAccount = accountRepository.findById(accountId).orElse(null);
-        if (currentAccount == null) {
-            throw new RuntimeException("Account not found");
-        }
-
+                                       String title, String content) {
+        // Check user applied
+        Account currentAccount = getAccountOrThrow(accountId);
+        // Get the current logged-in user
         String loginUserId = SecurityUtils.getCurrentUsername();
-        System.out.println(">>> LOI SML 22: " + loginUserId);
         if (loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+            throw new AppException("User not logged in!");
         }
-        Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        // Khi người dùng cập nhật thông tin, lưu thông tin người dùng đã cập nhật
-        currentAccount.setUpdateBy(user.getEmail());
-
-        // Lưu log hoạt động cập nhật thông tin tài khoản
+        // Check logged-in user
+        Account editorAccount = getAccountOrThrow(Long.valueOf(loginUserId));
+        // Set the updater email
+        currentAccount.setUpdateBy(editorAccount.getEmail());
+        // Set role of the user applied
         String entityType = "";
         if (currentAccount.getRole().getRoleId() == 2) {
             entityType = "NHÂN VIÊN";
         } else {
             entityType = "THÀNH VIÊN";
         }
-
-        // Ghi log hoạt động
+        // Log the activity
         activityLogService.log(
-                user.getEmail(),
+                editorAccount.getEmail(),
                 action,
                 entityType,
                 currentAccount.getEmail(),
                 description);
+        // Notify admins
+        List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if(adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found");
+        }
+        for (Account admin : adminAccounts) {
+            if (!admin.getAccountId().equals(editorAccount.getAccountId())) {
+                notificationService.notify(
+                        admin,
+                        title,
+                        editorAccount.getFullName() + content + currentAccount.getEmail(),
+                        "SYSTEM"
+                );
+            }
+        }
+    }
 
-        // Gửi notification cho tất cả admin còn lại
-        // TODO: Implement notification sending without circular dependency
-        // You can use ApplicationEventPublisher or a separate service
-        /*
-         * List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
-         * for (Account admin : adminAccounts) {
-         * if (!admin.getAccountId().equals(user.getAccountId())) {
-         * notificationService.notify(
-         * admin,
-         * title,
-         * user.getFullName() + content + currentAccount.getEmail(),
-         * "SYSTEM"
-         * );
-         * }
-         * }
-         */
+    /**
+     * Find account by id, or throw AppException("Account not found").
+     */
+    public Account getAccountOrThrow(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException("Account not found"));
+    }
+
+    /**
+     * Check if email is already in use by another account
+     * or throw AppException("Account already exists").
+     */
+    public void isAccountExist(String email) {
+        boolean exists = accountRepository.existsByEmail(email);
+        if (exists) {
+            throw new AppException("Account already exists");
+        }
+    }
+
+    /**
+     * Check if phoneNumber is already in use by another account
+     * or throw AppException("Phone already in use").
+     */
+    public void assertPhoneNotInUse(String phoneNumber, Long currentAccountId) {
+        boolean exists;
+        if (currentAccountId == null) {
+            // Add new account: check if phone number exists
+            exists = accountRepository.existsByPhoneNumber(phoneNumber);
+        } else {
+            // Update account: check if phone number exists but not for the current account
+            exists = accountRepository.existsByPhoneNumberAndAccountIdNot(phoneNumber, currentAccountId);
+        }
+        if (exists) {
+            throw new AppException("Phone already in use");
+        }
     }
 
 }
