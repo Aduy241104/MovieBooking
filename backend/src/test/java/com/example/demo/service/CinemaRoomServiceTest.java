@@ -455,5 +455,23 @@ class CinemaRoomServiceTest {
 
         assertTrue(ex.getMessage().contains("Seat type không tồn tại"));
     }
+    @Test
+    void updateRoom_shouldThrowDuplicateNameExceptionWhenNameConflict() {
+        RoomRequest request = new RoomRequest();
+        request.setName("Trùng tên");
+        request.setSeats(List.of());
+
+        CinemaRoom anotherRoom = new CinemaRoom();
+        anotherRoom.setCinemaRoomId(2L);
+
+        when(roomRepo.findById(1L)).thenReturn(Optional.of(sampleRoom));
+        when(roomRepo.findByCinemaRoomNameIgnoreCase("Trùng tên")).thenReturn(Optional.of(anotherRoom));
+
+        DuplicateNameException ex = assertThrows(DuplicateNameException.class, () -> {
+            cinemaRoomService.updateRoom(1L, request);
+        });
+
+        assertEquals("Tên phòng đã tồn tại.", ex.getMessage());
+    }
 
 }
