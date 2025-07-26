@@ -88,13 +88,14 @@ public class MovieScheduleController {
     }
 
     @GetMapping(MovieSchedulePath.TOTAL_NOW_SHOWING)
-    public ApiResponse<Long> totalNowShowingMovie() {
-        Long response = movieScheduleService.getTotalNowShowingMovie();
-        return ApiResponse.<Long>builder()
+    public ResponseEntity<ApiResponse<Long>> totalNowShowingMovie() {
+        ApiResponse<Long> result = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
                 .message("Get total now showing movie")
                 .result(movieScheduleService.getTotalNowShowingMovie())
                 .build();
+
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/acc")

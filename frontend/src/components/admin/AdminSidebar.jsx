@@ -177,11 +177,13 @@ import {
     LayoutDashboard,
     Ticket,
     Users,
+    Film,
     Video,
+    CalendarDays,
+    Receipt,
     MessageSquareText,
     History,
     FileText,
-    Film
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -253,7 +255,56 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
             label: <Link to="/admin/export-reports">Báo cáo & Xuất file</Link>,
         },
 
-
+        {
+            key: "movie",
+            icon: <Film size={20} strokeWidth={1.5} />,
+            label: "Quản lý phim",
+            children: [
+                {
+                    key: "movies",
+                    label: <Link to="/admin/movies">Phim</Link>,
+                },
+                {
+                    key: "movie-type",
+                    label: <Link to="/admin/movie-type">Thể loại</Link>,
+                },
+            ],
+        },
+        {
+            key: "showtime-list",
+            icon: <CalendarDays size={20} strokeWidth={1.5} />,
+            label: <Link to="/admin/showtime-list">Quản lý lịch chiếu</Link>,
+        },
+        {
+            key: "faretype",
+            icon: <Receipt size={20} strokeWidth={1.5} />,
+            label: "Quản lý giá vé",
+            children: [
+                {
+                    key: "faretype-list",
+                    label: <Link to="/admin/faretype-list">Loại giá vé</Link>,
+                },
+                {
+                    key: "booking-list",
+                    label: <Link to="/admin/booking-list">Lịch sử đặt vé</Link>,
+                },
+            ],
+        },
+        {
+            key: "review-list",
+            icon: <MessageSquareText size={20} strokeWidth={1.5} />,
+            label: <Link to="/admin/review-list">Quản lý bình luận</Link>,
+        },
+        {
+            key: "activity-logs",
+            icon: <History size={20} strokeWidth={1.5} />,
+            label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
+        },
+        {
+            key: "export-reports",
+            icon: <FileText size={20} strokeWidth={1.5} />,
+            label: <Link to="/admin/export-reports">Báo cáo & Xuất file</Link>,
+        },
     ];
 
     const getSelectedKeys = () => {
