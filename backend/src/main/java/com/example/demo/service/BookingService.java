@@ -534,7 +534,11 @@ public class BookingService {
             BigDecimal originalAmount) {
         if (booking == null)
             return null;
-
+        int pointsEarned = 0;
+        // Chỉ tính điểm thưởng cho các booking đã thanh toán thành công
+        if ("PAID".equals(booking.getBookingStatus()) && booking.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
+            pointsEarned = booking.getTotalAmount().multiply(POINTS_EARNING_RATE).intValue();
+        }
         BookingDetailResponseDTO.AccountInfoDTO accountInfo = null;
         if (booking.getAccount() != null) {
             accountInfo = BookingDetailResponseDTO.AccountInfoDTO.builder()
@@ -603,6 +607,7 @@ public class BookingService {
                 .discountApplied(booking.getDiscountApplied())
                 .pointsUsed(booking.getPointsUsed())
                 .pointsDiscount(booking.getPointsDiscount())
+                .pointsEarned(pointsEarned)
                 .bookingTime(booking.getBookingTime())
                 .totalAmount(booking.getTotalAmount())
                 .originalAmount(originalAmount)

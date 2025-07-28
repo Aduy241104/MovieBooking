@@ -1,8 +1,7 @@
-// src/pages/BookingSuccessPage/BookingSuccessPage.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getBookingDetails } from '../../../service/BookingService'; // KIỂM TRA ĐƯỜNG DẪN
-// import CustomizeButton from '../../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import styles from './bookingSuccessPage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
@@ -124,6 +123,11 @@ const BookingSuccessPage = () => {
                 <p className={cx('booking-code')}>
                     Mã đặt vé của bạn là: <strong>{bookingDetails.bookingCode}</strong>
                 </p>
+                 {bookingDetails.pointsEarned > 0 && (
+                <p className="text-success" style={{ fontWeight: '500' }}>
+                    Chúc mừng! Bạn đã được cộng {bookingDetails.pointsEarned.toLocaleString('vi-VN')} điểm thưởng vào tài khoản.
+                </p>
+            )}
 
                 <div className={cx('details-card')}>
                     <div className={cx('card-header')}>Chi tiết vé</div>

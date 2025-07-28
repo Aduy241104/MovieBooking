@@ -115,7 +115,7 @@ $input-focus-border: #43cea2;
 .invalid-feedback { display: block; }
 
 .payment-section {
-    h5 { margin-bottom: 1rem; }
+    h5 { margin-bottom: 1rem; color: $text-primary; }
     .form-check {
         margin-bottom: 0.75rem; color: $text-primary; display: flex; align-items: center;
         gap: 0.5rem; cursor: pointer;
