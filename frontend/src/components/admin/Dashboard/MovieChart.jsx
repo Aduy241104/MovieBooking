@@ -4,6 +4,11 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 export const MovieChart = ({ data }) => {
+    const chartData = data.map((item) => ({
+        name: item.movieType, // Chuyển đổi 'movieType' thành 'name'
+        quantity: item.quantity,
+        revenue: item.revenue,
+    }));
     const formatCurrency = (value) => {
         return new Intl.NumberFormat("vi-VN", {
             style: "currency",
@@ -16,14 +21,14 @@ export const MovieChart = ({ data }) => {
             <ResponsiveContainer>
                 <PieChart>
                     <Pie
-                        data={data}
+                        data={chartData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
                         label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
-                        dataKey="count"
+                        dataKey="quantity"
                     >
                         {data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

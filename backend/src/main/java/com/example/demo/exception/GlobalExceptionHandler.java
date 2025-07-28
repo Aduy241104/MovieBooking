@@ -163,4 +163,18 @@ public class GlobalExceptionHandler {
                                 .build();
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
         }
+
+        @ExceptionHandler(value = {
+                        AppException.class,
+        })
+        public ResponseEntity<ErrorResponse> handleResponseException(Exception ex, HttpServletRequest request) {
+                ErrorResponse errorResponse = ErrorResponse.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .error("An error occurred in the system!")
+                                .message(ex.getMessage())
+                                .path(request.getRequestURI())
+                                .build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
 }

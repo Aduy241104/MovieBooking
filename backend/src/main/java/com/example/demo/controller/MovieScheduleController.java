@@ -7,6 +7,7 @@ import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -87,13 +88,13 @@ public class MovieScheduleController {
     }
 
     @GetMapping(MovieSchedulePath.TOTAL_NOW_SHOWING)
-    public ApiResponse<Long> totalNowShowingMovie() {
-        Long response = movieScheduleService.getTotalNowShowingMovie();
-        return ApiResponse.<Long>builder()
+    public ResponseEntity<ApiResponse<Long>> totalNowShowingMovie() {
+        ApiResponse<Long> result = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
                 .message("Get total now showing movie")
-                .result(response)
+                .result(movieScheduleService.getTotalNowShowingMovie())
                 .build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/acc")

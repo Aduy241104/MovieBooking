@@ -1,17 +1,19 @@
 package com.example.demo.DTO.response.dashboard;
 
+import java.math.BigDecimal;
+
 import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class TopMovieByRevenueResponse {
     private String movieTitle;
     private String movieGenre;
-    private double avgRating;
-    private int ticketSold;
-    private long revenue;
+    private BigDecimal avgRating;
+    private Long ticketSold;
+    private BigDecimal revenue;
     private String posterUrl;
 }
