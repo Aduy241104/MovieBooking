@@ -8,6 +8,8 @@ import com.example.demo.DTO.request.ChangePasswordRequest;
 import com.example.demo.DTO.request.ProfileRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.ProfileDTO;
+import com.example.demo.DTO.response.RefreshAndAccessTokenResponse;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.UnauthorizedException;
@@ -41,6 +43,9 @@ public class ProfileService {
 
     @Autowired
     SecurityUtils securityUtils;
+
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
     /**
      * Retrieves the user profile information based on the given account ID.
@@ -92,7 +97,7 @@ public class ProfileService {
      * @throws NotFoundException     if the account is not found
      * @throws UnauthorizedException if the old password is incorrect
      */
-    public String changePassword(Long accountId, ChangePasswordRequest changePasswordRequest) {
+    public RefreshAndAccessTokenResponse changePassword(Long accountId, ChangePasswordRequest changePasswordRequest) {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new NotFoundException("Account not found"));
 
@@ -101,8 +106,12 @@ public class ProfileService {
         }
         account.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
         accountRepository.save(account);
-        String newToken = securityUtils.generateToken(account);
-        return newToken;
+        String newAccessToken = securityUtils.generateToken(account);
+        String newRefreshToken = refreshTokenService.createRefresToken(account).getToken();
+        return RefreshAndAccessTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken )
+                .build();
     }
 
     /**
@@ -135,7 +144,7 @@ public class ProfileService {
         boolean isValid = otpService.verifyOtp(newEmail, otp);
 
         if (!isValid) {
-            throw new UnauthorizedException("Otp or email not correct");
+            throw new BadRequestException("Otp or email not correct");
         }
 
         Account account = accountRepository.findById(accountId)

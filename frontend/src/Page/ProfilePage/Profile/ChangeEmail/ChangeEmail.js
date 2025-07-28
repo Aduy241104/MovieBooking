@@ -21,15 +21,15 @@ function ChangeEmail() {
     const handleFinish = async (values) => {
         try {
             setLoading(true);
-            const response = await requestChangeEmail(values);
+            await requestChangeEmail(values);
 
-            if (!response.success) {
-                if (response.status === 409) {
-                    throw new Error("Email này đã được đăng kí")
-                } else {
-                    throw new Error("lỗi không xác định vui lòng thử lại sau");
-                }
-            }
+            // if (!response.success) {
+            //     if (response.status === 409) {
+            //         throw new Error("Email này đã được đăng kí")
+            //     } else {
+            //         throw new Error("lỗi không xác định vui lòng thử lại sau");
+            //     }
+            // }
 
             setStep(2);
 

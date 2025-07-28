@@ -12,8 +12,7 @@ const tmdbAxios = axios.create({
         Authorization: `Bearer ${API_TOKEN_TMDB}`,
     },
 });
-
-
+        
 export const findMovieByNameAPI = async (movieName) => {
     try {
         const response = await tmdbAxios.get("/search/movie", {
