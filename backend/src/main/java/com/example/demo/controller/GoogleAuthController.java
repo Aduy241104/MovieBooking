@@ -48,20 +48,19 @@ public class GoogleAuthController {
     }
 
     @GetMapping("/google/google-login")
-public void redirectToGoogle(HttpServletResponse response) throws IOException {
-    String authUrl = UriComponentsBuilder
-            .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
-            .queryParam("client_id", clientId)
-            .queryParam("redirect_uri", redirectUri)
-            .queryParam("response_type", "code")
-            .queryParam("scope",
-                    "openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.phonenumbers.read")
-            .queryParam("access_type", "offline")
-            .build().toUriString();
+    public void redirectToGoogle(HttpServletResponse response) throws IOException {
+        String authUrl = UriComponentsBuilder
+                .fromUriString("https://accounts.google.com/o/oauth2/v2/auth")
+                .queryParam("client_id", clientId)
+                .queryParam("redirect_uri", redirectUri)
+                .queryParam("response_type", "code")
+                .queryParam("scope",
+                        "openid email profile https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.phonenumbers.read")
+                .queryParam("access_type", "offline")
+                .build().toUriString();
 
-    response.sendRedirect(authUrl);
-}
-
+        response.sendRedirect(authUrl);
+    }
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -115,6 +114,6 @@ public void redirectToGoogle(HttpServletResponse response) throws IOException {
         // result.put("name", name);
         // result.put("picture", picture);
 
-        return ResponseEntity.ok(userInfo); 
+        return ResponseEntity.ok(userInfo);
     }
 }

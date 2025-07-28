@@ -12,6 +12,7 @@ import com.example.demo.DTO.request.ProfileRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ProfileDTO;
+import com.example.demo.DTO.response.RefreshAndAccessTokenResponse;
 import com.example.demo.path.UserProfilePath;
 import com.example.demo.service.ProfileService;
 import com.example.demo.utils.SecurityUtils;
@@ -54,14 +55,15 @@ public class ProfileController {
     }
 
     @PutMapping(UserProfilePath.CHANGE_PASSWORD)
-    public ApiResponse<String> putMethodName(@RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
-       
+    public ApiResponse<RefreshAndAccessTokenResponse> putMethodName(
+            @RequestBody @Valid ChangePasswordRequest changePasswordRequest) {
+
         String currentUsername = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(currentUsername);
 
-        String newToken = profileService.changePassword(accountId, changePasswordRequest);
+        RefreshAndAccessTokenResponse newToken = profileService.changePassword(accountId, changePasswordRequest);
 
-        return ApiResponse.<String>builder()
+        return ApiResponse.<RefreshAndAccessTokenResponse>builder()
                 .message("Password changed successful")
                 .result(newToken)
                 .build();
