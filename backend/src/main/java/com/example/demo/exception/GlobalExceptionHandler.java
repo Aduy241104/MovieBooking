@@ -125,43 +125,32 @@ public class GlobalExceptionHandler {
 
         // Exception of booking
         @ExceptionHandler({
-                        SeatAlreadyBookedException.class,
-                        InvalidPromotionException.class,
-                        InsufficientPointsException.class,
-                        BookingValidationException.class,
-                        PendingBookingExistsException.class
+                SeatAlreadyBookedException.class,
+                InvalidPromotionException.class,
+                InsufficientPointsException.class,
+                BookingValidationException.class, // Bắt lỗi "ghế mồ côi" ở đây
+                PendingBookingExistsException.class
         })
         public ResponseEntity<ApiResponse<Object>> handleBookingExceptions(RuntimeException ex) {
-                HttpStatus status = HttpStatus.BAD_REQUEST; // 400
-                Object resultData = null;
-                if (ex instanceof SeatAlreadyBookedException || ex instanceof PendingBookingExistsException) {
-                        status = HttpStatus.CONFLICT; // 409
-                        if (ex instanceof PendingBookingExistsException) {
-                                // Returns the ID of the pending booking
-                                resultData = Map.of("existingBookingId",
-                                                ((PendingBookingExistsException) ex).getExistingBookingId());
-                        }
+            HttpStatus status = HttpStatus.BAD_REQUEST; // 400
+            Object resultData = null;
+
+            if (ex instanceof SeatAlreadyBookedException || ex instanceof PendingBookingExistsException) {
+                status = HttpStatus.CONFLICT; // 409
+                if (ex instanceof PendingBookingExistsException) {
+                    resultData = Map.of("existingBookingId", ((PendingBookingExistsException) ex).getExistingBookingId());
                 }
-                ApiResponse<Object> apiResponse = ApiResponse.builder()
-                                .status(status.value())
-                                .message(ex.getMessage())
-                                .result(resultData)
-                                .build();
-                return new ResponseEntity<>(apiResponse, status);
-        }
+            }
 
-        // Handle general Runtime errors (placed at the end)
+            // Lỗi "ghế mồ côi" (BookingValidationException) sẽ rơi vào đây và trả về 400
 
-        @ExceptionHandler(value = {
-                        RuntimeException.class,
-                        IllegalArgumentException.class,
-        })
-        public ResponseEntity<ApiResponse<Object>> handleApiResponseException(Exception ex) {
-                ApiResponse<Object> apiResponse = ApiResponse.builder()
-                                .status(HttpStatus.BAD_REQUEST.value())
-                                .message(ex.getMessage())
-                                .build();
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
+            ApiResponse<Object> apiResponse = ApiResponse.builder()
+                    .status(status.value())
+                    .message(ex.getMessage()) // <<< QUAN TRỌNG: Trả về message của exception
+                    .result(resultData)
+                    .build();
+
+            return new ResponseEntity<>(apiResponse, status);
         }
 
         @ExceptionHandler(value = {
@@ -222,6 +211,19 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+    // Handle general Runtime errors (placed at the end)
+
+    @ExceptionHandler(value = {
+            RuntimeException.class,
+            IllegalArgumentException.class,
+    })
+    public ResponseEntity<ApiResponse<Object>> handleApiResponseException(Exception ex) {
+        ApiResponse<Object> apiResponse = ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
     }
 
 }

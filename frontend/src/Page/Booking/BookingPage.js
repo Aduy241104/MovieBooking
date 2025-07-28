@@ -6,13 +6,12 @@ import { checkPromotion, createBooking, getUserPoints } from '../../service/Book
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
-// import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA
 import DefaultLayout from '../../layouts/DefaultLayout'; // GIẢ SỬ ĐƯỜNG DẪN ĐÚNG
 import styles from './bookingPage.scss'; // ĐÃ ĐỔI TÊN FILE CSS CHO NHẤT QUÁN
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-
+import { message, Modal } from 'antd';
 const cx = classNames.bind(styles);
 
 const BookingPage = () => {
@@ -169,48 +168,58 @@ const BookingPage = () => {
         });
     };
 
-     const handleApplyPromotion = async () => {
-        if (!promotionCode.trim()) {
-            setPromotionError('Vui lòng nhập mã khuyến mãi.');
-            return;
+      const handleApplyPromotion = async () => {
+    // 1. Kiểm tra đầu vào cơ bản ở frontend
+    if (!promotionCode.trim()) {
+        message.warning('Vui lòng nhập mã khuyến mãi.');
+        return;
+    }
+
+    // 2. Cập nhật trạng thái UI để bắt đầu quá trình
+    setCheckingPromotion(true);
+    setPromotionError('');
+    setPromotionSuccess('');
+    setAppliedPromotion(null);
+
+    try {
+        // 3. Gọi API - Đây là điểm tương tác duy nhất với backend
+        const response = await checkPromotion(promotionCode);
+
+        // 4. Xử lý khi API trả về thành công (HTTP 200)
+        // Nếu đến được đây, chúng ta chắc chắn mã hợp lệ về mặt tồn tại, thời gian,...
+        const promoData = response.data.result;
+
+        // Kiểm tra logic phụ thuộc vào trạng thái hiện tại của đơn hàng (totalPrice)
+        if (totalPrice < parseFloat(promoData.minOrder)) {
+            const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
+            const errorMessage = `Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`;
+            
+            setPromotionError(errorMessage); // Hiển thị lỗi dưới ô input (nếu có)
+            message.error(errorMessage);     // Hiển thị thông báo Antd
+            return; // Dừng lại, không áp dụng mã
         }
-        setCheckingPromotion(true);
-        setPromotionError('');
-        setPromotionSuccess('');
-        setAppliedPromotion(null);
 
-        try {
-            const response = await checkPromotion(promotionCode);
+        // Nếu tất cả điều kiện đều thỏa mãn
+        setAppliedPromotion(promoData);
+        setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
+        message.success('Áp dụng mã khuyến mãi thành công!');
 
-            // Kiểm tra xem API có trả về kết quả khuyến mãi không
-            if (response.data && response.data.result) {
-                const promoData = response.data.result;
-
-                // Kiểm tra điều kiện tối thiểu ở frontend để đưa ra phản hồi ngay
-                if (totalPrice < parseFloat(promoData.minOrder)) {
-                    // Tạo thông báo lỗi trực tiếp
-                    const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
-                    setPromotionError(`Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`);
-                    return; // Dừng lại ở đây
-                }
-
-                // Nếu mọi thứ hợp lệ
-                setAppliedPromotion(promoData);
-                setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
-
-            } else {
-                // Nếu API trả về result là null hoặc không có, nghĩa là mã không hợp lệ
-                setPromotionError('Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
-            }
-        } catch (err) {
-            // Xử lý các lỗi kết nối hoặc lỗi server 500
-            console.error("Error applying promotion:", err);
-            setPromotionError('Không thể áp dụng mã khuyến mãi lúc này. Vui lòng thử lại.');
-        } finally {
-            setCheckingPromotion(false);
-        }
-    };
-
+    } catch (err) {
+        // 5. Xử lý khi API trả về lỗi (HTTP 4xx, 5xx)
+        // Tất cả các lỗi nghiệp vụ từ backend (sai mã, hết hạn) sẽ rơi vào đây
+        console.error("Error applying promotion:", err);
+        
+        // Lấy message lỗi chính xác từ ApiResponse mà GlobalExceptionHandler đã tạo
+        const errorMessage = err.response?.data?.message || 'Không thể kết nối hoặc có lỗi xảy ra.';
+        
+        setPromotionError(errorMessage); // Hiển thị lỗi dưới ô input (nếu có)
+        message.error(errorMessage);     // Hiển thị thông báo Antd
+        
+    } finally {
+        // 6. Cập nhật lại trạng thái UI sau khi quá trình kết thúc
+        setCheckingPromotion(false);
+    }
+};
     const handlePointsInputChange = (e) => {
         const value = e.target.value;
         setPointsInputError('');
@@ -268,118 +277,69 @@ const BookingPage = () => {
         if (promotionSuccess) setPromotionSuccess('');
     };
 
-// <<< TẠO HÀM XỬ LÝ LỖI TẬP TRUNG >>>
-    const handleBookingError = (rawMessage) => {
-        const defaultMessage = 'Có lỗi xảy ra, vui lòng thử lại.';
-        if (!rawMessage) {
-            alert(defaultMessage);
+    const handleSubmitBooking = async () => {
+        if (selectedSeats.length === 0) {
+            message.warning('Vui lòng chọn ít nhất một ghế.');
+            return;
+        }
+        if (!selectedPaymentMethodId) {
+            message.warning('Vui lòng chọn phương thức thanh toán.');
             return;
         }
 
-        const parts = rawMessage.split(':');
-        const errorCode = parts[0];
-        const errorValue = parts[1];
+        setIsSubmitting(true);
+        const bookingPayload = {
+            screeningId: screeningInfo.screeningId,
+            seatIds: selectedSeats.map(s => s.seatId),
+            promotionCode: appliedPromotion ? appliedPromotion.code : null,
+            paymentMethodId: parseInt(selectedPaymentMethodId),
+            pointsToUse: parseInt(pointsToUse) || 0,
+        };
 
-        switch (errorCode) {
-            case 'INVALID_SEAT_SELECTION_SINGLE_GAP':
-                alert('Lựa chọn ghế không hợp lệ. Vui lòng không để lại một ghế trống ở giữa.');
-                break;
-            case 'SEAT_ALREADY_BOOKED':
-                alert(`Rất tiếc, ghế ${errorValue} đã có người khác đặt. Trang sẽ tự động tải lại sơ đồ ghế.`);
-                // Tùy chọn: Tải lại sơ đồ ghế để cập nhật
-                // loadSeats(); 
-                break;
-            case 'PROMOTION_MIN_ORDER_NOT_MET':
-                const minOrder = Number(errorValue) || 0;
-                alert(`Tổng tiền chưa đạt mức tối thiểu ${minOrder.toLocaleString('vi-VN')}đ của khuyến mãi.`);
-                break;
-            case 'PROMOTION_INVALID_OR_EXPIRED':
-                alert('Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
-                break;
+        try {
+            const response = await createBooking(bookingPayload);
+            const bookingResult = response.data.result;
 
-            case 'POINTS_EXCEEDED':
-                alert('Số điểm sử dụng vượt quá số điểm hiện có của bạn.');
-                break;
-            default:
-                // Hiển thị các lỗi khác mà không có mã cụ thể
-                alert(rawMessage);
-                break;
-        }
-    };
-
-    const handleSubmitBooking = async () => {
-    // 1. Kiểm tra đầu vào cơ bản ở frontend
-    if (selectedSeats.length === 0) {
-        alert('Vui lòng chọn ít nhất một ghế.');
-        return;
-    }
-    if (!selectedPaymentMethodId) {
-        alert('Vui lòng chọn phương thức thanh toán.');
-        return;
-    }
-
-    setIsSubmitting(true);
-
-    // 2. Chuẩn bị payload để gửi lên backend
-    const bookingPayload = {
-        screeningId: screeningInfo.screeningId,
-        seatIds: selectedSeats.map(s => s.seatId),
-        promotionCode: appliedPromotion ? appliedPromotion.code : null,
-        paymentMethodId: parseInt(selectedPaymentMethodId),
-        pointsToUse: parseInt(pointsToUse) || 0,
-    };
-
-    try {
-        // 3. Gọi API tạo booking
-        const response = await createBooking(bookingPayload);
-        const bookingResult = response.data.result;
-
-        // 4. Xử lý kết quả thành công
-        if (response.data.status === 201 && bookingResult) {
-            if (bookingResult.paymentUrl) {
-                // Nếu có URL thanh toán, lưu thông tin cần thiết và chuyển hướng
-                localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
-                // Lưu bookingId để có thể hủy nếu người dùng nhấn back
-                localStorage.setItem('pendingBookingId', bookingResult.bookingId.toString());
-                
-                window.location.href = bookingResult.paymentUrl;
+            if (response.data.status === 201 && bookingResult) {
+                if (bookingResult.paymentUrl) {
+                    localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
+                    window.location.href = bookingResult.paymentUrl;
+                } else {
+                    navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
+                }
             } else {
-                // Trường hợp thanh toán 100% bằng điểm, không có URL
-                navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
+                message.error(response.data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
             }
-        } else {
-            // Xử lý các lỗi logic không mong muốn khác từ backend (ít khi xảy ra nếu status là 201)
-            alert(response.data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
-        }
 
-    } catch (err) {
-        // 5. Bắt và xử lý các lỗi Exception từ backend (quan trọng nhất)
-        const rawMessage = err.response?.data?.message || 'UNKNOWN_ERROR';
-        
-        // --- LOGIC XỬ LÝ LỖI ĐẶT TRÙNG ---
-        if (rawMessage.startsWith('PENDING_BOOKING_EXISTS')) {
-            // Hỏi người dùng có muốn đến trang lịch sử để thanh toán không
-            if (window.confirm('Bạn đã có một đặt vé cho suất chiếu này đang chờ thanh toán. Bạn có muốn đi đến trang Lịch sử đặt vé để hoàn tất không?')) {
-                navigate('/profile/booking-history');
+        } catch (err) {
+            const errorResponse = err.response?.data;
+            const rawMessage = errorResponse?.message || 'UNKNOWN_ERROR';
+            
+            console.error("Booking failed with raw message:", rawMessage);
+            
+            if (rawMessage.startsWith('PENDING_BOOKING_EXISTS')) {
+                Modal.confirm({
+                    title: 'Đặt vé đang chờ xử lý',
+                    content: 'Bạn đã có một đặt vé cho suất chiếu này đang chờ thanh toán. Bạn có muốn đến trang Lịch sử đặt vé để hoàn tất không?',
+                    okText: 'Đến trang lịch sử',
+                    cancelText: 'Ở lại',
+                    onOk() {
+                        navigate('/profile/booking-history');
+                    },
+                });
+            } else {
+                // Sử dụng message từ API cho tất cả các lỗi khác
+                message.error(rawMessage);
+                
+                // Nếu lỗi là ghế đã đặt, tự động tải lại sơ đồ ghế
+                if (rawMessage.toLowerCase().includes('ghế') && rawMessage.toLowerCase().includes('đã có người khác chọn')) {
+                    handleSeatExpire(); // Tái sử dụng hàm này để refetch
+                }
             }
-        } 
-        // --- XỬ LÝ CÁC LỖI KHÁC ---
-        else if (rawMessage === 'INVALID_SEAT_SELECTION_SINGLE_GAP') {
-            alert('Lựa chọn ghế không hợp lệ. Vui lòng không để lại một ghế trống ở giữa.');
-        } else if (rawMessage.startsWith('SEAT_ALREADY_BOOKED')) {
-            const seatName = rawMessage.split(':')[1];
-            alert(`Rất tiếc, ghế ${seatName} đã có người khác đặt. Vui lòng chọn lại.`);
-            // Có thể thêm logic tải lại sơ đồ ghế ở đây
-        } else {
-            // Các lỗi chung khác
-            alert('Đã có lỗi xảy ra trong quá trình đặt vé. Vui lòng thử lại.');
-            console.error("Booking failed with message:", rawMessage);
+        } finally {
+            setIsSubmitting(false);
         }
-
-    } finally {
-        setIsSubmitting(false);
-    }
-};
+    };
 
    const handleSeatExpire = () => {
         console.log("A seat has expired. Refetching seat status...");

@@ -4,6 +4,7 @@ import com.example.demo.DTO.request.booking.BookingRequestDTO;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.service.AccountService;
@@ -17,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,19 +74,14 @@ public class BookingController {
 
     @GetMapping("/promotions/check/{code}")
     public ApiResponse<Promotion> checkPromotion(@PathVariable String code) {
-        Promotion promotion = promotionService.fetchPromotionByCode(code);
-        if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() ||
-                java.time.LocalDateTime.now().isBefore(promotion.getStartTime()) ||
-                java.time.LocalDateTime.now().isAfter(promotion.getEndTime())) {
-            return ApiResponse.<Promotion>builder()
-                    .status(HttpStatus.OK.value())
-                    .message("PROMOTION_INVALID")
-                    .result(null)
-                    .build();
-        }
+        // <<< CHỈ CẦN GỌI HÀM MỚI >>>
+        // Mọi logic kiểm tra và ném lỗi đã được PromotionService xử lý.
+        // Nếu hàm này không ném ra exception, chúng ta biết chắc mã đã hợp lệ.
+        Promotion promotion = promotionService.findAndValidatePromotion(code);
+
         return ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
-                .message("PROMOTION_VALID")
+                .message("Áp dụng mã khuyến mãi thành công!")
                 .result(promotion)
                 .build();
     }

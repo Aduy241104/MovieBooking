@@ -48,14 +48,14 @@ public class BookingService {
     private final AccountRepository accountRepository;
     private final ScreeningRepository screeningRepository;
     private final SeatRepository seatRepository;
-    private final PromotionRepository promotionRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final BookedSeatRepository bookedSeatRepository;
-    private final VnpayConfig vnpayConfig; // Inject VNPAY config
+    private final VnpayConfig vnpayConfig;
     private final EmailService emailService;
+    private final PromotionService promotionService;
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
-    public static final int BOOKING_EXPIRATION_MINUTES = 15;
+    public static final int BOOKING_EXPIRATION_MINUTES = 10;
     public Long getTotalRevenueByStatus(String status) {
         return bookingRepository.getTotalRevenueByStatus(status)
                 .orElseThrow(() -> new AppException("No revenue data found for status: " + status));
@@ -179,21 +179,26 @@ public class BookingService {
         validateSeatSelection(screening, selectedSeats);
         // 2. CALCULATE TOTAL PRINCIPAL
         BigDecimal originalTotalAmount = calculateOriginalTotalAmount(screening, selectedSeats);
+        // 3. APPLY PROMOTION
+
         Promotion promotion = null;
         BigDecimal discountAmount = BigDecimal.ZERO;
         String promotionCodeApplied = null;
         String discountTypeApplied = null;
-        // 3. APPLY PROMOTION
+
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
-            promotion = promotionRepository.findByCode(request.getPromotionCode());
-            if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
-                throw new InvalidPromotionException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
-            }
+            // Gọi đến PromotionService để tìm và xác thực mã khuyến mãi
+            promotion = promotionService.findAndValidatePromotion(request.getPromotionCode());
+
+            // Nếu mã hợp lệ, tiếp tục kiểm tra điều kiện của đơn hàng
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
                 throw new InvalidPromotionException("Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này.");
             }
+
+            // Nếu tất cả điều kiện đều ổn, tiến hành tính toán giảm giá
             promotionCodeApplied = promotion.getCode();
             discountTypeApplied = promotion.getDiscountType();
+
             if ("PERCENT".equalsIgnoreCase(promotion.getDiscountType())) {
                 discountAmount = originalTotalAmount
                         .multiply(promotion.getDiscountLevel().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
@@ -203,11 +208,13 @@ public class BookingService {
             } else if ("AMOUNT".equalsIgnoreCase(promotion.getDiscountType())) {
                 discountAmount = promotion.getDiscountLevel();
             }
+
             if (discountAmount.compareTo(originalTotalAmount) > 0) {
                 discountAmount = originalTotalAmount;
             }
         }
         BigDecimal finalTotalAmountAfterPromotion = originalTotalAmount.subtract(discountAmount);
+
 
         // 4. USE POIN
         BigDecimal pointsDiscountAmount = BigDecimal.ZERO;
