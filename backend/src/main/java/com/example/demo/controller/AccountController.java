@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.path.AccountPath;
 import com.turkraft.springfilter.boot.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,7 @@ public class AccountController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @GetMapping("/accounts")
+    @GetMapping(AccountPath.GET_ALL)
     public ApiResponse<ResPagination> getAllAccount(
             @Filter Specification<Account> spec, Pageable pageable) {
 
@@ -39,7 +40,7 @@ public class AccountController {
                 .build();
     }
 
-    @GetMapping("/accounts/{id}")
+    @GetMapping(AccountPath.GET_ACCOUNT)
     public ResponseEntity<ApiResponse<Account>> getAccount(@PathVariable Long id) {
         ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -49,7 +50,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/accounts/total-customer")
+    @GetMapping(AccountPath.TOTAL_CUSTOMER)
     public ResponseEntity<ApiResponse<Long>> totalCustomerAccount() {
         ApiResponse<Long> response = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
@@ -59,7 +60,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/accounts")
+    @PostMapping(AccountPath.CREATE_ACCOUNT)
     public ResponseEntity<ApiResponse<Account>> createAccount(@RequestBody Account account) {
         String passwordEncoded = passwordEncoder.encode(account.getPassword());
         account.setPassword(passwordEncoded);
@@ -72,7 +73,7 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/accounts")
+    @PutMapping(AccountPath.UPDATE_QUICK)
     public ResponseEntity<ApiResponse<Account>> updateAccountQuick(@RequestBody Account account) {
         ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -82,7 +83,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/accounts/{id}")
+    @PutMapping(AccountPath.UPDATE_DETAIL)
     public ResponseEntity<ApiResponse<Account>> updateAccountInfo(@PathVariable Long id, @RequestBody Account account) {
         ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -92,7 +93,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/accounts/status")
+    @PutMapping(AccountPath.UPDATE_STATUS)
     public ResponseEntity<ApiResponse<Account>> updateAccountStatus(@RequestBody Account account) {
         ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -102,7 +103,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/accounts/is-deleted")
+    @PutMapping(AccountPath.DELETE_ACCOUNT)
     public ResponseEntity<ApiResponse<Account>> deleteAccount(@RequestBody Account account) {
         ApiResponse<Account> response = ApiResponse.<Account>builder()
                 .status(HttpStatus.OK.value())
@@ -112,7 +113,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/accounts/{id}/avatar")
+    @PutMapping(AccountPath.UPLOAD_AVATAR)
     public ResponseEntity<ApiResponse<Account>> uploadAvatar(
             @PathVariable Long id,
             @RequestParam("avatar") MultipartFile avatarFile) {

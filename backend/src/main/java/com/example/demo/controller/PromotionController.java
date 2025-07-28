@@ -4,6 +4,7 @@ import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.ResPagination;
 //import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
+import com.example.demo.path.PromotionPath;
 import com.example.demo.service.PromotionService;
 import com.turkraft.springfilter.boot.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class PromotionController {
     @Autowired
     private PromotionService promotionService;
 
-    @PostMapping("/promotions")
+    @PostMapping(PromotionPath.CREATE)
     public ResponseEntity<ApiResponse<Promotion>> createPromotion(@RequestBody Promotion promotion) {
         ApiResponse<Promotion> response = ApiResponse.<Promotion>builder()
                 .status(HttpStatus.CREATED.value())
@@ -32,7 +33,7 @@ public class PromotionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/promotions")
+    @PutMapping(PromotionPath.UPDATE)
     public ResponseEntity<ApiResponse<Promotion>> updatePromotion(@RequestBody Promotion promotion) {
         ApiResponse<Promotion> response = ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
@@ -42,7 +43,7 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/promotions/active")
+    @PutMapping(PromotionPath.UPDATE_ACTIVE)
     public ResponseEntity<ApiResponse<Promotion>> updatePromotionActive(@RequestBody Promotion promotion) {
         ApiResponse<Promotion> response = ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
@@ -52,7 +53,7 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/promotions/is-deleted")
+    @PutMapping(PromotionPath.DELETE)
     public ResponseEntity<ApiResponse<Promotion>> deletePromotion(@RequestBody Promotion promotion) {
         ApiResponse<Promotion> response = ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
@@ -62,7 +63,7 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/promotions")
+    @GetMapping(PromotionPath.GET_ALL)
     public ResponseEntity<ApiResponse<ResPagination>> getAllPromotions(
             @Filter Specification<Promotion> spec, Pageable pageable) {
         ApiResponse<ResPagination> response = ApiResponse.<ResPagination>builder()
@@ -73,7 +74,7 @@ public class PromotionController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/promotions/total-active")
+    @GetMapping(PromotionPath.COUNT_ACTIVE)
     public ResponseEntity<ApiResponse<Long>> countActivePromotions() {
         ApiResponse<Long> response = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())

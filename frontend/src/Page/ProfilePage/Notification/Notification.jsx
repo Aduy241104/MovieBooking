@@ -1,22 +1,39 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext } from "react";
 import { Trash2, CheckCircle2 } from "lucide-react";
 import dayjs from "dayjs";
-import axios from "../../../config/axios";
-import { deleteNotificationAPI } from "../../../service/NotificationService";
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
 import { AuthContext } from "../../../context/AuthContext";
-import { message, Popconfirm } from "antd";
+import { Popconfirm } from "antd";
+import { useNotification } from "../../../context/NotificationContext";
 
 export const Notification = () => {
-    const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const { user } = useContext(AuthContext);
+    const {
+        notifications,
+        isLoading,
+        fetchNotifications,
+        markAsRead,
+        markAllAsRead,
+        deleteNotification,
+        deleteNotificationsByFilter,
+        setupWebSocket,
+    } = useNotification();
+
     const [timePreset, setTimePreset] = useState("all");
     const [page, setPage] = useState(1);
     const pageSize = 7;
 
-    const { user } = useContext(AuthContext);
-    const stompClientRef = useRef(null);
+    useEffect(() => {
+        // Fetch lần đầu khi component được mount
+        fetchNotifications();
+    }, [fetchNotifications]);
+
+    useEffect(() => {
+        if (!user || !user.accountID) return;
+        const client = setupWebSocket(user.accountID);
+        return () => {
+            if (client) client.deactivate();
+        };
+    }, [user, setupWebSocket]);
 
     // Preset filter
     const timePresets = [
@@ -26,42 +43,6 @@ export const Notification = () => {
         { label: "7 ngày trước", value: "7d" },
         { label: "Tháng này", value: "month" },
     ];
-
-    // Fetch notifications
-    const fetchNotifications = async () => {
-        setLoading(true);
-        try {
-            const res = await axios.get("/notifications");
-            setNotifications(Array.isArray(res) ? res : []);
-        } catch {
-            setNotifications([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-    useEffect(() => {
-        fetchNotifications();
-    }, []);
-
-    // WebSocket realtime notification
-    useEffect(() => {
-        if (!user || !user.accountID) return;
-        const client = new Client({
-            webSocketFactory: () => new SockJS("http://localhost:8081/ws-notification"),
-            reconnectDelay: 15000,
-            onConnect: () => {
-                client.subscribe(`/queue/notify-${user.accountID}`, (msg) => {
-                    const notification = JSON.parse(msg.body);
-                    setNotifications((prev) => [notification, ...prev]);
-                });
-            },
-        });
-        client.activate();
-        stompClientRef.current = client;
-        return () => {
-            client.deactivate();
-        };
-    }, [user]);
 
     // Filter logic
     const filterNotifications = () => {
@@ -93,96 +74,29 @@ export const Notification = () => {
         setPage(1);
     }, [timePreset]);
 
-    // Delete one notification
-    const handleDeleteNotification = async (id) => {
-        try {
-            await deleteNotificationAPI(id);
-            setNotifications((prev) => prev.filter((n) => n.id !== id));
-            message.success("Xoá thông báo thành công");
-        } catch (error) {
-            message.error(error?.response?.data?.message || error.message || "Lỗi không xác định");
-        }
-    };
-
     // Delete all notifications in filter
     const handleDeleteAllNotifications = async () => {
-        try {
-            let from = null;
-            let to = null;
-            const now = dayjs();
-            switch (timePreset) {
-                case "today":
-                    from = now.startOf("day").toISOString();
-                    to = now.endOf("day").toISOString();
-                    break;
-                case "3d":
-                    from = now.subtract(3, "day").startOf("day").toISOString();
-                    to = now.endOf("day").toISOString();
-                    break;
-                case "7d":
-                    from = now.subtract(7, "day").startOf("day").toISOString();
-                    to = now.endOf("day").toISOString();
-                    break;
-                case "month":
-                    from = now.startOf("month").toISOString();
-                    to = now.endOf("month").toISOString();
-                    break;
-                default:
-                    from = null;
-                    to = null;
-            }
-            let url = "/notifications/range";
-            const params = [];
-            if (from) params.push(`from=${encodeURIComponent(from)}`);
-            if (to) params.push(`to=${encodeURIComponent(to)}`);
-            if (params.length > 0) url += `?${params.join("&")}`;
-            await axios.delete(url);
-            setNotifications((prev) =>
-                prev.filter((n) => {
-                    const created = n.createdAt ? dayjs(n.createdAt) : null;
-                    if (!created) return true;
-                    switch (timePreset) {
-                        case "today":
-                            return !created.isSame(now, "day");
-                        case "3d":
-                            return !(now.diff(created, "day") < 3);
-                        case "7d":
-                            return !(now.diff(created, "day") < 7);
-                        case "month":
-                            return !created.isSame(now, "month");
-                        default:
-                            return false;
-                    }
-                })
-            );
-            message.success("Đã xoá tất cả thông báo");
-        } catch (error) {
-            message.error(error?.response?.data?.message || error.message || "Lỗi không xác định");
+        let params = {};
+        const now = dayjs();
+        switch (timePreset) {
+            case "today":
+                params.from = now.startOf("day").toISOString();
+                params.to = now.endOf("day").toISOString();
+                break;
+            case "3d":
+                params.from = now.subtract(3, "day").startOf("day").toISOString();
+                break;
+            case "7d":
+                params.from = now.subtract(7, "day").startOf("day").toISOString();
+                break;
+            case "month":
+                params.from = now.startOf("month").toISOString();
+                break;
+            default: // 'all'
+                break;
         }
-    };
-
-    // Đánh dấu đã đọc 1 thông báo
-    const handleMarkAsRead = async (id) => {
-        try {
-            await axios.post(`/notifications/${id}/read`);
-            setNotifications((prev) => {
-                const newList = prev.map((n) => (n.id === id ? { ...n, isRead: true } : n));
-                return newList;
-            });
-        } catch {}
-    };
-    // Đánh dấu tất cả đã đọc
-    const handleMarkAllAsRead = async () => {
-        const unread = notifications.filter((n) => !n.isRead);
-        for (const n of unread) {
-            try {
-                await axios.post(`/notifications/${n.id}/read`);
-            } catch {}
-        }
-        setNotifications((prev) => {
-            const newList = prev.map((n) => ({ ...n, isRead: true }));
-            return newList;
-        });
+        // Gọi hàm từ context
+        await deleteNotificationsByFilter(params);
     };
 
     const filtered = filterNotifications();
@@ -228,7 +142,7 @@ export const Notification = () => {
                             {notifications.some((n) => !n.isRead) && (
                                 <button
                                     className="ml-4 flex items-center gap-1 px-2 py-1 rounded bg-transparent text-green-400 hover:!bg-green-900/40 text-xs font-medium transition-colors"
-                                    onClick={handleMarkAllAsRead}
+                                    onClick={markAllAsRead}
                                 >
                                     <CheckCircle2 size={14} /> Đánh dấu tất cả đã đọc
                                 </button>
@@ -251,7 +165,7 @@ export const Notification = () => {
 
                 {/* Notification List */}
                 <div className="max-w-3xl mx-auto space-y-3">
-                    {loading ? (
+                    {isLoading ? (
                         <div className="text-center py-10 text-gray-400 text-sm">Đang tải...</div>
                     ) : paged.length === 0 ? (
                         <div className="text-center py-10 text-gray-500 text-lg">Không có thông báo nào</div>
@@ -261,7 +175,7 @@ export const Notification = () => {
                                 <div
                                     key={n.id}
                                     className={`flex items-start gap-3 bg-[#20242c] border border-[#23272f] rounded-lg px-4 py-3 text-sm hover:bg-[#23272c]/80 transition-colors cursor-pointer`}
-                                    onClick={() => !n.isRead && handleMarkAsRead(n.id)}
+                                    onClick={() => !n.isRead && markAsRead(n.id)}
                                 >
                                     <div
                                         className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
@@ -279,7 +193,7 @@ export const Notification = () => {
                                                 className="p-1 rounded hover:bg-red-900/20 text-red-400 hover:text-red-300 transition-colors"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleDeleteNotification(n.id);
+                                                    deleteNotification(n.id);
                                                 }}
                                                 title="Xoá thông báo"
                                             >

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Badge, Dropdown, List, Button, Empty, Typography } from "antd";
 import { BellOutlined, CheckOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import styles from "./NotificationBell.module.scss";
@@ -6,11 +6,13 @@ import classNames from "classnames/bind";
 import { useNotification } from "../../context/NotificationContext";
 import dayjs from "dayjs";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const cx = classNames.bind(styles);
 const { Text } = Typography;
 
-export const NotificationBell = ({ accountId }) => {
+export const NotificationBell = () => {
+    const { user } = useContext(AuthContext);
     const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead, setupWebSocket } =
         useNotification();
     const [visible, setVisible] = useState(false);
@@ -20,15 +22,12 @@ export const NotificationBell = ({ accountId }) => {
     }, [fetchNotifications]);
 
     useEffect(() => {
-        let client;
-        if (!accountId) return;
-
-        client = setupWebSocket(accountId);
-
+        if (!user) return;
+        const client = setupWebSocket(user.accountID);
         return () => {
             if (client) client.deactivate();
         };
-    }, [accountId, setupWebSocket]);
+    }, [user, setupWebSocket]);
 
     const handleDropdownOpen = (open) => {
         setVisible(open);
@@ -37,26 +36,18 @@ export const NotificationBell = ({ accountId }) => {
         }
     };
 
-    const handleMarkAsRead = async (id) => {
-        await markAsRead(id);
-    };
-
-    const handleMarkAllAsRead = async () => {
-        await markAllAsRead();
-    };
-
     const getNotificationIcon = (type) => {
         switch (type) {
-            case "MOVIE":
-                return "🎬";
-            case "BOOKING":
-                return "🎫";
-            case "REVIEW":
-                return "⭐";
-            case "SYSTEM":
+            case "PROMOTION":
+                return "🏷";
+            case "MAINTENANCE":
+                return "🛠";
+            case "ANNOUNCEMENT":
                 return "🔔";
+            case "SYSTEM":
+                return "🖥";
             default:
-                return "📢";
+                return "⚠️";
         }
     };
 
@@ -64,8 +55,6 @@ export const NotificationBell = ({ accountId }) => {
         const now = dayjs();
         const time = dayjs(createdAt);
         const diffInMinutes = now.diff(time, "minute");
-
-        // console.log('diffInMinutes', diffInMinutes);
 
         if (diffInMinutes < 1) return "Vừa xong";
         if (diffInMinutes < 60) return `${diffInMinutes} phút trước`;
@@ -82,7 +71,7 @@ export const NotificationBell = ({ accountId }) => {
                         Thông báo
                     </Text>
                     {unreadCount > 0 && (
-                        <Button type="text" size="small" onClick={handleMarkAllAsRead} className={cx("mark-all-btn")}>
+                        <Button type="text" size="small" onClick={markAllAsRead} className={cx("mark-all-btn")}>
                             Đánh dấu tất cả đã đọc
                         </Button>
                     )}
@@ -141,7 +130,7 @@ export const NotificationBell = ({ accountId }) => {
                                                         type="text"
                                                         size="small"
                                                         icon={<CheckOutlined />}
-                                                        onClick={() => handleMarkAsRead(item.id)}
+                                                        onClick={() => markAsRead(item.id)}
                                                         className={cx("mark-read-btn")}
                                                         title="Đánh dấu đã đọc"
                                                     />

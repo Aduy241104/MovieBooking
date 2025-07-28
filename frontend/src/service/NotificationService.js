@@ -19,8 +19,10 @@ export const deleteNotificationAPI = (id) => {
     return axios.delete(`/notifications/${id}`);
 };
 
-export const deleteNotificationsBeforeAPI = (before) => {
-    return axios.delete(`/notifications/before`, { params: { before } });
+// API xoá thông báo theo khoảng thời gian hoặc tất cả
+export const deleteNotificationsByFilterAPI = (params = {}) => {
+    // params có thể là { from, to }
+    return axios.delete("/notifications/range", { params });
 };
 
 // API gửi thông báo cho nhiều user

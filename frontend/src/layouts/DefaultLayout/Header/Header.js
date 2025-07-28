@@ -2,17 +2,19 @@ import classNames from "classnames/bind";
 import styles from "./Header.module.scss";
 import CustomizeText from "../../../components/CustomizeText";
 import CustomizeButton from "../../../components/CustomeButton";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Search from "../Search";
 import Avatar from "../../../components/Avatar/Avatar";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import menu from "./MenuItem/menu";
-// import { NotificationBell } from "../../../components/Notification/NotificationBell";
+import { NotificationBell } from "../../../components/Notification/NotificationBell";
+import { AuthContext } from "../../../context/AuthContext";
 
 const cx = classNames.bind(styles);
 
-function Header({ user }) {
+function Header() {
+    const { user, isAuthLoaded } = useContext(AuthContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const closeMenu = () => setIsMenuOpen(false);
@@ -53,10 +55,16 @@ function Header({ user }) {
                     <div className="me-5 d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
-                                <li className="fs-7" onClick={ () => navigate('/') }>Trang chủ</li>
-                                <li className="fs-7" onClick={() => navigate('/movies/now-playing')}>Đang chiếu</li>
+                                <li className="fs-7" onClick={() => navigate("/")}>
+                                    Trang chủ
+                                </li>
+                                <li className="fs-7" onClick={() => navigate("/movies/now-playing")}>
+                                    Đang chiếu
+                                </li>
 
-                                <li className="fs-7" onClick={ () => navigate('/movies/coming-soon') }>Sắp Chiếu</li>
+                                <li className="fs-7" onClick={() => navigate("/movies/coming-soon")}>
+                                    Sắp Chiếu
+                                </li>
                                 <li className="fs-7">Top Phim</li>
                             </ul>
                         </nav>
@@ -64,10 +72,10 @@ function Header({ user }) {
                             <Search />
 
                             {/* User profile và thông báo */}
-                            {user ? (
+                            {user && isAuthLoaded ? (
                                 <>
                                     <div className="d-flex align-items-center gap-1">
-                                        {/* {user && <NotificationBell accountId={user.accountID} />} */}
+                                        {user && <NotificationBell />}
                                         <Dropdown menu={{ items }} trigger={["click"]} placement="bottomRight">
                                             <span className="d-flex" style={{ cursor: "pointer", marginLeft: 16 }}>
                                                 <Avatar
