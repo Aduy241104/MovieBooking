@@ -30,12 +30,7 @@ const changePasswordAPI = async (data) => {
                 message: error.response.data.message || "Có lỗi xảy ra"
             };
         }
-        // Trường hợp lỗi không phải từ server (mất mạng, timeout,...)
-        return {
-            success: false,
-            status: 500,
-            message: "Không thể kết nối đến máy chủ"
-        };
+        throw new Error("Không thể kết nối đến máy chủ");
     }
 };
 
@@ -47,17 +42,11 @@ const requestChangeEmail = async (data) => {
 
     } catch (error) {
         if (error.response) {
-            return {
-                success: false,
-                status: error.response.status,
-                message: error.response.data.message || "Có lỗi xảy ra"
-            };
+            if (error.response.data.status === 409 && error.response.data.error === "") {
+                throw new Error("Email này đã được đăng kí")
+            }
         }
-        return {
-            success: false,
-            status: 500,
-            message: "Không thể kết nối đến máy chủ"
-        };
+        throw new Error("lỗi không xác định vui lòng thử lại sau");
     }
 }
 
@@ -65,8 +54,6 @@ const requestChangeEmail = async (data) => {
 const confirmChangeEmailAPI = async (data) => {
     try {
         const response = await axiosInstance.put("/me/confirm-change-email", data);
-        console.log(response);
-
         return { success: true, data: response.data }
 
     } catch (error) {

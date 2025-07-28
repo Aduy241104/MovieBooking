@@ -12,19 +12,8 @@ function RequestForgotPassword() {
         setLoading(true);
         try {
 
-            const response = await requestForgotPasswordAPI(values);
-            if (!response.success) {
-                console.log(response);
-
-                if (response.status === 404) {
-                    throw new Error("Tài khoản không tồn tại");
-                } else {
-                    throw new Error(response.message || "Tài khoản không tồn tại");
-                }
-            }
-
+            await requestForgotPasswordAPI(values);
             openNotification("success", "Email đã gởi", "Email thay đổi mật khẩu đã được gởi");
-
         } catch (error) {
 
             openNotification("error", "Lỗi", error.message);
@@ -38,7 +27,6 @@ function RequestForgotPassword() {
             <AuhenticationLayout>
                 <div className="text-light mx-auto mt-2">
                     <p className='pb-3'>Nhập email, chúng tôi sẽ gửi liên kết đặt lại mật khẩu cho bạn.</p>
-
                     <Form form={ form } layout="vertical" onFinish={ handleSendEmail }>
                         <Form.Item
                             label={ <span className='text-light'>Email</span> }
@@ -50,7 +38,6 @@ function RequestForgotPassword() {
                         >
                             <Input className="bg-transparent text-light p-2" />
                         </Form.Item>
-
                         <Button type="primary" htmlType="submit" className="bg-red text-dark p-2">
                             Gửi liên kết đặt lại mật khẩu
                             { isLoading &&
@@ -61,7 +48,6 @@ function RequestForgotPassword() {
                         </Button>
                     </Form>
                 </div>
-
             </AuhenticationLayout>
         </>
     );
