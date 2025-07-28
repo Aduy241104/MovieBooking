@@ -28,6 +28,10 @@ public class TypeService {
     @Autowired
     private NotificationService notificationService;
 
+    /**
+     * Adds a new movie type if the name is unique.
+     * Logs the activity and sends notifications to other admins.
+     */
     public Type addType(Type type) {
         if (typeRepository.existsByName(type.getName())) {
             throw new DuplicateNameException("Thể loại đã tồn tại!");
@@ -44,10 +48,17 @@ public class TypeService {
         return typeRepository.save(type);
     }
 
+    /**
+     * Retrieves all movie types that have not been soft-deleted.
+     */
     public List<Type> getAllTypes() {
         return typeRepository.findByIsDeletedFalse();
     }
 
+    /**
+     * Updates the name of an existing type if it exists and the new name is not duplicated.
+     * Logs the activity and notifies other admins.
+     */
     public Type updateType(Integer id, Type updatedType) {
         Type existing = typeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thể loại"));
@@ -69,6 +80,10 @@ public class TypeService {
         return typeRepository.save(existing);
     }
 
+    /**
+     * Soft deletes the given type by setting the isDeleted flag to true.
+     * Logs the deletion and notifies other admins.
+     */
     public void deleteType(Integer id) {
         Type type = typeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thể loại để xóa!"));
@@ -86,11 +101,17 @@ public class TypeService {
                 " vừa xoá thể loại phim: ");
     }
 
+    /**
+     * Fetches a type by its ID.
+     */
     public Optional<Type> getTypeById(Integer id) {
         return typeRepository.findById(id);
     }
 
-    // Helper method to log activity and send notifications
+    /**
+     * Helper method to log actions (create, update, delete) and send system notifications
+     * to all other admin users except the acting user.
+     */
     private void setLogAndNotification(Type type, String action, String description,
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();

@@ -7,15 +7,15 @@ import {
   Row,
   Col,
   Divider,
-  Tooltip,
   Space,
   Tag,
   notification,
 } from "antd";
 import { SquarePen, X } from "lucide-react";
 
-const seatColors = ["#e0e0e0", "#f74551", "#f536db"];
+// Define seat type names and colors (index: 0 = regular, 1 = vip, 2 = couple)
 const seatTypeNames = ["Thường", "VIP", "Đôi"];
+const seatColors = ["#e0e0e0", "#f74551", "#f536db"];
 
 export default function RoomForm({ room, onBack }) {
   const [roomName, setRoomName] = useState("");
@@ -25,7 +25,6 @@ export default function RoomForm({ room, onBack }) {
   const [errorMsg, setErrorMsg] = useState("");
   const token = localStorage.getItem("token");
 
-  // Fetch existing room (for edit)
   useEffect(() => {
     if (!room) return;
 
@@ -80,7 +79,7 @@ export default function RoomForm({ room, onBack }) {
   };
 
   const toggleSeatType = (code) => {
-    setSeatMap((prev) => ({ ...prev, [code]: (prev[code] + 1) % 3 }));
+    setSeatMap((prev) => ({ ...prev, [code]: (prev[code] + 1) % seatTypeNames.length }));
   };
 
   const validateRoomName = async () => {
@@ -101,18 +100,15 @@ export default function RoomForm({ room, onBack }) {
           (!room || r.cinemaRoomId !== room.id)
       );
 
-
       if (isDuplicate) {
         setErrorMsg("Tên phòng đã tồn tại.");
         return false;
       }
     } catch (err) {
       console.error("Lỗi kiểm tra tên phòng:", err.response?.data || err.message);
-
       notification.error({
         message: "KIỂM TRA TÊN PHÒNG THẤT BẠI",
-        description:
-          err.response?.data?.error || "Không thể kiểm tra tên phòng.",
+        description: err.response?.data?.error || "Không thể kiểm tra tên phòng.",
       });
       return false;
     }
@@ -167,62 +163,63 @@ export default function RoomForm({ room, onBack }) {
   };
 
   const renderSeatGrid = () => (
-  <>
-    <div
-      style={{
-        borderRadius: 10,
-        padding: 10,
-        margin: "0 auto 20px",
-        color: "#fff",
-        backgroundColor: "#1677FF",
-        width: `${colCount * 42 + (colCount - 1) * 6}px`,
-        minWidth: 300,
-        textAlign: "center",
-        fontWeight: 600,
-        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-      }}
-    >
-      Màn hình
-    </div>
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `repeat(${colCount}, 40px)`,
-        gap: 6,
-        justifyContent: "center",
-        minWidth: `${colCount * 40 + (colCount - 1) * 6}px`,
-      }}
-    >
-      {Object.entries(seatMap).map(([code, type]) => (
-        <div
-          key={code}
-          onClick={() => toggleSeatType(code)}
-          style={{
-            backgroundColor: seatColors[type],
-            width: 40,
-            height: 40,
-            borderRadius: 6,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            fontWeight: 500,
-            fontSize: 12,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          {code}
-        </div>
-      ))}
-    </div>
-    <Space style={{ marginTop: 16 }}>
-      <Tag color={seatColors[0]}>Thường</Tag>
-      <Tag color={seatColors[1]}>VIP</Tag>
-      <Tag color={seatColors[2]}>Đôi</Tag>
-    </Space>
-  </>
-);
-
+    <>
+      <div
+        style={{
+          borderRadius: 10,
+          padding: 10,
+          margin: "0 auto 20px",
+          color: "#fff",
+          backgroundColor: "#1677FF",
+          width: `${colCount * 42 + (colCount - 1) * 6}px`,
+          minWidth: 300,
+          textAlign: "center",
+          fontWeight: 600,
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        Màn hình
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${colCount}, 40px)`,
+          gap: 6,
+          justifyContent: "center",
+          minWidth: `${colCount * 40 + (colCount - 1) * 6}px`,
+        }}
+      >
+        {Object.entries(seatMap).map(([code, type]) => (
+          <div
+            key={code}
+            onClick={() => toggleSeatType(code)}
+            style={{
+              backgroundColor: seatColors[type],
+              width: 40,
+              height: 40,
+              borderRadius: 6,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              fontWeight: 500,
+              fontSize: 12,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            }}
+          >
+            {code}
+          </div>
+        ))}
+      </div>
+      <Space style={{ marginTop: 16 }}>
+        {seatTypeNames.map((name, index) => (
+          <Tag key={index} color={seatColors[index]}>
+            {name}
+          </Tag>
+        ))}
+      </Space>
+    </>
+  );
 
   return (
     <div className="p-6 min-h-screen bg-white">
