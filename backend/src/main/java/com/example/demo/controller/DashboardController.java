@@ -21,8 +21,8 @@ public class DashboardController {
         return dashboardService.getDashboardSummary();
     }
 
-    @GetMapping("/movie-type-revenue")
-    public MovieTypeRevenueResponse getMovieTypeRevenue() {
-        return dashboardService.getMovieTypeRevenue();
-    }
+//    @GetMapping("/movie-type-revenue")
+//    public MovieTypeRevenueResponse getMovieTypeRevenue() {
+//        return dashboardService.getMovieTypeRevenue();
+//    }
 }

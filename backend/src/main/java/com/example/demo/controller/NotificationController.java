@@ -3,8 +3,10 @@ package com.example.demo.controller;
 import com.example.demo.DTO.request.SendNotificationRequest;
 import com.example.demo.DTO.request.SendNotificationToAllRequest;
 import com.example.demo.DTO.response.ResAccountAPI;
+import com.example.demo.exception.AppException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Notification;
+import com.example.demo.path.NotificationPath;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.NotificationService;
 import com.example.demo.utils.SecurityUtils;
@@ -28,47 +30,47 @@ public class NotificationController {
     public List<Notification> getMyNotifications() {
         String currentUserId = SecurityUtils.getCurrentUsername();
         if (currentUserId == null) {
-            throw new RuntimeException("User not authenticated");
+            throw new AppException("User not authenticated");
         }
         Account account = accountService.fetchAccountById(Long.parseLong(currentUserId));
         return notificationService.getUserNotifications(account);
     }
 
-    @PostMapping("/{id}/read")
+    @PostMapping(NotificationPath.MARK_AS_READ)
     public void markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
     }
 
-    @GetMapping("/filter")
+    @GetMapping(NotificationPath.GET_MY_NOTIFICATIONS)
     public List<Notification> getMyNotificationsByTime(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
         String currentUserId = SecurityUtils.getCurrentUsername();
         if (currentUserId == null) {
-            throw new RuntimeException("User not authenticated");
+            throw new AppException("User not authenticated");
         }
         Account account = accountService.fetchAccountById(Long.parseLong(currentUserId));
         return notificationService.getUserNotificationsByTime(account, from, to);
     }
 
-    @DeleteMapping("/range")
+    @DeleteMapping(NotificationPath.DELETE_BY_TIME)
     public void deleteNotificationsByTime(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
         String currentUserId = SecurityUtils.getCurrentUsername();
         if (currentUserId == null) {
-            throw new RuntimeException("User not authenticated");
+            throw new AppException("User not authenticated");
         }
         Account account = accountService.fetchAccountById(Long.parseLong(currentUserId));
         notificationService.deleteNotificationsByTime(account, from, to);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(NotificationPath.DELETE_NOTIFICATION)
     public void deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
     }
 
-    @PostMapping("/send")
+    @PostMapping(NotificationPath.SEND_NOTIFICATION)
     public ResponseEntity<ResAccountAPI> sendNotification(@RequestBody SendNotificationRequest request) {
         try {
             notificationService.sendNotificationToUsers(
@@ -82,7 +84,7 @@ public class NotificationController {
         }
     }
 
-    @PostMapping("/send-all")
+    @PostMapping(NotificationPath.SEND_NOTIFICATION_TO_ALL)
     public ResponseEntity<ResAccountAPI> sendNotificationToAll(@RequestBody SendNotificationToAllRequest request) {
         try {
             notificationService.sendNotificationToAllUsers(

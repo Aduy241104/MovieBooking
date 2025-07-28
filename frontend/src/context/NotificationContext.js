@@ -1,5 +1,10 @@
 import { createContext, useContext, useState, useCallback } from "react";
-import { fetchNotificationsAPI, markNotificationAsReadAPI } from "../service/NotificationService";
+import {
+    deleteNotificationAPI,
+    deleteNotificationsByFilterAPI,
+    fetchNotificationsAPI,
+    markNotificationAsReadAPI,
+} from "../service/NotificationService";
 import { message } from "antd";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
@@ -32,9 +37,12 @@ export const NotificationProvider = ({ children }) => {
             return res;
         } catch (err) {
             if (err.message === "Network Error") {
-                message.error("Không thể tải thông báo. Vui lòng thử lại sau.");
+                console.error("Network error while fetching notifications:", err);
+            } else {
+                console.error("Error fetching notifications:", err);
+                message.error("Đã có lỗi xảy ra khi tải thông báo.");
             }
-            throw err;
+            // throw err;
         } finally {
             setIsLoading(false);
         }
@@ -82,6 +90,35 @@ export const NotificationProvider = ({ children }) => {
         });
     }, []);
 
+    // THÊM HÀM XÓA 1 THÔNG BÁO
+    const deleteNotification = async (id) => {
+        try {
+            await deleteNotificationAPI(id);
+            setNotifications((prev) => {
+                const newList = prev.filter((n) => n.id !== id);
+                // Cập nhật lại số lượng chưa đọc
+                setUnreadCount(newList.filter((n) => !n.isRead).length);
+                return newList;
+            });
+            message.success("Xóa thông báo thành công");
+        } catch (error) {
+            message.error("Xóa thông báo thất bại");
+        }
+    };
+
+    // THÊM HÀM XÓA NHIỀU THÔNG BÁO THEO BỘ LỌC
+    const deleteNotificationsByFilter = async (filterParams) => {
+        try {
+            await deleteNotificationsByFilterAPI(filterParams);
+            // Sau khi xóa ở backend, ta fetch lại danh sách để đảm bảo đồng bộ
+            // Hoặc có thể tự lọc state ở client nếu logic không quá phức tạp
+            await fetchNotifications(); // Cách đơn giản và an toàn nhất
+            message.success("Đã xóa các thông báo đã chọn");
+        } catch (error) {
+            message.error("Xóa thông báo thất bại");
+        }
+    };
+
     // Setup WebSocket connection
     const setupWebSocket = useCallback(
         (accountId) => {
@@ -128,6 +165,8 @@ export const NotificationProvider = ({ children }) => {
         setupWebSocket,
         setNotifications,
         setUnreadCount,
+        deleteNotification,
+        deleteNotificationsByFilter,
     };
 
     return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
