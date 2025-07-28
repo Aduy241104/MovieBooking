@@ -27,11 +27,7 @@ function ResetPassword() {
                 otp,
                 newPass: values.newPassword
             }
-            const response = await resetPasswordAPI(data);
-
-            if (!response.success) {
-                throw new Error("Đã xảy ra lỗi không xác định");
-            }
+             await resetPasswordAPI(data);
 
             openNotification("success", "Đã đặt lại mật khẩu", "Mật khẩu của bạn đã được thay đổi");
         } catch (error) {

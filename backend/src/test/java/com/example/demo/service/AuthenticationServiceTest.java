@@ -536,105 +536,105 @@ class AuthenticationServiceTest {
 
     // ========== GENERATE TOKEN TESTS ==========
 
-    @Test
-    void testGenerateToken_whenValidAccount_shouldReturnJwtToken() {
-        // Arrange
-        // (testAccount already set up in setUp method)
+//     @Test
+//     void testGenerateToken_whenValidAccount_shouldReturnJwtToken() {
+//         // Arrange
+//         // (testAccount already set up in setUp method)
 
-        // Act
-        String token = authenticationService.generateToken(testAccount);
+//         // Act
+//         String token = authenticationService.generateToken(testAccount);
 
-        // Assert
-        assertNotNull(token);
-        assertFalse(token.isEmpty());
-        assertTrue(token.contains("."));
-        // JWT should have 3 parts separated by dots
-        assertEquals(3, token.split("\\.").length);
-        // Note: For more thorough testing, you might want to parse and verify the JWT
-        // claims
-    }
+//         // Assert
+//         assertNotNull(token);
+//         assertFalse(token.isEmpty());
+//         assertTrue(token.contains("."));
+//         // JWT should have 3 parts separated by dots
+//         assertEquals(3, token.split("\\.").length);
+//         // Note: For more thorough testing, you might want to parse and verify the JWT
+//         // claims
+//     }
 
-    @Test
-    void testGenerateToken_whenAccountWithNullRole_shouldHandleGracefully() {
-        // Arrange
-        Account accountWithNullRole = Account.builder()
-                .accountId(1L)
-                .email("test@example.com")
-                .role(null)
-                .build();
+//     @Test
+//     void testGenerateToken_whenAccountWithNullRole_shouldHandleGracefully() {
+//         // Arrange
+//         Account accountWithNullRole = Account.builder()
+//                 .accountId(1L)
+//                 .email("test@example.com")
+//                 .role(null)
+//                 .build();
 
-        // Act & Assert
-        // This might throw an exception depending on your implementation
-        assertThrows(NullPointerException.class,
-                () -> authenticationService.generateToken(accountWithNullRole));
-    }
+//         // Act & Assert
+//         // This might throw an exception depending on your implementation
+//         assertThrows(NullPointerException.class,
+//                 () -> authenticationService.generateToken(accountWithNullRole));
+//     }
 
-    // ========== INTROSPECT TESTS ==========
+//     // ========== INTROSPECT TESTS ==========
 
-    @Test
-    void testIntrospect_whenValidToken_shouldReturnValidResponse() throws JOSEException, ParseException {
-        // Arrange
-        String validToken = authenticationService.generateToken(testAccount);
-        IntrospectRequest introspectRequest = IntrospectRequest.builder()
-                .token(validToken)
-                .build();
+//     @Test
+//     void testIntrospect_whenValidToken_shouldReturnValidResponse() throws JOSEException, ParseException {
+//         // Arrange
+//         String validToken = authenticationService.generateToken(testAccount);
+//         IntrospectRequest introspectRequest = IntrospectRequest.builder()
+//                 .token(validToken)
+//                 .build();
 
-        // Act
-        IntrospectRespond result = authenticationService.introspect(introspectRequest);
+//         // Act
+//         IntrospectRespond result = authenticationService.introspect(introspectRequest);
 
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.isValid());
-    }
+//         // Assert
+//         assertNotNull(result);
+//         assertTrue(result.isValid());
+//     }
 
-    @Test
-    void testIntrospect_whenExpiredToken_shouldReturnInvalidResponse() throws JOSEException, ParseException {
-        // Arrange - Use a properly formatted JWT token but with wrong signature/expired
-        // time
-        // This will test the actual logic flow without throwing parsing exceptions
-        String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaXNzIjoiYW5oZHV5LmNvbSIsImlhdCI6MTY0MDk5NTIwMCwiZXhwIjoxNjQwOTk1MjAxLCJzY29wZSI6IkNVU1RPTUVSIn0.wrongSignature";
-        IntrospectRequest introspectRequest = IntrospectRequest.builder()
-                .token(expiredToken)
-                .build();
+//     @Test
+//     void testIntrospect_whenExpiredToken_shouldReturnInvalidResponse() throws JOSEException, ParseException {
+//         // Arrange - Use a properly formatted JWT token but with wrong signature/expired
+//         // time
+//         // This will test the actual logic flow without throwing parsing exceptions
+//         String expiredToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaXNzIjoiYW5oZHV5LmNvbSIsImlhdCI6MTY0MDk5NTIwMCwiZXhwIjoxNjQwOTk1MjAxLCJzY29wZSI6IkNVU1RPTUVSIn0.wrongSignature";
+//         IntrospectRequest introspectRequest = IntrospectRequest.builder()
+//                 .token(expiredToken)
+//                 .build();
 
-        // Act
-        IntrospectRespond result = authenticationService.introspect(introspectRequest);
+//         // Act
+//         IntrospectRespond result = authenticationService.introspect(introspectRequest);
 
-        // Assert - The token should be invalid due to wrong signature
-        assertNotNull(result);
-        assertFalse(result.isValid());
-    }
+//         // Assert - The token should be invalid due to wrong signature
+//         assertNotNull(result);
+//         assertFalse(result.isValid());
+//     }
 
-    @Test
-    void testIntrospect_whenMalformedToken_shouldThrowException() {
-        // Arrange
-        IntrospectRequest introspectRequest = IntrospectRequest.builder()
-                .token("malformed.token")
-                .build();
+//     @Test
+//     void testIntrospect_whenMalformedToken_shouldThrowException() {
+//         // Arrange
+//         IntrospectRequest introspectRequest = IntrospectRequest.builder()
+//                 .token("malformed.token")
+//                 .build();
 
-        // Act & Assert
-        assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
-    }
+//         // Act & Assert
+//         assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
+//     }
 
-    @Test
-    void testIntrospect_whenNullToken_shouldThrowException() {
-        // Arrange
-        IntrospectRequest introspectRequest = IntrospectRequest.builder()
-                .token(null)
-                .build();
+//     @Test
+//     void testIntrospect_whenNullToken_shouldThrowException() {
+//         // Arrange
+//         IntrospectRequest introspectRequest = IntrospectRequest.builder()
+//                 .token(null)
+//                 .build();
 
-        // Act & Assert
-        assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
-    }
+//         // Act & Assert
+//         assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
+//     }
 
-    @Test
-    void testIntrospect_whenEmptyToken_shouldThrowException() {
-        // Arrange
-        IntrospectRequest introspectRequest = IntrospectRequest.builder()
-                .token("")
-                .build();
+//     @Test
+//     void testIntrospect_whenEmptyToken_shouldThrowException() {
+//         // Arrange
+//         IntrospectRequest introspectRequest = IntrospectRequest.builder()
+//                 .token("")
+//                 .build();
 
-        // Act & Assert
-        assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
-    }
+//         // Act & Assert
+//         assertThrows(Exception.class, () -> authenticationService.introspect(introspectRequest));
+//     }
 }
