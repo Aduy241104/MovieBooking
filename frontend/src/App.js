@@ -67,7 +67,7 @@ import ExportReportPage from "./Page/admin/ExportExcelPage";
 const PrivateRoute = ({ children }) => {
     const { user, isAuthLoaded } = useContext(AuthContext);
     if (!isAuthLoaded) return <div>Loading authentication state...</div>;
-    if (!user || user.role !== "ADMIN") {
+    if (!user || (user.role !== "ADMIN" && user.role !== "EMPLOYEE")) {
         return <Navigate to="/" replace />;
     }
     return children;
@@ -79,7 +79,7 @@ const ProtectedRoute = ({ children }) => {
     if (!isAuthLoaded) return <div>Loading authentication state...</div>;
     if (!user) {
         console.log("ProtectedRoute (in App.js) - No user after auth loaded, redirecting to /login");
-        return <Navigate to="/login" state={ { from: location } } replace />;
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
     return children;
 };
@@ -88,28 +88,28 @@ function App() {
     return (
         <NotificationProvider>
             <Routes>
-                {/* Auth */ }
-                <Route path="/login" element={ <LoginPage /> } />
-                <Route path="/register" element={ <SignUpPage /> } />
-                <Route path="/forgot-password" element={ <RequestForgotPassword /> } />
-                <Route path="/reset-password" element={ <ResetPassword /> } />
+                {/* Auth */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<SignUpPage />} />
+                <Route path="/forgot-password" element={<RequestForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* Public */ }
-                <Route path="/" element={ <HomePage /> } />
-                <Route path="/movie-detail/:id" element={ <MovieDetail /> } />
-                <Route path="/movies/:type" element={ <MovieListPage /> } />
+                {/* Public */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/movie-detail/:id" element={<MovieDetail />} />
+                <Route path="/movies/:type" element={<MovieListPage />} />
 
-                {/* Profile routes */ }
-                <Route path="/profile" element={ <ProfileLayout /> }>
-                    <Route index element={ <Profile /> } />
-                    <Route path="password" element={ <ChangePassword /> } />
-                    <Route path="transactions" element={ <Profile /> } />
-                    <Route path="notifications" element={ <Notification /> } />
+                {/* Profile routes */}
+                <Route path="/profile" element={<ProfileLayout />}>
+                    <Route index element={<Profile />} />
+                    <Route path="password" element={<ChangePassword />} />
+                    <Route path="transactions" element={<Profile />} />
+                    <Route path="notifications" element={<Notification />} />
                     <Route path="booking-history" element={<BookingHistoryPage />} />
-                       <Route path="booking-details/:bookingId" element={<BookingDetailPage />} />
+                    <Route path="booking-details/:bookingId" element={<BookingDetailPage />} />
                 </Route>
-                
-                {/* Booking */ }
+
+                {/* Booking */}
                 <Route
                     path="/booking"
                     element={
@@ -126,7 +126,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                <Route path="/booking/failure" element={ <BookingFailurePage /> } />
+                <Route path="/booking/failure" element={<BookingFailurePage />} />
                 <Route
                     path="/booking/history"
                     element={
@@ -148,7 +148,7 @@ function App() {
                     }
                 />
 
-                {/* Admin routes */ }
+                {/* Admin routes */}
                 <Route
                     path="/admin"
                     element={
@@ -157,63 +157,64 @@ function App() {
                         </PrivateRoute>
                     }
                 >
-                    <Route index element={ <DashboardPage /> } />
+                    <Route index element={<DashboardPage />} />
 
-                    {/* Room */ }
-                    <Route path="room-list" element={ <RoomList /> } />
-                    <Route path="room-list/add-room" element={ <CreateRoom /> } />
-                    <Route path="room-list/room/:id" element={ <RoomDetail /> } />
-                    <Route path="room-list/room/edit/:id" element={ <EditRoom /> } />
+                    {/* Room */}
+                    <Route path="room-list" element={<RoomList />} />
+                    <Route path="room-list/add-room" element={<CreateRoom />} />
+                    <Route path="room-list/room/:id" element={<RoomDetail />} />
+                    <Route path="room-list/room/edit/:id" element={<EditRoom />} />
 
-                    {/* Movie */ }
-                    <Route path="movie-type" element={ <TypeList /> } />
-                    <Route path="movies" element={ <MovieList /> } />
-                    <Route path="movies/add" element={ <AddMovie /> } />
-                    <Route path="movies/edit/:id" element={ <EditMovie /> } />
-                    <Route path="film-detail/:id" element={ <FilmDetail /> } />
+                    {/* Movie */}
+                    <Route path="movie-type" element={<TypeList />} />
+                    <Route path="movies" element={<MovieList />} />
+                    <Route path="movies/add" element={<AddMovie />} />
+                    <Route path="movies/edit/:id" element={<EditMovie />} />
+                    <Route path="film-detail/:id" element={<FilmDetail />} />
 
-                    {/* Showtime */ }
-                    <Route path="showtime-list" element={ <ShowtimeList /> } />
+                    {/* Showtime */}
+                    <Route path="showtime-list" element={<ShowtimeList />} />
 
-                    {/* Fare & Booking */ }
-                    <Route path="faretype-list" element={ <FareTypeList /> } />
-                    <Route path="booking-list" element={ <BookingList /> } />
-                    <Route path="booking-detail/:movieId" element={ <BookingDetail /> } />
+                    {/* Fare & Booking */}
+                    <Route path="faretype-list" element={<FareTypeList />} />
+                    <Route path="booking-list" element={<BookingList />} />
+                    <Route path="booking-detail/:movieId" element={<BookingDetail />} />
 
-                    {/* Review */ }
-                    <Route path="review-list" element={ <ReviewList /> } />
-                    <Route path="review-detail/:movieId" element={ <ReviewDetail /> } />
+                    {/* Review */}
+                    <Route path="review-list" element={<ReviewList />} />
+                    <Route path="review-detail/:movieId" element={<ReviewDetail />} />
 
-                    {/* Customer routes */ }
+                    {/* Customer routes */}
                     <Route
                         path="users-members"
-                        element={ <UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" /> }
+                        element={<UserPage key="members" userText="Thành viên" userFilter="CUSTOMER" />}
                     />
                     <Route
                         path="users-members/:accountId"
-                        element={ <UserDetailPage key="members-detail" userText="Thành viên" /> }
+                        element={<UserDetailPage key="members-detail" userText="Thành viên" />}
                     />
 
-                    {/* Employee routes */ }
+                    {/* Employee routes */}
                     <Route
                         path="users-employees"
-                        element={ <UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" /> }
+                        element={<UserPage key="employees" userText="Nhân viên" userFilter="EMPLOYEE" />}
                     />
                     <Route
                         path="users-employees/:accountId"
-                        element={ <UserDetailPage key="employees-detail" userText="Nhân viên" /> }
+                        element={<UserDetailPage key="employees-detail" userText="Nhân viên" />}
                     />
 
-                    {/* Promotion */ }
-                    <Route path="promotions" element={ <PromotionPage promotionText="Mã khuyến mãi" /> } />
+                    {/* Promotion */}
+                    <Route path="promotions" element={<PromotionPage promotionText="Mã khuyến mãi" />} />
 
-                    {/* Activity Log */ }
-                    <Route path="activity-logs" element={ <ActivityLogPage logsText="Lịch sử hoạt động" /> } />
-                 {/* ExportExcel */ }
-                 <Route path="export-reports" element={<ExportReportPage />} />
+                    {/* Activity Log */}
+                    <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+
+                    {/* ExportExcel */}
+                    <Route path="export-reports" element={<ExportReportPage />} />
                 </Route>
 
-                {/* Employee routes */ }
+                {/* Employee routes */}
                 <Route
                     path="/employee"
                     element={
@@ -222,8 +223,18 @@ function App() {
                         </PrivateRoute>
                     }
                 >
-                    <Route index element={ <h1>Employee Dashboard</h1> } />
-                    {/* Add employee-specific routes here */ }
+                    <Route index element={<DashboardPage />} />
+                    {/* Movie */}
+                    <Route path="movies" element={<MovieList />} />
+                    {/* Showtime */}
+                    <Route path="showtime-list" element={<ShowtimeList />} />
+                    {/* Fare & Booking */}
+                    <Route path="faretype-list" element={<FareTypeList />} />
+                    <Route path="booking-list" element={<BookingList />} />
+                    {/* Review */}
+                    <Route path="review-list" element={<ReviewList />} />
+                    {/* Activity Log */}
+                    <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
                 </Route>
             </Routes>
         </NotificationProvider>
