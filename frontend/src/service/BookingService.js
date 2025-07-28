@@ -1,6 +1,5 @@
-//locpng
 import axiosInstance from '../config/axiosBooking';
-const API_URL = '/bookings'; // Endpoint cần xác thực
+const API_URL = '/bookings'; 
 
 export const createBooking = (bookingData) => {
     return axiosInstance.post(API_URL, bookingData);
@@ -20,8 +19,8 @@ export const getBookingDetails = (bookingId) => {
 export const getUserPoints = () => {
     return axiosInstance.get(`${API_URL}/points`);
 };
-// <<< THÊM HÀM MỚI NÀY >>>
+
 export const retryPayment = (bookingId) => {
     return axiosInstance.post(`/bookings/${bookingId}/retry-payment`);
 };
-// Hàm vnpayReturn không cần gọi từ frontend, backend sẽ tự redirect
+// VNPayreturn function does not need to call from frontend, backend will be redirect

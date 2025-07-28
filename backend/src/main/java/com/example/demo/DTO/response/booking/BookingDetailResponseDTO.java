@@ -32,6 +32,7 @@ public class BookingDetailResponseDTO {
     private String bookingStatus;
     private List<BookedSeatInfoDTO> bookedSeats;
     private String paymentUrl;
+    private LocalDateTime expiresAt;
 
     @Data
     @Builder

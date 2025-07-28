@@ -132,7 +132,7 @@ public class BookingService {
         do {
             String randomPart = UUID.randomUUID().toString().substring(30).toUpperCase();
             code = "CINE-" + randomPart;
-        } while (bookingRepository.existsByBookingCode(code)); // Lặp lại nếu mã đã tồn tại
+        } while (bookingRepository.existsByBookingCode(code)); // Repeat if code already exists
         return code;
     }
 
@@ -146,7 +146,7 @@ public class BookingService {
             }
         }
 
-        // 1. INPUT CHECK
+        // 1. Input check
         Account account = accountRepository.findWithLockingByAccountId(accountId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản."));
         Screening screening = screeningRepository.findById(request.getScreeningId())
@@ -187,15 +187,15 @@ public class BookingService {
         String discountTypeApplied = null;
 
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
-            // Gọi đến PromotionService để tìm và xác thực mã khuyến mãi
+            // Call PromotionService to find and validate the promotion code
             promotion = promotionService.findAndValidatePromotion(request.getPromotionCode());
 
-            // Nếu mã hợp lệ, tiếp tục kiểm tra điều kiện của đơn hàng
+            // If the code is valid, continue checking the order conditions
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
                 throw new InvalidPromotionException("Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này.");
             }
 
-            // Nếu tất cả điều kiện đều ổn, tiến hành tính toán giảm giá
+            // If all conditions are ok, proceed to calculate discount
             promotionCodeApplied = promotion.getCode();
             discountTypeApplied = promotion.getDiscountType();
 
@@ -535,9 +535,14 @@ public class BookingService {
         if (booking == null)
             return null;
         int pointsEarned = 0;
-        // Chỉ tính điểm thưởng cho các booking đã thanh toán thành công
+        // Only calculate bonus points for successfully paid bookings
         if ("PAID".equals(booking.getBookingStatus()) && booking.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
             pointsEarned = booking.getTotalAmount().multiply(POINTS_EARNING_RATE).intValue();
+        }
+        // <<< THÊM LOGIC TÍNH TOÁN THỜI GIAN HẾT HẠN >>>
+        LocalDateTime expiresAt = null;
+        if ("PENDING_PAYMENT".equals(booking.getBookingStatus())) {
+            expiresAt = booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES);
         }
         BookingDetailResponseDTO.AccountInfoDTO accountInfo = null;
         if (booking.getAccount() != null) {
@@ -614,6 +619,7 @@ public class BookingService {
                 .bookingStatus(booking.getBookingStatus())
                 .bookedSeats(bookedSeatInfoList)
                 .paymentUrl(paymentUrl)
+                .expiresAt(expiresAt)
                 .build();
     }
 
@@ -648,12 +654,12 @@ public class BookingService {
             String qrContent = "Booking Code: " + booking.getBookingCode();
             byte[] qrCodeBytes = generateQrCodeImage(qrContent, 200, 200);
 
-            String qrCodeImageCid = "qrCodeImage"; // Content-ID này phải khớp với cid: trong HTML
+            String qrCodeImageCid = "qrCodeImage"; // This Content-ID must match the cid: in the HTML
             context.setVariable("qrCodeImageCid", qrCodeImageCid);
             emailService.sendHtmlEmailWithInlineImage(
                     booking.getAccount().getEmail(),
                     "Xác nhận đặt vé thành công - Mã vé: " + booking.getBookingCode(),
-                    "booking-confirmation", // Tên file template (không có .html)
+                    "booking-confirmation",
                     context,
                     qrCodeImageCid,
                     qrCodeBytes,

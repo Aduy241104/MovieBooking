@@ -1,4 +1,3 @@
-/* --- Biến màu cho Dark Theme (theo style tham khảo) --- */
 $dark-bg: #1a1d29;
 $dark-surface: #24283b;
 $primary-gradient: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
@@ -6,14 +5,13 @@ $text-primary: #e0e0e0;
 $text-secondary: #9e9e9e;
 $border-color: #394264;
 
-// Colors for status
 $success-color: #2ecc71;
 $danger-color: #e74c3c;
 $warning-color: #f39c12;
 $info-color: #3498db;
 $reserved-color: #9b59b6;
 
-/* --- NỀN VÀ LAYOUT CHUNG --- */
+/* GENERAL BACKGROUND AND LAYOUT */
 .page-container {
     background-color: $dark-bg;
     min-height: 100vh;
@@ -34,7 +32,7 @@ $reserved-color: #9b59b6;
     }
 }
 
-/* --- KHUNG VÉ CHÍNH --- */
+/* MAIN TICKET FRAME */
 .ticket-wrapper {
     background-color: $dark-surface;
     border: 1px solid $border-color;
@@ -42,12 +40,11 @@ $reserved-color: #9b59b6;
     max-width: 900px;
     width: 100%;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    overflow: hidden; // Đảm bảo border-radius được áp dụng cho các phần tử con
-     width: 100%; /* Cho phép vé chiếm toàn bộ chiều rộng của cột content */
-    max-width: 1500px; /* Đặt một giới hạn tối đa LỚN HƠN để nó trông rộng rãi, đẹp mắt */
+    overflow: hidden; 
+     width: 100%; 
+    max-width: 1500px;
 }
-
-/* --- HEADER CỦA VÉ --- */
+/* TICKET HEADER */
 .ticket-header {
     padding: 1.5rem 2rem;
     border-bottom: 1px dashed $border-color;
@@ -73,12 +70,12 @@ $reserved-color: #9b59b6;
     }
 }
 
-/* --- THÂN VÉ (CHỨA 2 CỘT) --- */
+/* TICKET BODY */
 .ticket-body {
     display: flex;
 }
 
-/* --- CỘT TRÁI - THÔNG TIN --- */
+/* LEFT COLUMN - INFORMATION */
 .left-panel {
     flex: 2;
     padding: 2rem;
@@ -107,7 +104,7 @@ $reserved-color: #9b59b6;
     gap: 0.25rem;
 
     &.full-width {
-        grid-column: 1 / -1; // Chiếm toàn bộ chiều rộng
+        grid-column: 1 / -1; 
     }
 
     .label {
@@ -116,7 +113,7 @@ $reserved-color: #9b59b6;
         font-weight: 500;
         i {
             margin-right: 0.5rem;
-            width: 16px; // Đảm bảo icon thẳng hàng
+            width: 16px; 
             text-align: center;
             color: $info-color;
         }
@@ -133,7 +130,7 @@ $reserved-color: #9b59b6;
     }
 }
 
-/* --- TÓM TẮT GIÁ --- */
+/* PRICE SUMMARY */
 .pricing-summary {
     border-top: 1px solid $border-color;
     padding-top: 1.5rem;
@@ -170,15 +167,15 @@ $reserved-color: #9b59b6;
          &.points-earned {
             margin-top: 10px;
             font-size: 0.95rem;
-            color: $success-color; // Dùng màu xanh lá
+            color: $success-color; 
             font-weight: 500;
-            border-top: 1px dashed #eee; // Thêm gạch ngang phân cách
+            border-top: 1px dashed #eee; 
             padding-top: 10px;
         }
     }
 }
 
-/* --- CỘT PHẢI - QR & TRẠNG THÁI --- */
+/* RIGHT COLUMN - QR & STATUS */
 .right-panel {
     flex: 1;
     padding: 2rem;
@@ -220,7 +217,7 @@ $reserved-color: #9b59b6;
     }
 }
 
-/* --- CÁC NÚT HÀNH ĐỘNG --- */
+/* ACTION BUTTONS */
 .ticket-actions {
     padding: 1.5rem 2rem;
     background-color: rgba(0, 0, 0, 0.2);
@@ -229,7 +226,6 @@ $reserved-color: #9b59b6;
     gap: 1rem;
 }
 
-/* --- STYLE CHO CÁC NÚT MỚI --- */
 .btn {
     padding: 10px 24px;
     font-size: 0.95rem;
@@ -270,7 +266,7 @@ $reserved-color: #9b59b6;
     }
 }
 
-/* --- RESPONSIVE --- */
+/* RESPONSIVE */
 @media (max-width: 768px) {
     .ticket-body {
         flex-direction: column;

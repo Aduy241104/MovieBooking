@@ -34,11 +34,11 @@ public class Screening {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-    // Tính thời gian kết thúc: showDateTime + thời lượng phim (phút)
+    // Calculate end time: showDateTime + movie duration (minutes)
     public LocalDateTime getEndDateTime() {
         if (movie != null && movie.getDuration() != null) {
             return showDateTime.plusMinutes(movie.getDuration());
         }
-        return showDateTime; // Dự phòng nếu không có thời lượng
+        return showDateTime; // Fallback if no duration
     }
 }
