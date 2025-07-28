@@ -2,12 +2,12 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.request.MovieRequest;
 import com.example.demo.DTO.response.MovieResponse;
-import com.example.demo.model.Movie;
-import com.example.demo.model.MovieType;
-import com.example.demo.model.Type;
+import com.example.demo.model.*;
+import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.MovieRepository;
 import com.example.demo.repository.MovieTypeRepository;
 import com.example.demo.repository.TypeRepository;
+import com.example.demo.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,10 +27,13 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final TypeRepository typeRepository;
     private final MovieTypeRepository movieTypeRepository;
+    private final AccountRepository accountRepository;
+    private final ActivityLogService activityLogService;
+    private final NotificationService notificationService;
 
     private final Path uploadRoot = Paths.get("uploads");
 
-//    private String saveFile(MultipartFile file, String subfolder) throws IOException {
+    //    private String saveFile(MultipartFile file, String subfolder) throws IOException {
 //        if (file == null || file.isEmpty()) return null;
 //        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
 //        Path dir = uploadRoot.resolve(subfolder);
@@ -39,25 +42,29 @@ public class MovieService {
 //        Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
 //        return "/images/" + filename;
 //    }
-private String saveFile(MultipartFile file, String subfolder) throws IOException {
-    if (file == null || file.isEmpty()) return null;
+    private String saveFile(MultipartFile file, String subfolder) throws IOException {
+        if (file == null || file.isEmpty()) return null;
 
-    String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-    Path dir = uploadRoot.resolve(subfolder);
-    Files.createDirectories(dir);
-    Path filepath = dir.resolve(filename);
-    Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
-    String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
-    return baseUrl + "/images/" + filename;
-}
+        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path dir = uploadRoot.resolve(subfolder);
+        Files.createDirectories(dir);
+        Path filepath = dir.resolve(filename);
+        Files.copy(file.getInputStream(), filepath, StandardCopyOption.REPLACE_EXISTING);
+        String baseUrl = ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        return baseUrl + "/images/" + filename;
+    }
 
     @Transactional
     public MovieResponse createMovie(MovieRequest request) throws IOException {
         movieRepository.findByNameVNAndIsDeletedFalse(request.getNameVN())
-                .ifPresent(m -> { throw new RuntimeException("Tên phim (VN) đã tồn tại"); });
+                .ifPresent(m -> {
+                    throw new RuntimeException("Tên phim (VN) đã tồn tại");
+                });
 
         movieRepository.findByNameENAndIsDeletedFalse(request.getNameEN())
-                .ifPresent(m -> { throw new RuntimeException("Tên phim (EN) đã tồn tại"); });
+                .ifPresent(m -> {
+                    throw new RuntimeException("Tên phim (EN) đã tồn tại");
+                });
 
         Movie movie = new Movie();
         mapRequestToEntity(movie, request);
@@ -80,6 +87,12 @@ private String saveFile(MultipartFile file, String subfolder) throws IOException
             }
         }
 
+        // Log activity and notification
+        setLogAndNotification(movie, "TẠO MỚI",
+                "Tạo mới phim",
+                "Tạo mới phim",
+                " đã tạo mới phim: ");
+
         return mapEntityToResponse(movie);
     }
 
@@ -90,11 +103,15 @@ private String saveFile(MultipartFile file, String subfolder) throws IOException
 
         movieRepository.findByNameVNAndIsDeletedFalse(request.getNameVN())
                 .filter(m -> !m.getId().equals(movieId))
-                .ifPresent(m -> { throw new RuntimeException("Tên phim (VN) đã tồn tại"); });
+                .ifPresent(m -> {
+                    throw new RuntimeException("Tên phim (VN) đã tồn tại");
+                });
 
         movieRepository.findByNameENAndIsDeletedFalse(request.getNameEN())
                 .filter(m -> !m.getId().equals(movieId))
-                .ifPresent(m -> { throw new RuntimeException("Tên phim (EN) đã tồn tại"); });
+                .ifPresent(m -> {
+                    throw new RuntimeException("Tên phim (EN) đã tồn tại");
+                });
 
         mapRequestToEntity(movie, request);
 
@@ -117,6 +134,12 @@ private String saveFile(MultipartFile file, String subfolder) throws IOException
             }
         }
 
+        // Log activity and notification
+        setLogAndNotification(movie, "CẬP NHẬT",
+                "Cập nhật thông tin phim",
+                "Cập nhật thông tin phim",
+                " đã cập nhật thông tin phim: ");
+
         return mapEntityToResponse(movie);
     }
 
@@ -137,6 +160,12 @@ private String saveFile(MultipartFile file, String subfolder) throws IOException
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phim để xóa"));
         movie.setIsDeleted(true);
         movieRepository.save(movie);
+
+        // Log activity and notification
+        setLogAndNotification(movie, "XOÁ",
+                "Xoá phim",
+                "Xoá phim",
+                " đã xoá phim: ");
     }
 
     private void mapRequestToEntity(Movie movie, MovieRequest request) {
@@ -184,5 +213,40 @@ private String saveFile(MultipartFile file, String subfolder) throws IOException
                 typeNames,
                 typeIds
         );
+    }
+
+    private void setLogAndNotification(Movie movie, String action, String description,
+                                       String title, String content) {
+        String loginUserId = SecurityUtils.getCurrentUsername();
+        System.out.println(">>> LOI SML 1: " + loginUserId);
+        if(loginUserId == null || loginUserId.isEmpty()) {
+//            throw new RuntimeException("Current user not found");
+            System.out.println(">>> LOI SML 2");
+        }
+        Account user = accountRepository.findById(Long.valueOf(loginUserId))
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
+        // Ghi log hoạt động
+        activityLogService.log(
+                user.getEmail(),
+                action,
+                "PHIM",
+                movie.getNameVN(),
+                description
+        );
+
+        // Gửi notification cho tất cả admin còn lại
+        List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        for (Account admin : adminAccounts) {
+            if (!admin.getAccountId().equals(user.getAccountId())) {
+                notificationService.notify(
+                        admin,
+                        title,
+                        user.getFullName() + content + movie.getNameVN(),
+                        "SYSTEM"
+                );
+            }
+        }
     }
 }

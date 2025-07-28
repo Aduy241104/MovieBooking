@@ -26,6 +26,8 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     long countByRole(Role role);
 
+    List<Account> findByRole_RoleName(String roleName);
+
     @Query(value = """
             SELECT
                 DATE_TRUNC('month', register_date) AS month,
@@ -39,7 +41,7 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
             ORDER BY month
             """, nativeQuery = true)
     List<Object[]> getUserRegistrationsByMonth(LocalDateTime fromDate, LocalDateTime toDate);
-// <<< THÊM PHƯƠNG THỨC NÀY VÀO >>>
+
     /**
      * Tìm tài khoản theo ID và khóa dòng đó lại để ghi (sử dụng cho việc cập nhật điểm).
      * Điều này ngăn chặn các giao dịch khác sửa đổi tài khoản cùng một lúc.

@@ -1,44 +1,42 @@
-// src/services/reviewService.js
-const BASE_URL = 'http://localhost:8081/api/public/reviews';
+import axios from "../config/axios";
 
-const ReviewService = {
-    async getReviewsByMovieId(movieId) {
-        const res = await fetch(`${BASE_URL}/movie/${movieId}`);
-        if (!res.ok) throw new Error("Không thể lấy danh sách đánh giá");
-        return res.json();
-    },
+// Lấy danh sách đánh giá của một phim
+const getReviewsByMovieId = (movieId, page = 0, size = 10) => {
+    const URL_BACKEND = `/public/reviews/movie/${movieId}?page=${page}&size=${size}`;
+    return axios.get(URL_BACKEND);
+};
 
-    async addReview(reviewData) {
-        const res = await fetch(`${BASE_URL}/add`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reviewData),
-        });
-        if (!res.ok) {
-            const error = await res.text();
-            throw new Error(error || "Lỗi khi gửi đánh giá");
-        }
-        return res.json();
-    },
-
-    async updateReview(reviewId, updatedData) {
-        const res = await fetch(`${BASE_URL}/${reviewId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(updatedData),
-        });
-        if (!res.ok) throw new Error("Cập nhật đánh giá thất bại");
-        return res.json();
-    },
-
-    async deleteReview(reviewId) {
-        const res = await fetch(`${BASE_URL}/${reviewId}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-        });
-        if (!res.ok) throw new Error("Xóa đánh giá thất bại");
-        return res;
+// Lấy điểm trung bình và số lượng đánh giá được duyệt của một phim
+const getAverageRatingAndCountByMovieId = async (movieId) => {
+    const URL_AVERAGE = `/public/reviews/movie/average-rating/${movieId}`;
+    const URL_COUNT = `/public/reviews/movie/total-approved/${movieId}`;
+    try {
+        const [averageResponse, countResponse] = await Promise.all([
+            axios.get(URL_AVERAGE),
+            axios.get(URL_COUNT),
+        ]);
+        console.log(`Phản hồi API average-rating/${movieId}:`, averageResponse);
+        console.log(`Phản hồi API total-approved/${movieId}:`, countResponse);
+        return {
+            averageRating: averageResponse?.result ?? 0.0,
+            totalApproved: countResponse?.result ?? 0,
+        };
+    } catch (error) {
+        console.error(`Lỗi khi lấy đánh giá cho phim ${movieId}:`, error);
+        throw new Error("Lỗi kết nối, vui lòng thử lại sau.");
     }
 };
 
-export default ReviewService;
+// Xóa mềm một đánh giá
+const deleteReviewAPI = (reviewId) => {
+    const URL_BACKEND = `/public/reviews/${reviewId}`;
+    return axios.delete(URL_BACKEND);
+};
+
+
+
+export {
+    getReviewsByMovieId,
+    getAverageRatingAndCountByMovieId,
+    deleteReviewAPI,
+};

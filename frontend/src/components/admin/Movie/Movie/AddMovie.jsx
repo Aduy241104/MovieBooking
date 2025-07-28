@@ -22,7 +22,7 @@ export default function AddMovie() {
   };
 
   return (
-    <div className="container mt-4">
+    <div >
       <MovieForm onSuccess={handleSuccess} />
     </div>
   );

@@ -2,17 +2,16 @@ import { Col, DatePicker, Form, Input, Modal, notification, Row, Select } from "
 import { createAccountAPI } from "../../../../service/AccountService";
 import { useOutletContext } from "react-router-dom";
 
-
 export const CreateUserModal = (props) => {
     const { setRefreshFlag } = useOutletContext();
 
     const { isCreateModalOpen, setIsCreateModalOpen, userText, userRole } = props;
     const [form] = Form.useForm();
 
-    const roleId = userRole === 'Member' ? 3 : userRole === 'Employee' ? 2 : 1
+    const roleId = userRole === "CUSTOMER" ? 3 : userRole === "EMPLOYEE" ? 2 : 1;
 
     const handleSubmit = async (values) => {
-        console.log('Values: ', roleId, values, userRole);
+        console.log("Values: ", roleId, values, userRole);
         const res = await createAccountAPI(
             roleId,
             values.email,
@@ -20,20 +19,20 @@ export const CreateUserModal = (props) => {
             values.gender,
             values.password,
             values.phoneNumber,
-            values.dateOfBirth.format('YYYY-MM-DD')
+            values.dateOfBirth.format("YYYY-MM-DD")
         );
         if (res.result) {
             notification.success({
                 message: "THÊM THÀNH CÔNG",
-                description: `Thêm mới ${userText.toLowerCase()} thành công`
+                description: `Thêm mới ${userText.toLowerCase()} thành công`,
             });
-            setRefreshFlag(prev => !prev);
+            setRefreshFlag((prev) => !prev);
             setIsCreateModalOpen(false);
             return;
         }
         notification.error({
             message: "THÊM THẤT BẠI",
-            description: `ERROR: ${res.message}`
+            description: `ERROR: ${res.message}`,
         });
     };
 
@@ -49,7 +48,8 @@ export const CreateUserModal = (props) => {
                 cancelText={"Huỷ"}
                 maskClosable={false}
             >
-                <Form form={form}
+                <Form
+                    form={form}
                     layout="vertical"
                     onFinish={handleSubmit}
                     initialValues={{
@@ -59,7 +59,7 @@ export const CreateUserModal = (props) => {
                     <Form.Item
                         label="Email"
                         name="email"
-                        rules={[{ required: true, message: 'Please input your email!' }]}
+                        rules={[{ required: true, message: "Please input your email!" }]}
                     >
                         <Input />
                     </Form.Item>
@@ -67,7 +67,7 @@ export const CreateUserModal = (props) => {
                     <Form.Item
                         label="Mật khẩu"
                         name="password"
-                        rules={[{ required: true, message: 'Please input your password!' }]}
+                        rules={[{ required: true, message: "Please input your password!" }]}
                     >
                         <Input.Password />
                     </Form.Item>
@@ -77,22 +77,19 @@ export const CreateUserModal = (props) => {
                             <Form.Item
                                 label="Họ và tên"
                                 name="fullName"
-                                rules={[{ required: true, message: 'Please input your full name!' }]}
+                                rules={[{ required: true, message: "Please input your full name!" }]}
                             >
                                 <Input />
                             </Form.Item>
                         </Col>
 
                         <Col lg={6}>
-                            <Form.Item
-                                label="Giới tính"
-                                name="gender"
-                            >
+                            <Form.Item label="Giới tính" name="gender">
                                 <Select
                                     options={[
-                                        { value: 'Nam', label: 'Nam' },
-                                        { value: 'Nữ', label: 'Nữ' },
-                                        { value: 'Khác', label: 'Khác' },
+                                        { value: "Nam", label: "Nam" },
+                                        { value: "Nữ", label: "Nữ" },
+                                        { value: "Khác", label: "Khác" },
                                     ]}
                                     placeholder="Giới tính"
                                 />
@@ -103,7 +100,7 @@ export const CreateUserModal = (props) => {
                     <Form.Item
                         label="Số điện thoại"
                         name="phoneNumber"
-                        rules={[{ required: true, message: 'Please input your phone!' }]}
+                        rules={[{ required: true, message: "Please input your phone!" }]}
                     >
                         <Input />
                     </Form.Item>
@@ -111,7 +108,7 @@ export const CreateUserModal = (props) => {
                     <Form.Item
                         label="Sinh nhật"
                         name="dateOfBirth"
-                        rules={[{ required: true, message: 'Please input your birthday!' }]}
+                        rules={[{ required: true, message: "Please input your birthday!" }]}
                     >
                         <DatePicker />
                     </Form.Item>
@@ -119,4 +116,4 @@ export const CreateUserModal = (props) => {
             </Modal>
         </>
     );
-}
+};

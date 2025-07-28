@@ -1,13 +1,4 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8081/api";
-
-const axiosInstance = axios.create({
-    baseURL: API_URL, // Base URL chung cho API
-    headers: {
-        "Content-Type": "application/json",
-    },
-});
+import axiosInstance from "./AxiosConfiguration/axiosInstance";
 
 export const getOtpAPI = async (registerData) => {
     try {

@@ -93,7 +93,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Object[]> getBookingTicketRecently(int limit);
 
 
-    @Query("SELECT COUNT(b) FROM Booking b " +
+     @Query("SELECT COUNT(b) FROM Booking b " +
             "JOIN Screening s ON b.screening.id = s.id " +
             "JOIN Movie m ON s.movie.id = m.id " +
             "WHERE b.account.id = :accountId AND m.id = :movieId AND b.bookingStatus = 'PAID'")
@@ -139,10 +139,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     boolean existsByBookingCode(String bookingCode); // code
 
-
-
-   //Tìm booking đang chờ thanh toán của một user cho một suất chiếu cụ thể.
-
+    //Tìm booking đang chờ thanh toán của một user cho một suất chiếu cụ thể.
     Optional<Booking> findByAccountAccountIdAndScreeningIdAndBookingStatus(Long accountId, Long screeningId, String status);
 
     /**
@@ -150,5 +147,23 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
      */
     List<Booking> findAllByBookingStatusAndBookingTimeBefore(String status, LocalDateTime expirationTime);
 
+    // <<< THÊM PHƯƠNG THỨC LẤY TẤT CẢ HÓA ĐƠN THEO ID PHIM >>>
+    @Query("""
+            SELECT b
+            FROM Booking b
+            JOIN b.screening s
+            WHERE s.movie.id = :movieId
+            ORDER BY b.bookingTime DESC
+            """)
+    List<Booking> findAllByMovieId(@Param("movieId") Long movieId);
+
+    // <<< THÊM PHƯƠNG THỨC ĐẾM TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
+    @Query("""
+            SELECT COUNT(b)
+            FROM Booking b
+            JOIN b.screening s
+            WHERE s.movie.id = :movieId
+            """)
+    Long countBookingsByMovieId(@Param("movieId") Long movieId);
 }
 

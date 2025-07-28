@@ -44,6 +44,10 @@ public class Review {
     @Column(name = "spoiler_alert")
     private Boolean spoilerAlert = false;
 
+     @Column(name = "is_deleted")
+    private Boolean isDeleted = false; // Cột xóa mềm
+
+
     @PrePersist
     public void handleBeforeCreate() {
         this.reviewDate = LocalDateTime.now();

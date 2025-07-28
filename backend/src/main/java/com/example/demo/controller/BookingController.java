@@ -54,7 +54,7 @@ public class BookingController {
     public List<DailyTicketRevenueResponse> getMonthlyTicketRevenue() {
         return bookingService.getMonthlyTicketRevenue(6);
     }
-//booking
+    //booking
 
     // API tạo booking mới (cần xác thực)
     @PostMapping
@@ -99,7 +99,6 @@ public class BookingController {
                 .build();
     }
 
-
     // API xử lý callback từ VNPAY
     @GetMapping("/payment/vnpay_return")
     public RedirectView vnpayReturn(HttpServletRequest request) {
@@ -128,7 +127,7 @@ public class BookingController {
     @GetMapping("/{bookingId}/details")
     public ApiResponse<BookingDetailResponseDTO> getBookingDetails(@PathVariable Integer bookingId) {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long accountId = Long.parseLong(accountIdStr);
+        Long accountId = Long.parseLong(accountIdStr); // Fixed the typo
         BookingDetailResponseDTO bookingDetail = bookingService.getBookingDetailsForUser(bookingId, accountId);
         return ApiResponse.<BookingDetailResponseDTO>builder()
                 .status(HttpStatus.OK.value())
@@ -136,6 +135,7 @@ public class BookingController {
                 .result(bookingDetail)
                 .build();
     }
+
     @GetMapping("/points") // Endpoint: GET /api/bookings/points
     public ApiResponse<Integer> getCurrentUserPoints() {
         // Lấy accountId từ Security Context
@@ -172,4 +172,25 @@ public class BookingController {
                 .build();
     }
 
+    // <<< THÊM ENDPOINT XEM TẤT CẢ HÓA ĐƠN THEO ID PHIM >>>
+    @GetMapping("/movie/{movieId}")
+    public ApiResponse<List<BookingDetailResponseDTO>> getAllBookingsByMovieId(@PathVariable Long movieId) {
+        List<BookingDetailResponseDTO> bookings = bookingService.getAllBookingsByMovieId(movieId);
+        return ApiResponse.<List<BookingDetailResponseDTO>>builder()
+                .status(HttpStatus.OK.value())
+                .message("Successfully fetched all bookings for movie ID: " + movieId)
+                .result(bookings)
+                .build();
+    }
+
+    // <<< THÊM ENDPOINT LẤY TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
+    @GetMapping("/movie/{movieId}/count")
+    public ApiResponse<Long> getTotalBookingsByMovieId(@PathVariable Long movieId) {
+        Long totalBookings = bookingService.getTotalBookingsByMovieId(movieId);
+        return ApiResponse.<Long>builder()
+                .status(HttpStatus.OK.value())
+                .message("Total bookings for movie ID: " + movieId)
+                .result(totalBookings)
+                .build();
+    }
 }

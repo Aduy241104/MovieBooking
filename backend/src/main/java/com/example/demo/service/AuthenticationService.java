@@ -17,7 +17,6 @@ import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.AuthRespond;
 import com.example.demo.DTO.response.IntrospectRespond;
-import com.example.demo.controller.AccountController;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.UnauthorizedException;
@@ -28,6 +27,7 @@ import com.example.demo.model.Role;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.utils.GoogleTokenVerifier;
+import com.example.demo.utils.SecurityUtils;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -75,6 +75,9 @@ public class AuthenticationService {
     @Autowired
     GoogleTokenVerifier googleTokenVerifier;
 
+    @Autowired
+    SecurityUtils securityUtils;
+
     // authentication cho table account
     public AuthRespond auth(AuthenticationRequest request) {
         Account account = accountRepository.findByEmailAndStatus(request.getUsername(), 1)
@@ -86,7 +89,7 @@ public class AuthenticationService {
         if (!match) {
             throw new UnauthorizedException("Invalid Password.");
         }
-        var token = generateToken(account);
+        var token = securityUtils.generateToken(account);
         RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
 
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);
@@ -187,7 +190,7 @@ public class AuthenticationService {
             accountRepository.save(account);
         }
 
-        var token = generateToken(account);
+        var token = securityUtils.generateToken(account);
         RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
 
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);

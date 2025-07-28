@@ -1,39 +1,6 @@
-import axios from "axios";
+import axiosInstance from './AxiosConfiguration/axiosInstance'
 
-const API_URL = process.env.REACT_APP_BASE_URL;
-
-
-const axiosInstance = axios.create({
-    baseURL: API_URL,
-    headers: {
-        "Content-Type": "application/json",
-    }
-});
-
-
-
-// Hàm lấy token từ localStorage
-export function getAuthHeaders() {
-    const token = localStorage.getItem("token");
-    return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
-// Thêm Interceptor cho request
-axiosInstance.interceptors.request.use(
-    (config) => {
-        const headers = getAuthHeaders();
-        if (headers.Authorization) {
-            config.headers.Authorization = headers.Authorization;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-
-export const viewPersonalProfileAPI = async () => {
+const viewPersonalProfileAPI = async () => {
     try {
         const response = await axiosInstance.get('/me/profile');
         return response.data;
@@ -42,7 +9,7 @@ export const viewPersonalProfileAPI = async () => {
     }
 }
 
-export const updateProfileAPI = async (data) => {
+const updateProfileAPI = async (data) => {
     try {
         const response = await axiosInstance.put('/me/update-profile', data);
         return response.data;
@@ -51,7 +18,7 @@ export const updateProfileAPI = async (data) => {
     }
 }
 
-export const changePasswordAPI = async (data) => {
+const changePasswordAPI = async (data) => {
     try {
         const response = await axiosInstance.put('/me/change-password', data);
         return { success: true, data: response.data };
@@ -73,7 +40,7 @@ export const changePasswordAPI = async (data) => {
 };
 
 
-export const requestChangeEmail = async (data) => {
+const requestChangeEmail = async (data) => {
     try {
         const response = await axiosInstance.post("/me/request-change-email", data);
         return { success: true, data: response.data }
@@ -95,7 +62,7 @@ export const requestChangeEmail = async (data) => {
 }
 
 
-export const confirmChangeEmailAPI = async (data) => {
+const confirmChangeEmailAPI = async (data) => {
     try {
         const response = await axiosInstance.put("/me/confirm-change-email", data);
         console.log(response);
@@ -118,7 +85,7 @@ export const confirmChangeEmailAPI = async (data) => {
     }
 }
 
-export const updateAvatarAPI = async (data) => {
+const updateAvatarAPI = async (data) => {
     try {
         const response = await axiosInstance.put("/me/change-avatar", data);
         return { success: true, data: response.data };
@@ -138,3 +105,12 @@ export const updateAvatarAPI = async (data) => {
         };
     }
 }
+
+export {
+    viewPersonalProfileAPI,
+    updateProfileAPI,
+    changePasswordAPI,
+    requestChangeEmail,
+    confirmChangeEmailAPI,
+    updateAvatarAPI
+};

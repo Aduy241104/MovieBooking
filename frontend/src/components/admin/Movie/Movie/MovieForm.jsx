@@ -26,18 +26,31 @@ export default function MovieForm({ movieId, onSuccess }) {
 
   const isEdit = !!movieId;
 
+  const token = localStorage.getItem('token')
+  console.log(">>> Token: " + token)
+
   const getFullImageUrl = (path) => {
     if (!path) return null;
     return path.startsWith("http") ? path : `http://localhost:8081${path}`;
   };
 
   useEffect(() => {
-    axios.get("http://localhost:8081/api/public/types").then((res) => {
+    axios.get("http://localhost:8081/api/types", {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      },
+    }).then((res) => {
       setTypes(res.data);
     });
 
     if (isEdit) {
-      axios.get(`http://localhost:8081/api/public/movies/${movieId}`).then((r) => {
+      axios.get(`http://localhost:8081/api/movies/${movieId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      }).then((r) => {
         const m = r.data;
         form.setFieldsValue({
           nameVN: m.nameVN,
@@ -66,9 +79,7 @@ export default function MovieForm({ movieId, onSuccess }) {
       const videoId =
         url.includes('youtu.be/')
           ? url.split('youtu.be/')[1]
-          : url.includes('watch?v=')
-            ? url.split('watch?v=')[1].split('&')[0]
-            : null;
+          : url.includes('watch?v=') ? url.split('watch?v=')[1].split('&')[0] : null;
 
       return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
     } catch {
@@ -98,12 +109,16 @@ export default function MovieForm({ movieId, onSuccess }) {
     if (largeImageFile) data.append("largeImage", largeImageFile);
 
     const url = isEdit
-      ? `http://localhost:8081/api/public/movies/${movieId}`
-      : "http://localhost:8081/api/public/movies";
+      ? `http://localhost:8081/api/movies/${movieId}`
+      : "http://localhost:8081/api/movies";
 
     try {
+
       await axios.post(url, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
       });
 
       notification.success({
@@ -124,19 +139,26 @@ export default function MovieForm({ movieId, onSuccess }) {
       layout="vertical"
       form={form}
       onFinish={handleSubmit}
-      style={{ maxWidth: 1000, margin: "auto", padding: 24, background: "#fff", borderRadius: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
+      style={{
+        maxWidth: "100%",
+        margin: "10px 10px",
+        padding: 24,
+        background: "#fff",
+        borderRadius: 12,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      }}
     >
       <h3 className="text-primary fw-bold" style={{ marginBottom: 24 }}>
         {isEdit ? "Cập nhật phim" : "Thêm phim mới"}
       </h3>
 
       <Row gutter={16}>
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item label="Tên phim (VN)" name="nameVN" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
           <Form.Item label="Tên phim (EN)" name="nameEN" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
           <Form.Item
             label="Thời lượng (phút)"
@@ -154,36 +176,21 @@ export default function MovieForm({ movieId, onSuccess }) {
             <Input type="number" />
           </Form.Item>
 
-          {/* <Form.Item
+          <Form.Item
             label="Giới hạn tuổi"
             name="ageLimit"
             rules={[
               { required: true, message: "Vui lòng nhập giới hạn tuổi." },
               {
                 validator: (_, value) =>
-                  value >= 0
+                  value >= 0 && value <= 18
                     ? Promise.resolve()
-                    : Promise.reject(new Error("Giới hạn tuổi phải lớn hơn hoặc bằng 0")),
+                    : Promise.reject(new Error("Giới hạn tuổi phải từ 0 đến 18")),
               },
             ]}
           >
-            <Input type="number" />
-          </Form.Item> */}
-          <Form.Item
-  label="Giới hạn tuổi"
-  name="ageLimit"
-  rules={[
-    { required: true, message: "Vui lòng nhập giới hạn tuổi." },
-    {
-      validator: (_, value) =>
-        value >= 0 && value <= 18
-          ? Promise.resolve()
-          : Promise.reject(new Error("Giới hạn tuổi phải từ 0 đến 18")),
-    },
-  ]}
->
-  <Input type="number" min={0} max={18} />
-</Form.Item>
+            <Input type="number" min={0} max={18} />
+          </Form.Item>
 
           <Form.Item
             label="Ngày bắt đầu chiếu"
@@ -223,13 +230,13 @@ export default function MovieForm({ movieId, onSuccess }) {
           </Form.Item>
         </Col>
 
-        <Col span={12}>
+        <Col xs={24} md={12}>
           <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
 
           <Form.Item label="Hãng sản xuất" name="movieProductionCompany" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
 
           <Form.Item label="Poster (ảnh nhỏ)" required>
@@ -241,10 +248,12 @@ export default function MovieForm({ movieId, onSuccess }) {
               }}
               showUploadList={false}
             >
-              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+              <Button icon={<UploadOutlined />} style={{ width: '100%' }}>
+                Chọn ảnh
+              </Button>
             </Upload>
             {previewSmallImage && (
-              <img src={previewSmallImage} alt="Poster" style={{ marginTop: 10, maxHeight: 150 }} />
+              <img src={previewSmallImage} alt="Poster" style={{ marginTop: 10, maxWidth: '100%' }} />
             )}
           </Form.Item>
 
@@ -257,10 +266,12 @@ export default function MovieForm({ movieId, onSuccess }) {
               }}
               showUploadList={false}
             >
-              <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
+              <Button icon={<UploadOutlined />} style={{ width: '100%' }}>
+                Chọn ảnh
+              </Button>
             </Upload>
             {previewLargeImage && (
-              <img src={previewLargeImage} alt="Banner" style={{ marginTop: 10, maxHeight: 150 }} />
+              <img src={previewLargeImage} alt="Banner" style={{ marginTop: 10, maxWidth: '100%' }} />
             )}
           </Form.Item>
 
@@ -285,13 +296,13 @@ export default function MovieForm({ movieId, onSuccess }) {
 
       <Form.Item>
         <Row gutter={12}>
-          <Col>
-            <Button type="primary" htmlType="submit" icon={<PlusOutlined />}>
+          <Col xs={24} sm={12}>
+            <Button type="primary" htmlType="submit" icon={<PlusOutlined />} block>
               {isEdit ? "Cập nhật" : "Thêm phim"}
             </Button>
           </Col>
-          <Col>
-            <Button icon={<CloseOutlined />} onClick={() => navigate("/admin/movies")}>
+          <Col xs={24} sm={12}>
+            <Button icon={<CloseOutlined />} onClick={() => navigate("/admin/movies")} block>
               Hủy
             </Button>
           </Col>

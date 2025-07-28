@@ -15,13 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.example.demo.DTO.response.ApiResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -45,12 +48,14 @@ public class SecurityConfig {
                         "/avatars/**",
                         "/ws-notification/**",
                         "/api/bookings/payment/vnpay_return",
-                        "/images/**")
+                        "/images/**",
+                        "/api/bookings/movie/**", // Thêm endpoint để lấy danh sách hóa đơn theo movieId
+                        "/api/bookings/movie/{movieId}/count" // Thêm endpoint để đếm hóa đơn
+                )
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
-
 
     @Bean
     @Order(2)
@@ -62,9 +67,29 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder()))
-                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                )
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+
+                            ApiResponse<Object> apiResponse = new ApiResponse<>(
+                                    401,
+                                    "Invalid or expired token",
+                                    null);
+
+                            new ObjectMapper().writeValue(response.getOutputStream(), apiResponse);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+
+                            ApiResponse<Object> apiResponse = new ApiResponse<>(
+                                    403,
+                                    "You do not have permission to access this resource",
+                                    null);
+
+                            new ObjectMapper().writeValue(response.getOutputStream(), apiResponse);
+                        }))
+
                 .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();

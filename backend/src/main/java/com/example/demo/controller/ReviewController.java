@@ -52,35 +52,63 @@ public class ReviewController {
                 .build();
     }
 
-    @PostMapping
-    public ResponseEntity<Review> createReview(@Valid @RequestBody Review review) {
-        Review savedReview = reviewRepository.save(review);
-        return ResponseEntity.ok(savedReview);
-    }
-
-    @GetMapping("/movie/{movieId}")
-    public ResponseEntity<List<MovieReviewWrapperDTO>> getWrappedReviews(@PathVariable Long movieId) {
-        return ResponseEntity.ok(reviewService.getWrappedReviewsByMovieId(movieId));
-    }
-
+    /**
+     * Creates a new review based on the provided data.
+     *
+     * @param dto the data of the review to be created
+     * @return an ApiResponse containing the created review details
+     */
     @PostMapping("/add")
-    public ResponseEntity<ReviewResponseDTO> addReview(@RequestBody ReviewRequestDTO dto) {
-        return ResponseEntity.ok(reviewService.addReview(dto));
+    public ApiResponse<ReviewResponseDTO> addReview(@RequestBody ReviewRequestDTO dto) {
+        ReviewResponseDTO result = reviewService.addReview(dto);
+        return ApiResponse.<ReviewResponseDTO>builder()
+                .status(HttpStatus.OK.value())
+                .message("Thêm đánh giá thành công")
+                .result(result)
+                .build();
     }
 
+    /**
+     * Updates an existing review by its ID.
+     *
+     * @param id  the ID of the review to be updated
+     * @param dto the updated review data
+     * @return an ApiResponse containing the updated review details
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Integer id, @RequestBody ReviewRequestDTO dto) {
-        return ResponseEntity.ok(reviewService.updateReview(id, dto));
+    public ApiResponse<ReviewResponseDTO> updateReview(@PathVariable Long id, @RequestBody ReviewRequestDTO dto) {
+        ReviewResponseDTO result = reviewService.updateReview(id, dto);
+        return ApiResponse.<ReviewResponseDTO>builder()
+                .status(HttpStatus.OK.value())
+                .message("Cập nhật đánh giá thành công")
+                .result(result)
+                .build();
     }
 
+    /**
+     * Permanently deletes a review by its ID.
+     *
+     * @param id the ID of the review to delete
+     * @return an ApiResponse indicating the deletion status
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Integer id) {
+    public ApiResponse<Void> deleteReview(@PathVariable Long id) {
         reviewService.deleteReview(id);
-        return ResponseEntity.noContent().build();
-
+        return ApiResponse.<Void>builder()
+                .status(HttpStatus.NO_CONTENT.value())
+                .message("Đánh giá đã được xóa")
+                .build();
     }
 
-    @GetMapping("/movie/{movieId}/paged")
+    /**
+     * Retrieves paginated reviews for a specific movie.
+     *
+     * @param movieId the ID of the movie
+     * @param page    the page number (default is 0)
+     * @param size    the page size (default is 7)
+     * @return a paginated list of review DTOs
+     */
+    @GetMapping("/movie-aa/{movieId}/paged")
     public ResponseEntity<PaginatedResponseDTO<ReviewResponseDTO>> getPagedReviewsByMovie(
             @PathVariable Long movieId,
             @RequestParam(defaultValue = "0") int page,
@@ -94,9 +122,50 @@ public class ReviewController {
                 resultPage.getTotalPages(), // totalPages
                 resultPage.getContent() // content list
 
-                
         );
 
         return ResponseEntity.ok(response);
+
     }
+
+    // Lấy tất cả đánh giá của một phim
+    @GetMapping("/movie/{movieId}")
+    public ApiResponse<List<Review>> getReviewsByMovieId(@PathVariable Long movieId) {
+        return ApiResponse.<List<Review>>builder()
+                .status(HttpStatus.OK.value())
+                .message("Danh sách đánh giá của phim ID " + movieId)
+                .result(reviewService.getReviewsByMovieId(movieId))
+                .build();
+    }
+
+    // Đếm số đánh giá được duyệt của một phim
+    @GetMapping("/movie/total-approved/{movieId}")
+    public ApiResponse<Long> totalApprovedReviewsByMovieId(@PathVariable Long movieId) {
+        return ApiResponse.<Long>builder()
+                .status(HttpStatus.OK.value())
+                .message("Số lượng đánh giá được duyệt của phim ID " + movieId)
+                .result(reviewService.getTotalApprovedReviewsByMovieId(movieId))
+                .build();
+    }
+
+    // Tính trung bình sao của một phim
+    @GetMapping("/movie/average-rating/{movieId}")
+    public ApiResponse<Double> averageRatingByMovieId(@PathVariable Long movieId) {
+        return ApiResponse.<Double>builder()
+                .status(HttpStatus.OK.value())
+                .message("Trung bình điểm đánh giá được duyệt của phim ID " + movieId)
+                .result(reviewService.getAverageRatingByMovieId(movieId))
+                .build();
+    }
+
+    // Xóa mềm một đánh giá
+    @DeleteMapping("/admin/{reviewId}")
+    public ApiResponse<Void> softDeleteReview(@PathVariable Long reviewId) {
+        reviewService.softDeleteReview(reviewId);
+        return ApiResponse.<Void>builder()
+                .status(HttpStatus.OK.value())
+                .message("Đánh giá với ID " + reviewId + " đã được xóa mềm")
+                .build();
+    }
+
 }
