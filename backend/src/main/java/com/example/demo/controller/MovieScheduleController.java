@@ -7,16 +7,20 @@ import com.example.demo.DTO.response.SingleMovieDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.DTO.request.ScreeningRequest;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.MovieScheduleDTO;
 import com.example.demo.model.Account;
 import com.example.demo.model.Screening;
+import com.example.demo.path.MovieSchedulePath;
 import com.example.demo.repository.ScreeningRepository;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.MovieScheduleService;
+import com.example.demo.service.ScreeningService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,20 +34,23 @@ public class MovieScheduleController {
     ScreeningRepository repository;
 
     @Autowired
+    ScreeningService screeningService;
+
+    @Autowired
     MovieScheduleService movieScheduleService;
 
     @Autowired
     AccountService accountService;
 
-    @GetMapping("/getAll")
-    public ApiResponse<List<Screening>> getAllScreenings() {
+    @GetMapping(MovieSchedulePath.GET_ALL)
+    public ApiResponse<List<Screening>> getMethodName() {
         List<Screening> response = repository.findAll();
         return ApiResponse.<List<Screening>>builder()
                 .result(response)
                 .build();
     }
 
-    @GetMapping("/by-date")
+    @GetMapping(MovieSchedulePath.BY_DATE)
     public ApiResponse<List<MovieScheduleDTO>> getScheduleByDate(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<MovieScheduleDTO> result = movieScheduleService.getSchedule(date);
@@ -53,7 +60,7 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/now-showing")
+    @GetMapping(MovieSchedulePath.NOW_SHOWING)
     public ApiResponse<List<SingleMovieDTO>> getNowShowing() {
         List<SingleMovieDTO> response = movieScheduleService.getNowShowingMovie(LocalDate.now());
         return ApiResponse.<List<SingleMovieDTO>>builder()
@@ -62,7 +69,7 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/up-coming")
+    @GetMapping(MovieSchedulePath.UPCOMING)
     public ApiResponse<List<SingleMovieDTO>> getUpComing() {
         List<SingleMovieDTO> response = movieScheduleService.getCommingSoonMovie(LocalDate.now());
         return ApiResponse.<List<SingleMovieDTO>>builder()
@@ -71,8 +78,8 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<SingleMovieDTO> getMovieDetail(@PathVariable Long id) {
+    @GetMapping(MovieSchedulePath.DETAIL)
+    public ApiResponse<SingleMovieDTO> getMethodName(@PathVariable Long id) {
         SingleMovieDTO singleMovieDTO = movieScheduleService.getMovieDetail(id);
         return ApiResponse.<SingleMovieDTO>builder()
                 .message("success")
@@ -80,19 +87,20 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/now-showing/total")
-    public ApiResponse<Long> totalNowShowingMovie() {
-        Long response = movieScheduleService.getTotalNowShowingMovie();
-        return ApiResponse.<Long>builder()
+    @GetMapping(MovieSchedulePath.TOTAL_NOW_SHOWING)
+    public ResponseEntity<ApiResponse<Long>> totalNowShowingMovie() {
+        ApiResponse<Long> result = ApiResponse.<Long>builder()
                 .status(HttpStatus.OK.value())
                 .message("Get total now showing movie")
-                .result(response)
+                .result(movieScheduleService.getTotalNowShowingMovie())
                 .build();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/acc")
-    public ApiResponse<List<Account>> getAllAccounts() {
+    public ApiResponse<List<Account>> getMethod() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
+
         log.info("User info: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
@@ -102,7 +110,7 @@ public class MovieScheduleController {
                 .build();
     }
 
-    @GetMapping("/top-booking")
+    @GetMapping(MovieSchedulePath.TOP_BOOKING)
     public ApiResponse<List<SingleMovieDTO>> getTopBookedMovie() {
         List<SingleMovieDTO> listMovie = movieScheduleService.getTopBookedMovieByDate();
         return ApiResponse.<List<SingleMovieDTO>>builder()
@@ -110,4 +118,5 @@ public class MovieScheduleController {
                 .result(listMovie)
                 .build();
     }
+
 }

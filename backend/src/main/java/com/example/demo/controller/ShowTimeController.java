@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*") // Cho phép truy cập API từ mọi nguồn (domain)
-@RestController // Đánh dấu đây là một REST Controller
-@RequestMapping("/api/movieSchedule/admin") // Gán URL gốc cho các endpoint trong controller này
-@Slf4j // Tự động tạo logger
+@CrossOrigin(origins = "*")
+@RestController
+@RequestMapping("/api/movieSchedule/admin")
+@Slf4j
 public class ShowTimeController {
 
     @Autowired

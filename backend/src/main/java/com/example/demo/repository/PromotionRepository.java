@@ -16,6 +16,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long>, Jpa
 
     Boolean existsByCode(String code);
 
+    Boolean existsByCodeAndIdNot(String code, Long id);
+
     Long countByActive(Boolean active);
 
     List<Promotion> findByActiveTrue();

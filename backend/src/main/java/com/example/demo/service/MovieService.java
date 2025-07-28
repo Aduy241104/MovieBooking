@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.request.MovieRequest;
 import com.example.demo.DTO.response.MovieResponse;
+import com.example.demo.exception.AppException;
 import com.example.demo.model.*;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.MovieRepository;
@@ -218,16 +219,12 @@ public class MovieService {
     private void setLogAndNotification(Movie movie, String action, String description,
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();
-        System.out.println(">>> LOI SML 1: " + loginUserId);
         if(loginUserId == null || loginUserId.isEmpty()) {
-//            throw new RuntimeException("Current user not found");
-            System.out.println(">>> LOI SML 2");
+            throw new AppException("User not logged in");
         }
         Account user = accountRepository.findById(Long.valueOf(loginUserId))
                 .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
-        // Ghi log hoạt động
+        // Log activity
         activityLogService.log(
                 user.getEmail(),
                 action,
@@ -235,9 +232,11 @@ public class MovieService {
                 movie.getNameVN(),
                 description
         );
-
-        // Gửi notification cho tất cả admin còn lại
+        // Notify admins
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if(adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found");
+        }
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(user.getAccountId())) {
                 notificationService.notify(

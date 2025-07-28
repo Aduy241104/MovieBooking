@@ -188,11 +188,6 @@ function Avatar({ originalImage, gender = "Male" }) {
                                     className='bg-light text-black p-1 pe-3 ps-3 rounded-1 ms-2 me-4'
                                 >
                                     Đóng
-                                    { isLoading &&
-                                        <div className="spinner-border spinner-border-sm" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    }
                                 </button>
                             </div>
                         </> }

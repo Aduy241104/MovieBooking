@@ -24,14 +24,13 @@ public class BookingDetailResponseDTO {
     private String discountTypeApplied;
     private BigDecimal discountApplied;
     private LocalDateTime bookingTime;
-    private BigDecimal totalAmount; // Số tiền sau khi đã trừ khuyến mãi
-    private BigDecimal originalAmount; // Số tiền gốc trước khuyến mãi
-    // <<< THÊM 2 TRƯỜNG NÀY VÀO >>>
+    private BigDecimal totalAmount;
+    private BigDecimal originalAmount;
     private Integer pointsUsed;
     private BigDecimal pointsDiscount;
     private String bookingStatus;
     private List<BookedSeatInfoDTO> bookedSeats;
-    private String paymentUrl; // For VNPAY
+    private String paymentUrl;
 
     @Data
     @Builder
@@ -77,6 +76,6 @@ public class BookingDetailResponseDTO {
         private String seatRow;
         private String seatCol;
         private String seatTypeName;
-        private BigDecimal pricePaid; // Giá đã trả cho ghế này (đã bao gồm phụ thu loại ghế)
+        private BigDecimal pricePaid;
     }
 }

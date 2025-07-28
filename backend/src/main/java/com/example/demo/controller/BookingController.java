@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/bookings")
 public class BookingController {
     private final BookingService bookingService;
-    private final PromotionService promotionService; // Booking
+    private final PromotionService promotionService;
     private final AccountService accountService;
 
     @GetMapping("/revenue")
@@ -56,7 +56,6 @@ public class BookingController {
     }
     //booking
 
-    // API tạo booking mới (cần xác thực)
     @PostMapping
     public ApiResponse<BookingDetailResponseDTO> createBooking(@RequestBody BookingRequestDTO bookingRequest, HttpServletRequest httpServletRequest) {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -70,28 +69,19 @@ public class BookingController {
                 .build();
     }
 
-    // API kiểm tra mã khuyến mãi (có thể gọi trước khi tạo booking)
+
     @GetMapping("/promotions/check/{code}")
     public ApiResponse<Promotion> checkPromotion(@PathVariable String code) {
         Promotion promotion = promotionService.fetchPromotionByCode(code);
-
-        // Kiểm tra tất cả các điều kiện
         if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() ||
                 java.time.LocalDateTime.now().isBefore(promotion.getStartTime()) ||
                 java.time.LocalDateTime.now().isAfter(promotion.getEndTime())) {
-
-            // <<< THAY ĐỔI QUAN TRỌNG >>>
-            // Nếu không hợp lệ, trả về một response thành công về mặt HTTP (status 200)
-            // nhưng với result là null và một message mã lỗi.
-            // Hoặc đơn giản là trả về result null, frontend sẽ tự hiểu.
             return ApiResponse.<Promotion>builder()
-                    .status(HttpStatus.OK.value()) // Vẫn là OK, vì request đã được xử lý
-                    .message("PROMOTION_INVALID") // Một mã lỗi để frontend bắt
-                    .result(null) // Quan trọng: result là null
+                    .status(HttpStatus.OK.value())
+                    .message("PROMOTION_INVALID")
+                    .result(null)
                     .build();
         }
-
-        // Nếu hợp lệ, trả về như cũ
         return ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
                 .message("PROMOTION_VALID")
@@ -99,18 +89,17 @@ public class BookingController {
                 .build();
     }
 
-    // API xử lý callback từ VNPAY
+    // API callback VNPAY
     @GetMapping("/payment/vnpay_return")
     public RedirectView vnpayReturn(HttpServletRequest request) {
         Map<String, String> params = request.getParameterMap().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue()[0]));
 
         String redirectUrl = bookingService.handleVnpayReturn(params);
-        System.out.println("BookingController - Redirecting to frontend URL: " + redirectUrl); // LOG URL NÀY
+        System.out.println("BookingController - Redirecting to frontend URL: " + redirectUrl);
         return new RedirectView(redirectUrl);
     }
 
-    // API lấy lịch sử đặt vé của người dùng (cần xác thực)
     @GetMapping("/history")
     public ApiResponse<List<BookingDetailResponseDTO>> getUserBookingHistory() {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -123,7 +112,6 @@ public class BookingController {
                 .build();
     }
 
-    // API lấy chi tiết một booking của người dùng
     @GetMapping("/{bookingId}/details")
     public ApiResponse<BookingDetailResponseDTO> getBookingDetails(@PathVariable Integer bookingId) {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -136,17 +124,11 @@ public class BookingController {
                 .build();
     }
 
-    @GetMapping("/points") // Endpoint: GET /api/bookings/points
+    @GetMapping("/points")
     public ApiResponse<Integer> getCurrentUserPoints() {
-        // Lấy accountId từ Security Context
         String accountIdStr = SecurityUtils.getCurrentUsername();
         Long accountId = Long.parseLong(accountIdStr);
-
-        // Gọi service để lấy thông tin tài khoản
-        // Chúng ta có thể dùng AccountService ở đây vì nó đã có sẵn phương thức cần thiết
         Account account = accountService.fetchAccountById(accountId);
-
-        // Trả về số điểm
         return ApiResponse.<Integer>builder()
                 .status(HttpStatus.OK.value())
                 .message("User points fetched successfully.")
@@ -154,7 +136,6 @@ public class BookingController {
                 .build();
     }
 
-    // <<< THÊM ENDPOINT MỚI NÀY >>>
     @PostMapping("/{bookingId}/retry-payment")
     public ApiResponse<String> retryPayment(
             @PathVariable Integer bookingId,
@@ -172,7 +153,6 @@ public class BookingController {
                 .build();
     }
 
-    // ADMIN : THÊM ENDPOINT XEM TẤT CẢ HÓA ĐƠN THEO ID PHIM
     @GetMapping("/movie/{movieId}")
     public ApiResponse<List<BookingDetailResponseDTO>> getAllBookingsByMovieId(@PathVariable Long movieId) {
         List<BookingDetailResponseDTO> bookings = bookingService.getAllBookingsByMovieId(movieId);
@@ -183,7 +163,6 @@ public class BookingController {
                 .build();
     }
 
-    // ADMIN : THÊM ENDPOINT LẤY TỔNG SỐ HÓA ĐƠN CỦA MỘT PHIM >>>
     @GetMapping("/movie/{movieId}/count")
     public ApiResponse<Long> getTotalBookingsByMovieId(@PathVariable Long movieId) {
         Long totalBookings = bookingService.getTotalBookingsByMovieId(movieId);

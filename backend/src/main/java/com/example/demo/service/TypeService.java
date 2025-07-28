@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.AppException;
 import com.example.demo.model.Account;
-import com.example.demo.model.Movie;
 import com.example.demo.model.Type;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.TypeRepository;
@@ -29,7 +29,9 @@ public class TypeService {
             throw new RuntimeException("Thể loại đã tồn tại!");
         }
         // Log activity and notification
-        setLogAndNotification(type, "TẠO MỚI",
+        setLogAndNotification(
+                type,
+                "TẠO MỚI",
                 "Tạo mới thể loại phim",
                 "Tạo mới thể loại phim",
                 " vừa tạo mới thể loại phim: ");
@@ -51,7 +53,9 @@ public class TypeService {
         }
 
         // Log activity and notification
-        setLogAndNotification(existing, "CẬP NHẬT",
+        setLogAndNotification(
+                existing,
+                "CẬP NHẬT",
                 "Cập nhật thể loại phim",
                 "Cập nhật thể loại phim",
                 " vừa cập nhật thể loại phim: ");
@@ -70,7 +74,9 @@ public class TypeService {
         typeRepository.save(type);
 
         // Log activity and notification
-        setLogAndNotification(type, "XOÁ",
+        setLogAndNotification(
+                type,
+                "XOÁ",
                 "Xoá thể loại phim",
                 "Xoá thể loại phim",
                 " vừa xoá thể loại phim: ");
@@ -80,17 +86,16 @@ public class TypeService {
         return typeRepository.findById(id);
     }
 
+    // Helper method to log activity and send notifications
     private void setLogAndNotification(Type type, String action, String description,
                                        String title, String content) {
         String loginUserId = SecurityUtils.getCurrentUsername();
         if (loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+            throw new AppException("User not logged in");
         }
         Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
-        // Ghi log hoạt động
+                .orElseThrow(() -> new AppException("Current user not found"));
+        // Log the activity
         activityLogService.log(
                 user.getEmail(),
                 action,
@@ -98,9 +103,11 @@ public class TypeService {
                 type.getName(),
                 description
         );
-
-        // Gửi notification cho tất cả admin còn lại
+        // Send notification to the admin accounts
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if( adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found to notify");
+        }
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(user.getAccountId())) {
                 notificationService.notify(

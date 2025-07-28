@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.exception.AppException;
 import com.example.demo.model.*;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.utils.SecurityUtils;
@@ -56,8 +57,7 @@ public class CinemaRoomService {
         List<Seat> seats = mapSeatResponsesToEntities(request.getSeats(), room);
         seatRepo.saveAll(seats);
 
-        // Ghi log hoạt động và notification tạo phòng chiếu
-
+        // Log activity and notification for room creation
         setLogAndNotification(room, "TẠO MỚI",
                 "Tạo phòng chiếu mới",
                 "Tạo mới phòng chiếu",
@@ -82,7 +82,7 @@ public class CinemaRoomService {
         List<Seat> newSeats = mapSeatResponsesToEntities(request.getSeats(), room);
         seatRepo.saveAll(newSeats);
 
-        // Ghi log hoạt động và notification cập nhật phòng chiếu
+        // Log activity and notification for room update
         setLogAndNotification(room, "CẬP NHẬT",
                 "Cập nhật thông tin phòng chiếu",
                 "Cập nhật thông tin phòng chiếu",
@@ -98,7 +98,7 @@ public class CinemaRoomService {
         room.setIsDeleted(true);
         roomRepo.save(room);
 
-        // Ghi log hoạt động và notification xoá phòng chiếu
+        // Log delete activity and notification
         setLogAndNotification(room, "XOÁ",
                 "Xoá phòng chiếu",
                 "Xoá phòng chiếu",
@@ -161,17 +161,20 @@ public class CinemaRoomService {
         return roomRepo.count();
     }
 
+
+    /**
+     * Sets log and sends notification for room actions.
+     */
     private void setLogAndNotification(CinemaRoom room, String action, String description,
                                        String title, String content) {
+        // Get current user ID from security context
         String loginUserId = SecurityUtils.getCurrentUsername();
         if(loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+            throw new AppException("User not logged in");
         }
         Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
-        // Ghi log hoạt động
+                .orElseThrow(() -> new AppException("Current user not found"));
+        // Log activity
         activityLogService.log(
                 user.getEmail(),
                 action,
@@ -179,8 +182,7 @@ public class CinemaRoomService {
                 room.getCinemaRoomName(),
                 description
         );
-
-        // Gửi notification cho tất cả admin còn lại
+        // Send notification to all admins
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(user.getAccountId())) {

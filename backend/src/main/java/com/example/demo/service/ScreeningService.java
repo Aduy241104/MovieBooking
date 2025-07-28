@@ -8,6 +8,12 @@ import java.util.stream.Collectors;
 
 import com.example.demo.DTO.response.booking.ScreeningScheduleResponseDTO;
 import com.example.demo.DTO.response.booking.SeatStatusDTO;
+import com.example.demo.exception.AppException;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+import com.example.demo.utils.SecurityUtils;
+import com.example.demo.exception.InternalServerException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +46,21 @@ public class ScreeningService {
     @Autowired
     private FareTypeRepository fareTypeRepository;
 
+    // Use for user logging
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private ActivityLogService activityLogService;
+
+    @Autowired
+    private NotificationService notificationService;
+
     @Autowired
     private BookedSeatRepository bookedSeatRepository;
 
-    private static final int EXPIRATION_MINUTES = 15; // Thời gian hết hạn
+    private static final int EXPIRATION_MINUTES = 15;
+    
     public List<MovieScheduleDTO> getAllMovieScheduleByDate(LocalDate date) {
         List<Screening> listScreening = screeningRepository.findScreeningsByDate(date);
 
@@ -80,7 +97,7 @@ public class ScreeningService {
     //Booking
     public ScreeningScheduleResponseDTO getSchedulesForMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + movieId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + movieId));
 
         List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(15)); // Cho phép trễ 15p
 
@@ -104,23 +121,22 @@ public class ScreeningService {
 
     public List<SeatStatusDTO> getSeatStatusForScreening(Long screeningId) {
         Screening screening = screeningRepository.findById(screeningId)
-                .orElseThrow(() -> new RuntimeException("Screening not found with id: " + screeningId));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu với ID: " + screeningId));
         CinemaRoom cinemaRoom = screening.getCinemaRoom();
         if (cinemaRoom == null) {
-            throw new RuntimeException("Cinema room not found for screening: " + screeningId);
+            throw new InternalServerException("Lỗi dữ liệu hệ thống: Suất chiếu không có thông tin phòng.", null);
         }
 
         List<Seat> allSeatsInRoom = seatRepository.findByCinemaRoom(cinemaRoom);
         List<BookedSeat> bookedSeats = bookedSeatRepository.findByScreeningId(screeningId);
 
-        // <<< SỬA LỖI LOGIC TẠI ĐÂY >>>
         Map<Long, Booking> seatBookingMap = bookedSeats.stream()
                 .filter(bs -> bs.getSeat() != null && bs.getBooking() != null)
                 .collect(Collectors.toMap(
                         bs -> bs.getSeat().getSeatId(),
                         BookedSeat::getBooking,
                         (existingBooking, newBooking) -> {
-                            // Merge function: Ưu tiên trạng thái "mạnh" hơn
+                            // Merge function: Prioritize the "stronger" state
                             if ("PAID".equals(existingBooking.getBookingStatus())) return existingBooking;
                             if ("PAID".equals(newBooking.getBookingStatus())) return newBooking;
 
@@ -129,8 +145,6 @@ public class ScreeningService {
 
                             if ("PENDING_PAYMENT".equals(existingBooking.getBookingStatus())) return existingBooking;
                             if ("PENDING_PAYMENT".equals(newBooking.getBookingStatus())) return newBooking;
-
-                            // Nếu không có trạng thái nào ở trên, giữ lại cái cũ
                             return existingBooking;
                         }
                 ));
@@ -198,6 +212,17 @@ public class ScreeningService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy loại vé")));
         screening.setShowDateTime(startTime);
         screening.setIsDeleted(false);
+
+        // Log and notify about the new screening creation
+        setLogAndNotification(
+                screening.getId(),
+                "TẠO MỚI",
+                "Tạo mới lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
+                        + screening.getCinemaRoom().getCinemaRoomName(),
+                "Tạo mới lịch chiếu",
+                " vừa tạo mới lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
+                        + screening.getCinemaRoom().getCinemaRoomName()
+        );
         return screeningRepository.save(screening);
     }
 
@@ -225,6 +250,18 @@ public class ScreeningService {
         screening.setFareType(fareTypeRepository.findById(request.getFareTypeId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy loại vé")));
         screening.setShowDateTime(startTime);
+
+        // Log and notify about the updated screening
+        setLogAndNotification(
+                screening.getId(),
+                "CẬP NHẬT",
+                "Cập nhật lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
+                        + screening.getCinemaRoom().getCinemaRoomName(),
+                "Tạo mới lịch chiếu",
+                " vừa cập nhật lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
+                + screening.getCinemaRoom().getCinemaRoomName()
+        );
+
         return screeningRepository.save(screening);
     }
 
@@ -234,10 +271,76 @@ public class ScreeningService {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch chiếu"));
         screening.setIsDeleted(true);
         screeningRepository.save(screening);
+
+        // Log and notify about the screening deletion
+        setLogAndNotification(
+                screening.getId(),
+                "XOÁ",
+                "Xoá lịch chiếu của phim: " + screening.getMovie().getNameVN() + " tại phòng chiếu: "
+                        + screening.getCinemaRoom().getCinemaRoomName(),
+                "Xoá lịch chiếu",
+                " vừa xoá lịch chiếu của phim: " + screening.getMovie().getNameVN() + " tại phòng chiếu: "
+                + screening.getCinemaRoom().getCinemaRoomName()
+        );
     }
 
     //  Lấy tất cả lịch chiếu chưa xoá
     public List<Screening> getAllActiveScreenings() {
         return screeningRepository.findAllActive();
+    }
+
+    /**
+     * Sets log and sends notification for screening actions.
+     */
+    private void setLogAndNotification(Long screeningId, String action, String description,
+                                       String title, String content) {
+        // Check if the screening exists
+        Screening currentScreening = getPromotionOrThrow(screeningId);
+        // Get the current logged-in user
+        String loginUserId = SecurityUtils.getCurrentUsername();
+        if(loginUserId == null || loginUserId.isEmpty()) {
+            throw new AppException("User not logged in!");
+        }
+        Account editorAccount = getAccountOrThrow(Long.valueOf(loginUserId));
+        // Log the activity
+        activityLogService.log(
+                editorAccount.getEmail(),
+                action,
+                "LỊCH CHIẾU",
+                currentScreening.getMovie().getNameVN(),
+                description
+        );
+        // Find all admin accounts to notify
+        List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if(adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found to notify");
+        }
+        // Send notifications to all admin accounts except the editor
+        for (Account admin : adminAccounts) {
+            if (!admin.getAccountId().equals(editorAccount.getAccountId())) {
+                notificationService.notify(
+                        admin,
+                        title,
+                        editorAccount.getFullName() + content + currentScreening.getMovie().getNameVN(),
+                        "SYSTEM"
+                );
+            }
+        }
+    }
+
+    /**
+     * Find screening by id, or throw AppException("Screening not found").
+     */
+    public Screening getPromotionOrThrow(Long screeningId) {
+        return screeningRepository.findById(screeningId)
+                .orElseThrow(() -> new AppException("Screening not found"));
+    }
+
+    /**
+     * Find account by id, or throw AppException("Account not found").
+     */
+    public Account getAccountOrThrow(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException("Account not found"));
     }
 }

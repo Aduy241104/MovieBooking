@@ -1,20 +1,22 @@
 package com.example.demo.DTO.response.dashboard;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.time.LocalDate;
-
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class DailyTicketRevenueResponse {
-    private LocalDate date;
-    private Long revenue;
+    private Timestamp date;
+    private BigDecimal revenue;
     private Long tickets;
 
+    public LocalDateTime getDate() {
+        return date.toLocalDateTime();
+    }
 }
