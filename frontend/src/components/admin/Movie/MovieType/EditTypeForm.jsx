@@ -84,15 +84,6 @@ const token = localStorage.getItem('token')
         />
       )}
 
-      {/* <Input
-        value={form.name}
-        onChange={(e) =>
-          setForm((f) => ({ ...f, name: e.target.value }))
-        }
-        onPressEnter={handleSubmit}
-        placeholder="Nhập tên thể loại"
-        size="large"
-      /> */}
       <Input
         value={form.name}
         onChange={(e) => {

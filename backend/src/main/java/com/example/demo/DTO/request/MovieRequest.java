@@ -28,5 +28,5 @@ public class MovieRequest {
     private String actor;
     private String movieProductionCompany;
     private Integer ageLimit;
-    private List<Integer> typeIds;
+    private List<Long> typeIds;
 }
