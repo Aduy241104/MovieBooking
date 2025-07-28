@@ -21,20 +21,18 @@ function ChangePassword() {
                             errors: ["Mật khẩu hiện tại không đúng"],
                         },
                     ]);
-                } else {
-                    openNotification("error", "Lỗi", response.message);
                 }
                 return;
             }
             openNotification("success", "Cập nhật thành công", "Mật khẩu đã được thay đổi.");
-            localStorage.setItem("token", response.data.result);
+            localStorage.setItem("token", response.data.result.accessToken);
+            localStorage.setItem("refreshToken", response.data.result.refreshToken);
+            console.log(response);
             form.resetFields();
 
         } catch (error) {
-            openNotification("error", "Lỗi");
-        } finally {
+            openNotification("error", error.message)
             setLoading(false);
-
         }
     };
 
