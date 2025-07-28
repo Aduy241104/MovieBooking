@@ -35,7 +35,20 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
             setVisible(false);
         } catch (err) {
             console.error("Lỗi khi cập nhật:", err);
-            message.error("Cập nhật thất bại.");
+
+            const backendMessage = err?.response?.data;
+
+            // Nếu backend trả về đối tượng có message
+            if (backendMessage?.message?.includes("Tên phương thức thanh toán đã tồn tại")) {
+                message.error(backendMessage.message);
+            }
+            // Nếu backend trả về chuỗi đơn giản
+            else if (typeof backendMessage === 'string' && backendMessage.includes("Tên phương thức thanh toán đã tồn tại")) {
+                message.error(backendMessage);
+            }
+            else {
+                message.error("Cập nhật thất bại.");
+            }
         }
     };
 
@@ -49,10 +62,10 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
             title="Chỉnh sửa phương thức"
         >
             <Form layout="vertical" form={form}>
-                <Form.Item name="name" label="Tên phương thức" rules={[{ required: true, message: 'Nhập tên' }]}>
+                <Form.Item name="name" label="Tên phương thức" rules={[{ required: true, message: 'Vui lòng nhập tên phương thức' }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="description" label="Mô tả">
+                <Form.Item name="description" label="Mô tả" rules={[{ required: true, message: 'Vui lòng nhập mô tả của phương thức' }]}>
                     <Input.TextArea rows={2} />
                 </Form.Item>
                 {/* <Form.Item name="active" label="Trạng thái">

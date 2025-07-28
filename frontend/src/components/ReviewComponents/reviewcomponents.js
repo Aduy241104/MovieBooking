@@ -3,7 +3,7 @@ import { useContext, useState, useEffect } from 'react';
 import styles from "./review.module.scss";
 import { useParams } from "react-router-dom";
 import { AuthContext } from '../../context/AuthContext';
-import ReviewService from '../../service/ReviewService';
+import ReviewService from '../../service/ReviewUserService';
 import { message } from 'antd';
 import { Modal } from 'antd';
 import { openNotification } from '../../Utils/Notification';
@@ -44,7 +44,7 @@ const ReviewBox = () => {
     // --- Xem đánh giá: tải danh sách đánh giá của phim ---
     useEffect(() => {
         setLoading(true);
-        fetch(`http://localhost:8081/api/public/reviews/movie/${movieId}/paged?page=${page}&size=${7}`)
+        fetch(`http://localhost:8081/api/public/reviews/movie-aa/${movieId}/paged?page=${page}&size=${7}`)
             .then((res) => res.json())
             .then((data) => {
                 const content = data.content || [];
@@ -134,6 +134,10 @@ const ReviewBox = () => {
                 return res.json();
             })
             .then((data) => {
+                const createdReview = data.result; // Lấy review thực tế từ .result
+
+                console.log("Review đã thêm:", createdReview);
+
                 setReviews([]); // 🧹 Reset review trước
                 setPage(-1);    // Ép đổi trạng thái để useEffect chạy lại
                 setTimeout(() => {
@@ -144,6 +148,7 @@ const ReviewBox = () => {
 
                 setNewReview({ rating: 10, comment: "", spoilerAlert: false });
             })
+
             .catch((err) => {
                 let errorMessage = 'Gửi đánh giá thất bại!';
 
@@ -192,12 +197,18 @@ const ReviewBox = () => {
                 if (!res.ok) throw new Error("Cập nhật thất bại");
                 return res.json();
             })
-            .then((updatedReview) => {
+            .then((data) => {
+                const updatedReview = data.result; // 🟢 Lấy từ .result
+
                 setReviews((prev) =>
                     prev.map((r) => (r.id === reviewId ? updatedReview : r))
                 );
+
                 setEditingReviewId(null);
                 setIsEditModalOpen(false);
+
+                // Optional: show message
+                message.success(data.message || "Cập nhật đánh giá thành công!");
             })
             .catch((err) => {
                 console.error("Lỗi cập nhật đánh giá:", err);
@@ -222,7 +233,7 @@ const ReviewBox = () => {
 
 
     console.log("test2: ", reviews);
-    
+
 
     // Hàm xử lý xóa review (đã chỉnh lại)
     const handleDelete = async (reviewId) => {
@@ -236,21 +247,21 @@ const ReviewBox = () => {
                     },
                 });
 
-                if (!response.ok)
-                    throw new Error('Xóa đánh giá thất bại');
+                const data = await response.json(); // luôn parse JSON để lấy message
 
+                if (!response.ok) {
+                    throw new Error(data.message || 'Xóa đánh giá thất bại');
+                }
+
+                message.success(data.message || "Đánh giá đã được xóa");
+
+                // Làm mới danh sách đánh giá
                 setPage(0);
                 setHasMore(true);
                 setRefreshTrigger(prev => prev + 1);
-
-                // Sau khi xóa, load lại danh sách đánh giá từ server
-                // await loadReviews();
-
-                // Đóng menu và reset trạng thái
-                // setMenuOpenId(null);
             } catch (error) {
                 console.error('Error deleting review:', error);
-                alert('Có lỗi xảy ra khi xóa đánh giá');
+                message.error(error.message || 'Có lỗi xảy ra khi xóa đánh giá');
             } finally {
                 setSubmitting(false);
             }

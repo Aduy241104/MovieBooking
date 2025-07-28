@@ -108,6 +108,6 @@ export default PaymentMethodService;
 
 
 export const getActivePaymentMethods = () => {
-    return axiosInstance.get(BASE_URL);
+     return instance.get(BASE_URL);
 };
 

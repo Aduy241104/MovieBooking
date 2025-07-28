@@ -11,18 +11,19 @@ import java.util.Optional;
 @Repository
 public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, Long> {
 
-    // Tìm các phương thức thanh toán đang hoạt động
+    // Find all active payment methods
     List<PaymentMethod> findByActiveTrue();
 
-    // Tìm phương thức thanh toán theo tên
+    // Find a payment method by name (case-insensitive)
     PaymentMethod findByNameIgnoreCase(String name);
 
-    // Tìm phương thức thanh toán theo loại (CARD, EWALLET, CASH, etc.)
+    // Find active payment methods by type (e.g., CARD, EWALLET, CASH)
     List<PaymentMethod> findByNameIgnoreCaseAndActiveTrue(String type);
 
-    // Kiểm tra tồn tại phương thức thanh toán
+    // Check if a payment method with the given name exists (case-insensitive)
     boolean existsByNameIgnoreCase(String name);
 
+    // Find a payment method by ID only if it is active
     Optional<PaymentMethod> findByIdAndActiveTrue(Long id);
 }
 

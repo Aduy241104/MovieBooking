@@ -61,7 +61,11 @@ const CreatePaymentMethodModal = ({ isCreateModalOpen, setIsCreateModalOpen, set
                     <Input />
                 </Form.Item>
 
-                <Form.Item label="Mô tả" name="description">
+                <Form.Item
+                    label="Mô tả"
+                    name="description"
+                    rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
+                >
                     <Input.TextArea rows={2} />
                 </Form.Item>
 

@@ -15,12 +15,23 @@ import com.example.demo.repository.BookingRepository;
 
 import org.springframework.data.domain.Pageable;
 
+/**
+ * Service class responsible for handling payment transaction-related logic.
+ */
 @Service
 public class PaymentTransactionService {
 
     @Autowired
     private BookingRepository bookingRepository;
 
+
+     /**
+     * Retrieves a paginated list of all payment transactions in the system.
+     *
+     * @param page the page number to retrieve (zero-based)
+     * @param size the number of items per page
+     * @return a paginated list of {@link PaymentTransactionResponseDTO}
+     */
     public Page<PaymentTransactionResponseDTO> getAllTransactions(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Booking> bookingPage = bookingRepository.findAll(pageable);
