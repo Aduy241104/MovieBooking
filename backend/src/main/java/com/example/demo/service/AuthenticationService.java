@@ -12,6 +12,7 @@ import com.example.demo.DTO.request.RegisterRequest;
 import com.example.demo.DTO.response.AccountRespond;
 import com.example.demo.DTO.response.AuthRespond;
 import com.example.demo.enums.RoleTypes;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.RoleNotFoundException;
@@ -101,7 +102,7 @@ public class AuthenticationService {
                 accountWithOtp.getVerifyOtp());
 
         if (!isOtpValid) {
-            throw new UnauthorizedException("OTP is invalid or expired");
+            throw new BadRequestException("OTP is invalid or expired");
         }
 
         RegisterRequest registerRequest = accountWithOtp.getRegisterRequest();
@@ -129,7 +130,7 @@ public class AuthenticationService {
         boolean isOtpValid = otpService.verifyOtp(email, otp);
 
         if (!isOtpValid) {
-            throw new UnauthorizedException("OTP is invalid or expired");
+            throw new BadRequestException("OTP is invalid or expired");
         }
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("account not found"));

@@ -167,6 +167,14 @@ $reserved-color: #9b59b6;
             span:first-child { color: #fff; }
             span:last-child { color: $success-color; }
         }
+         &.points-earned {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: $success-color; // Dùng màu xanh lá
+            font-weight: 500;
+            border-top: 1px dashed #eee; // Thêm gạch ngang phân cách
+            padding-top: 10px;
+        }
     }
 }
 

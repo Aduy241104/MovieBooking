@@ -11,46 +11,46 @@ function Sidebar() {
     const { user } = useContext(AuthContext);
 
     return (
-        <div className={cx("p-3 ms-5", "sidebar")}>
-            <div className={cx("p-5 rounded-4", "inner-sidebar")}>
+        <div className={ cx("p-3 ms-5", "sidebar") }>
+            <div className={ cx("p-5 rounded-4", "inner-sidebar") }>
                 <h5 className="fw-bolder">Quản lý tài khoản</h5>
                 <ul className="list-unstyled mt-5 pb-5">
-                    <li className={cx("mb-4", "link-layout")}>
+                    <li className={ cx("mb-4", "link-layout") }>
                         <NavLink
                             to="/profile"
                             end
-                            className={({ isActive }) =>
+                            className={ ({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
                             <i className="fa-solid fa-user"></i> <span className="ps-2 fs-7">Tài khoản</span>
                         </NavLink>
                     </li>
-                    <li className={cx("mb-4", "link-layout")}>
+                    <li className={ cx("mb-4", "link-layout") }>
                         <NavLink
                             to="/profile/password"
-                            className={({ isActive }) =>
+                            className={ ({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
                             <i className="fa-solid fa-key"></i> <span className="ps-2 fs-7">Mật khẩu</span>
                         </NavLink>
                     </li>
-                    <li className={cx("mb-4", "link-layout")}>
+                    <li className={ cx("mb-4", "link-layout") }>
                         <NavLink
                             to="/profile/booking-history"
-                            className={({ isActive }) =>
+                            className={ ({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
-                            <i className="fa-solid fa-clock-rotate-left"></i>{" "}
+                            <i className="fa-solid fa-clock-rotate-left"></i>{ " " }
                             <span className="ps-2 fs-7">Giao dịch</span>
                         </NavLink>
                     </li>
-                    <li className={cx("mb-4", "link-layout")}>
+                    <li className={ cx("mb-4", "link-layout") }>
                         <NavLink
                             to="/profile/notifications"
-                            className={({ isActive }) =>
+                            className={ ({ isActive }) =>
                                 cx(isActive ? "text-red fw-bolder" : "text-light", "btn-layout")
                             }
                         >
@@ -60,16 +60,16 @@ function Sidebar() {
                     </li>
                 </ul>
 
-                {/* User info at bottom */}
-                <div className={cx("mb-5 mt-5 pt-5", "bottom-sidebar")}>
-                    <div className={cx("rounded-full mb-2", "avt")}>
-                        {user && (
+                {/* User info at bottom */ }
+                { user && <div className={ cx("mb-5 mt-5 pt-5", "bottom-sidebar") }>
+                    <div className={ cx("rounded-full mb-2", "avt") }>
+                        { user && (
                             <Avatar
-                                className={cx("avt")}
-                                src={user.avatar + ""}
-                                fallBack={"/Assests/Image/Screenshot 2025-06-13 102311.png"}
+                                className={ cx("avt") }
+                                src={ user.avatar + "" }
+                                fallBack={ "/Assests/Image/Screenshot 2025-06-13 102311.png" }
                             />
-                        )}
+                        ) }
                     </div>
                     <p>{user?.fullName}</p>
                     <p className="text-secondary fs-7">duya15914@gmail.com</p>
@@ -78,7 +78,7 @@ function Sidebar() {
                         <i className="fa-solid fa-arrow-right-from-bracket pe-2"></i>
                         Đăng xuất
                     </button>
-                </div>
+                </div> }
             </div>
         </div>
     );

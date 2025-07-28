@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.repository.AccountRepository;
@@ -115,14 +116,6 @@ public class PromotionService {
         return promotionRepository.countByActive(true);
     }
 
-    public Promotion fetchPromotionByCode(String code) {
-        // Check if the promotion code exists
-        boolean isPromotionExist = promotionRepository.existsByCode(code);
-        if (!isPromotionExist) {
-            throw new AppException("Promotion code not found");
-        }
-        return promotionRepository.findByCode(code);
-    }
 
     private void setLogAndNotification(Long promotionId, String action, String description,
                                        String title, String content) {
@@ -216,5 +209,30 @@ public class PromotionService {
     public Account getAccountOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new AppException("Account not found"));
+    }
+
+    //Use for booking------------------------
+    /**
+     * Tìm và xác thực một mã khuyến mãi.
+     * Ném ra exception nếu mã không hợp lệ để sử dụng.
+     * @param code Mã khuyến mãi cần kiểm tra.
+     * @return Đối tượng Promotion nếu hợp lệ.
+     * @throws NotFoundException nếu mã không tồn tại, hết hạn, hoặc chưa active.
+     */
+    public Promotion findAndValidatePromotion(String code) {
+        Promotion promotion = promotionRepository.findByCode(code);
+
+        // Gom tất cả các điều kiện kiểm tra vào đây
+        if (promotion == null ||
+                !promotion.getActive() ||
+                promotion.getIsDeleted() ||
+                LocalDateTime.now().isBefore(promotion.getStartTime()) ||
+                LocalDateTime.now().isAfter(promotion.getEndTime())) {
+
+            // Ném ra một lỗi duy nhất với message thân thiện
+            throw new NotFoundException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
+        }
+
+        return promotion;
     }
 }

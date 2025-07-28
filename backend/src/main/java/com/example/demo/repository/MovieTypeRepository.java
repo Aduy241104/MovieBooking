@@ -13,7 +13,7 @@ import com.example.demo.model.MovieType;
 public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
     @Query("SELECT mt.type.name FROM MovieType mt WHERE mt.movie.id = :movieId")
     List<String> findTypeNamesByMovieId(@Param("movieId") Long movieId);
-
+    List<MovieType> findByMovie_Id(Long movieId);
     @Query(value = """
             SELECT
 
@@ -38,8 +38,16 @@ public interface MovieTypeRepository extends JpaRepository<MovieType, Integer> {
             """, nativeQuery = true)
     List<MovieTypeRevenueResponse.MovieTypeRevenue> getMoviesByTypeRevenue();
 
+    /**
+     * Finds all MovieType associations for the given movie.
+     * Useful for retrieving all types linked to a specific movie.
+     */
     List<MovieType> findByMovie(Movie movie);
 
+    /**
+     * Deletes all MovieType records by the given movie ID.
+     * Typically used when deleting or updating a movie to remove existing type associations.
+     */
     void deleteByMovieId(Long movieId);
 
     List<MovieType> findByType_NameIgnoreCaseAndMovie_IsDeletedFalse(String typeName);

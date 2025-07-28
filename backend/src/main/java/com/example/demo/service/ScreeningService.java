@@ -14,15 +14,13 @@ import com.example.demo.repository.*;
 import com.example.demo.utils.SecurityUtils;
 import com.example.demo.exception.InternalServerException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.DTO.request.ScreeningRequest;
 import com.example.demo.DTO.response.MovieScheduleDTO;
 import com.example.demo.DTO.response.ShowTimeDTO;
-
+import static com.example.demo.service.BookingService.BOOKING_EXPIRATION_MINUTES;
 @Service
 public class ScreeningService {
 
@@ -59,7 +57,7 @@ public class ScreeningService {
     @Autowired
     private BookedSeatRepository bookedSeatRepository;
 
-    private static final int EXPIRATION_MINUTES = 15;
+
     
     public List<MovieScheduleDTO> getAllMovieScheduleByDate(LocalDate date) {
         List<Screening> listScreening = screeningRepository.findScreeningsByDate(date);
@@ -119,6 +117,7 @@ public class ScreeningService {
         return new ScreeningScheduleResponseDTO(movie, sortedGroupedSchedules);
     }
 
+
     public List<SeatStatusDTO> getSeatStatusForScreening(Long screeningId) {
         Screening screening = screeningRepository.findById(screeningId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy suất chiếu với ID: " + screeningId));
@@ -130,19 +129,17 @@ public class ScreeningService {
         List<Seat> allSeatsInRoom = seatRepository.findByCinemaRoom(cinemaRoom);
         List<BookedSeat> bookedSeats = bookedSeatRepository.findByScreeningId(screeningId);
 
+        // Logic tạo Map giữ nguyên, nó đã rất tốt
         Map<Long, Booking> seatBookingMap = bookedSeats.stream()
                 .filter(bs -> bs.getSeat() != null && bs.getBooking() != null)
                 .collect(Collectors.toMap(
                         bs -> bs.getSeat().getSeatId(),
                         BookedSeat::getBooking,
                         (existingBooking, newBooking) -> {
-                            // Merge function: Prioritize the "stronger" state
                             if ("PAID".equals(existingBooking.getBookingStatus())) return existingBooking;
                             if ("PAID".equals(newBooking.getBookingStatus())) return newBooking;
-
                             if ("RESERVED".equals(existingBooking.getBookingStatus())) return existingBooking;
                             if ("RESERVED".equals(newBooking.getBookingStatus())) return newBooking;
-
                             if ("PENDING_PAYMENT".equals(existingBooking.getBookingStatus())) return existingBooking;
                             if ("PENDING_PAYMENT".equals(newBooking.getBookingStatus())) return newBooking;
                             return existingBooking;
@@ -155,16 +152,29 @@ public class ScreeningService {
 
             Booking booking = seatBookingMap.get(seat.getSeatId());
             if (booking != null) {
+
+                // <<< THAY ĐỔI LOGIC NẰM Ở ĐÂY >>>
                 switch (booking.getBookingStatus()) {
                     case "PAID":
                     case "RESERVED":
                         status = "Booked";
                         break;
                     case "PENDING_PAYMENT":
-                        status = "Pending";
-                        expiresAt = booking.getBookingTime().plusMinutes(EXPIRATION_MINUTES);
+                        // Tính toán thời gian hết hạn
+                        LocalDateTime expirationTime = booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES);
+
+                        // Kiểm tra xem đã hết hạn hay chưa
+                        if (expirationTime.isBefore(LocalDateTime.now())) {
+                            // Mặc dù trong DB vẫn là PENDING, nhưng về mặt logic nó đã hết hạn.
+                            // Coi như ghế này đã trống.
+                            status = "Available";
+                        } else {
+                            // Nếu chưa hết hạn, mới hiển thị là Pending
+                            status = "Pending";
+                            expiresAt = expirationTime; // Gán thời gian hết hạn để trả về cho frontend
+                        }
                         break;
-                    default: // EXPIRED, FAILED, CANCELLED
+                    default: // EXPIRED, FAILED, CANCELLED và các trạng thái khác
                         status = "Available";
                         break;
                 }
@@ -187,7 +197,6 @@ public class ScreeningService {
             );
         }).collect(Collectors.toList());
     }
-
 
 
     //  Thêm lịch chiếu mới
