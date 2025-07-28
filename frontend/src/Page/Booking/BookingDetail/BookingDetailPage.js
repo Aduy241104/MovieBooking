@@ -192,6 +192,12 @@ const BookingDetailPage = () => {
                             <span>Tổng cộng</span>
                             <span>{bookingDetails.totalAmount?.toLocaleString("vi-VN")}đ</span>
                         </div>
+                        {bookingDetails.pointsEarned > 0 && (
+                            <div className={cx("price-row", "points-earned")}>
+                                <span>Điểm thưởng nhận được</span>
+                                <span>+ {bookingDetails.pointsEarned?.toLocaleString("vi-VN")}</span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

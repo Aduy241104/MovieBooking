@@ -28,6 +28,7 @@ public class BookingDetailResponseDTO {
     private BigDecimal originalAmount;
     private Integer pointsUsed;
     private BigDecimal pointsDiscount;
+    private Integer pointsEarned;
     private String bookingStatus;
     private List<BookedSeatInfoDTO> bookedSeats;
     private String paymentUrl;
