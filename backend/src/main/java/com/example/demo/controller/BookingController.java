@@ -4,7 +4,6 @@ import com.example.demo.DTO.request.booking.BookingRequestDTO;
 import com.example.demo.DTO.response.ApiResponse;
 import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
-import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.service.AccountService;
@@ -18,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,11 +72,7 @@ public class BookingController {
 
     @GetMapping("/promotions/check/{code}")
     public ApiResponse<Promotion> checkPromotion(@PathVariable String code) {
-        // <<< CHỈ CẦN GỌI HÀM MỚI >>>
-        // Mọi logic kiểm tra và ném lỗi đã được PromotionService xử lý.
-        // Nếu hàm này không ném ra exception, chúng ta biết chắc mã đã hợp lệ.
         Promotion promotion = promotionService.findAndValidatePromotion(code);
-
         return ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
                 .message("Áp dụng mã khuyến mãi thành công!")
@@ -112,7 +106,7 @@ public class BookingController {
     @GetMapping("/{bookingId}/details")
     public ApiResponse<BookingDetailResponseDTO> getBookingDetails(@PathVariable Integer bookingId) {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long accountId = Long.parseLong(accountIdStr); // Fixed the typo
+        Long accountId = Long.parseLong(accountIdStr);
         BookingDetailResponseDTO bookingDetail = bookingService.getBookingDetailsForUser(bookingId, accountId);
         return ApiResponse.<BookingDetailResponseDTO>builder()
                 .status(HttpStatus.OK.value())

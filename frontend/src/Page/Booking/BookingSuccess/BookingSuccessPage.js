@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getBookingDetails } from '../../../service/BookingService'; // KIỂM TRA ĐƯỜNG DẪN
+import { getBookingDetails } from '../../../service/BookingService'; 
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingSuccessPage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
+import styles from './bookingSuccessPage.module.scss'; 
 import classNames from 'classnames/bind';
 import DefaultLayout from '../../../layouts/DefaultLayout';
 
@@ -13,13 +13,10 @@ const cx = classNames.bind(styles);
 const BookingSuccessPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const queryParams = new URLSearchParams(location.search);
-
-    // Ưu tiên lấy bookingId từ query params (khi redirect từ backend sau VNPAY)
-    // Sau đó mới thử lấy từ location.state (khi navigate nội bộ từ BookingPage cho thanh toán tại quầy)
+    const queryParams = new URLSearchParams(location.search); 
+    //Get bookingId from query params (when redirecting from backend after VNPAY)
     const bookingIdFromQuery = queryParams.get('bookingId');
-    const bookingIdFromState = location.state?.bookingId;
-    const bookingId = bookingIdFromQuery || bookingIdFromState;
+    const bookingId = bookingIdFromQuery;
 
     console.log('BookingSuccessPage - Final bookingId to use:', bookingId);
 
@@ -27,7 +24,6 @@ const BookingSuccessPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // --- LOGIC GỐC GIỮ NGUYÊN ---
     useEffect(() => {
         if (!bookingId) {
             console.warn('BookingSuccessPage: No bookingId found. Navigating to home.');
@@ -73,7 +69,6 @@ const BookingSuccessPage = () => {
         }
     };
 
-    // --- CÁC TRƯỜNG HỢP HIỂN THỊ ---
     if (loading) {
         return <div className={cx('page-container', 'centered-message')}>Đang tải thông tin đặt vé...</div>;
     }
@@ -112,7 +107,6 @@ const BookingSuccessPage = () => {
         );
     }
 
-    // --- HIỂN THỊ KHI THÀNH CÔNG ---
     return (
         <DefaultLayout>
         <div className={cx('page-container')}>

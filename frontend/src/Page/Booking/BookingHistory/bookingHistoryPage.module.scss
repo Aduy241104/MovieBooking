@@ -1,6 +1,3 @@
-/* bookingHistoryPage.module.scss */
-
-/* --- Biến màu (giữ nguyên) --- */
 $dark-surface: #24283b;
 $text-primary: #e0e0e0;
 $text-secondary: #9e9e9e;
@@ -11,18 +8,6 @@ $warning-color: #f39c12;
 $info-color: #3498db;
 $reserved-color: #9b59b6;
 
-
-/* --- Style cho wrapper của trang này --- */
-// Component ProfileLayout đã có nền, padding, v.v.
-// Wrapper này chỉ để gom nhóm, không cần style phức tạp
-.history-page-wrapper {
-    // Có thể bạn không cần style gì ở đây cả, hoặc chỉ cần style đơn giản
-    // background-color: $dark-surface; // Có thể bỏ nếu nền của ProfileLayout đã đủ tốt
-    // border-radius: 12px;
-    // padding: 2rem;
-}
-
-/* --- CÁC STYLE CÒN LẠI GIỮ NGUYÊN --- */
 .page-title {
     font-size: 2rem;
     font-weight: 600;
@@ -42,7 +27,7 @@ $reserved-color: #9b59b6;
     border-radius: 12px;
     &.error-message { color: $danger-color; }
 }
-/* --- DANH SÁCH LỊCH SỬ ĐẶT VÉ --- */
+
 .booking-list {
     display: flex;
     flex-direction: column;
@@ -68,7 +53,6 @@ $reserved-color: #9b59b6;
 }
 
 
-/* --- CÁC STYLE CON BÊN TRONG ITEM (giữ nguyên không đổi) --- */
 .item-header {
     display: flex;
     justify-content: space-between;
@@ -161,7 +145,6 @@ $reserved-color: #9b59b6;
     &.status-unknown { background-color: rgba($text-secondary, 0.2); color: $text-secondary; }
 }
 
-/* RESPONSIVE: Khi màn hình nhỏ, sidebar có thể sẽ ẩn đi, ta bỏ margin-left */
 @media (max-width: 768px) {
     .page-content-wrapper {
         margin-left: 0;

@@ -8,7 +8,6 @@ import com.example.demo.model.Promotion;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.PromotionRepository;
 import com.example.demo.utils.SecurityUtils;
-import org.apache.el.stream.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 
 @Service
@@ -213,23 +210,19 @@ public class PromotionService {
 
     //Use for booking------------------------
     /**
-     * Tìm và xác thực một mã khuyến mãi.
-     * Ném ra exception nếu mã không hợp lệ để sử dụng.
-     * @param code Mã khuyến mãi cần kiểm tra.
-     * @return Đối tượng Promotion nếu hợp lệ.
-     * @throws NotFoundException nếu mã không tồn tại, hết hạn, hoặc chưa active.
+     * @param code Promotional code needs to be checked.
+     * @return Promotion object if valid.
+     * @throws NotFoundException If the code does not exist, is expired, or is not active.
      */
     public Promotion findAndValidatePromotion(String code) {
         Promotion promotion = promotionRepository.findByCode(code);
 
-        // Gom tất cả các điều kiện kiểm tra vào đây
         if (promotion == null ||
                 !promotion.getActive() ||
                 promotion.getIsDeleted() ||
                 LocalDateTime.now().isBefore(promotion.getStartTime()) ||
                 LocalDateTime.now().isAfter(promotion.getEndTime())) {
 
-            // Ném ra một lỗi duy nhất với message thân thiện
             throw new NotFoundException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
         }
 

@@ -7,7 +7,7 @@ import { format, parseISO } from "date-fns";
 import { vi } from "date-fns/locale";
 import styles from "./bookingDetailPage.module.scss";
 import classNames from "classnames/bind";
-import { createPrintableTicketHtml } from "./printableTicketTemplate"; // Import hàm helper mới
+import { createPrintableTicketHtml } from "./printableTicketTemplate";
 
 const cx = classNames.bind(styles);
 
@@ -47,14 +47,11 @@ const BookingDetailPage = () => {
     const handlePrint = () => {
         if (!bookingDetails) return;
 
-        // Lấy HTML của QR Code từ component ẩn
+        // Get the HTML of the QR Code from the hidden component
         const qrCodeSvgElement = document.getElementById('printable-qr-code');
         const qrCodeHtml = qrCodeSvgElement ? qrCodeSvgElement.outerHTML : '<p>Lỗi tạo QR Code</p>';
-
-        // Gọi hàm helper để tạo chuỗi HTML hoàn chỉnh
         const printContent = createPrintableTicketHtml(bookingDetails, qrCodeHtml);
 
-        // Mở cửa sổ mới và thực hiện in
         const printWindow = window.open('', '_blank', 'height=600,width=800');
         if (printWindow) {
             printWindow.document.write(printContent);
@@ -103,20 +100,17 @@ const BookingDetailPage = () => {
         showTime: bookingDetails.screening?.showDateTime,
     });
     const hasDiscount = bookingDetails.discountApplied > 0 || bookingDetails.pointsDiscount > 0;
-
+    const isTicketValid = bookingDetails.bookingStatus === 'PAID' || bookingDetails.bookingStatus === 'RESERVED';
     return (
         <div className={cx("ticket-wrapper")}>
-            {/* QR CODE ẨN - Dùng để lấy mã HTML cho việc in */}
-            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-                <QRCodeSVG
-                    id="printable-qr-code"
-                    value={qrValue} // Dùng qrValue chung cho cả hai
-                    size={128}
-                    level={"H"}
-                />
-            </div>
+            {/* HIDDEN QR CODE - Used to get HTML code for printing */}
+            {isTicketValid && (
+                <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+                    <QRCodeSVG id="printable-qr-code" value={qrValue} size={128} level={"H"} />
+                </div>
+            )}
 
-            {/* --- HEADER CỦA VÉ --- */}
+            {/* HEADER */}
             <div className={cx("ticket-header")}>
                 <h2 className={cx("title")}>Vé Xem Phim Điện Tử</h2>
                 <div className={cx("booking-code")}>
@@ -124,9 +118,9 @@ const BookingDetailPage = () => {
                 </div>
             </div>
 
-            {/* --- THÂN VÉ --- */}
+            {/* BODY */}
             <div className={cx("ticket-body")}>
-                {/* --- CỘT TRÁI - THÔNG TIN CHI TIẾT --- */}
+                {/* LEFT COLUMN - DETAILED INFORMATION */}
                 <div className={cx("left-panel")}>
                     <h4 className={cx("movie-title")}>{bookingDetails.screening?.movieNameVn}</h4>
                     <div className={cx("info-grid")}>
@@ -168,7 +162,7 @@ const BookingDetailPage = () => {
                         </div>
                     </div>
 
-                    {/* --- TÓM TẮT GIÁ TIỀN --- */}
+                    {/* PRICE SUMMARY */}
                     <div className={cx("pricing-summary")}>
                         {hasDiscount && (
                             <div className={cx("price-row")}>
@@ -201,19 +195,26 @@ const BookingDetailPage = () => {
                     </div>
                 </div>
 
-                {/* --- CỘT PHẢI - QR CODE & TRẠNG THÁI --- */}
+                {/* RIGHT COLUMN - QR CODE & STATUS */}
                 <div className={cx("right-panel")}>
-                    <div className={cx("qr-code-section")}>
-                        <QRCodeSVG
-                            value={qrValue}
-                            size={160}
-                            level={"H"}
-                            includeMargin={true}
-                            bgColor="#ffffff"
-                            fgColor="#24283b"
-                        />
-                        <p>Dùng mã này để quét tại rạp</p>
-                    </div>
+                    {isTicketValid ? (
+                        <div className={cx("qr-code-section")}>
+                            <QRCodeSVG
+                                value={qrValue}
+                                size={160}
+                                level={"H"}
+                                includeMargin={true}
+                                bgColor="#ffffff"
+                                fgColor="#24283b"
+                            />
+                            <p>Dùng mã này để quét tại rạp</p>
+                        </div>
+                    ) : (
+                        <div className={cx("qr-placeholder")}>
+                            <i className="fas fa-qrcode"></i>
+                            <p>Mã QR sẽ hiển thị sau khi thanh toán thành công.</p>
+                        </div>
+                    )}
                     <div className={cx("status-section")}>
                         <span className={cx("label")}>Trạng thái</span>
                         <span className={cx("value", statusInfo.className)}>{statusInfo.text}</span>
@@ -227,9 +228,9 @@ const BookingDetailPage = () => {
                 </div>
             </div>
 
-            {/* --- CÁC NÚT HÀNH ĐỘNG --- */}
+            {/* ACTION BUTTONS */}
             <div className={cx("ticket-actions")}>
-                {(bookingDetails.bookingStatus === 'PAID' || bookingDetails.bookingStatus === 'RESERVED') && (
+                {isTicketValid && (
                     <button className={cx("btn", "btn-secondary")} onClick={handlePrint}>
                         <i className="fas fa-print"></i> In vé
                     </button>
