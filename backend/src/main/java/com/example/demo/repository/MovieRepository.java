@@ -115,7 +115,13 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
             """, nativeQuery = true)
     List<TopMovieByRevenueResponse> getTopMoviesByRevenue();
 
+    /**
+     * Finds a movie by its Vietnamese name where the movie is not marked as deleted.
+     */
     Optional<Movie> findByNameVNAndIsDeletedFalse(String nameVN);
 
+    /**
+     * Finds a movie by its English name where the movie is not marked as deleted.
+     */
     Optional<Movie> findByNameENAndIsDeletedFalse(String nameEN);
 }

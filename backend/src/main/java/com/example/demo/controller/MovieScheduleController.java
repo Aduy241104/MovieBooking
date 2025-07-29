@@ -94,6 +94,7 @@ public class MovieScheduleController {
                 .message("Get total now showing movie")
                 .result(movieScheduleService.getTotalNowShowingMovie())
                 .build();
+
         return ResponseEntity.ok(result);
     }
 
