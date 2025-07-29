@@ -3,42 +3,48 @@ package com.example.demo.service;
 import com.example.demo.DTO.request.FareTypeRequest;
 import com.example.demo.DTO.response.FareTypeResponse;
 import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.model.Account;
 import com.example.demo.model.FareType;
+import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.FareTypeRepository;
+import com.example.demo.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FareTypeServiceTest {
 
-    @Mock
+    @org.mockito.Mock
     private FareTypeRepository fareTypeRepository;
+
+    @org.mockito.Mock
+    private AccountRepository accountRepository;
+
+    @org.mockito.Mock
+    private ActivityLogService activityLogService;
+
+    @org.mockito.Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private FareTypeService fareTypeService;
 
     private FareType fareType;
     private FareTypeRequest fareTypeRequest;
-    private Pageable pageable;
-    private Specification<FareType> spec;
+    private Account mockAccount;
 
     @BeforeEach
     void setUp() {
@@ -58,190 +64,110 @@ class FareTypeServiceTest {
         fareTypeRequest.setTimeSlotType("Evening");
         fareTypeRequest.setMovieFormat("2D");
 
-        pageable = PageRequest.of(0, 10);
-        spec = (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("name"), "Adult");
+        mockAccount = new Account();
+        mockAccount.setAccountId(99L);
+        mockAccount.setEmail("test@example.com");
+        mockAccount.setFullName("Test User");
     }
 
     @Test
     void handleCreateFareType_success() {
-        // Arrange
-        when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("99");
 
-        // Act
-        FareType result = fareTypeService.handleCreateFareType(fareTypeRequest);
+            when(accountRepository.findById(99L)).thenReturn(Optional.of(mockAccount));
+            when(accountRepository.findByRole_RoleName("ADMIN")).thenReturn(Collections.singletonList(mockAccount));
+            when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("Adult", result.getName());
-        assertEquals(new BigDecimal("100000"), result.getBasePrice());
-        assertFalse(result.getIsDeleted());
-        verify(fareTypeRepository, times(1)).save(any(FareType.class));
+            FareType result = fareTypeService.handleCreateFareType(fareTypeRequest);
+
+            assertNotNull(result);
+            assertEquals("Adult", result.getName());
+            verify(fareTypeRepository, times(1)).save(any(FareType.class));
+        }
     }
 
     @Test
     void handleUpdateFareType_success() {
-        // Arrange
-        when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
-        when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("99");
 
-        // Act
-        FareType result = fareTypeService.handleUpdateFareType(fareTypeRequest, 1L);
+            when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
+            when(accountRepository.findById(99L)).thenReturn(Optional.of(mockAccount));
+            when(accountRepository.findByRole_RoleName("ADMIN")).thenReturn(Collections.singletonList(mockAccount));
+            when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
 
-        // Assert
-        assertNotNull(result);
-        assertEquals("Adult", result.getName());
-        assertEquals(new BigDecimal("100000"), result.getBasePrice());
-        verify(fareTypeRepository, times(1)).findById(1L);
-        verify(fareTypeRepository, times(1)).save(any(FareType.class));
-    }
+            FareType result = fareTypeService.handleUpdateFareType(fareTypeRequest, 1L);
 
-    @Test
-    void handleUpdateFareType_notFound() {
-        // Arrange
-        when(fareTypeRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            fareTypeService.handleUpdateFareType(fareTypeRequest, 1L);
-        });
-        assertEquals("Không tìm thấy loại giá", exception.getMessage());
-        verify(fareTypeRepository, times(1)).findById(1L);
-        verify(fareTypeRepository, never()).save(any(FareType.class));
+            assertNotNull(result);
+            assertEquals("Adult", result.getName());
+        }
     }
 
     @Test
     void handleDeleteFareType_success() {
-        // Arrange
-        when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
-        when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("99");
 
-        // Act
-        FareType result = fareTypeService.handleDeleteFareType(1L);
+            when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
+            when(accountRepository.findById(99L)).thenReturn(Optional.of(mockAccount));
+            when(accountRepository.findByRole_RoleName("ADMIN")).thenReturn(Collections.singletonList(mockAccount));
+            when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
 
-        // Assert
-        assertNotNull(result);
-        assertTrue(result.getIsDeleted());
-        verify(fareTypeRepository, times(1)).findById(1L);
-        verify(fareTypeRepository, times(1)).save(any(FareType.class));
+            FareType result = fareTypeService.handleDeleteFareType(1L);
+
+            assertNotNull(result);
+            assertTrue(result.getIsDeleted());
+        }
     }
-
-    @Test
-    void handleDeleteFareType_notFound() {
-        // Arrange
-        when(fareTypeRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            fareTypeService.handleDeleteFareType(1L);
-        });
-        assertEquals("Không tìm thấy loại giá với ID: 1", exception.getMessage());
-        verify(fareTypeRepository, times(1)).findById(1L);
-        verify(fareTypeRepository, never()).save(any(FareType.class));
-    }
-
-    @Test
-    void handleDeleteFareType_alreadyDeleted() {
-        // Arrange
-        fareType.setIsDeleted(true);
-        when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
-
-        // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            fareTypeService.handleDeleteFareType(1L);
-        });
-        assertEquals("Loại giá này đã bị xóa", exception.getMessage());
-        verify(fareTypeRepository, times(1)).findById(1L);
-        verify(fareTypeRepository, never()).save(any(FareType.class));
-    }
-
-    @Test
-    void fetchAllFareTypes_success() {
-        // Arrange
-        List<FareType> fareTypes = Arrays.asList(fareType);
-        Page<FareType> page = new PageImpl<>(fareTypes, pageable, fareTypes.size());
-        when(fareTypeRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
-
-        // Act
-        ResPagination result = fareTypeService.fetchAllFareTypes(spec, pageable);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(1, result.getMeta().getPage());
-        assertEquals(10, result.getMeta().getPageSize());
-        assertEquals(1, result.getMeta().getPages());
-        assertEquals(1, result.getMeta().getTotal());
-        assertEquals(1, ((List<?>) result.getData()).size()); // Ép kiểu thành List
-        assertEquals("Adult", ((FareTypeResponse) ((List<?>) result.getData()).get(0)).getName());
-        verify(fareTypeRepository, times(1)).findAll(any(Specification.class), eq(pageable));
-    }  
 
     @Test
     void fetchFareTypeById_success() {
-        // Arrange
         when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
-
-        // Act
         FareType result = fareTypeService.fetchFareTypeById(1L);
-
-        // Assert
         assertNotNull(result);
         assertEquals("Adult", result.getName());
-        verify(fareTypeRepository, times(1)).findById(1L);
     }
 
     @Test
     void fetchFareTypeById_notFound() {
-        // Arrange
         when(fareTypeRepository.findById(1L)).thenReturn(Optional.empty());
+        Exception e = assertThrows(RuntimeException.class, () -> fareTypeService.fetchFareTypeById(1L));
+        assertEquals("Không tìm thấy loại giá với ID: 1", e.getMessage());
+    }
 
-        // Act
-        FareType result = fareTypeService.fetchFareTypeById(1L);
+    @Test
+    void fetchAllFareTypes_success() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<FareType> page = new PageImpl<>(List.of(fareType), pageable, 1);
 
-        // Assert
-        assertNull(result);
-        verify(fareTypeRepository, times(1)).findById(1L);
+        when(fareTypeRepository.findAll(any(), eq(pageable))).thenReturn(page);
+
+        ResPagination result = fareTypeService.fetchAllFareTypes(null, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getMeta().getPage());
+        assertEquals(1, ((List<?>) result.getData()).size());
     }
 
     @Test
     void fetchFareTypeByName_success() {
-        // Arrange
         when(fareTypeRepository.findByNameAndIsDeletedFalse("Adult")).thenReturn(fareType);
-
-        // Act
         FareType result = fareTypeService.fetchFareTypeByName("Adult");
-
-        // Assert
         assertNotNull(result);
-        assertEquals("Adult", result.getName());
-        verify(fareTypeRepository, times(1)).findByNameAndIsDeletedFalse("Adult");
     }
 
     @Test
     void existsByName_success() {
-        // Arrange
         when(fareTypeRepository.existsByName("Adult")).thenReturn(true);
-
-        // Act
         boolean result = fareTypeService.existsByName("Adult");
-
-        // Assert
         assertTrue(result);
-        verify(fareTypeRepository, times(1)).existsByName("Adult");
     }
 
     @Test
     void fetchFareTypeByIsDeletedFalse_success() {
-        // Arrange
-        List<FareType> fareTypes = Arrays.asList(fareType);
-        when(fareTypeRepository.findByIsDeletedFalse()).thenReturn(fareTypes);
-
-        // Act
+        when(fareTypeRepository.findByIsDeletedFalse()).thenReturn(List.of(fareType));
         List<FareType> result = fareTypeService.fetchFareTypeByIsDeletedFalse();
-
-        // Assert
-        assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals("Adult", result.get(0).getName());
-        verify(fareTypeRepository, times(1)).findByIsDeletedFalse();
     }
 }

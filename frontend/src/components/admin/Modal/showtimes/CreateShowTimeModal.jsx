@@ -15,6 +15,14 @@ export const CreateShowtimeModal = (props) => {
 
   useEffect(() => {
     const fetchRooms = async () => {
+      if (!token) {
+        notification.error({
+          message: "LỖI XÁC THỰC",
+          description: "Không tìm thấy token. Vui lòng đăng nhập lại.",
+        });
+        return;
+      }
+
       try {
         const res = await axiosInstance.get("/rooms", {
           headers: {
@@ -22,6 +30,7 @@ export const CreateShowtimeModal = (props) => {
             "Content-Type": "application/json",
           },
         });
+        console.log("Rooms API response:", res);
         const responseData = res.data || res;
         if (Array.isArray(responseData)) {
           const activeRooms = responseData.filter((room) => !room.isDeleted);
@@ -33,14 +42,23 @@ export const CreateShowtimeModal = (props) => {
           });
         }
       } catch (err) {
+        console.error("Fetch rooms error:", err.response || err);
         notification.error({
           message: "LỖI KẾT NỐI",
-          description: "Không thể kết nối tới API phòng chiếu",
+          description: `Không thể kết nối tới API phòng chiếu: ${err.message}`,
         });
       }
     };
 
     const fetchMovies = async () => {
+      if (!token) {
+        notification.error({
+          message: "LỖI XÁC THỰC",
+          description: "Không tìm thấy token. Vui lòng đăng nhập lại.",
+        });
+        return;
+      }
+
       try {
         const res = await axiosInstance.get("/movies", {
           headers: {
@@ -48,6 +66,7 @@ export const CreateShowtimeModal = (props) => {
             "Content-Type": "application/json",
           },
         });
+        console.log("Movies API response:", res);
         const responseData = res.data || res;
 
         if (Array.isArray(responseData)) {
@@ -61,16 +80,26 @@ export const CreateShowtimeModal = (props) => {
           });
         }
       } catch (err) {
+        console.error("Fetch movies error:", err.response || err);
         notification.error({
           message: "LỖI KẾT NỐI",
-          description: "Không thể kết nối tới API phim",
+          description: `Không thể kết nối tới API phim: ${err.message}`,
         });
       }
     };
 
     const fetchFareTypes = async () => {
+      if (!token) {
+        notification.error({
+          message: "LỖI XÁC THỰC",
+          description: "Không tìm thấy token. Vui lòng đăng nhập lại.",
+        });
+        return;
+      }
+
       try {
         const res = await fetchAllActiveFareTypesAPI();
+        console.log("Fare types API response:", res);
         const responseData = res.data || res;
         const fareTypeData = responseData.result || responseData;
 
@@ -83,6 +112,7 @@ export const CreateShowtimeModal = (props) => {
           });
         }
       } catch (err) {
+        console.error("Fetch fare types error:", err.response || err);
         notification.error({
           message: "LỖI KẾT NỐI",
           description: `Không thể lấy dữ liệu loại vé: ${err.message}`,
@@ -95,34 +125,66 @@ export const CreateShowtimeModal = (props) => {
       fetchMovies();
       fetchFareTypes();
     }
-  }, [isCreateModalOpen]);
+  }, [isCreateModalOpen, token]);
 
   const handleSubmit = async (values) => {
-    try {
-      const res = await createShowtimeAPI({
-        movieId: values.movieId,
-        cinemaRoomId: values.cinemaRoomId,
-        fareTypeId: values.fareTypeId,
-        showDateTime: values.showDateTime.format("YYYY-MM-DDTHH:mm:ss"),
+    if (!token) {
+      notification.error({
+        message: "LỖI XÁC THỰC",
+        description: "Không tìm thấy token. Vui lòng đăng nhập lại.",
       });
+      return;
+    }
 
-      if (res.result) {
-        notification.success({
-          message: "THÊM THÀNH CÔNG",
-          description: `Thêm lịch chiếu thành công`,
-        });
-        setRefreshFlag((prev) => !prev);
+    if (!values.movieId || !values.cinemaRoomId || !values.fareTypeId || !values.showDateTime) {
+      notification.error({
+        message: "DỮ LIỆU KHÔNG HỢP LỆ",
+        description: "Vui lòng điền đầy đủ tất cả các trường bắt buộc.",
+      });
+      return;
+    }
+
+    const movieExists = movies.some((movie) => movie.id === values.movieId);
+    const roomExists = rooms.some((room) => room.cinemaRoomId === values.cinemaRoomId);
+    const fareTypeExists = fareTypes.some((fareType) => fareType.id === values.fareTypeId);
+
+    if (!movieExists || !roomExists || !fareTypeExists) {
+      notification.error({
+        message: "DỮ LIỆU KHÔNG HỢP LỆ",
+        description: `Vui lòng kiểm tra lại: ${
+          !movieExists ? "Phim, " : ""
+        }${!roomExists ? "Phòng chiếu, " : ""}${!fareTypeExists ? "Loại vé" : ""} không hợp lệ.`,
+      });
+      return;
+    }
+
+    try {
+      const showtimeRequest = {
+        movieId: Number(values.movieId),
+        cinemaRoomId: Number(values.cinemaRoomId),
+        fareTypeId: Number(values.fareTypeId),
+        showDateTime: values.showDateTime.format("YYYY-MM-DD HH:mm:ss")
+      };
+      console.log("Showtime request (raw JSON):", JSON.stringify(showtimeRequest, null, 2));
+      const res = await createShowtimeAPI(showtimeRequest);
+
+      if (res && res.status === 201 && res.result) {
+        notification.success({ message: "Thêm lịch chiếu thành công!" });
         setIsCreateModalOpen(false);
+        form.resetFields();
+        setRefreshFlag(true);
       } else {
         notification.error({
-          message: "THÊM THẤT BẠI",
-          description: `ERROR: ${res.message}`,
+          message: "THẤT BẠI",
+          description: res?.message || "Không xác định lỗi từ server",
         });
       }
     } catch (err) {
+      console.error("Create showtime error:", err.response || err);
+      const errorMessage = err.response?.data?.message || err.message || "Có lỗi xảy ra khi tạo lịch chiếu";
       notification.error({
         message: "THÊM THẤT BẠI",
-        description: "Có lỗi xảy ra khi tạo lịch chiếu",
+        description: errorMessage,
       });
     }
   };
@@ -152,7 +214,8 @@ export const CreateShowtimeModal = (props) => {
             }))}
             showSearch
             optionFilterProp="label"
-            dropdownStyle={{ maxHeight: 200, overflow: "auto" }}
+            allowClear={false}
+            styles={{ popup: { root: { maxHeight: 200, overflow: "auto" } } }}
           />
         </Form.Item>
 
@@ -169,7 +232,8 @@ export const CreateShowtimeModal = (props) => {
             }))}
             showSearch
             optionFilterProp="label"
-            dropdownStyle={{ maxHeight: 200, overflow: "auto" }}
+            allowClear={false}
+            styles={{ popup: { root: { maxHeight: 200, overflow: "auto" } } }}
           />
         </Form.Item>
 
@@ -182,11 +246,16 @@ export const CreateShowtimeModal = (props) => {
             placeholder="Chọn loại vé"
             options={fareTypes.map((fareType) => ({
               value: fareType.id,
-              label: `${fareType.name} - ${fareType.movieFormat} - ${fareType.basePrice.toLocaleString('vi-VN')} VNĐ - ${fareType.dayPrice.toLocaleString('vi-VN')} VNĐ - ${fareType.timeSlotType || 'Không xác định'}`,
+              label: `${fareType.name} - ${fareType.movieFormat} - ${fareType.basePrice.toLocaleString(
+                "vi-VN"
+              )} VNĐ - ${fareType.dayPrice.toLocaleString("vi-VN")} VNĐ - ${
+                fareType.timeSlotType || "Không xác định"
+              }`,
             }))}
             showSearch
             optionFilterProp="label"
-            dropdownStyle={{ maxHeight: 200, overflow: "auto" }}
+            allowClear={false}
+            styles={{ popup: { root: { maxHeight: 200, overflow: "auto" } } }}
           />
         </Form.Item>
 
@@ -199,9 +268,7 @@ export const CreateShowtimeModal = (props) => {
             showTime
             format="YYYY-MM-DD HH:mm"
             style={{ width: "100%" }}
-            disabledDate={(current) =>
-              current && current < dayjs().startOf("day")
-            }
+            disabledDate={(current) => current && current < dayjs().startOf("day")}
           />
         </Form.Item>
       </Form>
