@@ -17,6 +17,7 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    
     @Query(value = """
             SELECT COALESCE(SUM(b.total_amount), 0)
             FROM booking b
@@ -95,6 +96,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             """)
     List<BookingTicketRecentlyResponse> getBookingTicketRecently(int limit);
 
+
+     @Query("SELECT COUNT(b) FROM Booking b " +
+            "JOIN Screening s ON b.screening.id = s.id " +
+            "JOIN Movie m ON s.movie.id = m.id " +
+            "WHERE b.account.id = :accountId AND m.id = :movieId AND b.bookingStatus = 'PAID'")
+    long countPaidBookings(@Param("accountId") Long accountId, @Param("movieId") Long movieId);
+
+
     // Booking
     List<Booking> findByAccountAccountIdOrderByBookingTimeDesc(Long accountId);
     Optional<Booking> findByIdAndAccountAccountId(Integer bookingId, Long accountId);
@@ -162,5 +171,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 
 
-
 }
+
