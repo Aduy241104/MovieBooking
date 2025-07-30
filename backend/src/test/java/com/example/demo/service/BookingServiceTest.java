@@ -1,23 +1,30 @@
 package com.example.demo.service;
 
+import com.example.demo.DTO.request.booking.BookingRequestDTO;
+import com.example.demo.DTO.response.booking.BookingDetailResponseDTO;
 import com.example.demo.DTO.response.dashboard.BookingTicketRecentlyResponse;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
+import com.example.demo.configuration.VnpayConfig;
 import com.example.demo.exception.AppException;
-import com.example.demo.repository.BookingRepository;
+import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.booking.BookingValidationException;
+import com.example.demo.exception.booking.InsufficientPointsException;
+import com.example.demo.exception.booking.SeatAlreadyBookedException;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -33,6 +40,22 @@ class BookingServiceTest {
 
     @Mock
     private BookingRepository bookingRepository;
+    @Mock
+    private AccountRepository accountRepository;
+    @Mock
+    private ScreeningRepository screeningRepository;
+    @Mock
+    private SeatRepository seatRepository;
+    @Mock
+    private PaymentMethodRepository paymentMethodRepository;
+    @Mock
+    private BookedSeatRepository bookedSeatRepository;
+    @Mock
+    private VnpayConfig vnpayConfig;
+    @Mock
+    private EmailService emailService;
+    @Mock
+    private PromotionService promotionService;
 
     @InjectMocks
     private BookingService bookingService;
@@ -41,6 +64,12 @@ class BookingServiceTest {
     private List<DailyTicketRevenueResponse> mockWeeklyStats;
     private List<DailyTicketRevenueResponse> mockMonthlyStats;
     private List<BookingTicketRecentlyResponse> mockRecentBookings;
+    private Account sampleAccount;
+    private Screening sampleScreening;
+    private Seat sampleSeat;
+    private PaymentMethod samplePaymentMethod;
+    private BookingRequestDTO sampleRequest;
+    private MockHttpServletRequest httpServletRequest;
 
     @BeforeEach
     void setUp() {
@@ -98,6 +127,53 @@ class BookingServiceTest {
                 .paymentMethod("VNPAY")
                 .paymentStatus("PAID")
                 .build());
+
+        sampleAccount = new Account();
+        sampleAccount.setAccountId(1L);
+        sampleAccount.setScore(10000);
+
+        CinemaRoom cinemaRoom = new CinemaRoom();
+        cinemaRoom.setCinemaRoomId(1L);
+
+        Movie movie = new Movie();
+        movie.setNameVN("Phim Mẫu");
+
+        FareType fareType = new FareType();
+        fareType.setBasePrice(new BigDecimal("75000"));
+        fareType.setMovieFormat("2D");
+        fareType.setTimeSlotType("Ngày Thường");
+
+        sampleScreening = new Screening();
+        sampleScreening.setId(1L);
+        sampleScreening.setShowDateTime(LocalDateTime.now().plusDays(1));
+        sampleScreening.setCinemaRoom(cinemaRoom);
+        sampleScreening.setMovie(movie);
+        sampleScreening.setFareType(fareType);
+
+        sampleSeat = new Seat();
+        sampleSeat.setSeatId(1L);
+        sampleSeat.setSeatRow("A");
+        sampleSeat.setSeatCol("1");
+        sampleSeat.setCinemaRoom(cinemaRoom);
+        sampleSeat.setSeatStatus("Available");
+        SeatType seatType = new SeatType();
+        seatType.setSeatTypePrice(BigDecimal.ZERO);
+        sampleSeat.setSeatType(seatType);
+
+
+        samplePaymentMethod = new PaymentMethod();
+        samplePaymentMethod.setId(1L);
+        samplePaymentMethod.setName("VNPAY");
+
+        sampleRequest = new BookingRequestDTO();
+        sampleRequest.setScreeningId(1L);
+        sampleRequest.setSeatIds(List.of(1L));
+        sampleRequest.setPaymentMethodId(1L);
+
+        httpServletRequest = new MockHttpServletRequest();
+
+
+
     }
 
     // ========== GET TOTAL REVENUE BY STATUS TESTS ==========
@@ -514,5 +590,152 @@ class BookingServiceTest {
         assertNotNull(firstBooking.getPaymentStatus());
 
         verify(bookingRepository).getBookingTicketRecently(limit);
+    }
+
+    // --- TEST CASE FOR METHOD createBooking ---
+
+    @Test
+    void createBooking_Success_ShouldReturnBookingDetail() {
+        // Arrange
+        when(accountRepository.findWithLockingByAccountId(1L)).thenReturn(Optional.of(sampleAccount));
+        when(screeningRepository.findById(1L)).thenReturn(Optional.of(sampleScreening));
+        when(paymentMethodRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(samplePaymentMethod));
+        when(seatRepository.findBySeatIdIn(List.of(1L))).thenReturn(List.of(sampleSeat));
+        when(seatRepository.findBookedSeatIdsByScreeningId(1L)).thenReturn(Collections.emptySet());
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking bookingToSave = invocation.getArgument(0);
+
+            // Simulate the behavior of @PrePersist: assign bookingTime if it doesn't exist yet
+            if (bookingToSave.getBookingTime() == null) {
+                bookingToSave.setBookingTime(LocalDateTime.now());
+            }
+
+            // (Optional) Simulate ID assignment if it doesn't already exist
+            if (bookingToSave.getId() == null) {
+                bookingToSave.setId(new Random().nextInt(1000));
+            }
+
+            return bookingToSave; // Returns the updated booking
+        });
+        when(vnpayConfig.getVnp_HashSecret()).thenReturn("DUMMYSECRETKEYFORTESTING1234567890");
+        when(vnpayConfig.getVnp_PayUrl()).thenReturn("http://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+        // Act
+        BookingDetailResponseDTO result = bookingService.createBooking(sampleRequest, 1L, httpServletRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals("PENDING_PAYMENT", result.getBookingStatus());
+        assertNotNull(result.getPaymentUrl(), "Payment URL should be generated");
+
+        verify(bookingRepository, times(1)).save(any(Booking.class));
+        verify(bookedSeatRepository, times(1)).saveAll(any());
+    }
+
+    @Test
+    void createBooking_WhenScreeningNotFound_ShouldThrowNotFoundException() {
+        // Arrange
+        when(accountRepository.findWithLockingByAccountId(1L)).thenReturn(Optional.of(sampleAccount));
+        when(screeningRepository.findById(1L)).thenReturn(Optional.empty()); // Emulator cannot find screening
+
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> {
+            bookingService.createBooking(sampleRequest, 1L, httpServletRequest);
+        });
+    }
+
+    @Test
+    void createBooking_WhenSeatIsAlreadyBooked_ShouldThrowSeatAlreadyBookedException() {
+        // Arrange
+        when(accountRepository.findWithLockingByAccountId(1L)).thenReturn(Optional.of(sampleAccount));
+        when(screeningRepository.findById(1L)).thenReturn(Optional.of(sampleScreening));
+        when(paymentMethodRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(samplePaymentMethod));
+        when(seatRepository.findBySeatIdIn(List.of(1L))).thenReturn(List.of(sampleSeat));
+        when(seatRepository.findBookedSeatIdsByScreeningId(1L)).thenReturn(Set.of(1L)); // Simulate 1L chair has been placed
+
+        // Act & Assert
+        assertThrows(SeatAlreadyBookedException.class, () -> {
+            bookingService.createBooking(sampleRequest, 1L, httpServletRequest);
+        });
+    }
+
+    @Test
+    void createBooking_WithValidPromotion_ShouldApplyDiscount() {
+        // Arrange
+        Promotion promotion = new Promotion();
+        promotion.setCode("GIAM10");
+        promotion.setDiscountType("PERCENT");
+        promotion.setDiscountLevel(new BigDecimal("10"));
+        promotion.setMinOrder(BigDecimal.ZERO);
+
+        sampleRequest.setPromotionCode("GIAM10");
+
+        when(accountRepository.findWithLockingByAccountId(1L)).thenReturn(Optional.of(sampleAccount));
+        when(screeningRepository.findById(1L)).thenReturn(Optional.of(sampleScreening));
+        when(paymentMethodRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(samplePaymentMethod));
+        when(seatRepository.findBySeatIdIn(List.of(1L))).thenReturn(List.of(sampleSeat));
+        when(seatRepository.findBookedSeatIdsByScreeningId(1L)).thenReturn(Collections.emptySet());
+        when(promotionService.findAndValidatePromotion("GIAM10")).thenReturn(promotion);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking bookingToSave = invocation.getArgument(0);
+            if (bookingToSave.getBookingTime() == null) {
+                bookingToSave.setBookingTime(LocalDateTime.now());
+            }
+            if (bookingToSave.getId() == null) {
+                bookingToSave.setId(new Random().nextInt(1000));
+            }
+            return bookingToSave;
+        });
+        when(vnpayConfig.getVnp_HashSecret()).thenReturn("DUMMYSECRETKEYFORTESTING1234567890");
+        when(vnpayConfig.getVnp_PayUrl()).thenReturn("http://sandbox.vnpayment.vn/paymentv2/vpcpay.html");
+        // Act
+        BookingDetailResponseDTO result = bookingService.createBooking(sampleRequest, 1L, httpServletRequest);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(0, new BigDecimal("67500").compareTo(result.getTotalAmount()));
+        assertEquals(0, new BigDecimal("7500.00").compareTo(result.getDiscountApplied()));
+        assertNotNull(result.getPaymentUrl(), "Payment URL should be generated even with promotion");
+    }
+
+    @Test
+    void createBooking_WithInsufficientPoints_ShouldThrowException() {
+        // Arrange
+        sampleAccount.setScore(1000); // User has only 1000 points
+        sampleRequest.setPointsToUse(2000); // But want to use 2000
+
+        when(accountRepository.findWithLockingByAccountId(1L)).thenReturn(Optional.of(sampleAccount));
+        when(screeningRepository.findById(1L)).thenReturn(Optional.of(sampleScreening));
+        when(paymentMethodRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(samplePaymentMethod));
+        when(seatRepository.findBySeatIdIn(List.of(1L))).thenReturn(List.of(sampleSeat));
+        when(seatRepository.findBookedSeatIdsByScreeningId(1L)).thenReturn(Collections.emptySet());
+
+        // Act & Assert
+        assertThrows(InsufficientPointsException.class, () -> {
+            bookingService.createBooking(sampleRequest, 1L, httpServletRequest);
+        });
+    }
+
+    // --- TEST CASES FOR OTHER METHODS ---
+
+    @Test
+    void retryPayment_WhenBookingIsExpired_ShouldThrowExceptionAndSetStatusToExpired() {
+        // Arrange
+        Booking expiredBooking = new Booking();
+        expiredBooking.setId(1);
+        expiredBooking.setBookingStatus("PENDING_PAYMENT");
+        // Simulate booking created 20 minutes ago
+        expiredBooking.setBookingTime(LocalDateTime.now().minusMinutes(20));
+        expiredBooking.setAccount(sampleAccount);
+        expiredBooking.setPointsUsed(0);
+
+        when(bookingRepository.findByIdAndAccountAccountId(1, 1L)).thenReturn(Optional.of(expiredBooking));
+
+        // Act & Assert
+        assertThrows(BookingValidationException.class, () -> {
+            bookingService.retryPayment(1, 1L, httpServletRequest);
+        });
+
+        assertEquals("EXPIRED", expiredBooking.getBookingStatus());
+        verify(bookingRepository, times(1)).save(expiredBooking);
     }
 }
