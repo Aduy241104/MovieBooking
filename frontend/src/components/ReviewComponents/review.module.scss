@@ -164,14 +164,23 @@
 
 }
 
+.buttonBase {
+  padding: 8px 18px;
+  font-size: 14px;
+  border: none;
+  border-radius: 20px; /* Tạo nút tròn đều */
+  cursor: pointer;
+  min-width: 100px;
+  text-align: center;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+
 .editButton {
     background-color: #FFD875;
     color: #000;
-    border: none;
-    padding: 2px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
+    @extend .buttonBase;
 
     &:hover {
         background-color: #ffca28;
@@ -199,16 +208,13 @@
 }
 
 .cancelButton {
-    background-color: #555;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+    background-color: #000;
+    color: #FFD875;
     margin-left: 10px;
-    cursor: pointer;
+    @extend .buttonBase;
 
     &:hover {
-        background-color: #777;
+        background-color: red;
     }
 }
 
@@ -317,15 +323,15 @@
 }
 
 .editForm {
-  background-color: white; // ← Đặt nền trắng
-  padding: 16px;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    background-color: white; // ← Đặt nền trắng
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.editTextarea{
+.editTextarea {
     background-color: white !important;
     color: black !important;
 }
