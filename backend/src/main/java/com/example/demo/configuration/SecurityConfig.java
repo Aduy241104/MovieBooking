@@ -63,6 +63,8 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/admin/**").hasAuthority("SCOPE_ADMIN")
+
                         .requestMatchers(new AntPathRequestMatcher("/api/bookings/**")).authenticated()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
