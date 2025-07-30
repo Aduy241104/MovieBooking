@@ -9,7 +9,7 @@ $success-color: #2ecc71;
 $danger-color: #e74c3c;
 $warning-color: #f39c12;
 $info-color: #3498db;
-$reserved-color: #9b59b6;
+$expired-color: #9b59b6;
 
 /* GENERAL BACKGROUND AND LAYOUT */
 .page-container {
@@ -211,9 +211,9 @@ $reserved-color: #9b59b6;
         border-radius: 20px;
         display: inline-block;
         &.status-paid { background-color: rgba($success-color, 0.2); color: $success-color; }
-        &.status-cancelled, &.status-failed { background-color: rgba($danger-color, 0.2); color: $danger-color; }
+        &.status-failed { background-color: rgba($danger-color, 0.2); color: $danger-color; }
         &.status-pending { background-color: rgba($warning-color, 0.2); color: $warning-color; }
-        &.status-reserved { background-color: rgba($reserved-color, 0.2); color: $reserved-color; }
+        &.status-expired { background-color: rgba($expired-color, 0.2); color: $expired-color; }
     }
 }
 

@@ -1,17 +1,12 @@
-
 :global(body) {
     background-color: #1a1d29;
 }
-
-
 $dark-bg: #1a1d29;
 $dark-surface: #24283b;
 $primary-gradient: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
 $text-primary: #e0e0e0;
 $text-secondary: #9e9e9e;
 $border-color: #394264;
-
-
 $success-color: #2ecc71;
 $danger-color: #e74c3c;
 $warning-color: #f39c12;
@@ -138,10 +133,7 @@ $reserved-color: #9b59b6;
     padding: 4px 10px;
     border-radius: 20px;
     display: inline-block;
-    
-    &.status-paid { background-color: rgba($success-color, 0.2); color: $success-color; }
-    &.status-pending, &.status-reserved { background-color: rgba($warning-color, 0.2); color: $warning-color; }
-    &.status-unknown { background-color: rgba($text-secondary, 0.2); color: $text-secondary; }
+    background-color: rgba($success-color, 0.2); color: $success-color;
 }
 
 /* ACTION BUTTON AREA */
