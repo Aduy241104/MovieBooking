@@ -4,7 +4,7 @@ import { Header } from "antd/es/layout/layout";
 import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import { NotificationBell } from "../Notification/NotificationBellAdmin";
+import NotificationBell from "../Notification/Admin/NotificationBell";
 
 export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
     const location = useLocation();

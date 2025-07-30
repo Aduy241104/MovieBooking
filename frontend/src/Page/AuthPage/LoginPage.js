@@ -98,7 +98,7 @@ function LoginPage() {
                     />
                     <div className="w-100 border border-bottom-1 border-light"></div>
                     <div className="invalid-feedback">Vui lòng nhập password</div>
-                </div> 
+                </div>
                 <div className="d-flex justify-content-between register">
                     <p>
                         Bạn chưa có tài khoản?

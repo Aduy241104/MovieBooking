@@ -72,19 +72,10 @@ public class BookingController {
 
     @GetMapping("/promotions/check/{code}")
     public ApiResponse<Promotion> checkPromotion(@PathVariable String code) {
-        Promotion promotion = promotionService.fetchPromotionByCode(code);
-        if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() ||
-                java.time.LocalDateTime.now().isBefore(promotion.getStartTime()) ||
-                java.time.LocalDateTime.now().isAfter(promotion.getEndTime())) {
-            return ApiResponse.<Promotion>builder()
-                    .status(HttpStatus.OK.value())
-                    .message("PROMOTION_INVALID")
-                    .result(null)
-                    .build();
-        }
+        Promotion promotion = promotionService.findAndValidatePromotion(code);
         return ApiResponse.<Promotion>builder()
                 .status(HttpStatus.OK.value())
-                .message("PROMOTION_VALID")
+                .message("Áp dụng mã khuyến mãi thành công!")
                 .result(promotion)
                 .build();
     }
@@ -115,7 +106,7 @@ public class BookingController {
     @GetMapping("/{bookingId}/details")
     public ApiResponse<BookingDetailResponseDTO> getBookingDetails(@PathVariable Integer bookingId) {
         String accountIdStr = SecurityContextHolder.getContext().getAuthentication().getName();
-        Long accountId = Long.parseLong(accountIdStr); // Fixed the typo
+        Long accountId = Long.parseLong(accountIdStr);
         BookingDetailResponseDTO bookingDetail = bookingService.getBookingDetailsForUser(bookingId, accountId);
         return ApiResponse.<BookingDetailResponseDTO>builder()
                 .status(HttpStatus.OK.value())

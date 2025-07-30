@@ -4,7 +4,6 @@ import com.example.demo.DTO.response.SingleMovieDTO;
 import com.example.demo.DTO.response.dashboard.BookingTicketRecentlyResponse;
 import com.example.demo.DTO.response.dashboard.DailyTicketRevenueResponse;
 import com.example.demo.model.Booking;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
