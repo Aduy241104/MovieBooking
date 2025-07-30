@@ -20,12 +20,12 @@ import java.util.function.Consumer;
 @Service
 public class AIModelService {
 
-    private final String API_URL = "http://localhost:11434/api/chat";
+    private final String API_URL = "https://rooster-saving-loudly.ngrok-free.app/api/chat";
 //    private final String API_KEY = "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";
 
     /**
      * Gọi AI model với streaming response
-     * 
+     *
      * @param systemPrompt  System prompt đã được tối ưu
      * @param userContent   Câu hỏi gốc của user
      * @param chunkConsumer Consumer để xử lý từng chunk response

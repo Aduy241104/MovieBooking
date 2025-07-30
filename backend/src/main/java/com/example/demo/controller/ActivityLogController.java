@@ -9,6 +9,7 @@ import com.turkraft.springfilter.boot.Filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +23,14 @@ public class ActivityLogController {
     private ActivityLogService activityLogService;
 
     @GetMapping
-    public ApiResponse<ResPagination> getAllLogs(@Filter Specification<ActivityLog> spec, Pageable pageable) {
-        return ApiResponse.<ResPagination>builder()
+    public ResponseEntity<ApiResponse<ResPagination>> getAllLogs(
+            @Filter Specification<ActivityLog> spec, Pageable pageable
+    ) {
+        ApiResponse<ResPagination> response = ApiResponse.<ResPagination>builder()
                 .status(200)
-                .message("Fetch all activity logs")
+                .message("Fetch all activity logs successfully")
                 .result(activityLogService.fetchAllLogs(spec, pageable))
                 .build();
+        return ResponseEntity.ok(response);
     }
 }

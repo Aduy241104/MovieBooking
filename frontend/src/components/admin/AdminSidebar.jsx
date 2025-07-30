@@ -8,8 +8,9 @@ import {
   CalendarDays,
   Receipt,
   MessageSquareText,
-  HandCoins,
   History,
+  HandCoins,
+  FileText,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -96,6 +97,11 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
       icon: <History size={20} strokeWidth={1.5} />,
       label: <Link to="/admin/activity-logs">Lịch sử hoạt động</Link>,
     },
+    {
+      key: "export-reports",
+      icon: <FileText size={20} strokeWidth={1.5} />,
+      label: <Link to="/admin/export-reports">Báo cáo & Xuất file</Link>,
+    },
 
     {
 
@@ -128,10 +134,10 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
     if (path.includes("faretype-list")) return ["faretype-list"];
     if (path.includes("booking-list")) return ["booking-list"];
     if (path.includes("review-list")) return ["review-list"];
+    if (path.includes("activity-logs")) return ["activity-logs"];
+    if (path.includes("export-reports")) return ["export-reports"];
     if (path.includes('paymentmethod')) return ['paymentmethod'];
     if (path.includes('payment-transactions')) return ['paymenttransactions'];
-
-    if (path.includes("activity-logs")) return ["activity-logs"];
     return [];
   };
 
@@ -145,8 +151,6 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
       setOpenKeys(["faretype"]);
     } else if (path.includes('paymentmethod') || path.includes('payment-transactions')) {
       setOpenKeys(['payment-management']);
-    } else {
-      setOpenKeys([]);
     }
   }, [location.pathname]);
 
@@ -173,7 +177,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
           justifyContent: collapsed ? "center" : "flex-start",
           padding: collapsed ? "0" : "0 24px",
           borderBottom: "1px solid #f0f0f0",
-          background: "#fff",
+          // background: "#fff",
           transition: "all 0.2s",
         }}
       >
@@ -191,6 +195,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
             fontSize: collapsed ? "14px" : "16px",
             marginRight: collapsed ? "0" : "12px",
             transition: "all 0.2s",
+            padding: collapsed ? "0" : "0 6px",
           }}
         >
           {collapsed ? "A" : "AD"}
@@ -198,7 +203,7 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
         {!collapsed && (
           <span
             style={{
-              color: "#333",
+              color: theme === "dark" ? "#fff" : "#000",
               fontWeight: "600",
               fontSize: "16px",
               whiteSpace: "nowrap",
@@ -211,12 +216,13 @@ export const AdminSidebar = ({ collapsed, width, theme }) => {
 
       <Menu
         selectedKeys={getSelectedKeys()}
-        openKeys={collapsed ? [] : openKeys}
+        openKeys={openKeys}
         onOpenChange={handleOpenChange}
-        mode="inline"
-        theme="light"
+        mode={"inline"}
+        theme={theme}
         inlineCollapsed={collapsed}
         items={items}
+        triggerSubMenuAction="click"
       />
     </Sider>
   );

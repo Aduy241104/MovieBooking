@@ -60,7 +60,7 @@ export const AdminLayout = () => {
     return (
         <>
             <Layout style={{ minHeight: "100vh" }}>
-                <AdminSidebar collapsed={collapsed} width={256} theme={"light"} />
+                <AdminSidebar collapsed={collapsed} width={256} theme={"dark"} />
 
                 <Layout>
                     <AdminHeader collapsed={collapsed} toggleCollapsed={toggleCollapsed} />

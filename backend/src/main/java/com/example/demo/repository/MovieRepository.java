@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.DTO.response.SingleMovieDTO;
+
+import com.example.demo.DTO.response.dashboard.TopMovieByRevenueResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -81,46 +83,46 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
                 FROM Movie m
                 WHERE m.fromDate <= :currentDate AND m.toDate >= :currentDate
             """)
-    long fetchTotalNowShowingMovies(@Param("currentDate") LocalDate currentDate);
+    Long fetchTotalNowShowingMovies(@Param("currentDate") LocalDate currentDate);
 
     @Query(value = """
-                SELECT
-                    m.movie_name_en AS movie_title,
-                    STRING_AGG(DISTINCT t.type_name, ', ') AS genres,
-                    COALESCE(avg_reviews.avg_rating, 0) AS avg_rating,
-                    COALESCE(ticket_stats.tickets_sold, 0) AS tickets_sold,
-                    COALESCE(ticket_stats.revenue, 0) AS revenue,
-                    m.small_image AS small_image
-                FROM movie m
-                LEFT JOIN movie_type mt ON m.movie_id = mt.movie_id
-                LEFT JOIN type t ON mt.type_id = t.type_id
-
-                -- Subquery tính vé và doanh thu chỉ booking PAID
-                LEFT JOIN (
-                    SELECT m2.movie_id,
-                            COUNT(bs.booked_seat_id) AS tickets_sold,
-                            SUM(bs.price_paid) AS revenue
-                    FROM movie m2
-                    JOIN screening s2 ON s2.movie_id = m2.movie_id
-                    JOIN booking b2 ON b2.screening_id = s2.screening_id AND b2.booking_status = 'PAID'
+            SELECT
+                m.movie_name_en,
+                COALESCE(STRING_AGG(DISTINCT t.type_name, ', '), '') AS genres,
+                COALESCE(AVG(r.rating), 0.0) AS avg_rating,
+                (
+                    SELECT COUNT(bs.booked_seat_id)
+                    FROM booking b2
                     JOIN booked_seat bs ON bs.booking_id = b2.booking_id
-                    GROUP BY m2.movie_id
-                ) ticket_stats ON m.movie_id = ticket_stats.movie_id
-
-                -- Subquery tính rating trung bình
-                LEFT JOIN (
-                    SELECT r.movie_id, AVG(r.rating) AS avg_rating
-                    FROM review r
-                    WHERE r.is_approved = true
-                    GROUP BY r.movie_id
-                ) avg_reviews ON m.movie_id = avg_reviews.movie_id
-
-                GROUP BY m.movie_id, m.movie_name_en, avg_reviews.avg_rating, ticket_stats.tickets_sold, ticket_stats.revenue
-                ORDER BY revenue DESC
-                LIMIT 5
+                    JOIN screening s2 ON b2.screening_id = s2.screening_id
+                    WHERE s2.movie_id = m.movie_id AND b2.booking_status = 'PAID'
+                ) AS ticket_sold,
+                (
+                    SELECT COALESCE(SUM(b1.total_amount), 0)
+                    FROM booking b1
+                    JOIN screening s1 ON b1.screening_id = s1.screening_id
+                    WHERE s1.movie_id = m.movie_id AND b1.booking_status = 'PAID'
+                ) AS revenue,
+                m.small_image
+            FROM movie m
+            LEFT JOIN movie_type mt ON mt.movie_id = m.movie_id
+            LEFT JOIN type t ON t.type_id = mt.type_id
+            LEFT JOIN review r ON r.movie_id = m.movie_id AND r.is_approved = true
+            WHERE m.is_deleted = false
+            GROUP BY m.movie_id, m.movie_name_en, m.small_image
+            ORDER BY revenue DESC
+            LIMIT 5
             """, nativeQuery = true)
-    List<Object[]> getTopMoviesByRevenue();
+    List<TopMovieByRevenueResponse> getTopMoviesByRevenue();
+
+    /**
+     * Finds a movie by its Vietnamese name where the movie is not marked as deleted.
+     */
     Optional<Movie> findByNameVNAndIsDeletedFalse(String nameVN);
+
+    /**
+     * Finds a movie by its English name where the movie is not marked as deleted.
+     */
     Optional<Movie> findByNameENAndIsDeletedFalse(String nameEN);
 }
 

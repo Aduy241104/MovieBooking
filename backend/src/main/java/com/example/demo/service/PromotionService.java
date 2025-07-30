@@ -1,11 +1,13 @@
 package com.example.demo.service;
 
 import com.example.demo.DTO.response.ResPagination;
+import com.example.demo.exception.AppException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.PromotionRepository;
 import com.example.demo.utils.SecurityUtils;
+import org.apache.el.stream.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,104 +34,60 @@ public class PromotionService {
     private NotificationService notificationService;
 
     public Promotion handleCreatePromotion(Promotion promotion) {
-
+        // Check if the promotion code already exists
+        assertPromotionCodeNotInUse(promotion.getCode(), null);
+        // Format discount value by discount type (% or VND)
         String discountValue = formatDiscount(promotion.getDiscountLevel());
-
-        setLogAndNotification(promotion, "TẠO MỚI",
+        // Save promotion trước để sinh id
+        Promotion savedPromotion = promotionRepository.save(promotion);
+        // Log the activity
+        setLogAndNotification(
+                savedPromotion.getId(),
+                "TẠO MỚI",
                 "Tạo mới mã khuyến mãi" + " với mức giảm giá: " + discountValue,
                 "Tạo mới mã khuyến mãi",
                 " vừa tạo mới khuyến mãi: ");
-
-        return promotionRepository.save(promotion);
+        return savedPromotion;
     }
 
     public Promotion handleUpdatePromotion(Promotion promotion) {
-        Promotion currentPromotion = promotionRepository.findById(promotion.getId()).orElse(null);
-        if (currentPromotion == null) {
-            throw new RuntimeException("Promotion not found");
-        }
-
-        StringBuilder message = new StringBuilder();
-        /*---- 1. Kiểm tra mã khuyến mãi thay đổi ----*/
-        if (!Objects.equals(promotion.getCode(), currentPromotion.getCode())) {   // !=
-            message.append("Mã KM: ")
-                    .append(currentPromotion.getCode())
-                    .append(" -> ")
-                    .append(promotion.getCode())
-                    .append(", ");
-        }
-        /*---- 2. Kiểm tra mức giảm giá thay đổi ----*/
-        if (promotion.getDiscountLevel().compareTo(currentPromotion.getDiscountLevel()) != 0) { // !=
-            String oldDiscount = formatDiscount(currentPromotion.getDiscountLevel());
-            String newDiscount = formatDiscount(promotion.getDiscountLevel());
-
-            message.append("Giảm giá: ")
-                    .append(oldDiscount)
-                    .append(" -> ")
-                    .append(newDiscount)
-                    .append(", ");
-        }
-        /*---- 3. Kiểm tra ngày bắt đầu thay đổi ----*/
-        if (!promotion.getStartTime().isEqual(currentPromotion.getStartTime())) {          // !=
-            String oldStart = formatDate(currentPromotion.getStartTime());
-            String newStart = formatDate(promotion.getStartTime());
-
-            message.append("Bắt đầu: ")
-                    .append(oldStart)
-                    .append(" -> ")
-                    .append(newStart)
-                    .append(", ");
-        }
-        /*---- 4. Kiểm tra ngày hết hạn thay đổi ----*/
-        if (!promotion.getEndTime().isEqual(currentPromotion.getEndTime())) {              // !=
-            String oldEnd = formatDate(currentPromotion.getEndTime());
-            String newEnd = formatDate(promotion.getEndTime());
-
-            message.append("Hết hạn: ")
-                    .append(oldEnd)
-                    .append(" -> ")
-                    .append(newEnd)
-                    .append(", ");
-        }
-
-        String description = "";
-        if(message.isEmpty()) {
-            description = "Cập nhật thông tin mã khuyến mãi";
-        } else {
-            description = "Cập nhật thông tin mã khuyến mãi: " + message;
-        }
-
-        setLogAndNotification(currentPromotion, "CẬP NHẬT",
-                description,
+        // Check if the promotion exists
+        Promotion currentPromotion = getPromotionOrThrow(promotion.getId());
+        // Check if the promotion code is already in use by another promotion
+        assertPromotionCodeNotInUse(promotion.getCode(), currentPromotion.getId());
+        // Instead of using a mapper, use BeanUtils to copy properties
+        // Update the properties of the existing promotion except for the promotion ID
+        BeanUtils.copyProperties(promotion, currentPromotion, "id");
+        // Log the activity
+        setLogAndNotification(
+                currentPromotion.getId(),
+                "CẬP NHẬT",
+                "Cập nhật mã thông tin khuyến mãi",
                 "Cập nhật thông tin khuyến mãi",
                 " vừa cập nhật thông tin khuyến mãi: ");
-
-        BeanUtils.copyProperties(promotion, currentPromotion, "id");
-
         return promotionRepository.save(currentPromotion);
     }
 
     public Promotion handleUpdatePromotionActive(Promotion promotion) {
-        Promotion currentPromotion = promotionRepository.findById(promotion.getId()).orElse(null);
-        if (currentPromotion == null) {
-            throw new RuntimeException("Promotion not found");
-        }
+        // Check if the promotion exists
+        Promotion currentPromotion = getPromotionOrThrow(promotion.getId());
+        // Update the active status of the promotion
         currentPromotion.setActive(promotion.getActive());
         return promotionRepository.save(currentPromotion);
     }
 
     public Promotion handleDeletePromotion(Promotion promotion) {
-        Promotion currentPromotion = promotionRepository.findById(promotion.getId()).orElse(null);
-        if (currentPromotion == null) {
-            throw new RuntimeException("Promotion not found");
-        }
+        // Check if the promotion exists
+        Promotion currentPromotion = getPromotionOrThrow(promotion.getId());
+        // Set the promotion as deleted
         currentPromotion.setIsDeleted(true);
-
-        setLogAndNotification(currentPromotion, "XOÁ",
+        // Log the activity
+        setLogAndNotification(
+                currentPromotion.getId(),
+                "XOÁ",
                 "Xoá mã khuyến mãi" + currentPromotion.getCode(),
                 "Xoá mã khuyến mãi",
                 " vừa xoá mã khuyến mãi: ");
-
         return promotionRepository.save(currentPromotion);
     }
 
@@ -138,16 +96,15 @@ public class PromotionService {
         Specification<Promotion> finalSpec = Specification.where(spec)
                 .and((root, query, criteriaBuilder) ->
                         criteriaBuilder.equal(root.get("isDeleted"), false));
-
+        // Fetch all promotions with pagination
         Page<Promotion> promotions = promotionRepository.findAll(finalSpec, pageable);
-
+        // Create MetaDTO for pagination
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
                 .page(pageable.getPageNumber() + 1)
                 .pageSize(pageable.getPageSize())
                 .pages(promotions.getTotalPages())
                 .total(promotions.getTotalElements())
                 .build();
-
         return ResPagination.builder()
                 .meta(metaDTO)
                 .data(promotions.getContent())
@@ -158,54 +115,93 @@ public class PromotionService {
         return promotionRepository.countByActive(true);
     }
 
-    public Promotion fetchPromotionById(Long id) {
-        return promotionRepository.findById(id).orElse(null);
-    }
-
     public Promotion fetchPromotionByCode(String code) {
+        // Check if the promotion code exists
+        boolean isPromotionExist = promotionRepository.existsByCode(code);
+        if (!isPromotionExist) {
+            throw new AppException("Promotion code not found");
+        }
         return promotionRepository.findByCode(code);
     }
 
-    public boolean existsByCode(String code) {
-        return promotionRepository.existsByCode(code);
-    }
-
-    private void setLogAndNotification(Promotion currentPromotion, String action, String description,
+    private void setLogAndNotification(Long promotionId, String action, String description,
                                        String title, String content) {
+        // Check if the promotion exists
+        Promotion currentPromotion = getPromotionOrThrow(promotionId);
+        // Get the current logged-in user
         String loginUserId = SecurityUtils.getCurrentUsername();
         if(loginUserId == null || loginUserId.isEmpty()) {
-            throw new RuntimeException("Current user not found");
+            throw new AppException("User not logged in!");
         }
-        Account user = accountRepository.findById(Long.valueOf(loginUserId))
-                .orElseThrow(() -> new RuntimeException("Current user not found"));
-
-        // Lưu log hoạt động cập nhật thông tin mã khuyến mãi
-        // Ghi log hoạt động
+        Account editorAccount = getAccountOrThrow(Long.valueOf(loginUserId));
+        // Log the activity
         activityLogService.log(
-                user.getEmail(),
+                editorAccount.getEmail(),
                 action,
                 "KHUYẾN MÃI",
                 currentPromotion.getCode(),
                 description
         );
-
-        // Gửi notification cho tất cả admin còn lại
+        // Find all admin accounts to notify
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
+        if(adminAccounts.isEmpty()) {
+            throw new AppException("No admin accounts found to notify");
+        }
+        // Send notifications to all admin accounts except the editor
         for (Account admin : adminAccounts) {
-            if (!admin.getAccountId().equals(user.getAccountId())) {
+            if (!admin.getAccountId().equals(editorAccount.getAccountId())) {
                 notificationService.notify(
                         admin,
                         title,
-                        user.getFullName() + content + currentPromotion.getCode(),
+                        editorAccount.getFullName() + content + currentPromotion.getCode(),
                         "SYSTEM"
                 );
             }
         }
     }
 
-    /*------------------------------------------------
-     * Hàm tiện ích: trả về chuỗi đã có % hoặc đ
-     *------------------------------------------------*/
+    /**
+     * Find promotion by id, or throw AppException("Promotion not found").
+     */
+    public Promotion getPromotionOrThrow(Long promotionId) {
+        return promotionRepository.findById(promotionId)
+                .orElseThrow(() -> new AppException("Promotion not found"));
+    }
+
+    /**
+     * Check if promotion code is already in use by another promotion.
+     * or throw AppException("Promotion code already exists").
+     */
+    public void isPromotionExist(String promotionCode) {
+        boolean exists = promotionRepository.existsByCode(promotionCode);
+        if (exists) {
+            throw new AppException("Promotion code already exists");
+        }
+    }
+
+    /**
+     * Check if promotion code is already in use except for the current promotion.
+     * or throw AppException("Promotion code already in use").
+     */
+    public void assertPromotionCodeNotInUse(String promotionCode, Long currentPromotionId) {
+        boolean exists;
+        if (currentPromotionId == null) {
+            // Add new promotion: check if promotion code exists
+            exists = promotionRepository.existsByCode(promotionCode);
+        } else {
+            // Update promotion: check if promotion code exists but not for the current promotion
+            exists = promotionRepository.existsByCodeAndIdNot(promotionCode, currentPromotionId);
+        }
+        if (exists) {
+            throw new AppException("Promotion code already in use");
+        }
+    }
+
+    /**
+     * Format discount level to a string with appropriate suffix.
+     * If the level is between 1 and 99, it appends a percentage sign (%).
+     * Otherwise, it appends "đ" for VND currency.
+     */
     private static String formatDiscount(BigDecimal level) {
         String suffix = (level.compareTo(BigDecimal.ONE) >= 0 &&
                 level.compareTo(BigDecimal.valueOf(99)) <= 0)
@@ -214,11 +210,11 @@ public class PromotionService {
         return level.stripTrailingZeros().toPlainString() + suffix;
     }
 
-    /*------------------------------------------------
-     * Hàm định dạng ngày/giờ
-     *------------------------------------------------*/
-    private static String formatDate(LocalDateTime time) {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        return time.format(fmt);
+    /**
+     * Find account by id, or throw AppException("Account not found").
+     */
+    public Account getAccountOrThrow(Long accountId) {
+        return accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException("Account not found"));
     }
 }

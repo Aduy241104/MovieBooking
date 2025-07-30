@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import Header from "./Header";
 import { AuthContext } from "../../context/AuthContext";
 import GoToTop from "../../components/GoToTop/GoToTop";
-import { AIChatBox } from "../../components/AIChatBox/AIChatBox";
+// import { AIChatBox } from "../../components/AIChatBox/AIChatBox";
 import Footer from "./Footer/Footer";
 
 function DefaultLayout({ children }) {
@@ -18,7 +18,7 @@ function DefaultLayout({ children }) {
             <Header user={isLogin} logout={logout} />
             {children}
             <GoToTop />
-            <AIChatBox />
+            {/* <AIChatBox /> */}
             <Footer />
         </div>
     );

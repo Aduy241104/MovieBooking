@@ -13,10 +13,11 @@ import com.example.demo.model.Screening;
 public interface ScreeningRepository extends JpaRepository<Screening, Long> {
     @Query("SELECT s FROM Screening s WHERE FUNCTION('DATE', s.showDateTime) = :date")
     List<Screening> findScreeningsByDate(@Param("date") LocalDate date);
-
-    // Lấy các suất chiếu cho một phim cụ thể, còn hoạt động và trong tương lai hoặc hôm nay
+//Booking
+// Get showtimes for a specific movie, active and in the future or today
     @Query("SELECT s FROM Screening s WHERE s.movie.id = :movieId AND s.isDeleted = false AND s.showDateTime >= :now ORDER BY s.showDateTime ASC")
     List<Screening> findActiveScreeningsForMovie(@Param("movieId") Long movieId, @Param("now") LocalDateTime now);
+//Booking-end
 
     // ====== ADMIN ======
 

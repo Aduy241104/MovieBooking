@@ -11,18 +11,22 @@ const GENRES = [
     // ... thêm hoặc xóa dễ dàng
 ];
 
+const getGenreList = (setGenre) => {
+    const genreMenu = {
+        items: [
+            {
+                key: "All",
+                label: <div onClick={ () => setGenre("Tất cả") }>Tất cả</div>,
+            },
+            ...GENRES.map((genre) => ({
+                key: genre,
+                label: <div onClick={ () => setGenre(genre) }>{ genre }</div>,
+            })),
+        ],
+    };
 
-const genreMenu = {
-    items: [
-        {
-            key: "All",
-            label: <div onClick={ () => console.log("")}>Tất cả</div>,
-        },
-        ...GENRES.map((genre) => ({
-            key: genre,
-            label: <div onClick={ () => console.log("") }>{ genre }</div>,
-        })),
-    ],
-};
 
-export default genreMenu;
+    return genreMenu;
+}
+
+export default getGenreList;

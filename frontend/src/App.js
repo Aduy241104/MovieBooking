@@ -61,9 +61,11 @@ import BookingSuccessPage from "./Page/Booking/BookingSuccess/BookingSuccessPage
 import BookingFailurePage from "./Page/Booking/BookingFailure/BookingFailurePage";
 import BookingHistoryPage from "./Page/Booking/BookingHistory/BookingHistoryPage";
 import BookingDetailPage from "./Page/Booking/BookingDetail/BookingDetailPage";
+import ExportReportPage from "./Page/admin/ExportExcelPage";
 
 import { PaymentMethodPage } from './components/PaymentMethod/PaymentMethodPage';
 import PaymentTransactionPage from './components/PaymentTransaction/PaymentTransactionPage';
+
 
 // Route bảo vệ
 const PrivateRoute = ({ children }) => {
@@ -107,11 +109,10 @@ function App() {
           <Route path="password" element={<ChangePassword />} />
           <Route path="transactions" element={<Profile />} />
           <Route path="notifications" element={<Notification />} />
+          <Route path="booking-history" element={<BookingHistoryPage />} />
+          <Route path="booking-details/:bookingId" element={<BookingDetailPage />} />
         </Route>
-        <Route element={<ProfileLayout />}>
-          <Route path="/booking/history" element={<BookingHistoryPage />} />
-          <Route path="/booking/details/:bookingId" element={<BookingDetailPage />} />
-        </Route>
+
         {/* Booking */}
         <Route
           path="/booking"
@@ -218,8 +219,12 @@ function App() {
             path="payment-transactions"
             element={<PaymentTransactionPage paymentmethodText="Lịch sử giao dịch" />}
           />
+
+
           {/* Activity Log */}
           <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+          {/* ExportExcel */}
+          <Route path="export-reports" element={<ExportReportPage />} />
         </Route>
 
         {/* Employee routes */}
