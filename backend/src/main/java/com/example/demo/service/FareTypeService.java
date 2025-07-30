@@ -39,21 +39,27 @@ public class FareTypeService {
     @Autowired
     private NotificationService notificationService;
 
+// TẠO MỚI
     public FareType handleCreateFareType(FareTypeRequest request) {
         FareType fareType = new FareType();
         BeanUtils.copyProperties(request, fareType);
         fareType.setIsDeleted(false);
 
+        // 🛠️ Lưu vào DB trước để sinh ID
+        FareType savedFareType = fareTypeRepository.save(fareType);
+
+        // ✅ Sau khi đã có ID thì mới gọi hàm ghi log & thông báo
         setLogAndNotification(
-                fareType.getId(),
+                savedFareType.getId(),
                 "TẠO MỚI",
-                "Tạo mới loại vé " + fareType.getName() + ", định dạng phim: " + fareType.getMovieFormat(),
+                "Tạo mới loại vé " + savedFareType.getName() + ", định dạng phim: " + savedFareType.getMovieFormat(),
                 "Tạo mới loại vé",
-                " vừa tạo mới loại vé: " + fareType.getName() + ", định dạng phim: " + fareType.getMovieFormat()
+                " vừa tạo mới loại vé: " + savedFareType.getName() + ", định dạng phim: " + savedFareType.getMovieFormat()
         );
 
-        return fareTypeRepository.save(fareType);
+        return savedFareType;
     }
+
 
     public FareType handleUpdateFareType(FareTypeRequest request, Long id) {
         FareType currentFareType = fareTypeRepository.findById(id)

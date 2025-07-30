@@ -1,4 +1,4 @@
-import { Col, Form, Input, Modal, notification, Row, Select } from "antd";
+import { Col, Form, InputNumber, Modal, notification, Row, Select } from "antd";
 import { useState } from "react";
 import { createFareTypeAPI } from "../../../../service/TicketPriceService";
 import { v4 as uuidv4 } from "uuid";
@@ -7,17 +7,16 @@ export const CreateFareTypeModal = (props) => {
   const { isCreateModalOpen, setIsCreateModalOpen, setRefreshFlag } = props;
   const [form] = Form.useForm();
   const [timeSlotType, setTimeSlotType] = useState("");
-  
 
   const handleSubmit = async (values) => {
     try {
-      // Tạo fare_type_id tự động
-      const fareTypeId = `FT-${uuidv4().slice(0, 8).toUpperCase()}`; // Ví dụ: FT-12345678
-
-      const res = await createFareTypeAPI({
+      const payload = {
         ...values,
-        fare_type_id: fareTypeId,
-      });
+        basePrice: Number(values.basePrice),
+        dayPrice: Number(values.dayPrice),
+      };
+
+      const res = await createFareTypeAPI(payload);
 
       if (res.status === 201) {
         notification.success({
@@ -73,30 +72,24 @@ export const CreateFareTypeModal = (props) => {
             { required: true, message: "Vui lòng nhập giá cơ bản!" },
             {
               validator: (_, value) => {
-                if (!value) return Promise.resolve();
-                const num = Number(value);
-                if (isNaN(num)) {
-                  return Promise.reject(new Error("Giá cơ bản phải là số!"));
-                }
-                if (num <= 0) {
+                if (value === undefined || value === null) return Promise.reject(new Error("Vui lòng nhập giá cơ bản!"));
+                if (value <= 0) {
                   return Promise.reject(new Error("Giá cơ bản phải lớn hơn 0!"));
                 }
-                if (num > 1000000) {
-                  return Promise.reject(
-                    new Error("Giá cơ bản không được quá 1,000,000 VNĐ!")
-                  );
+                if (value > 1000000) {
+                  return Promise.reject(new Error("Giá cơ bản không được quá 1,000,000 VNĐ!"));
                 }
                 return Promise.resolve();
               },
             },
           ]}
         >
-          <Input
-            type="number"
+          <InputNumber
             min={0}
             max={1000000}
             addonAfter="VNĐ"
             placeholder="VD: 80000"
+            style={{ width: "100%" }}
           />
         </Form.Item>
 
@@ -108,32 +101,24 @@ export const CreateFareTypeModal = (props) => {
             { required: true, message: "Vui lòng nhập giá theo ngày!" },
             {
               validator: (_, value) => {
-                if (!value) return Promise.resolve();
-                const num = Number(value);
-                if (isNaN(num)) {
-                  return Promise.reject(new Error("Giá theo ngày phải là số!"));
+                if (value === undefined || value === null) return Promise.reject(new Error("Vui lòng nhập giá theo ngày!"));
+                if (value < 0) {
+                  return Promise.reject(new Error("Giá theo ngày phải lớn hơn hoặc bằng 0!"));
                 }
-                if (num < 0) {
-                  return Promise.reject(
-                    new Error("Giá theo ngày phải lớn hơn hoặc bằng 0!")
-                  );
-                }
-                if (num > 1000000) {
-                  return Promise.reject(
-                    new Error("Giá theo ngày không được quá 1,000,000 VNĐ!")
-                  );
+                if (value > 1000000) {
+                  return Promise.reject(new Error("Giá theo ngày không được quá 1,000,000 VNĐ!"));
                 }
                 return Promise.resolve();
               },
             },
           ]}
         >
-          <Input
-            type="number"
+          <InputNumber
             min={0}
             max={1000000}
             addonAfter="VNĐ"
             placeholder="VD: 100000"
+            style={{ width: "100%" }}
           />
         </Form.Item>
 
@@ -174,12 +159,13 @@ export const CreateFareTypeModal = (props) => {
           </Col>
         </Row>
 
+        {/* Khung giờ */}
         <Form.Item
           label="Khung giờ"
           name="timeSlotType"
           rules={[{ required: true, message: "Vui lòng chọn khung giờ!" }]}
         >
-         <Select
+          <Select
             placeholder="Chọn khung giờ"
             options={[
               { value: "Ngày Thường", label: "Ngày Thường" },

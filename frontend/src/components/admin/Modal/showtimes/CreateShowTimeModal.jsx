@@ -163,7 +163,7 @@ export const CreateShowtimeModal = (props) => {
         movieId: Number(values.movieId),
         cinemaRoomId: Number(values.cinemaRoomId),
         fareTypeId: Number(values.fareTypeId),
-        showDateTime: values.showDateTime.format("YYYY-MM-DD HH:mm:ss")
+        showDateTime: values.showDateTime.format("YYYY-MM-DDTHH:mm:ss")
       };
       console.log("Showtime request (raw JSON):", JSON.stringify(showtimeRequest, null, 2));
       const res = await createShowtimeAPI(showtimeRequest);
