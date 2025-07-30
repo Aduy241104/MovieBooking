@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getUserBookingHistory, retryPayment } from '../../../service/BookingService'; 
-import { AuthContext } from '../../../context/AuthContext'; 
-import { format, parseISO} from 'date-fns';
+import { getUserBookingHistory, retryPayment } from '../../../service/BookingService';
+import { AuthContext } from '../../../context/AuthContext';
+import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingHistoryPage.module.scss'; 
+import styles from './bookingHistoryPage.module.scss';
 import classNames from 'classnames/bind';
-import CountdownTimer from '../../../components/Booking/CountdownTimer'; 
+import CountdownTimer from '../../../components/Booking/CountdownTimer';
 import { message } from 'antd';
 const cx = classNames.bind(styles);
 
@@ -17,7 +17,7 @@ const BookingHistoryPage = () => {
     const [error, setError] = useState('');
     const [retryingPaymentId, setRetryingPaymentId] = useState(null);
 
-   // Function to reload history
+    // Function to reload history
     const fetchHistory = async () => {
         //setLoading(true);
         setError('');
@@ -49,22 +49,22 @@ const BookingHistoryPage = () => {
         try {
             const response = await retryPayment(bookingId);
             if (response.data?.result) {
-               // If successful, redirect user to payment gateway
+                // If successful, redirect user to payment gateway
                 window.location.href = response.data.result;
             } else {
                 message.error("Không thể tạo lại link thanh toán. Vé có thể đã hết hạn.");
-                fetchHistory(); 
+                fetchHistory();
             }
         } catch (error) {
             const errorMessage = error.response?.data?.message;
             if (errorMessage === 'BOOKING_EXPIRED') {
-                 message.error("Vé đã hết hạn thanh toán. Trang sẽ được tải lại.");
+                message.error("Vé đã hết hạn thanh toán. Trang sẽ được tải lại.");
             } else if (errorMessage === 'BOOKING_NOT_PENDING') {
-                 message.error("Vé này không còn ở trạng thái chờ thanh toán. Trang sẽ được tải lại.");
+                message.error("Vé này không còn ở trạng thái chờ thanh toán. Trang sẽ được tải lại.");
             } else {
-                  message.error("Lỗi khi thử thanh toán lại. Vui lòng thử lại sau.");
+                message.error("Lỗi khi thử thanh toán lại. Vui lòng thử lại sau.");
             }
-            fetchHistory(); 
+            fetchHistory();
         } finally {
             setRetryingPaymentId(null);
         }
@@ -78,29 +78,29 @@ const BookingHistoryPage = () => {
             return 'N/A';
         }
     };
-    
-   // Map state to CSS class
+
+    // Map state to CSS class
     const getStatusInfo = (booking) => {
         const { bookingStatus, expiresAt } = booking;
         const isExpiredByTime = expiresAt ? new Date() > parseISO(expiresAt) : false;
 
-       // Prioritize EXPIRED status from backend, if not available then calculate automatically
+        // Prioritize EXPIRED status from backend, if not available then calculate automatically
         if (bookingStatus === 'EXPIRED' || (bookingStatus === 'PENDING_PAYMENT' && isExpiredByTime)) {
             return { text: 'Đã hết hạn', className: 'status-expired' };
         }
-        
+
         switch (bookingStatus) {
             case 'PAID': return { text: 'Đã thanh toán', className: 'status-paid' };
             case 'RESERVED': return { text: 'Đã giữ chỗ', className: 'status-reserved' };
             case 'PENDING_PAYMENT': return { text: 'Chờ thanh toán', className: 'status-pending' };
-            case 'CANCELLED': return { text: 'Đã hủy', className: 'status-cancelled' };
             case 'PAYMENT_FAILED': return { text: 'Thanh toán thất bại', className: 'status-failed' };
+            case "EXPIRED": return { text: "Đã hết hạn", className: "status-expired" };
             default: return { text: bookingStatus || 'Không xác định', className: 'status-unknown' };
         }
     };
 
 
-      const renderBookingItem = (booking) => {
+    const renderBookingItem = (booking) => {
         const isPending = booking.bookingStatus === 'PENDING_PAYMENT';
         const expiryTime = booking.expiresAt; // Get directly from API
         const shouldShowActions = isPending && expiryTime && new Date() < parseISO(expiryTime);
@@ -109,8 +109,8 @@ const BookingHistoryPage = () => {
         return (
             <Link to={`/profile/booking-details/${booking.bookingId}`} key={booking.bookingId} className={cx('booking-item')}>
                 <div className={cx('item-header')}>
-                   <h5 className={cx('movie-title')}>{booking.screening?.movieNameVn || 'N/A'}</h5>
-                   <span className={cx('booking-code')}>Mã vé: <strong>{booking.bookingCode}</strong></span>
+                    <h5 className={cx('movie-title')}>{booking.screening?.movieNameVn || 'N/A'}</h5>
+                    <span className={cx('booking-code')}>Mã vé: <strong>{booking.bookingCode}</strong></span>
                 </div>
                 <div className={cx('item-body')}>
                     <div className={cx('info-row')}>
@@ -138,7 +138,7 @@ const BookingHistoryPage = () => {
 
                 {shouldShowActions && (
                     <div className={cx('pending-actions')}>
-                        <CountdownTimer 
+                        <CountdownTimer
                             expiryTime={expiryTime}
                             onExpire={() => fetchHistory()}
                         />
@@ -165,7 +165,7 @@ const BookingHistoryPage = () => {
         if (bookings.length === 0) {
             return <div className={cx('centered-message')}>Bạn chưa có đơn đặt vé nào.</div>;
         }
-        
+
         return (
             <div className={cx('booking-list')}>
                 {bookings.map(booking => renderBookingItem(booking))}

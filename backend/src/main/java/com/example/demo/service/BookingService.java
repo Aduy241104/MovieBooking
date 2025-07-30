@@ -55,7 +55,7 @@ public class BookingService {
     private final PromotionService promotionService;
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
-    public static final int BOOKING_EXPIRATION_MINUTES = 10;
+    public static final int BOOKING_EXPIRATION_MINUTES = 5;
     public Long getTotalRevenueByStatus(String status) {
         return bookingRepository.getTotalRevenueByStatus(status)
                 .orElseThrow(() -> new AppException("No revenue data found for status: " + status));
@@ -460,7 +460,6 @@ public class BookingService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
@@ -539,7 +538,6 @@ public class BookingService {
         if ("PAID".equals(booking.getBookingStatus()) && booking.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
             pointsEarned = booking.getTotalAmount().multiply(POINTS_EARNING_RATE).intValue();
         }
-        // <<< THÊM LOGIC TÍNH TOÁN THỜI GIAN HẾT HẠN >>>
         LocalDateTime expiresAt = null;
         if ("PENDING_PAYMENT".equals(booking.getBookingStatus())) {
             expiresAt = booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES);
@@ -735,10 +733,10 @@ public class BookingService {
                 httpServletRequest);
     }
 
-    @Scheduled(cron = "0 */5 * * * *") //5 minute
+    @Scheduled(fixedRate = 60000) //60,000 milliseconds = 1 minute
     @Transactional
     public void cancelExpiredPendingBookings() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(BOOKING_EXPIRATION_MINUTES);
         logger.info("Running scheduled task to cancel expired bookings older than {}", expirationTime);
 
         List<Booking> expiredBookings = bookingRepository.findAllByBookingStatusAndBookingTimeBefore("PENDING_PAYMENT",

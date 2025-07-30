@@ -97,7 +97,7 @@ public class ScreeningService {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + movieId));
 
-        List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(15)); // Cho phép trễ 15p
+        List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(BOOKING_EXPIRATION_MINUTES));
 
         Map<LocalDate, List<ScreeningScheduleResponseDTO.ScreeningTimeDTO>> groupedSchedules = screenings.stream()
                 .collect(Collectors.groupingBy(
