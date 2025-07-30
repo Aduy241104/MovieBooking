@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8081/api'; // URL backend của bạn
+const API_BASE_URL = 'http://localhost:8081/api';
 
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
@@ -19,12 +19,12 @@ axiosInstance.interceptors.request.use(
     }
 );
 
+/*
 // Optional: Interceptor for response handling (e.g., redirect on 401)
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Ví dụ: Xóa token, user và redirect về trang login
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             // Nên dùng history của react-router-dom để redirect thay vì window.location
@@ -36,6 +36,6 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
+*/
 
 export default axiosInstance;

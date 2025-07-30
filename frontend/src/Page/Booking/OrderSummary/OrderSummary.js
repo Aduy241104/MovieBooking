@@ -4,12 +4,9 @@ import classNames from "classnames/bind";
 const cx = classNames.bind(styles);
 
 const OrderSummary = ({ totalPrice, discountAmount, pointsDiscount, finalPrice }) => {
-    // ... formatScreeningDateTime giữ nguyên ...
-
+ 
     return (
         <div className={cx("order-summary-card", "p-3", "border", "rounded")}>
-            {/* ... Phần thông tin phim và ghế đã chọn giữ nguyên ... */}
-
             <div className={cx("pricing-details")}>
                 <div className={cx("price-row")}>
                     <span>Tạm tính:</span>
@@ -21,7 +18,6 @@ const OrderSummary = ({ totalPrice, discountAmount, pointsDiscount, finalPrice }
                         <span className={cx("amount")}>- {discountAmount.toLocaleString("vi-VN")}đ</span>
                     </div>
                 )}
-                {/* <<< THÊM DÒNG NÀY >>> */}
                 {pointsDiscount > 0 && (
                     <div className={cx("price-row", "discount")}>
                         <span>Giảm giá (từ điểm):</span>

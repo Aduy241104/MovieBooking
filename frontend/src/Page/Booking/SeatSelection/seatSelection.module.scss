@@ -1,17 +1,16 @@
-/* --- Bảng màu đã được tinh chỉnh cho hài hòa hơn --- */
-$color-regular: #7f8c8d;      // Xám trung tính
-$color-vip: #e67e22;          // Cam cà rốt
-$color-couple: #8e44ad;      // Tím
-$color-selected: #2ecc71;    // Xanh ngọc lục bảo
-$color-pending: #f1c40f;      // Vàng hướng dương
-$color-disabled: #ecf0f1;    // Xám rất sáng (gần như trắng)
+$color-regular: #7f8c8d;     
+$color-vip: #e67e22;          
+$color-couple: #8e44ad;     
+$color-selected: #2ecc71;    
+$color-pending: #f1c40f;      
+$color-disabled: #ecf0f1;    
 
 $color-text-on-dark: #ffffff;
-$color-text-disabled: #bdc3c7; // Màu chữ trên ghế disabled
+$color-text-disabled: #bdc3c7; 
 $color-screen-bg: #2c3e50;
-$color-container-bg: #ffffff; // Nền trắng sạch sẽ
+$color-container-bg: #ffffff; 
 
-/* Animation cho ghế pending */
+/* Animation for pending seat */
 @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba($color-pending, 0.6); }
     70% { box-shadow: 0 0 0 8px rgba($color-pending, 0); }
@@ -19,13 +18,12 @@ $color-container-bg: #ffffff; // Nền trắng sạch sẽ
 }
 
 
-/* --- BỐ CỤC CHUNG --- */
+/* GENERAL LAYOUT */
 .seat-map-container {
     padding: 25px;
     background-color: $color-container-bg;
     border-radius: 12px;
     overflow-x: auto;
-    // Thêm thanh cuộn đẹp hơn cho trình duyệt Webkit
     &::-webkit-scrollbar {
         height: 8px;
     }
@@ -79,11 +77,11 @@ $color-container-bg: #ffffff; // Nền trắng sạch sẽ
     gap: 8px;
 }
 
-/* --- STYLE CHO GHẾ --- */
+/* STYLE FOR CHAIR */
 .seat {
     width: 30px;
     height: 28px;
-    border-radius: 6px 6px 2px 2px; // Bo góc trên nhiều hơn
+    border-radius: 6px 6px 2px 2px; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -101,15 +99,15 @@ $color-container-bg: #ffffff; // Nền trắng sạch sẽ
         filter: brightness(110%);
     }
 
-    /* MÀU SẮC THEO LOẠI */
+    /* COLOR BY SEAT TYPE */
     &.regular { background-color: $color-regular; }
     &.vip { background-color: $color-vip; }
     &.couple {
         background-color: $color-couple;
-        width: (30px * 2) + 8px; // width*2 + gap
+        width: (30px * 2) + 8px; 
     }
 
-    /* TRẠNG THÁI (Ưu tiên từ dưới lên) */
+    /* STATUS */
     &.disabled {
         background-color: $color-disabled !important;
         cursor: not-allowed;
@@ -131,7 +129,7 @@ $color-container-bg: #ffffff; // Nền trắng sạch sẽ
     }
 }
 
-/* --- CHÚ THÍCH (LEGEND) --- */
+/* LEGEND*/
 .legend {
     display: flex;
     flex-wrap: wrap;
@@ -147,8 +145,6 @@ $color-container-bg: #ffffff; // Nền trắng sạch sẽ
     align-items: center;
     font-size: 0.85rem;
     color: #34495e;
-
-    // Class .seat trong legend kế thừa style từ class .seat ở trên
     .seat {
         margin-right: 10px;
         cursor: default;

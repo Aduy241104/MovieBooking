@@ -1,8 +1,6 @@
-// src/pages/BookingFailurePage/BookingFailurePage.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-// import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA, không còn sử dụng
-import styles from './bookingFailurePage.module.scss'; // SỬ DỤNG FILE SCSS MỚI
+import styles from './bookingFailurePage.module.scss'; 
 import classNames from 'classnames/bind';
 import DefaultLayout from '../../../layouts/DefaultLayout';
 
@@ -18,7 +16,6 @@ const BookingFailurePage = () => {
     const [retrievedMovieInfo, setRetrievedMovieInfo] = useState(null);
     const [tryAgainLink, setTryAgainLink] = useState('/');
 
-    // --- LOGIC GỐC GIỮ NGUYÊN ---
     useEffect(() => {
         let movieInfoString = localStorage.getItem('lastMovieInfoForBooking');
         let movieIdForLink = null;
@@ -26,15 +23,13 @@ const BookingFailurePage = () => {
         if (movieInfoString) {
             try {
                 const parsedMovieInfo = JSON.parse(movieInfoString);
-                setRetrievedMovieInfo(parsedMovieInfo); // Lưu lại nếu cần hiển thị tên phim v.v.
+                setRetrievedMovieInfo(parsedMovieInfo); 
                 if (parsedMovieInfo && parsedMovieInfo.id) {
                     movieIdForLink = parsedMovieInfo.id;
                 }
-                // Xóa sau khi lấy để tránh dùng lại ở lần thất bại khác nếu người dùng không đi từ BookingPage
                 localStorage.removeItem('lastMovieInfoForBooking');
             } catch (e) {
                 console.error('BookingFailurePage - Error parsing movieInfo from localStorage:', e);
-                // Nếu parse lỗi, thử lấy movieId dự phòng nếu có
                 movieIdForLink = localStorage.getItem('lastMovieIdForBooking');
                 if (movieIdForLink) {
                     localStorage.removeItem('lastMovieIdForBooking');
@@ -52,12 +47,11 @@ const BookingFailurePage = () => {
         if (movieIdForLink) {
             setTryAgainLink(`/movie/${movieIdForLink}`);
         } else {
-            setTryAgainLink('/'); // Mặc định về trang chủ nếu không có thông tin phim
+            setTryAgainLink('/'); 
         }
 
-    }, []); // Chạy một lần khi component mount
+    }, []); // Run once when component mounts
 
-    // --- LOGIC GỐC GIỮ NGUYÊN ---
     let message = "Giao dịch không thành công.";
     if (reason === 'payment_declined') {
         message = `Thanh toán bị từ chối bởi VNPAY. (Mã lỗi: ${vnpResponseCode || 'N/A'})`;
@@ -95,7 +89,7 @@ const BookingFailurePage = () => {
                         </button>
                     </Link>
                     
-                    {tryAgainLink !== '/' && ( // Chỉ hiển thị nút "Về Trang Chủ" thứ hai nếu nút "Thử Lại" không phải là về trang chủ
+                    {tryAgainLink !== '/' && ( 
                          <Link to="/">
                             <button className={cx('btn', 'btn-primary')}>
                                 Về Trang Chủ

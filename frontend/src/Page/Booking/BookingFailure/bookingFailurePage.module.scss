@@ -1,4 +1,3 @@
-/* --- Biến màu cho Dark Theme (theo style tham khảo) --- */
 $dark-bg: #1a1d29;
 $dark-surface: #24283b;
 $primary-gradient: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
@@ -7,7 +6,7 @@ $text-secondary: #9e9e9e;
 $border-color: #394264;
 $danger-color: #e74c3c;
 
-/* --- NỀN VÀ LAYOUT CHUNG --- */
+/* GENERAL BACKGROUND AND LAYOUT */
 .page-container {
     background-color: $dark-bg;
     min-height: 100vh;
@@ -18,7 +17,7 @@ $danger-color: #e74c3c;
     color: $text-primary;
 }
 
-/* --- KHUNG NỘI DUNG CHÍNH --- */
+/* MAIN CONTENT FRAME */
 .content-wrapper {
     background-color: $dark-surface;
     border: 1px solid $border-color;
@@ -30,7 +29,7 @@ $danger-color: #e74c3c;
     text-align: center;
 }
 
-/* --- CÁC THÀNH PHẦN GIAO DIỆN --- */
+/* INTERFACE COMPONENTS */
 .icon-failure {
     font-size: 5rem;
     color: $danger-color;
@@ -64,16 +63,16 @@ $danger-color: #e74c3c;
     margin-top: 0.5rem;
 }
 
-/* --- KHU VỰC CÁC NÚT HÀNH ĐỘNG --- */
+/* ACTION BUTTONS AREA */
 .actions-container {
     margin-top: 2rem;
     display: flex;
     justify-content: center;
     gap: 1rem;
-    flex-wrap: wrap; // Cho phép xuống dòng trên màn hình nhỏ
+    flex-wrap: wrap; 
 }
 
-/* --- STYLE CHO CÁC NÚT (TÁI SỬ DỤNG TỪ STYLE TRƯỚC) --- */
+/* STYLE FOR BUTTONS */
 .btn {
     padding: 12px 28px;
     font-size: 1rem;

@@ -191,6 +191,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+
+    @ExceptionHandler(UnpaidBookingException.class)
+    public ResponseEntity<ErrorResponse> handleUnpaidBooking(UnpaidBookingException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Unpaid Booking")
+                .message(ex.getMessage())
+                .path(request.getRequestURI())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+    
     @ExceptionHandler(SeatConversionException.class)
     public ResponseEntity<ErrorResponse> handleSeatConversion(SeatConversionException ex, HttpServletRequest request) {
         ErrorResponse errorResponse = ErrorResponse.builder()
@@ -211,6 +225,7 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+
     }
     // Handle general Runtime errors (placed at the end)
 

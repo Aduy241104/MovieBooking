@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getUserBookingHistory, retryPayment } from '../../../service/BookingService'; // Đảm bảo đường dẫn đúng
-import { AuthContext } from '../../../context/AuthContext'; // Đảm bảo đường dẫn đúng
-import { format, parseISO, addMinutes, isAfter } from 'date-fns';
+import { getUserBookingHistory, retryPayment } from '../../../service/BookingService';
+import { AuthContext } from '../../../context/AuthContext';
+import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingHistoryPage.module.scss'; // Đảm bảo có file scss tương ứng
+import styles from './bookingHistoryPage.module.scss';
 import classNames from 'classnames/bind';
-import CountdownTimer from '../../../components/Booking/CountdownTimer'; // Đảm bảo đường dẫn đúng
-
+import CountdownTimer from '../../../components/Booking/CountdownTimer';
+import { message } from 'antd';
 const cx = classNames.bind(styles);
 
 const BookingHistoryPage = () => {
@@ -17,9 +17,9 @@ const BookingHistoryPage = () => {
     const [error, setError] = useState('');
     const [retryingPaymentId, setRetryingPaymentId] = useState(null);
 
-    // Hàm để tải lại lịch sử, có thể gọi lại khi cần
+    // Function to reload history
     const fetchHistory = async () => {
-        setLoading(true);
+        //setLoading(true);
         setError('');
         try {
             const response = await getUserBookingHistory();
@@ -42,30 +42,29 @@ const BookingHistoryPage = () => {
     }, [user]);
 
     const handleRetryPayment = async (e, bookingId) => {
-        e.preventDefault(); // Ngăn thẻ <Link> điều hướng ngay lập tức
-        e.stopPropagation(); // Ngăn sự kiện click nổi bọt lên thẻ <Link>
+        e.preventDefault(); // Prevent <Link> tag from navigating immediately
+        e.stopPropagation(); // Prevent click events from bubbling on the <Link> tag
 
         setRetryingPaymentId(bookingId);
         try {
             const response = await retryPayment(bookingId);
             if (response.data?.result) {
-                // Nếu thành công, chuyển hướng người dùng đến cổng thanh toán
+                // If successful, redirect user to payment gateway
                 window.location.href = response.data.result;
             } else {
-                // Nếu API trả về thành công nhưng không có URL
-                alert("Không thể tạo lại link thanh toán. Vé có thể đã hết hạn.");
-                fetchHistory(); // Tải lại lịch sử để cập nhật trạng thái
+                message.error("Không thể tạo lại link thanh toán. Vé có thể đã hết hạn.");
+                fetchHistory();
             }
         } catch (error) {
             const errorMessage = error.response?.data?.message;
             if (errorMessage === 'BOOKING_EXPIRED') {
-                alert("Vé đã hết hạn thanh toán. Trang sẽ được tải lại.");
+                message.error("Vé đã hết hạn thanh toán. Trang sẽ được tải lại.");
             } else if (errorMessage === 'BOOKING_NOT_PENDING') {
-                alert("Vé này không còn ở trạng thái chờ thanh toán. Trang sẽ được tải lại.");
+                message.error("Vé này không còn ở trạng thái chờ thanh toán. Trang sẽ được tải lại.");
             } else {
-                alert("Lỗi khi thử thanh toán lại. Vui lòng thử lại sau.");
+                message.error("Lỗi khi thử thanh toán lại. Vui lòng thử lại sau.");
             }
-            fetchHistory(); // Tải lại trong mọi trường hợp lỗi để đồng bộ
+            fetchHistory();
         } finally {
             setRetryingPaymentId(null);
         }
@@ -79,35 +78,39 @@ const BookingHistoryPage = () => {
             return 'N/A';
         }
     };
-    
-    // Ánh xạ trạng thái sang class CSS để dễ style
-    const getStatusInfo = (status, isExpired) => {
-        if (status === 'PENDING_PAYMENT' && isExpired) {
+
+    // Map state to CSS class
+    const getStatusInfo = (booking) => {
+        const { bookingStatus, expiresAt } = booking;
+        const isExpiredByTime = expiresAt ? new Date() > parseISO(expiresAt) : false;
+
+        // Prioritize EXPIRED status from backend, if not available then calculate automatically
+        if (bookingStatus === 'EXPIRED' || (bookingStatus === 'PENDING_PAYMENT' && isExpiredByTime)) {
             return { text: 'Đã hết hạn', className: 'status-expired' };
         }
-        switch (status) {
+
+        switch (bookingStatus) {
             case 'PAID': return { text: 'Đã thanh toán', className: 'status-paid' };
             case 'RESERVED': return { text: 'Đã giữ chỗ', className: 'status-reserved' };
             case 'PENDING_PAYMENT': return { text: 'Chờ thanh toán', className: 'status-pending' };
-            case 'CANCELLED': return { text: 'Đã hủy', className: 'status-cancelled' };
-            case 'EXPIRED': return { text: 'Đã hết hạn', className: 'status-expired' };
             case 'PAYMENT_FAILED': return { text: 'Thanh toán thất bại', className: 'status-failed' };
-            default: return { text: status || 'Không xác định', className: 'status-unknown' };
+            case "EXPIRED": return { text: "Đã hết hạn", className: "status-expired" };
+            default: return { text: bookingStatus || 'Không xác định', className: 'status-unknown' };
         }
     };
 
+
     const renderBookingItem = (booking) => {
         const isPending = booking.bookingStatus === 'PENDING_PAYMENT';
-        const expiryTime = addMinutes(parseISO(booking.bookingTime), 15); // Thời gian hết hạn là 15 phút sau khi đặt
-        const isExpired = isAfter(new Date(), expiryTime);
-
-        const statusInfo = getStatusInfo(booking.bookingStatus, isExpired);
+        const expiryTime = booking.expiresAt; // Get directly from API
+        const shouldShowActions = isPending && expiryTime && new Date() < parseISO(expiryTime);
+        const statusInfo = getStatusInfo(booking);
 
         return (
             <Link to={`/profile/booking-details/${booking.bookingId}`} key={booking.bookingId} className={cx('booking-item')}>
                 <div className={cx('item-header')}>
-                   <h5 className={cx('movie-title')}>{booking.screening?.movieNameVn || 'N/A'}</h5>
-                   <span className={cx('booking-code')}>Mã vé: <strong>{booking.bookingCode}</strong></span>
+                    <h5 className={cx('movie-title')}>{booking.screening?.movieNameVn || 'N/A'}</h5>
+                    <span className={cx('booking-code')}>Mã vé: <strong>{booking.bookingCode}</strong></span>
                 </div>
                 <div className={cx('item-body')}>
                     <div className={cx('info-row')}>
@@ -133,12 +136,11 @@ const BookingHistoryPage = () => {
                     </div>
                 </div>
 
-                {/* Khu vực hành động chỉ hiển thị cho các booking đang chờ và chưa hết hạn */}
-                {isPending && !isExpired && (
+                {shouldShowActions && (
                     <div className={cx('pending-actions')}>
-                        <CountdownTimer 
+                        <CountdownTimer
                             expiryTime={expiryTime}
-                            onExpire={() => fetchHistory()} // Tự động tải lại danh sách khi đồng hồ hết giờ
+                            onExpire={() => fetchHistory()}
                         />
                         <button
                             onClick={(e) => handleRetryPayment(e, booking.bookingId)}
@@ -163,7 +165,7 @@ const BookingHistoryPage = () => {
         if (bookings.length === 0) {
             return <div className={cx('centered-message')}>Bạn chưa có đơn đặt vé nào.</div>;
         }
-        
+
         return (
             <div className={cx('booking-list')}>
                 {bookings.map(booking => renderBookingItem(booking))}
