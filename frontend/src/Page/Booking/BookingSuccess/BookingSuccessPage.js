@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getBookingDetails } from '../../../service/BookingService'; 
+import { getBookingDetails } from '../../../service/BookingService';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import styles from './bookingSuccessPage.module.scss'; 
+import styles from './bookingSuccessPage.module.scss';
 import classNames from 'classnames/bind';
 import DefaultLayout from '../../../layouts/DefaultLayout';
 
@@ -13,7 +13,7 @@ const cx = classNames.bind(styles);
 const BookingSuccessPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const queryParams = new URLSearchParams(location.search); 
+    const queryParams = new URLSearchParams(location.search);
     //Get bookingId from query params (when redirecting from backend after VNPAY)
     const bookingIdFromQuery = queryParams.get('bookingId');
     const bookingId = bookingIdFromQuery;
@@ -89,16 +89,16 @@ const BookingSuccessPage = () => {
             </div>
         );
     }
-    
+
     if (!bookingDetails) {
         return (
             <div className={cx('page-container')}>
-                 <div className={cx('content-wrapper', 'error-wrapper')}>
+                <div className={cx('content-wrapper', 'error-wrapper')}>
                     <i className={cx('icon-status', 'icon-error', 'fas fa-question-circle')}></i>
                     <h2 className={cx('title')}>Thông tin không khả dụng</h2>
                     <p className={cx('message')}>Không tìm thấy chi tiết cho đơn đặt vé #{bookingId}. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.</p>
                     <div className={cx('actions-container')}>
-                         <Link to="/">
+                        <Link to="/">
                             <button className={cx('btn', 'btn-primary')}>Về Trang Chủ</button>
                         </Link>
                     </div>
@@ -109,43 +109,45 @@ const BookingSuccessPage = () => {
 
     return (
         <DefaultLayout>
-        <div className={cx('page-container')}>
-            <div className={cx('content-wrapper')}>
-                <i className={cx('icon-status', 'icon-success', 'fas fa-check-circle')}></i>
-                <h2 className={cx('title')}>Đặt vé thành công!</h2>
-                <p className={cx('message')}>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
-                <p className={cx('booking-code')}>
-                    Mã đặt vé của bạn là: <strong>{bookingDetails.bookingCode}</strong>
-                </p>
-                 {bookingDetails.pointsEarned > 0 && (
-                <p className="text-success" style={{ fontWeight: '500' }}>
-                    Chúc mừng! Bạn đã được cộng {bookingDetails.pointsEarned.toLocaleString('vi-VN')} điểm thưởng vào tài khoản.
-                </p>
-            )}
+            <div className={cx('page-container')}>
+                <div className={cx('content-wrapper')}>
+                    <i className={cx('icon-status', 'icon-success', 'fas fa-check-circle')}></i>
+                    <h2 className={cx('title')}>Đặt vé thành công!</h2>
+                    <p className={cx('message')}>Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi.</p>
+                    <p className={cx('booking-code')}>
+                        Mã đặt vé của bạn là: <strong>{bookingDetails.bookingCode}</strong>
+                    </p>
+                    {bookingDetails.pointsEarned > 0 && (
+                        <p className="text-success" style={{ fontWeight: '500' }}>
+                            Chúc mừng! Bạn đã được cộng {bookingDetails.pointsEarned.toLocaleString('vi-VN')} điểm thưởng vào tài khoản.
+                        </p>
+                    )}
 
-                <div className={cx('details-card')}>
-                    <div className={cx('card-header')}>Chi tiết vé</div>
-                    <div className={cx('card-body')}>
-                        <div className={cx('info-item')}><span>Phim:</span><span>{bookingDetails.screening?.movieNameVn || 'N/A'}</span></div>
-                        <div className={cx('info-item')}><span>Suất chiếu:</span><span>{formatScreeningDateTime(bookingDetails.screening?.showDateTime)}</span></div>
-                        <div className={cx('info-item')}><span>Phòng chiếu:</span><span>{bookingDetails.screening?.cinemaRoomName || 'N/A'}</span></div>
-                        <div className={cx('info-item')}><span>Ghế:</span><span className={cx('seats')}>{bookingDetails.bookedSeats?.map(s => `${s.seatRow}${s.seatCol}`).join(', ') || 'N/A'}</span></div>
-                        <div className={cx('info-item')}><span>Tổng tiền:</span><span>{(bookingDetails.totalAmount || 0).toLocaleString('vi-VN')}đ</span></div>
-                        {bookingDetails.paymentMethod?.methodName && <div className={cx('info-item')}><span>Thanh toán:</span><span>{bookingDetails.paymentMethod.methodName}</span></div>}
-                        <div className={cx('info-item')}><span>Trạng thái:</span><span className={cx('status-badge', getStatusClass(bookingDetails.bookingStatus))}>{bookingDetails.bookingStatus || 'N/A'}</span></div>
+                    <div className={cx('details-card')}>
+                        <div className={cx('card-header')}>Chi tiết vé</div>
+                        <div className={cx('card-body')}>
+                            <div className={cx('info-item')}><span>Phim:</span><span>{bookingDetails.screening?.movieNameVn || 'N/A'}</span></div>
+                            <div className={cx('info-item')}><span>Suất chiếu:</span><span>{formatScreeningDateTime(bookingDetails.screening?.showDateTime)}</span></div>
+                            <div className={cx('info-item')}><span>Phòng chiếu:</span><span>{bookingDetails.screening?.cinemaRoomName || 'N/A'}</span></div>
+                            <div className={cx('info-item')}><span>Ghế:</span><span className={cx('seats')}>{bookingDetails.bookedSeats?.map(s => `${s.seatRow}${s.seatCol}`).join(', ') || 'N/A'}</span></div>
+                            <div className={cx('info-item')}><span>Tổng tiền:</span><span>{(bookingDetails.totalAmount || 0).toLocaleString('vi-VN')}đ</span></div>
+                            {bookingDetails.paymentMethod?.methodName && <div className={cx('info-item')}><span>Thanh toán:</span><span>{bookingDetails.paymentMethod.methodName}</span></div>}
+                            <div className={cx('info-item')}><span>Trạng thái:</span><span className={cx('status-badge')}>Thanh toán thành công</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div className={cx('actions-container')}>
+                        <Link to="/profile/booking-history">
+                            <button className={cx('btn', 'btn-secondary')}>Xem Lịch Sử Đặt Vé</button>
+                        </Link>
+                        <Link to="/">
+                            <button className={cx('btn', 'btn-primary')}>Về Trang Chủ</button>
+                        </Link>
                     </div>
                 </div>
-
-                <div className={cx('actions-container')}>
-                    <Link to="/profile/booking-history">
-                        <button className={cx('btn', 'btn-secondary')}>Xem Lịch Sử Đặt Vé</button>
-                    </Link>
-                    <Link to="/">
-                        <button className={cx('btn', 'btn-primary')}>Về Trang Chủ</button>
-                    </Link>
-                </div>
             </div>
-        </div>
         </DefaultLayout>
     );
 };

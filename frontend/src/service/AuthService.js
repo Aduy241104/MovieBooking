@@ -55,6 +55,7 @@ export const veiryfyOtpAPI = async (data) => {
 export const loginOAuth = async (loginData) => {
     try {
         const response = await axiosInstance.post("/auth/login-oauth", loginData);
+        console.log(response)
         return response.data; // Thành công: trả dữ liệu
     } catch (error) {
 

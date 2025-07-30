@@ -21,10 +21,11 @@ const BookingDetailPage = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (!bookingId || !user) {
+        if (!bookingId) {
             navigate("/login");
             return;
         }
+            
         const fetchDetails = async () => {
             setLoading(true);
             setError("");
@@ -74,10 +75,10 @@ const BookingDetailPage = () => {
                 return { text: "Đã giữ chỗ", className: "status-reserved" };
             case "PENDING_PAYMENT":
                 return { text: "Chờ thanh toán", className: "status-pending" };
-            case "CANCELLED":
-                return { text: "Đã hủy", className: "status-cancelled" };
             case "PAYMENT_FAILED":
                 return { text: "Thanh toán thất bại", className: "status-failed" };
+            case "EXPIRED":
+                return { text: "Đã hết hạn", className: "status-expired" };
             default:
                 return { text: status || "Không xác định", className: "status-unknown" };
         }

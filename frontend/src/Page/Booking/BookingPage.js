@@ -7,7 +7,7 @@ import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
 import DefaultLayout from '../../layouts/DefaultLayout'; 
-import styles from './bookingPage.scss'; 
+import styles from './bookingPage.module.scss'; 
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -399,7 +399,7 @@ const BookingPage = () => {
                                         <h5><i className="fas fa-star"></i> Sử dụng điểm</h5>
                                         {pointsToUse && <button onClick={handleCancelPoints} className={cx('btn-cancel')}>Hủy</button>}
                                     </div>
-                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong></p>
+                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')} | 1.000 điểm = 1.000 VND</strong></p>
                                     <div className={cx('input-group')}>
                                         <input type="text" className={cx('form-control', { 'is-invalid': pointsInputError })} placeholder="Nhập số điểm" value={pointsToUse} onChange={handlePointsInputChange} disabled={!canApplyDiscount} />
                                     </div>
