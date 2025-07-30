@@ -422,7 +422,6 @@ class PromotionServiceTest {
     @Test
     void testFetchPromotionByCode_whenPromotionExists_shouldReturnPromotion() {
         // Arrange
-        when(promotionRepository.existsByCode("TEST2024")).thenReturn(true);
         when(promotionRepository.findByCode("TEST2024")).thenReturn(testPromotion);
 
         // Act
@@ -432,20 +431,19 @@ class PromotionServiceTest {
         assertNotNull(result);
         assertEquals("TEST2024", result.getCode());
         assertEquals("PERCENT", result.getDiscountType());
-        verify(promotionRepository).existsByCode("TEST2024");
         verify(promotionRepository).findByCode("TEST2024");
     }
 
     @Test
     void testFetchPromotionByCode_whenPromotionNotFound_shouldThrowAppException() {
         // Arrange
-        when(promotionRepository.existsByCode("NONEXISTENT")).thenReturn(false);
+        when(promotionRepository.findByCode("NONEXISTENT")).thenReturn(null);
 
         // Act & Assert
         AppException exception = assertThrows(AppException.class,
                 () -> promotionService.fetchPromotionByCode("NONEXISTENT"));
-        assertEquals("Promotion code not found", exception.getMessage());
-        verify(promotionRepository).existsByCode("NONEXISTENT");
+        assertEquals("Promotion not found", exception.getMessage());
+        verify(promotionRepository).findByCode("NONEXISTENT");
     }
 
     @Test
@@ -457,7 +455,6 @@ class PromotionServiceTest {
                 .active(false)
                 .build();
 
-        when(promotionRepository.existsByCode("INACTIVE2024")).thenReturn(true);
         when(promotionRepository.findByCode("INACTIVE2024")).thenReturn(inactivePromotion);
 
         // Act
@@ -467,7 +464,6 @@ class PromotionServiceTest {
         assertNotNull(result);
         assertEquals("INACTIVE2024", result.getCode());
         assertFalse(result.getActive());
-        verify(promotionRepository).existsByCode("INACTIVE2024");
         verify(promotionRepository).findByCode("INACTIVE2024");
     }
 
@@ -482,7 +478,6 @@ class PromotionServiceTest {
                 .endTime(LocalDateTime.now().minusDays(30)) // Expired
                 .build();
 
-        when(promotionRepository.existsByCode("EXPIRED2024")).thenReturn(true);
         when(promotionRepository.findByCode("EXPIRED2024")).thenReturn(expiredPromotion);
 
         // Act
@@ -492,7 +487,6 @@ class PromotionServiceTest {
         assertNotNull(result);
         assertEquals("EXPIRED2024", result.getCode());
         assertTrue(result.getActive());
-        verify(promotionRepository).existsByCode("EXPIRED2024");
         verify(promotionRepository).findByCode("EXPIRED2024");
     }
 
@@ -507,7 +501,6 @@ class PromotionServiceTest {
                 .endTime(LocalDateTime.now().plusDays(40))
                 .build();
 
-        when(promotionRepository.existsByCode("FUTURE2024")).thenReturn(true);
         when(promotionRepository.findByCode("FUTURE2024")).thenReturn(futurePromotion);
 
         // Act
@@ -517,7 +510,6 @@ class PromotionServiceTest {
         assertNotNull(result);
         assertEquals("FUTURE2024", result.getCode());
         assertTrue(result.getActive());
-        verify(promotionRepository).existsByCode("FUTURE2024");
         verify(promotionRepository).findByCode("FUTURE2024");
     }
 
