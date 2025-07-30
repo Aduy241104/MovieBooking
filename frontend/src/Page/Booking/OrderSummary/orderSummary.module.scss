@@ -13,7 +13,7 @@
     .movie-name {
         font-size: 1.1rem;
         font-weight: bold;
-        color: var(--primary-color); /* Sử dụng biến màu nếu có */
+        color: var(--primary-color); 
     }
     p {
         font-size: 0.9rem;
@@ -32,10 +32,10 @@
         margin-bottom: 0.5rem;
     }
     .seat-list {
-        max-height: 150px; /* Giới hạn chiều cao, cho phép cuộn */
+        max-height: 150px; 
         overflow-y: auto;
         font-size: 0.85rem;
-        padding-right: 5px; /* Cho scrollbar */
+        padding-right: 5px; 
     }
     .seat-item {
         display: flex;
@@ -60,7 +60,7 @@
         }
         &.total {
             font-size: 1.1rem;
-            color: #e53935; // Màu đỏ cho tổng tiền
+            color: #e53935; 
             .amount {
                 font-weight: bold;
             }
@@ -72,24 +72,4 @@
     .divider {
         margin: 0.75rem 0;
     }
-}
-
-// Thêm class cho bookingPage.module.scss để style chung cho trang
-/* src/pages/BookingPage/bookingPage.module.scss */
-.booking-container {
-  .page-title {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #2c3e50;
-  }
-  .section {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    margin-bottom: 20px;
-  }
-  .btn-apply-promo, .btn-submit-booking {
-    // Tùy chỉnh thêm nếu cần
-  }
 }

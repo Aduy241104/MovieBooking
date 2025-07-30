@@ -6,8 +6,6 @@ import SeatTooltip from './SeatTooltip';
 
 const cx = classNames.bind(styles);
 
-// <<< BỎ HOÀN TOÀN OBJECT SEAT_COLORS Ở ĐÂY >>>
-
 const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, screeningInfo, onSeatExpire }) => {
     const seatsByRow = (seatsData || []).reduce((acc, seat) => {
         const row = seat.seatRow;
@@ -19,7 +17,6 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, screeningInfo, 
     const sortedRows = Object.keys(seatsByRow).sort();
 
     const getSeatDisplayPrice = (seat) => {
-        // ... logic tính giá của bạn giữ nguyên ...
         if (!screeningInfo || !screeningInfo.fareType) return 0;
         const basePrice = parseFloat(screeningInfo.fareType.basePrice || 0);
         const movieFormat = screeningInfo.fareType.movieFormat || '';
@@ -45,11 +42,7 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, screeningInfo, 
                             {seatsByRow[rowLabel].map(seat => {
                                 const isSelected = selectedSeats.some(s => s.seatId === seat.seatId);
                                 const isDisabled = seat.status === 'Booked' || seat.status === 'Unavailable' || seat.status === 'Pending';
-                                
-                                // Tạo class loại ghế từ seatTypeName
                                 const seatTypeClass = seat.seatTypeName ? seat.seatTypeName.toLowerCase() : 'regular';
-
-                                // Gộp tất cả các class cần thiết
                                 const seatClasses = cx('seat', seatTypeClass, {
                                     'selected': isSelected,
                                     'disabled': isDisabled,
@@ -62,8 +55,7 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, screeningInfo, 
                                     <div 
                                         key={seat.seatId} 
                                         id={seatTooltipId} 
-                                        className={seatClasses} // <<< CHỈ DÙNG CLASSNAME >>>
-                                        // Bỏ hoàn toàn prop `style`
+                                        className={seatClasses} 
                                         onClick={() => !isDisabled && onSeatSelect(seat)}
                                     >
                                         {`${seat.seatRow}${seat.seatCol}`}
@@ -77,7 +69,6 @@ const SeatSelection = ({ seatsData, selectedSeats, onSeatSelect, screeningInfo, 
                     </div>
                 ))}
             </div>
-            {/* <<< SỬA LẠI LEGEND ĐỂ DÙNG CLASS THAY VÌ INLINE STYLE >>> */}
             <div className={cx('legend', 'mt-4')}>
                 <div className={cx('legend-item')}>
                     <div className={cx('seat', 'regular')}></div>

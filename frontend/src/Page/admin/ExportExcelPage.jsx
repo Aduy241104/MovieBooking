@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Button, DatePicker, message, Space, Typography } from 'antd';
 import { FileSpreadsheet } from 'lucide-react';
-import dayjs from 'dayjs'; // Cần cài đặt: npm install dayjs
-import 'dayjs/locale/vi'; // Import locale tiếng Việt
+import dayjs from 'dayjs'; 
+import 'dayjs/locale/vi'; 
 import weekday from 'dayjs/plugin/weekday';
 import localeData from 'dayjs/plugin/localeData';
-import axiosInstance from '../../config/axiosBooking'; // TODO: Sửa đường dẫn
+import axiosInstance from '../../config/axiosBooking'; 
 import { useLocation, useOutletContext } from "react-router-dom";
 dayjs.extend(weekday);
 dayjs.extend(localeData);
@@ -25,7 +25,7 @@ const ExportExcelPage = () => {
             ]);
         }
     }, [location.pathname, setBreadcrumbItems]);
-    const [dates, setDates] = useState([dayjs(), dayjs()]); // Mặc định chọn ngày hôm nay
+    const [dates, setDates] = useState([dayjs(), dayjs()]); // Default today
     const [isExporting, setIsExporting] = useState(false);
 
     const handleDateChange = (dates) => {
@@ -48,17 +48,16 @@ const ExportExcelPage = () => {
 
         try {
             const response = await axiosInstance.get('/admin/export/excel', {
-                params: { startDate, endDate }, // Truyền tham số
+                params: { startDate, endDate }, 
                 responseType: 'blob',
             });
-
-            // ... (logic tải file giữ nguyên) ...
+// Logic Download
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
             const contentDisposition = response.headers['content-disposition'];
             let fileName = `bookings_${startDate}_to_${endDate}.xlsx`;
-            if (contentDisposition) { /* ... */ }
+            if (contentDisposition) 
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();

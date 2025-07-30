@@ -97,7 +97,7 @@ public class ScreeningService {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + movieId));
 
-        List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(15)); // Cho phép trễ 15p
+        List<Screening> screenings = screeningRepository.findActiveScreeningsForMovie(movieId, LocalDateTime.now().minusMinutes(BOOKING_EXPIRATION_MINUTES));
 
         Map<LocalDate, List<ScreeningScheduleResponseDTO.ScreeningTimeDTO>> groupedSchedules = screenings.stream()
                 .collect(Collectors.groupingBy(
@@ -129,7 +129,7 @@ public class ScreeningService {
         List<Seat> allSeatsInRoom = seatRepository.findByCinemaRoom(cinemaRoom);
         List<BookedSeat> bookedSeats = bookedSeatRepository.findByScreeningId(screeningId);
 
-        // Logic tạo Map giữ nguyên, nó đã rất tốt
+        // Maping
         Map<Long, Booking> seatBookingMap = bookedSeats.stream()
                 .filter(bs -> bs.getSeat() != null && bs.getBooking() != null)
                 .collect(Collectors.toMap(
@@ -153,28 +153,24 @@ public class ScreeningService {
             Booking booking = seatBookingMap.get(seat.getSeatId());
             if (booking != null) {
 
-                // <<< THAY ĐỔI LOGIC NẰM Ở ĐÂY >>>
                 switch (booking.getBookingStatus()) {
                     case "PAID":
                     case "RESERVED":
                         status = "Booked";
                         break;
                     case "PENDING_PAYMENT":
-                        // Tính toán thời gian hết hạn
+                        // Calculate expiration time
                         LocalDateTime expirationTime = booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES);
 
-                        // Kiểm tra xem đã hết hạn hay chưa
+                        // Check if expired or not
                         if (expirationTime.isBefore(LocalDateTime.now())) {
-                            // Mặc dù trong DB vẫn là PENDING, nhưng về mặt logic nó đã hết hạn.
-                            // Coi như ghế này đã trống.
                             status = "Available";
                         } else {
-                            // Nếu chưa hết hạn, mới hiển thị là Pending
                             status = "Pending";
-                            expiresAt = expirationTime; // Gán thời gian hết hạn để trả về cho frontend
+                            expiresAt = expirationTime; // Set expiration time to return to frontend
                         }
                         break;
-                    default: // EXPIRED, FAILED, CANCELLED và các trạng thái khác
+                    default: // EXPIRED, FAILED, CANCELLED .....
                         status = "Available";
                         break;
                 }
