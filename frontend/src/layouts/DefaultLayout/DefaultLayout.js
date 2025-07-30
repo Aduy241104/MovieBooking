@@ -10,8 +10,13 @@ function DefaultLayout({ children }) {
     const [isLogin, setLogin] = useState(user);
 
     useEffect(() => {
+
+        console.log("UESEEE:  ", user);
+        
         setLogin(user);
     }, [user]);
+
+
 
     return (
         <div className="bg-midnight position-relative">

@@ -4,13 +4,13 @@ import CustomizeButton from '../../../components/CustomeButton';
 import TrailerModal from '../TrailerModal/TrailerModal';
 import styles from './mss.module.scss'
 import classNames from 'classnames/bind'
-import BookingSchedule from '../../Booking/BookingSchedule/BookingSchedule'; //locpng
+import BookingSchedule from '../../Booking/BookingSchedule/BookingSchedule'; 
 
 const cx = classNames.bind(styles);
 
 function RightComponent(props) {
     const [isOpenTrailer, setOpenTrailer] = useState(false);
-    const { movie} = props; // <<<< NHẬN movie TỪ PROPS/locpng
+    const { movie} = props; 
    
     return (
         <div className='w-100'>

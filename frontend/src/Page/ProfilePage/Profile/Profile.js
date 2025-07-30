@@ -59,7 +59,7 @@ function Profile() {
                         <p className='text-secondary fs-6 pb-4'>Cập nhật thông tin tài khoản</p>
                     </div>
                     <p className='pb-3 fs-6 score-place'>
-                        Điểm tích lũy <span className='text-warning'> 100</span>
+                        Điểm tích lũy <span className='text-warning'> { accountInfor.score }</span>
                     </p>
 
                     <Form

@@ -22,17 +22,7 @@ function ChangeEmail() {
         try {
             setLoading(true);
             await requestChangeEmail(values);
-
-            // if (!response.success) {
-            //     if (response.status === 409) {
-            //         throw new Error("Email này đã được đăng kí")
-            //     } else {
-            //         throw new Error("lỗi không xác định vui lòng thử lại sau");
-            //     }
-            // }
-
             setStep(2);
-
         } catch (error) {
             form.setFields([{
                 name: 'newEmail',
@@ -53,6 +43,7 @@ function ChangeEmail() {
                 classNames="modal-trailer"
                 style={ { top: 200, backgroundColor: 'black' } }
                 width={ 500 }
+                maskClosable={ false }  
             >
                 { step === 0 && (
                     <div>

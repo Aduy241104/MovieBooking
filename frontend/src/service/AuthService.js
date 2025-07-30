@@ -1,27 +1,19 @@
 import axiosInstance from "./AxiosConfiguration/axiosInstance";
 
-export const getOtpAPI = async (registerData) => {
+export const registerAccountAPI = async (registerData) => {
     try {
-        const response = await fetch("http://localhost:8081/api/auth/register-2", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(registerData)
-        });
-
-        if (response.status === 409) {
-            return {
-                success: false,
-                message: "Email đã tồn tại. Vui lòng chọn tài khoản khác."
-            }
-        }
-        return { success: true };
-
+        const response = await axiosInstance.post("/auth/register-2", registerData);
+        return response.data;
     } catch (error) {
-        console.error("Lỗi kết nối đến server");
-        return {
-            success: false,
-            message: "Không thế kết nối máy chủ"
+        const status = error.response?.status;
+        const errorCode = error.response?.data?.error;
+
+        if (status === 400 && errorCode === "VALIDATION_FAILED") {
+            throw new Error(error.response.data.message);
+        } else if (status === 409 && errorCode === "EMAIL_ALREADY_EXISTS") {
+            throw new Error("Email đã tồn tại. Vui lòng chọn tài khoản khác.");
         }
+        throw new Error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
     }
 }
 
@@ -52,10 +44,28 @@ export const veiryfyOtpAPI = async (data) => {
     }
 }
 
+export const verifyOTP = async (data) => {
+    try {
+        const response = await axiosInstance.post("/auth/verify-otp", data);
+        return response.data;
+    } catch (error) {
+        const status = error.response?.status;
+        const errorCode = error.response?.data?.error;
+
+        console.log("ERROR TEST: ", error);
+        
+
+        if (status === 400 && errorCode === "BAD_REQUEST") {
+            throw new Error (error.response.data.message);
+        }
+        throw new Error("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
+    }
+}
+
 export const loginOAuth = async (loginData) => {
     try {
         const response = await axiosInstance.post("/auth/login-oauth", loginData);
-        return response.data; // Thành công: trả dữ liệu
+        return response.data;
     } catch (error) {
 
         if (error.response) {
@@ -65,11 +75,9 @@ export const loginOAuth = async (loginData) => {
         if (error.request) {
             throw new Error("Không thể kết nối đến máy chủ.");
         }
-
         throw new Error("Đã xảy ra lỗi không xác định.");
     }
 };
-
 
 export const requestForgotPasswordAPI = async (data) => {
     try {
@@ -83,7 +91,6 @@ export const requestForgotPasswordAPI = async (data) => {
         if (status === 404 && errorCode === "RESOURCE_NOT_FOUND") {
             throw new Error("Tài khoản không tồn tại");
         }
-        
         throw new Error("Đã có lỗi xảy ra, vui lòng thử lại");
     }
 };

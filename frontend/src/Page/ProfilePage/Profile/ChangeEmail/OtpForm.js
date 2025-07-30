@@ -5,6 +5,7 @@ import { confirmChangeEmailAPI } from '../../../../service/ProfileService';
 function OtpForm({ newEmail, nextStep }) {
     const inputRefs = useRef([]);
     const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const [form] = Form.useForm();
 
@@ -50,26 +51,10 @@ function OtpForm({ newEmail, nextStep }) {
         try {
             setLoading(true);
             const response = await confirmChangeEmailAPI(data);
-            if (!response.success) {
-                if (response.status === 401) {
-                    // Đặt lỗi cho tất cả các ô OTP
-                    form.setFields(
-                        Object.keys(values).map((key) => ({
-                            name: key,
-                            errors: [' '], // cần lỗi để hiển thị viền đỏ
-                        }))
-                    );
-                    message.error("OTP không hợp lệ hoặc đã hết hạn");
-                    return;
-                } else {
-                    throw new Error("Lỗi không xác định, vui lòng thử lại sau");
-                }
-            }
-
-            localStorage.setItem("user", JSON.stringify(response.data.result));
+            localStorage.setItem("user", JSON.stringify(response.result));
             nextStep(3);
         } catch (error) {
-            message.error(error.message || "Đã xảy ra lỗi");
+            setError(error.message);
         } finally {
             setLoading(false);
         }
@@ -107,6 +92,7 @@ function OtpForm({ newEmail, nextStep }) {
                 </Space>
             </Form.Item>
 
+            <p className='text-danger'>{ error }</p>
             <Form.Item>
                 <Button
                     type="primary"

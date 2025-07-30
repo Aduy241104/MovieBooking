@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import useAutoRefreshToken from "../hooks/useAutoRefreshToken";
+import { LogOut } from "lucide-react";
 
 export const AuthContext = createContext();
 
@@ -31,6 +32,8 @@ function AuthProvider({ children }) {
         if (savedToken && savedUser) {
             setToken(savedToken);
             setUser(JSON.parse(savedUser));
+        }else {
+            logout();
         }
         setIsAuthLoaded(true);
     }, [])
