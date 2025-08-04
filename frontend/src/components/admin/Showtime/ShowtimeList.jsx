@@ -29,9 +29,9 @@ const ShowtimeList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes("/admin/showtime-list")) {
+    if (location.pathname.includes("/employee/showtime-list") || location.pathname.includes("/admin/showtime-list")) {
       setBreadcrumbItems([
-        { title: "Trang chủ", href: "/admin" },
+        { title: "Trang chủ" },
         { title: "Quản lý lịch chiếu" },
       ]);
     }

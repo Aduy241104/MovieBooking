@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.DTO.request.FareTypeRequest;
-import com.example.demo.DTO.response.FareTypeResponse;
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.model.Account;
 import com.example.demo.model.FareType;
@@ -11,11 +10,10 @@ import com.example.demo.utils.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -27,16 +25,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class FareTypeServiceTest {
 
-    @org.mockito.Mock
+    @Mock
     private FareTypeRepository fareTypeRepository;
 
-    @org.mockito.Mock
+    @Mock
     private AccountRepository accountRepository;
 
-    @org.mockito.Mock
+    @Mock
     private ActivityLogService activityLogService;
 
-    @org.mockito.Mock
+    @Mock
     private NotificationService notificationService;
 
     @InjectMocks
@@ -77,15 +75,35 @@ class FareTypeServiceTest {
 
             when(accountRepository.findById(99L)).thenReturn(Optional.of(mockAccount));
             when(accountRepository.findByRole_RoleName("ADMIN")).thenReturn(Collections.singletonList(mockAccount));
-            when(fareTypeRepository.save(any(FareType.class))).thenReturn(fareType);
+
+            // ✅ Giả lập DB tự gán ID khi save
+            when(fareTypeRepository.save(any(FareType.class))).thenAnswer(invocation -> {
+                FareType saved = invocation.getArgument(0);
+                saved.setId(1L);
+                return saved;
+            });
+
+            // ✅ Cần thêm mock nếu `setLogAndNotification` gọi lại `findById`
+            when(fareTypeRepository.findById(1L)).thenReturn(Optional.of(fareType));
 
             FareType result = fareTypeService.handleCreateFareType(fareTypeRequest);
 
             assertNotNull(result);
             assertEquals("Adult", result.getName());
-            verify(fareTypeRepository, times(1)).save(any(FareType.class));
+
+            ArgumentCaptor<FareType> captor = ArgumentCaptor.forClass(FareType.class);
+            verify(fareTypeRepository).save(captor.capture());
+            FareType saved = captor.getValue();
+
+            assertEquals("Adult", saved.getName());
+            assertEquals(new BigDecimal("100000"), saved.getBasePrice());
+            assertEquals(new BigDecimal("120000"), saved.getDayPrice());
+            assertEquals("Evening", saved.getTimeSlotType());
+            assertEquals("2D", saved.getMovieFormat());
+            assertFalse(saved.getIsDeleted());
         }
     }
+
 
     @Test
     void handleUpdateFareType_success() {
@@ -101,6 +119,16 @@ class FareTypeServiceTest {
 
             assertNotNull(result);
             assertEquals("Adult", result.getName());
+
+            // 👇 Capture and verify updated data
+            ArgumentCaptor<FareType> captor = ArgumentCaptor.forClass(FareType.class);
+            verify(fareTypeRepository).save(captor.capture());
+            FareType updated = captor.getValue();
+
+            assertEquals("Adult", updated.getName());
+            assertEquals("Evening", updated.getTimeSlotType());
+            assertEquals("2D", updated.getMovieFormat());
+            assertEquals(new BigDecimal("120000"), updated.getDayPrice());
         }
     }
 
@@ -118,6 +146,13 @@ class FareTypeServiceTest {
 
             assertNotNull(result);
             assertTrue(result.getIsDeleted());
+
+            // 👇 Verify that isDeleted was set to true
+            ArgumentCaptor<FareType> captor = ArgumentCaptor.forClass(FareType.class);
+            verify(fareTypeRepository).save(captor.capture());
+            FareType deleted = captor.getValue();
+
+            assertTrue(deleted.getIsDeleted());
         }
     }
 
@@ -141,7 +176,8 @@ class FareTypeServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<FareType> page = new PageImpl<>(List.of(fareType), pageable, 1);
 
-        when(fareTypeRepository.findAll(any(), eq(pageable))).thenReturn(page);
+        // ✅ Fix: specify Specification.class to avoid ambiguity
+        when(fareTypeRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(page);
 
         ResPagination result = fareTypeService.fetchAllFareTypes(null, pageable);
 

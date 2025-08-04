@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/fare-types")
+@RequestMapping("/api/admin/fare-types")
 public class FareTypeController {
 
     private static final Logger logger = LoggerFactory.getLogger(FareTypeController.class);
@@ -31,52 +31,52 @@ public class FareTypeController {
         this.fareTypeService = fareTypeService;
     }
 
-    // Thêm mới FareType
+    // Create a new FareType
     @PostMapping("/create")
     public ApiResponse<FareTypeResponse> createFareType(@RequestBody FareTypeRequest request) {
         FareType fareType = fareTypeService.handleCreateFareType(request);
         return ApiResponse.<FareTypeResponse>builder()
                 .status(HttpStatus.CREATED.value())
-                .message("Thêm mới loại giá thành công")
+                .message("Fare type created successfully")
                 .result(convertToResponse(fareType))
                 .build();
     }
 
-    // Sửa FareType
+    // Update an existing FareType
     @PutMapping("/update/{id}")
     public ApiResponse<FareTypeResponse> updateFareType(@PathVariable Long id, @RequestBody FareTypeRequest request) {
         FareType fareType = fareTypeService.handleUpdateFareType(request, id);
         return ApiResponse.<FareTypeResponse>builder()
                 .status(HttpStatus.OK.value())
-                .message("Cập nhật loại giá thành công")
+                .message("Fare type updated successfully")
                 .result(convertToResponse(fareType))
                 .build();
     }
 
-    // Xóa mềm FareType
+    // Soft delete a FareType
     @PutMapping("/is-deleted/{id}")
     public ApiResponse<FareTypeResponse> deleteFareType(@PathVariable Long id) {
-        logger.info("Gọi endpoint xóa mềm FareType với ID: {}", id);
+        logger.info("Calling soft delete FareType endpoint with ID: {}", id);
         FareType fareType = fareTypeService.handleDeleteFareType(id);
         return ApiResponse.<FareTypeResponse>builder()
                 .status(HttpStatus.OK.value())
-                .message("Xóa loại giá thành công")
+                .message("Fare type deleted successfully")
                 .result(convertToResponse(fareType))
                 .build();
     }
 
-    // Lấy danh sách FareType với phân trang và lọc
+    // Get paginated and filtered list of FareTypes
     @GetMapping
     public ApiResponse<ResPagination> getAllFareTypes(
             @Filter Specification<FareType> spec, Pageable pageable) {
         return ApiResponse.<ResPagination>builder()
                 .status(HttpStatus.OK.value())
-                .message("Lấy danh sách loại giá thành công")
+                .message("Fare type list retrieved successfully")
                 .result(fareTypeService.fetchAllFareTypes(spec, pageable))
                 .build();
     }
 
-    // Lấy tất cả FareType chưa bị xóa mềm
+    // Get all FareTypes that are not soft-deleted
     @GetMapping("/getAll")
     public ApiResponse<List<FareTypeResponse>> getAllActiveFareTypes() {
         List<FareType> fareTypes = fareTypeService.fetchFareTypeByIsDeletedFalse();
@@ -85,12 +85,12 @@ public class FareTypeController {
                 .collect(Collectors.toList());
         return ApiResponse.<List<FareTypeResponse>>builder()
                 .status(HttpStatus.OK.value())
-                .message("Lấy tất cả loại giá chưa xóa thành công")
+                .message("All active fare types retrieved successfully")
                 .result(fareTypeResponses)
                 .build();
     }
 
-    // Chuyển đổi từ Entity sang Response DTO
+    // Convert Entity to Response DTO
     private FareTypeResponse convertToResponse(FareType fareType) {
         FareTypeResponse response = new FareTypeResponse();
         BeanUtils.copyProperties(fareType, response);

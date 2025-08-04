@@ -18,11 +18,11 @@ const BookingList = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (location.pathname.includes("/admin/movie-list")) {
+    if (location.pathname.includes("/employee/booking-list") || location.pathname.includes("/admin/booking-list")) {
       setBreadcrumbItems([
-        { title: "Trang chủ", href: "/admin" },
+        { title: "Trang chủ"},
         { title: "Quản lý phim" },
-        { title: "Phim" },
+        { title: "Lịch sử đặt vé" },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);

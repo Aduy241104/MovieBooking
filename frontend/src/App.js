@@ -71,7 +71,8 @@ import PaymentTransactionPage from './components/PaymentTransaction/PaymentTrans
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
   if (!isAuthLoaded) return <div>Loading authentication state...</div>;
-  if (!user || user.role !== "ADMIN") {
+  console.log("user = ", user)
+  if (!user || (user.role !== "ADMIN" && user.role !== "EMPLOYEE")) {
     return <Navigate to="/" replace />;
   }
   return children;
@@ -235,9 +236,9 @@ function App() {
                         </PrivateRoute>
                     }
                 >
-                    <Route index element={<DashboardPage />} />
+                    <Route index element={<MovieList />} />
                     {/* Movie */}
-                    <Route path="movies" element={<MovieList />} />
+                    <Route path="movies" element={<MovieList userText="Phim"/>} />
                     {/* Showtime */}
                     <Route path="showtime-list" element={<ShowtimeList />} />
                     {/* Fare & Booking */}

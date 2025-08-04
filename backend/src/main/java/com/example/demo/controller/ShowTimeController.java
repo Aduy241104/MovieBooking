@@ -13,42 +13,41 @@ import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/movieSchedule/admin")
-@Slf4j
+@RequestMapping("/api/admin/movieSchedule")
 public class ShowTimeController {
 
     @Autowired
-    private ScreeningService screeningService; // Inject service xử lý logic liên quan lịch chiếu
+    private ScreeningService screeningService; // Inject service to handle screening-related logic
 
-    // API thêm mới lịch chiếu
+    // API to add a new screening
     @PostMapping("/add-time")
     public ApiResponse<Screening> addScreening(@RequestBody ScreeningRequest request) {
         try {
-            Screening screening = screeningService.addScreening(request); // Gọi service thêm lịch chiếu
+            Screening screening = screeningService.addScreening(request); // Call service to add screening
             return ApiResponse.<Screening>builder()
-                    .status(HttpStatus.CREATED.value()) // Trả về mã 201 Created
-                    .message("Thêm lịch chiếu thành công")
+                    .status(HttpStatus.CREATED.value()) // Return 201 Created
+                    .message("Screening added successfully")
                     .result(screening)
                     .build();
-        } catch (IllegalArgumentException e) { // Bắt lỗi nếu request không hợp lệ
+        } catch (IllegalArgumentException e) { // Catch invalid request error
             return ApiResponse.<Screening>builder()
-                    .status(HttpStatus.BAD_REQUEST.value()) // Mã lỗi 400
+                    .status(HttpStatus.BAD_REQUEST.value()) // 400 Bad Request
                     .message(e.getMessage())
                     .build();
         }
     }
 
-    // API cập nhật lịch chiếu theo ID
+    // API to update a screening by ID
     @PutMapping("/update-time/{id}")
     public ApiResponse<Screening> updateScreening(@PathVariable Long id, @RequestBody ScreeningRequest request) {
         try {
-            Screening screening = screeningService.updateScreening(id, request); // Gọi service cập nhật
+            Screening screening = screeningService.updateScreening(id, request); // Call service to update screening
             return ApiResponse.<Screening>builder()
-                    .status(HttpStatus.OK.value()) // Mã 200 OK
-                    .message("Cập nhật lịch chiếu thành công")
+                    .status(HttpStatus.OK.value()) // 200 OK
+                    .message("Screening updated successfully")
                     .result(screening)
                     .build();
-        } catch (IllegalArgumentException e) { // Nếu không tìm thấy hoặc dữ liệu không hợp lệ
+        } catch (IllegalArgumentException e) { // Catch if not found or invalid data
             return ApiResponse.<Screening>builder()
                     .status(HttpStatus.BAD_REQUEST.value())
                     .message(e.getMessage())
@@ -56,14 +55,14 @@ public class ShowTimeController {
         }
     }
 
-    // API xóa mềm lịch chiếu (chỉ cập nhật trạng thái isDelete)
+    // API to soft delete a screening (only updates isDelete status)
     @DeleteMapping("/delete-time/{id}")
     public ApiResponse<Void> softDeleteScreening(@PathVariable Long id) {
         try {
-            screeningService.softDeleteScreening(id); // Gọi service để xóa mềm
+            screeningService.softDeleteScreening(id); // Call service to soft delete screening
             return ApiResponse.<Void>builder()
                     .status(HttpStatus.OK.value())
-                    .message("Xóa lịch chiếu thành công")
+                    .message("Screening deleted successfully")
                     .build();
         } catch (IllegalArgumentException e) {
             return ApiResponse.<Void>builder()
@@ -73,13 +72,13 @@ public class ShowTimeController {
         }
     }
 
-    // API lấy danh sách các lịch chiếu chưa bị xóa mềm (isDelete = false)
+    // API to get all screenings that are not soft-deleted (isDelete = false)
     @GetMapping("/list-isdelete")
     public ApiResponse<List<Screening>> getAllActiveScreenings() {
-        List<Screening> screenings = screeningService.getAllActiveScreenings(); // Gọi service lấy danh sách
+        List<Screening> screenings = screeningService.getAllActiveScreenings(); // Call service to fetch the list
         return ApiResponse.<List<Screening>>builder()
                 .status(HttpStatus.OK.value())
-                .message("Danh sách lịch chiếu chưa bị xóa mềm")
+                .message("List of active (non-deleted) screenings")
                 .result(screenings)
                 .build();
     }

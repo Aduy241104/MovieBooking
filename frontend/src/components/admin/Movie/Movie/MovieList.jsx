@@ -5,7 +5,7 @@ import { SquarePen, Trash2 } from "lucide-react";
 import { Link, useLocation, useOutletContext, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const MovieList = () => {
+const MovieList = ({userText}) => {
   const [movies, setMovies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
@@ -21,9 +21,9 @@ const MovieList = () => {
   console.log(">>> Token: " + token)
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movies')) {
+    if (location.pathname.includes('/employee/movies') || location.pathname.includes('/admin/movies')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
+        { title: 'Trang chủ' },
         { title: 'Quản lý phim' },
         { title: 'Phim' },
       ]);

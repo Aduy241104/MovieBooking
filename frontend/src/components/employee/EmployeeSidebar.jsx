@@ -17,11 +17,6 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
   const [openKeys, setOpenKeys] = useState([]);
 
   const items = [
-    {
-      key: "dashboard",
-      icon: <LayoutDashboard size={20} strokeWidth={1.5} />,
-      label: <Link to="/employee">Dashboard</Link>,
-    },
      {
       key: "movie",
       icon: <Film size={20} strokeWidth={1.5} />,
@@ -30,7 +25,7 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
     {   
       key: "showtime-list",
       icon: <CalendarDays size={20} strokeWidth={1.5} />,
-      label: <Link to="/admin/showtime-list">Quản lý lịch chiếu</Link>,
+      label: <Link to="/employee/showtime-list">Quản lý lịch chiếu</Link>,
     },
     {
       key: "faretype",
@@ -62,8 +57,7 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
   // Xác định selectedKeys dựa trên pathname
   const getSelectedKeys = () => {
     const pathname = location.pathname;
-    if (pathname === "/employee") return ["dashboard"];
-    if (pathname.includes("movies")) return ["movies"];
+    if (pathname.includes("movies")) return ["movie"];
     if (pathname.includes("showtime-list")) return ["showtime-list"];
     if (pathname.includes("faretype-list")) return ["faretype-list"];
     if (pathname.includes("booking-list")) return ["booking-list"];
@@ -75,12 +69,8 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
   // Cập nhật openKeys khi pathname thay đổi
   useEffect(() => {
     const pathname = location.pathname;
-    if (pathname.includes("movies")) {
-      setOpenKeys(["movie"]);
-    } else if (pathname.includes("faretype-list") || pathname.includes("booking-list")) {
+    if (pathname.includes("faretype-list") || pathname.includes("booking-list")) {
       setOpenKeys(["faretype"]);
-    } else {
-      setOpenKeys([]);
     }
   }, [location.pathname]);
 
@@ -108,7 +98,7 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
           justifyContent: collapsed ? "center" : "flex-start",
           padding: collapsed ? "0" : "0 24px",
           borderBottom: "1px solid #f0f0f0",
-          background: "#fff",
+          // background: "#fff",
           transition: "all 0.2s",
         }}
       >
@@ -133,7 +123,7 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
         {!collapsed && (
           <span
             style={{
-              color: "#333",
+              color: theme === "dark" ? "#fff" : "#000",
               fontWeight: "600",
               fontSize: "16px",
               whiteSpace: "nowrap",
@@ -146,10 +136,10 @@ export const EmployeeSidebar = ({ collapsed, width, theme }) => {
 
       <Menu
         selectedKeys={getSelectedKeys()}
-        openKeys={collapsed ? [] : openKeys}
+        openKeys={openKeys}
         onOpenChange={handleOpenChange}
         mode="inline"
-        theme="light"
+        theme="dark"
         inlineCollapsed={collapsed}
         items={items}
       />
