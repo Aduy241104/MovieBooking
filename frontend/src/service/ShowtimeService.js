@@ -1,25 +1,28 @@
 import axios from "../config/axios";
 
+// Lấy toàn bộ lịch chiếu đang hoạt động
+const fetchAllActiveShowtimesAPI = () => {
+  return axios.get("/admin/movieSchedule/list-isdelete");
+};
+
 // Thêm lịch chiếu
 const createShowtimeAPI = (showtimeRequest) => {
-    const URL_BACKEND = `/public/movieSchedule/admin/add-time`;
-    return axios.post(URL_BACKEND, showtimeRequest);
+  return axios.post("/admin/movieSchedule/add-time", showtimeRequest);
 };
 
 // Sửa lịch chiếu
 const updateShowtimeAPI = (id, showtimeRequest) => {
-    const URL_BACKEND = `/public/movieSchedule/admin/update-time/${id}`;
-    return axios.put(URL_BACKEND, showtimeRequest);
+  return axios.put(`/admin/movieSchedule/update-time/${id}`, showtimeRequest);
 };
 
 // Xóa mềm lịch chiếu
 const deleteShowtimeAPI = (id) => {
-    const URL_BACKEND = `/public/movieSchedule/admin/delete-time/${id}`;
-    return axios.delete(URL_BACKEND);
+  return axios.delete(`/admin/movieSchedule/delete-time/${id}`);
 };
 
 export {
-    createShowtimeAPI,
-    updateShowtimeAPI,
-    deleteShowtimeAPI
+  fetchAllActiveShowtimesAPI,
+  createShowtimeAPI,
+  updateShowtimeAPI,
+  deleteShowtimeAPI,
 };

@@ -2,19 +2,33 @@ import { DatePicker, Form, Modal, notification, Select } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import axiosInstance from "../../../../config/axios";
+import axios from "axios";
 import { fetchAllActiveFareTypesAPI } from "../../../../service/TicketPriceService";
 
 export const UpdateShowtimeModal = (props) => {
-  const { setRefreshFlag, isUpdateModalOpen, setIsUpdateModalOpen, showtimeData } = props;
+  const {
+    setRefreshFlag,
+    isUpdateModalOpen,
+    setIsUpdateModalOpen,
+    showtimeData,
+  } = props;
+
   const [form] = Form.useForm();
   const [rooms, setRooms] = useState([]);
   const [movies, setMovies] = useState([]);
   const [fareTypes, setFareTypes] = useState([]);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const res = await axiosInstance.get("/public/rooms");
+        const res = await axios.get("http://localhost:8081/api/rooms", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
         const responseData = res.data || res;
         if (Array.isArray(responseData)) {
           const activeRooms = responseData.filter((room) => !room.isDeleted);
@@ -35,10 +49,14 @@ export const UpdateShowtimeModal = (props) => {
 
     const fetchMovies = async () => {
       try {
-        const res = await axiosInstance.get("/public/movies");
-        const responseData = res.data || res;
+        const res = await axios.get("http://localhost:8081/api/movies", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
 
-        // ✅ Xử lý mảng hoặc object có content
+        const responseData = res.data || res;
         if (Array.isArray(responseData)) {
           setMovies(responseData);
         } else if (responseData && Array.isArray(responseData.content)) {
@@ -82,6 +100,7 @@ export const UpdateShowtimeModal = (props) => {
       fetchRooms();
       fetchMovies();
       fetchFareTypes();
+
       if (showtimeData) {
         form.setFieldsValue({
           movieId: showtimeData.movieId,
@@ -91,7 +110,7 @@ export const UpdateShowtimeModal = (props) => {
         });
       }
     }
-  }, [isUpdateModalOpen, showtimeData, form]);
+  }, [isUpdateModalOpen, showtimeData, form, token]);
 
   const handleSubmit = async (values) => {
     try {
@@ -110,7 +129,16 @@ export const UpdateShowtimeModal = (props) => {
         showDateTime: values.showDateTime.format("YYYY-MM-DDTHH:mm:ss"),
       };
 
-      const res = await axiosInstance.put(`/public/movieSchedule/admin/update-time/${showtimeData.id}`, body);
+      const res = await axiosInstance.put(
+        `/movieSchedule/admin/update-time/${showtimeData.id}`,
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       const data = res.data || res;
 
       if (data.status === 200) {
@@ -189,7 +217,11 @@ export const UpdateShowtimeModal = (props) => {
             placeholder="Chọn loại vé"
             options={fareTypes.map((fareType) => ({
               value: fareType.id,
-              label: `${fareType.name} - ${fareType.movieFormat} - ${fareType.basePrice.toLocaleString('vi-VN')} VNĐ - ${fareType.dayPrice.toLocaleString('vi-VN')} VNĐ - ${fareType.timeSlotType || 'Không xác định'}`,
+              label: `${fareType.name} - ${fareType.movieFormat} - ${fareType.basePrice.toLocaleString(
+                "vi-VN"
+              )} VNĐ - ${fareType.dayPrice.toLocaleString("vi-VN")} VNĐ - ${
+                fareType.timeSlotType || "Không xác định"
+              }`,
             }))}
             showSearch
             optionFilterProp="label"
@@ -198,7 +230,7 @@ export const UpdateShowtimeModal = (props) => {
         </Form.Item>
 
         <Form.Item
-          label="Ngày giờ - chiếu"
+          label="Ngày giờ chiếu"
           name="showDateTime"
           rules={[{ required: true, message: "Vui lòng chọn ngày giờ chiếu!" }]}
         >

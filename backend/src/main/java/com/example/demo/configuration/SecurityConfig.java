@@ -48,9 +48,7 @@ public class SecurityConfig {
                         "/avatars/**",
                         "/ws-notification/**",
                         "/api/bookings/payment/vnpay_return",
-                        "/images/**",
-                        "/api/bookings/movie/**", // Thêm endpoint để lấy danh sách hóa đơn theo movieId
-                        "/api/bookings/movie/{movieId}/count" // Thêm endpoint để đếm hóa đơn
+                        "/images/**"
                 )
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable);
