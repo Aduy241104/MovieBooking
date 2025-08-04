@@ -1,4 +1,4 @@
-import { Button, Modal, Tooltip } from "antd";
+import { Button, Modal } from "antd";
 import { Bell } from "lucide-react";
 import NotificationItem from "./NotificationItem";
 import { useNotification } from "../../../context/NotificationContext";

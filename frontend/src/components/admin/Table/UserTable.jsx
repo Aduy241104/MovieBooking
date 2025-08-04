@@ -178,6 +178,7 @@ export const UserTable = (props) => {
                             onClick={() => {
                                 setIsNotificationModalOpen(true);
                                 setPreselectedUser(record);
+                                // console.log("Preselected user for notification:", record);
                             }}
                         >
                             <Bell size={16} strokeWidth={1.7} />

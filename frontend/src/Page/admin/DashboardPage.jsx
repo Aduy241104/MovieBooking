@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Row, Col, Card, Statistic, Spin, message } from "antd";
-import { TrendingUp, Users, Calendar, DollarSign, Eye, Star, UserCheck, Film } from "lucide-react";
+import { TrendingUp, Users, Calendar, DollarSign, UserCheck, Film } from "lucide-react";
 import { RevenueChart } from "../../components/admin/Dashboard/RevenueChart";
 import { MovieChart } from "../../components/admin/Dashboard/MovieChart";
 import { UserChart } from "../../components/admin/Dashboard/UserChart";
@@ -66,11 +66,6 @@ export const DashboardPage = () => {
                     },
                     moviesByType: dashboardSummary.data.charts.moviesByType,
                     userRegistrations: dashboardSummary.data.charts.userRegistrations,
-                    // bookingsByPaymentMethod: [
-                    //     { name: "VNPAY", count: 45, revenue: 55000000 },
-                    //     { name: "Momo", count: 35, revenue: 42000000 },
-                    //     { name: "ZaloPay", count: 20, revenue: 28000000 },
-                    // ],
                 },
                 tables: {
                     topMovies: dashboardSummary.data.tables.topMovies.map((movie, index) => ({
