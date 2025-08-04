@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button, DatePicker, message, Space, Typography } from 'antd';
 import { FileSpreadsheet } from 'lucide-react';
-import dayjs from 'dayjs'; 
-import 'dayjs/locale/vi'; 
+import dayjs from 'dayjs';
+import 'dayjs/locale/vi';
 import weekday from 'dayjs/plugin/weekday';
 import localeData from 'dayjs/plugin/localeData';
 import axiosInstance from '../../config/axiosBooking'; 
 import { useLocation, useOutletContext } from "react-router-dom";
+
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('vi');
@@ -25,7 +26,8 @@ const ExportExcelPage = () => {
             ]);
         }
     }, [location.pathname, setBreadcrumbItems]);
-    const [dates, setDates] = useState([dayjs(), dayjs()]); // Default today
+
+    const [dates, setDates] = useState([dayjs(), dayjs()]);
     const [isExporting, setIsExporting] = useState(false);
 
     const handleDateChange = (dates) => {
@@ -48,26 +50,49 @@ const ExportExcelPage = () => {
 
         try {
             const response = await axiosInstance.get('/admin/export/excel', {
-                params: { startDate, endDate }, 
+                params: { startDate, endDate },
                 responseType: 'blob',
             });
-// Logic Download
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+
+    //Create blob
+            const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            
+            // CreateL object from Blob
+            const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
+    
             const contentDisposition = response.headers['content-disposition'];
             let fileName = `bookings_${startDate}_to_${endDate}.xlsx`;
-            if (contentDisposition) 
+            if (contentDisposition) {
+                const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (fileNameMatch && fileNameMatch.length === 2) {
+                    fileName = fileNameMatch[1];
+                }
+            }
+            
             link.setAttribute('download', fileName);
             document.body.appendChild(link);
             link.click();
-            link.parentNode.removeChild(link);
+            
+            // Clean
+            document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
 
             message.success({ content: 'Tải file thành công!', key: 'exporting', duration: 2 });
         } catch (error) {
             console.error("Error exporting to Excel:", error);
-            message.error({ content: 'Xuất file thất bại!', key: 'exporting', duration: 2 });
+            // Read error from blob
+            if (error.response && error.response.data instanceof Blob && error.response.data.type.includes("application/json")) {
+                 const reader = new FileReader();
+                 reader.onload = function() {
+                     const errorJson = JSON.parse(this.result);
+                     message.error({ content: errorJson.message || 'Xuất file thất bại!', key: 'exporting', duration: 2 });
+                 };
+                 reader.readAsText(error.response.data);
+            } else {
+                 message.error({ content: 'Xuất file thất bại! Kiểm tra lại kết nối hoặc quyền truy cập.', key: 'exporting', duration: 2 });
+            }
         } finally {
             setIsExporting(false);
         }

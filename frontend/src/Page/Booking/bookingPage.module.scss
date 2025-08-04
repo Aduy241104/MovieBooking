@@ -23,7 +23,7 @@ $input-focus-border: #43cea2;
 
 /* general layout  */
 .page-background { padding: 2rem 1rem; }
-.booking-container { display: flex; gap: 2rem; max-width: 1300px; margin: 0 auto; }
+.booking-container { display: flex; gap: 2rem; max-width: 1300px; margin: 0 auto; padding-top: 2%; }
 .main-content { flex: 3; min-width: 0; }
 .sidebar { flex: 2; position: sticky; top: 2rem; align-self: flex-start; min-width: 0; }
 .sidebar-content {

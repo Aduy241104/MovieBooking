@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSeatStatus } from '../../service/ScreeningService';
-import { getActivePaymentMethods } from '../../service/PaymentMethodService';
+import { getActivePaymentMethods } from '../../service/PaymentMethodPublicService';
 import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService'; 
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
