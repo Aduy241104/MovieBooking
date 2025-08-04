@@ -1,12 +1,42 @@
 import { LoadingOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
-import { Avatar, Button, Divider, Form, Input, message, Popconfirm, Tag, Spin, Row, Col, Select, DatePicker, Upload, Modal } from "antd";
-import { Bolt, Cake, Calendar, IdCard, LetterText, Lock, LockOpen, Mail, Phone, UserPen, VenusAndMars } from "lucide-react";
+import {
+    Avatar,
+    Button,
+    Divider,
+    Form,
+    Input,
+    message,
+    Popconfirm,
+    Tag,
+    Spin,
+    Row,
+    Col,
+    Select,
+    DatePicker,
+} from "antd";
+import {
+    Bolt,
+    Cake,
+    Calendar,
+    IdCard,
+    LetterText,
+    Lock,
+    LockOpen,
+    Mail,
+    Phone,
+    UserPen,
+    VenusAndMars,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import dayjs from "dayjs";
-import { fetchAccountByIdAPI, updateAccountInfoAPI, updateAccountStatusAPI, updateAccountAvatarAPI } from "../../service/AccountService";
+import {
+    fetchAccountByIdAPI,
+    updateAccountInfoAPI,
+    updateAccountStatusAPI,
+    updateAccountAvatarAPI,
+} from "../../service/AccountService";
 import { UploadAvatarModal } from "../../components/admin/Modal/users/UploadAvatarModal";
-
 
 export const UserDetailPage = (props) => {
     const { setBreadcrumbItems } = useOutletContext();
@@ -23,15 +53,15 @@ export const UserDetailPage = (props) => {
     const [uploading, setUploading] = useState(false);
 
     const menuItems = [
-        { key: '1', label: <Link to={"/admin/users-members"}>Thành viên</Link> },
-        { key: '2', label: <Link to={"/admin/users-employees"}>Nhân viên</Link> },
+        { key: "1", label: <Link to={"/admin/users-members"}>Thành viên</Link> },
+        { key: "2", label: <Link to={"/admin/users-employees"}>Nhân viên</Link> },
     ];
 
     useEffect(() => {
         setBreadcrumbItems([
-            { title: 'Trang chủ', href: '/admin' },
-            { title: 'Người dùng', menu: { items: menuItems } },
-            { title: userText, href: '/admin' + (userText === "Thành viên" ? '/users-members' : '/users-employees') },
+            { title: "Trang chủ", href: "/admin" },
+            { title: "Người dùng", menu: { items: menuItems } },
+            { title: userText, href: "/admin" + (userText === "Thành viên" ? "/users-members" : "/users-employees") },
             { title: dataUser?.fullName || (loading ? "Đang tải..." : `Chi tiết ${userText.toLowerCase()}`) },
         ]);
     }, [setBreadcrumbItems, dataUser, loading]);
@@ -57,16 +87,16 @@ export const UserDetailPage = (props) => {
     const handleUpdateAccountStatus = async (dataUser) => {
         const res = await updateAccountStatusAPI(dataUser.accountId, dataUser.status === 1 ? 0 : 1);
         if (res && res.result) {
-            setDataUser(prevUser => ({ ...prevUser, status: dataUser.status === 1 ? 0 : 1 }));
+            setDataUser((prevUser) => ({ ...prevUser, status: dataUser.status === 1 ? 0 : 1 }));
             message.success(
                 <span>
-                    {dataUser.status === 0 ? 'Mở khoá tài khoản ' : 'Khoá tài khoản '}
-                    <span className='font-medium'>{dataUser.email}</span>
-                    {' thành công'}
+                    {dataUser.status === 0 ? "Mở khoá tài khoản " : "Khoá tài khoản "}
+                    <span className="font-medium">{dataUser.email}</span>
+                    {" thành công"}
                 </span>
             );
         } else {
-            message.error(`Lỗi: ${res?.error?.message || 'Cập nhật trạng thái thất bại'}`);
+            message.error(`Lỗi: ${res?.error?.message || "Cập nhật trạng thái thất bại"}`);
         }
     };
 
@@ -87,7 +117,7 @@ export const UserDetailPage = (props) => {
             message.error(res?.error?.message || "Cập nhật thông tin thất bại.");
         }
         setIsEditing(false);
-    }
+    };
 
     // if (!dataUser || Object.keys(dataUser).length === 0) {
     //     return <div className="text-center mt-10">Không tìm thấy thông tin thành viên hoặc có lỗi xảy ra.</div>;
@@ -112,44 +142,47 @@ export const UserDetailPage = (props) => {
         try {
             const res = await updateAccountAvatarAPI(accountId, file);
             if (res && res.result) {
-                setDataUser(prev => ({ ...prev, avatar: res.result.avatar }));
-                message.success('Cập nhật ảnh đại diện thành công!');
+                setDataUser((prev) => ({ ...prev, avatar: res.result.avatar }));
+                message.success("Cập nhật ảnh đại diện thành công!");
                 setIsUploadModalOpen(false);
                 if (resetModal) resetModal();
             } else {
-                message.error(res?.error?.message || 'Upload ảnh thất bại!');
+                message.error(res?.error?.message || "Upload ảnh thất bại!");
             }
         } catch (error) {
-            console.error('Error upload file: ', error?.response?.data || error);
-            message.error('Có lỗi xảy ra khi upload ảnh!');
+            console.error("Error upload file: ", error?.response?.data || error);
+            message.error("Có lỗi xảy ra khi upload ảnh!");
         }
         setUploading(false);
     };
 
-
-
     return (
         <>
-            <div style={{
-                padding: 24,
-                // minHeight: 360,
-                background: '#fff',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            }}>
-
+            <div
+                style={{
+                    padding: 24,
+                    // minHeight: 360,
+                    background: "#fff",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                }}
+            >
                 {loading ? (
                     <>
-                        <div className='flex flex-col justify-center items-center gap-3 h-screen'>
+                        <div className="flex flex-col justify-center items-center gap-3 h-screen">
                             <Spin indicator={<LoadingOutlined spin />} size="large" />
-                            <span className='text-xl font-semibold'>Đang tải dữ liệu...</span>
+                            <span className="text-xl font-semibold">Đang tải dữ liệu...</span>
                         </div>
                     </>
                 ) : (
                     <>
                         <div className="flex flex-col md:flex-row items-start md:items-center gap-20 px-4">
                             <div className="flex items-center gap-3 w-full md:w-auto">
-                                <Avatar size={90} src={`${process.env.REACT_APP_BACKEND_URL}/avatars/${dataUser.avatar}`} icon={!dataUser.avatar && <UserOutlined />} />
+                                <Avatar
+                                    size={90}
+                                    src={`${process.env.REACT_APP_BACKEND_URL}/avatars/${dataUser.avatar}`}
+                                    icon={!dataUser.avatar && <UserOutlined />}
+                                />
                                 <div className="flex flex-col gap-1">
                                     <p className="text-lg font-medium">{dataUser.fullName}</p>
                                     <p className="text-base text-cyan-600 font-medium">{userText}</p>
@@ -165,35 +198,45 @@ export const UserDetailPage = (props) => {
 
                             <div className="flex-1 w-full mt-3 md:mt-0">
                                 <div className="flex items-center justify-between mb-2">
-                                    <p className="text-lg font-semibold text-gray-500">Thông tin {userText.toLowerCase()}</p>
+                                    <p className="text-lg font-semibold text-gray-500">
+                                        Thông tin {userText.toLowerCase()}
+                                    </p>
                                     <div className="flex gap-4 items-center">
                                         {!isEditing && (
-                                            <Button icon={<UserPen strokeWidth={1.75} />} onClick={() => setIsEditing(true)}
+                                            <Button
+                                                icon={<UserPen strokeWidth={1.75} />}
+                                                onClick={() => setIsEditing(true)}
                                                 style={{ padding: "18px 12px" }}
                                             >
                                                 Chỉnh sửa
                                             </Button>
                                         )}
-                                        {typeof dataUser.status === 'number' && (
+                                        {typeof dataUser.status === "number" && (
                                             <Popconfirm
                                                 placement="leftTop"
                                                 title={dataUser.status === 0 ? "Mở khoá tài khoản" : "Khoá tài khoản"}
-                                                description={`Xác nhận ${dataUser.status === 0 ? 'mở khoá' : 'khoá'}?`}
+                                                description={`Xác nhận ${dataUser.status === 0 ? "mở khoá" : "khoá"}?`}
                                                 onConfirm={() => handleUpdateAccountStatus(dataUser)}
                                                 okText="Xác nhận"
                                                 cancelText="Huỷ"
                                             >
-                                                <Button danger={dataUser.status === 1} type={dataUser.status === 0 ? "default" : "primary"}
+                                                <Button
+                                                    danger={dataUser.status === 1}
+                                                    type={dataUser.status === 0 ? "default" : "primary"}
                                                     style={{ padding: "18px 12px" }}
                                                 >
-                                                    {dataUser.status === 0 ? <LockOpen strokeWidth={1.75} color="green" /> : <Lock strokeWidth={1.75} />}
+                                                    {dataUser.status === 0 ? (
+                                                        <LockOpen strokeWidth={1.75} color="green" />
+                                                    ) : (
+                                                        <Lock strokeWidth={1.75} />
+                                                    )}
                                                     {dataUser.status === 0 ? " Mở khoá" : " Khoá TK"}
                                                 </Button>
                                             </Popconfirm>
                                         )}
                                     </div>
                                 </div>
-                                <Divider className="mt-0 mb-4" style={{ borderTop: '2px solid #e0e0e0' }} />
+                                <Divider className="mt-0 mb-4" style={{ borderTop: "2px solid #e0e0e0" }} />
 
                                 <Form
                                     form={form}
@@ -207,13 +250,14 @@ export const UserDetailPage = (props) => {
                                                 label="Họ và tên"
                                                 name="fullName"
                                                 rules={[
-                                                    { required: true, message: 'Vui lòng nhập họ tên!' },
-                                                    { min: 2, message: 'Họ tên phải có ít nhất 2 ký tự!' },
-                                                    { max: 50, message: 'Họ tên không được quá 50 ký tự!' },
+                                                    { required: true, message: "Vui lòng nhập họ tên!" },
+                                                    { min: 2, message: "Họ tên phải có ít nhất 2 ký tự!" },
+                                                    { max: 50, message: "Họ tên không được quá 50 ký tự!" },
                                                     {
-                                                        pattern: /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/,
-                                                        message: 'Họ tên chỉ được chứa chữ cái và khoảng trắng!'
-                                                    }
+                                                        pattern:
+                                                            /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/,
+                                                        message: "Họ tên chỉ được chứa chữ cái và khoảng trắng!",
+                                                    },
                                                 ]}
                                             >
                                                 <Input
@@ -227,9 +271,9 @@ export const UserDetailPage = (props) => {
                                                 label="Email"
                                                 name="email"
                                                 rules={[
-                                                    { required: true, message: 'Vui lòng nhập email!' },
-                                                    { type: 'email', message: 'Địa chỉ email không hợp lệ!' },
-                                                    { max: 100, message: 'Email không được quá 100 ký tự!' }
+                                                    { required: true, message: "Vui lòng nhập email!" },
+                                                    { type: "email", message: "Địa chỉ email không hợp lệ!" },
+                                                    { max: 100, message: "Email không được quá 100 ký tự!" },
                                                 ]}
                                             >
                                                 <Input
@@ -242,13 +286,13 @@ export const UserDetailPage = (props) => {
                                             <Form.Item
                                                 label="Giới tính"
                                                 name="gender"
-                                                rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                                                rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
                                             >
                                                 <Select
                                                     prefix={<VenusAndMars size={20} strokeWidth={1.5} />}
                                                     placeholder="Chọn giới tính"
                                                     disabled={!isEditing}
-                                                // allowClear
+                                                    // allowClear
                                                 >
                                                     <Select.Option value="Nam">Nam</Select.Option>
                                                     <Select.Option value="Nữ">Nữ</Select.Option>
@@ -264,38 +308,47 @@ export const UserDetailPage = (props) => {
                                                         validator: (_, value) => {
                                                             if (!value) return Promise.resolve();
                                                             const today = dayjs();
-                                                            const age = today.diff(value, 'year');
+                                                            const age = today.diff(value, "year");
                                                             if (age < 16) {
-                                                                return Promise.reject(new Error('Tuổi phải từ 16 trở lên!'));
+                                                                return Promise.reject(
+                                                                    new Error("Tuổi phải từ 16 trở lên!")
+                                                                );
                                                             }
                                                             if (age > 100) {
-                                                                return Promise.reject(new Error('Tuổi không được quá 100!'));
+                                                                return Promise.reject(
+                                                                    new Error("Tuổi không được quá 100!")
+                                                                );
                                                             }
                                                             return Promise.resolve();
-                                                        }
-                                                    }
+                                                        },
+                                                    },
                                                 ]}
                                             >
                                                 <DatePicker
                                                     prefix={<Cake size={20} strokeWidth={1.5} />}
-                                                    style={{ width: '100%' }}
+                                                    style={{ width: "100%" }}
                                                     format="DD/MM/YYYY"
                                                     disabled={!isEditing}
                                                     disabledDate={(current) => {
                                                         // Không cho chọn ngày trong tương lai và quá 80 năm trước
                                                         const today = dayjs();
-                                                        const eightyYearsAgo = today.subtract(80, 'year');
+                                                        const eightyYearsAgo = today.subtract(80, "year");
                                                         return current && (current > today || current < eightyYearsAgo);
                                                     }}
                                                     placeholder="Chọn ngày sinh"
                                                 />
                                             </Form.Item>
 
-
                                             <Form.Item label="Ngày tạo">
                                                 <Input
                                                     prefix={<Calendar size={20} strokeWidth={1.5} />}
-                                                    value={dataUser.registerDate ? dayjs(dataUser.registerDate).format("DD/MM/YYYY hh:mm:ss A") : ""}
+                                                    value={
+                                                        dataUser.registerDate
+                                                            ? dayjs(dataUser.registerDate).format(
+                                                                  "DD/MM/YYYY hh:mm:ss A"
+                                                              )
+                                                            : ""
+                                                    }
                                                     disabled
                                                 />
                                             </Form.Item>
@@ -308,19 +361,24 @@ export const UserDetailPage = (props) => {
                                                 rules={[
                                                     {
                                                         pattern: /^0[0-9]{9}$/,
-                                                        message: 'Số điện thoại phải có 10 chữ số!'
+                                                        message: "Số điện thoại phải có 10 chữ số!",
                                                     },
                                                     {
                                                         validator: (_, value) => {
                                                             if (!value) return Promise.resolve();
                                                             // Kiểm tra số điện thoại Việt Nam
-                                                            const phoneRegex = /^0(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/;
+                                                            const phoneRegex =
+                                                                /^0(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/;
                                                             if (!phoneRegex.test(value)) {
-                                                                return Promise.reject(new Error('Số điện thoại không đúng định dạng Việt Nam!'));
+                                                                return Promise.reject(
+                                                                    new Error(
+                                                                        "Số điện thoại không đúng định dạng Việt Nam!"
+                                                                    )
+                                                                );
                                                             }
                                                             return Promise.resolve();
-                                                        }
-                                                    }
+                                                        },
+                                                    },
                                                 ]}
                                             >
                                                 <Input
@@ -341,18 +399,18 @@ export const UserDetailPage = (props) => {
                                                 rules={[
                                                     {
                                                         pattern: /^[0-9]{12}$/,
-                                                        message: 'CCCD phải có đúng 12 chữ số!'
+                                                        message: "CCCD phải có đúng 12 chữ số!",
                                                     },
                                                     {
                                                         validator: (_, value) => {
                                                             if (!value) return Promise.resolve();
                                                             // Kiểm tra CCCD không được toàn số giống nhau
                                                             if (/^(\d)\1{11}$/.test(value)) {
-                                                                return Promise.reject(new Error('CCCD không hợp lệ!'));
+                                                                return Promise.reject(new Error("CCCD không hợp lệ!"));
                                                             }
                                                             return Promise.resolve();
-                                                        }
-                                                    }
+                                                        },
+                                                    },
                                                 ]}
                                             >
                                                 <Input
@@ -372,18 +430,24 @@ export const UserDetailPage = (props) => {
                                                             if (value !== undefined && value !== null) {
                                                                 const num = Number(value);
                                                                 if (isNaN(num)) {
-                                                                    return Promise.reject(new Error('Điểm phải là số!'));
+                                                                    return Promise.reject(
+                                                                        new Error("Điểm phải là số!")
+                                                                    );
                                                                 }
                                                                 if (num < 0) {
-                                                                    return Promise.reject(new Error('Điểm không được âm!'));
+                                                                    return Promise.reject(
+                                                                        new Error("Điểm không được âm!")
+                                                                    );
                                                                 }
                                                                 if (num > 999999) {
-                                                                    return Promise.reject(new Error('Điểm không được quá 999,999!'));
+                                                                    return Promise.reject(
+                                                                        new Error("Điểm không được quá 999,999!")
+                                                                    );
                                                                 }
                                                             }
                                                             return Promise.resolve();
-                                                        }
-                                                    }
+                                                        },
+                                                    },
                                                 ]}
                                             >
                                                 <Input
@@ -404,20 +468,26 @@ export const UserDetailPage = (props) => {
 
                                             {isEditing && (
                                                 <Form.Item>
-                                                    <Button type="primary" htmlType="submit" loading={loading} className="me-2">
+                                                    <Button
+                                                        type="primary"
+                                                        htmlType="submit"
+                                                        loading={loading}
+                                                        className="me-2"
+                                                    >
                                                         Lưu thay đổi
                                                     </Button>
-                                                    <Button onClick={() => {
-                                                        setIsEditing(false);
-                                                        form.resetFields();
-                                                    }}>
+                                                    <Button
+                                                        onClick={() => {
+                                                            setIsEditing(false);
+                                                            form.resetFields();
+                                                        }}
+                                                    >
                                                         Huỷ
                                                     </Button>
                                                 </Form.Item>
                                             )}
                                         </Col>
                                     </Row>
-
                                 </Form>
                             </div>
                         </div>
@@ -432,9 +502,7 @@ export const UserDetailPage = (props) => {
                         />
                     </>
                 )}
-
             </div>
-
         </>
     );
-}
+};
