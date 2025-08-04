@@ -22,7 +22,7 @@ function Header() {
     const navigate = useNavigate();
 
     const items = menu();
-
+    
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 70) {
@@ -37,21 +37,21 @@ function Header() {
     }, []);
 
     return (
-        <header className={cx("header", { scrolled: isScrolled })}>
+        <header className={ cx("header", { scrolled: isScrolled }) }>
             <div className="container-fluid px-3 h-100">
                 <div className="d-flex justify-content-between align-items-center py-2 h-100">
-                    {/* Logo */}
+                    {/* Logo */ }
                     <div className="text-light ms-md-5">
-                        <CustomizeText level={"h4"}>G4</CustomizeText>
+                        <CustomizeText level={ "h4" }>G4</CustomizeText>
                     </div>
 
-                    {/* Menu Toggle - Mobile only */}
+                    {/* Menu Toggle - Mobile only */ }
                     <button className="d-lg-none bg-transparent border-0 text-white d-flex align-items-center">
                         <Search />
-                        <i onClick={toggleMenu} className="fa-solid fa-bars fa-xl"></i>
+                        <i onClick={ toggleMenu } className="fa-solid fa-bars fa-xl"></i>
                     </button>
 
-                    {/* Navigation & Actions - Desktop */}
+                    {/* Navigation & Actions - Desktop */ }
                     <div className="me-5 d-none d-lg-flex justify-content-center align-items-center flex-grow-1">
                         <nav className="d-flex justify-content-end me-5 flex-fill ms-5">
                             <ul className="d-flex justify-content-evenly align-items-center text-light fw-bold list-unstyled mb-0 gap-4">
@@ -79,7 +79,7 @@ function Header() {
                                         <Dropdown menu={{ items }} trigger={["click"]} placement="bottomRight">
                                             <span className="d-flex" style={{ cursor: "pointer", marginLeft: 16 }}>
                                                 <Avatar
-                                                    src={user.avatar + ""}
+                                                    src={ user.avatar + "" }
                                                     fallBack="/Assests/Image/Screenshot 2025-06-13 102311.png"
                                                 />
                                                 <i className="fa-solid fa-sort-down ms-2 fs-8 mt-2 text-light"></i>
@@ -88,24 +88,24 @@ function Header() {
                                     </div>
                                 </>
                             ) : (
-                                <CustomizeButton className={cx("login-btn", "fs-7")} to="/login" primary small rounded>
-                                    <p style={{ lineHeight: "25px" }}>
+                                <CustomizeButton className={ cx("login-btn", "fs-7") } to="/login" primary small rounded>
+                                    <p style={ { lineHeight: "25px" } }>
                                         <i className="fa-solid fa-user me-1"></i> Đăng nhập
                                     </p>
                                 </CustomizeButton>
-                            )}
+                            ) }
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Mobile Menu */}
-            {isMenuOpen && (
-                <div className={cx("mobileMenu")}>
+            {/* Mobile Menu */ }
+            { isMenuOpen && (
+                <div className={ cx("mobileMenu") }>
                     <div className="d-flex justify-content-between align-items-center mb-3">
-                        <CustomizeText level={"h4"}>MENU</CustomizeText>
+                        <CustomizeText level={ "h4" }>MENU</CustomizeText>
 
-                        <button className="bg-transparent border-0 text-white" onClick={closeMenu}>
+                        <button className="bg-transparent border-0 text-white" onClick={ closeMenu }>
                             <i className="fa-solid fa-xmark fa-xl"></i>
                         </button>
                     </div>
@@ -123,7 +123,7 @@ function Header() {
                         </CustomizeButton>
                     </div>
                 </div>
-            )}
+            ) }
         </header>
     );
 }

@@ -26,7 +26,7 @@ $red-hover-border: #ffcdd2;
     padding: 20px;
     background-color: transparent; 
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05); // Bóng đổ và viền sáng nhẹ
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05); 
     color: $light-text-primary;
 }
 
@@ -54,8 +54,7 @@ $red-hover-border: #ffcdd2;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: #adb5bd $light-surface-alt; // Màu scrollbar
-
+    scrollbar-color: #adb5bd $light-surface-alt; 
     &::-webkit-scrollbar { height: 6px; }
     &::-webkit-scrollbar-track { background: $light-surface-alt; border-radius: 3px; }
     &::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 3px; border: 1px solid $light-surface-alt; }
@@ -164,7 +163,7 @@ $red-hover-border: #ffcdd2;
       outline: none;
       box-shadow: 0 0 0 0.2rem rgba(red($primary-color), green($primary-color), blue($primary-color), 0.3);
     }
-    .time-separator, .time-end { // Giữ nguyên font-size mặc định của nút (fs-7)
+    .time-separator, .time-end { 
         opacity: 0.9;
     }
 }

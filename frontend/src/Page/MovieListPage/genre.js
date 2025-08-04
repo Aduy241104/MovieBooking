@@ -8,7 +8,6 @@ const GENRES = [
     "Hài hước",
     "Chiến tranh",
     "Khoa học viễn tưởng"
-    // ... thêm hoặc xóa dễ dàng
 ];
 
 const getGenreList = (setGenre) => {
