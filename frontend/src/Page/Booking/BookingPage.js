@@ -2,16 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSeatStatus } from '../../service/ScreeningService';
 import { getActivePaymentMethods } from '../../service/PaymentMethodPublicService';
-import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService'; 
+import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService';
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
-import DefaultLayout from '../../layouts/DefaultLayout'; 
-import styles from './bookingPage.module.scss'; 
+import DefaultLayout from '../../layouts/DefaultLayout';
+import styles from './bookingPage.module.scss';
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { message, Modal } from 'antd';
+import { message, Modal, Slider, InputNumber } from 'antd';
 const cx = classNames.bind(styles);
 
 const BookingPage = () => {
@@ -20,7 +20,7 @@ const BookingPage = () => {
     const { user } = useContext(AuthContext);
     const { screeningInfo, movieInfo } = location.state || {};
 
-   // States for data loaded from API
+    // States for data loaded from API
     const [seats, setSeats] = useState([]);
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [userPoints, setUserPoints] = useState(0);
@@ -29,8 +29,7 @@ const BookingPage = () => {
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
     const [promotionCode, setPromotionCode] = useState('');
-    const [pointsToUse, setPointsToUse] = useState('');
-
+    const [pointsToUse, setPointsToUse] = useState(0);
     // States for computed values
     const [totalPrice, setTotalPrice] = useState(0);
     const [discountAmount, setDiscountAmount] = useState(0);
@@ -44,7 +43,6 @@ const BookingPage = () => {
     const [checkingPromotion, setCheckingPromotion] = useState(false);
     const [promotionError, setPromotionError] = useState('');
     const [promotionSuccess, setPromotionSuccess] = useState('');
-    const [pointsInputError, setPointsInputError] = useState('');
     const [appliedPromotion, setAppliedPromotion] = useState(null);
 
     useEffect(() => {
@@ -128,7 +126,7 @@ const BookingPage = () => {
 
         const finalTotalAfterPromotion = currentTotal - currentDiscount;
 
-       // 3. Calculate discount from point 
+        // 3. Calculate discount from point 
         let currentPointsDiscount = 0;
         const pointsInputValue = parseInt(pointsToUse) || 0;
         if (pointsInputValue > 0) {
@@ -140,12 +138,12 @@ const BookingPage = () => {
         }
         setPointsDiscount(currentPointsDiscount);
 
-       // 4. Calculate final price
+        // 4. Calculate final price
         setFinalPrice(Math.max(0, finalTotalAfterPromotion - currentPointsDiscount));
 
     }, [selectedSeats, appliedPromotion, pointsToUse, screeningInfo]);
 
-  // Event handler functions
+    // Event handler functions
     const handleSeatSelect = (seatFromMap) => {
         setSelectedSeats(prevSeats => {
             const isSelected = prevSeats.find(s => s.seatId === seatFromMap.seatId);
@@ -163,71 +161,73 @@ const BookingPage = () => {
         });
     };
 
-      const handleApplyPromotion = async () => {
-   
-    // Update UI status to start the process
-    setCheckingPromotion(true);
-    setPromotionError('');
-    setPromotionSuccess('');
-    setAppliedPromotion(null);
+    const handleApplyPromotion = async () => {
 
-    try {
-        // Call API - This is the only interaction with backend
-        const response = await checkPromotion(promotionCode);
+        // Update UI status to start the process
+        setCheckingPromotion(true);
+        setPromotionError('');
+        setPromotionSuccess('');
+        setAppliedPromotion(null);
 
-        // Handling when API returns successfully (http 200)
-        const promoData = response.data.result;
+        try {
+            // Call API - This is the only interaction with backend
+            const response = await checkPromotion(promotionCode);
 
-        // Logic check depends on the current state of the order (Totalprice)
-        if (totalPrice < parseFloat(promoData.minOrder)) {
-            const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
-            const errorMessage = `Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`;
-            
-            setPromotionError(errorMessage); 
-            message.error(errorMessage);     
-            return; 
-        }
+            // Handling when API returns successfully (http 200)
+            const promoData = response.data.result;
 
-        // If all conditions are satisfied
-        setAppliedPromotion(promoData);
-        setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
-        message.success('Áp dụng mã khuyến mãi thành công!');
+            // Logic check depends on the current state of the order (Totalprice)
+            if (totalPrice < parseFloat(promoData.minOrder)) {
+                const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
+                const errorMessage = `Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`;
 
-    } catch (err) {
-       // 5. Handling when API returns error (http 4xx, 5xx) 
-// All professional errors from the backend (wrong code, expired)
-        console.error("Error applying promotion:", err);
-        
-       // Take the exact error message from Apiresponse that GlobalexceptiHandler created
-        const errorMessage = err.response?.data?.message || 'Không thể kết nối hoặc có lỗi xảy ra.';
-        setPromotionError(errorMessage); 
-        message.error(errorMessage);    
-        
-    } finally {
-        // 6. Update the UI state after the ending process
-        setCheckingPromotion(false);
-    }
-};
-    const handlePointsInputChange = (e) => {
-        const value = e.target.value;
-        setPointsInputError('');
-        if (value === '' || /^[0-9\b]+$/.test(value)) {
-            const numValue = parseInt(value) || 0;
-            if (numValue < 0) {
-                setPointsInputError('Số điểm không được âm.');
-                setPointsToUse('');
-            } else if (numValue > userPoints) {
-                setPointsInputError(`Bạn chỉ có ${userPoints.toLocaleString('vi-VN')} điểm.`);
-                setPointsToUse(userPoints.toString());
-            } else {
-                setPointsToUse(value);
+                setPromotionError(errorMessage);
+                message.error(errorMessage);
+                return;
             }
-        } else {
-            setPointsInputError('Vui lòng chỉ nhập số.');
+
+            // If all conditions are satisfied
+            setAppliedPromotion(promoData);
+            setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
+            message.success('Áp dụng mã khuyến mãi thành công!');
+
+        } catch (err) {
+            // 5. Handling when API returns error (http 4xx, 5xx) 
+            // All professional errors from the backend (wrong code, expired)
+            console.error("Error applying promotion:", err);
+
+            // Take the exact error message from Apiresponse that GlobalexceptiHandler created
+            const errorMessage = err.response?.data?.message || 'Không thể kết nối hoặc có lỗi xảy ra.';
+            setPromotionError(errorMessage);
+            message.error(errorMessage);
+
+        } finally {
+            // 6. Update the UI state after the ending process
+            setCheckingPromotion(false);
         }
     };
+    const handlePointsChange = (value) => {
+        if (value === null || isNaN(Number(value)) || value < 0) {
+            setPointsToUse(0);
+            return;
+        }
 
-    
+        if (value > userPoints) {
+            setPointsToUse(userPoints);
+            return;
+        }
+
+        setPointsToUse(value);
+    };
+
+    const handleUseMaxPoints = () => {
+        setPointsToUse(userPoints);
+    };
+
+    const handleCancelPoints = () => {
+        setPointsToUse(0);
+    };
+
 
     const formatScreeningTime = (isoDateTimeString) => {
         if (!isoDateTimeString) return "N/A";
@@ -252,12 +252,8 @@ const BookingPage = () => {
         setPromotionSuccess('');
     };
 
-    const handleCancelPoints = () => {
-        setPointsToUse('');
-        setPointsInputError('');
-    };
 
-  // Erase the error when the user starts to enter again
+    // Erase the error when the user starts to enter again
     const handlePromotionCodeChange = (e) => {
         setPromotionCode(e.target.value);
         if (promotionError) setPromotionError('');
@@ -322,7 +318,7 @@ const BookingPage = () => {
         }
     };
 
-   const handleSeatExpire = () => {
+    const handleSeatExpire = () => {
         getSeatStatus(screeningInfo.screeningId)
             .then(response => {
                 if (response.data && response.data.result) {
@@ -373,7 +369,7 @@ const BookingPage = () => {
                                 selectedSeats={selectedSeats}
                                 onSeatSelect={handleSeatSelect}
                                 screeningInfo={screeningInfo}
-                                 onSeatExpire={handleSeatExpire} 
+                                onSeatExpire={handleSeatExpire}
                             />
                         </div>
                     </div>
@@ -391,22 +387,56 @@ const BookingPage = () => {
                                 finalPrice={finalPrice}
                             />
 
-                           {/* Discount area */}
+                            {/* Discount area */}
                             <div className={cx('discount-area', { 'disabled': !canApplyDiscount })}>
-                               {/* Bonus point */}
-                                <div className={cx('discount-section')}>
+                                {/* Bonus point */}
+                                <div className={cx('discount-section', 'points-section')}>
                                     <div className={cx('section-header')}>
                                         <h5><i className="fas fa-star"></i> Sử dụng điểm</h5>
-                                        {pointsToUse && <button onClick={handleCancelPoints} className={cx('btn-cancel')}>Hủy</button>}
+                                        {pointsToUse > 0 && (
+                                            <button onClick={handleCancelPoints} className={cx('btn-cancel')}>Xóa</button>
+                                        )}
                                     </div>
-                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')} | 1.000 điểm = 1.000 VND</strong></p>
-                                    <div className={cx('input-group')}>
-                                        <input type="text" className={cx('form-control', { 'is-invalid': pointsInputError })} placeholder="Nhập số điểm" value={pointsToUse} onChange={handlePointsInputChange} disabled={!canApplyDiscount} />
+                                    <div className={cx('points-info')}>
+                                        <span className={cx('points-available')}>
+                                            Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong>
+                                        </span>
+                                        {userPoints > 0 && pointsToUse < userPoints && (
+                                            <button onClick={handleUseMaxPoints} className={cx('btn-use-max')}>Dùng hết</button>
+                                        )}
                                     </div>
-                                    {pointsInputError && <div className={cx('invalid-feedback')}>{pointsInputError}</div>}
+
+                                    <div className={cx('points-input-slider')}>
+                                        <Slider
+                                            min={0}
+                                            max={userPoints > 0 ? userPoints : 1}
+                                            step={1000}
+                                            value={pointsToUse}
+                                            onChange={handlePointsChange}
+                                            disabled={!canApplyDiscount || userPoints === 0}
+                                            className={cx('points-slider')}
+                                        />
+                                        <InputNumber
+                                            min={0}
+                                            max={userPoints}
+                                            step={1000}
+                                            value={pointsToUse}
+                                            onChange={handlePointsChange}
+                                            disabled={!canApplyDiscount || userPoints === 0}
+                                            className={cx('points-input')}
+                                            formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                            parser={(value) => value.replace(/\s?|(,*)/g, '')}
+                                        />
+                                    </div>
+
+                                    {pointsDiscount > 0 && (
+                                        <p className="text-success small mt-2">
+                                            Áp dụng giảm: <strong>{pointsDiscount.toLocaleString('vi-VN')}đ</strong>
+                                        </p>
+                                    )}
                                 </div>
 
-                               {/* Promotion code */}
+                                {/* Promotion code */}
                                 <div className={cx('discount-section')}>
                                     <div className={cx('section-header')}>
                                         <h5><i className="fas fa-tags"></i> Mã khuyến mãi</h5>
@@ -419,7 +449,7 @@ const BookingPage = () => {
                                                 className={cx('form-control')}
                                                 placeholder="Nhập mã"
                                                 value={promotionCode}
-                                                onChange={handlePromotionCodeChange} 
+                                                onChange={handlePromotionCodeChange}
                                                 disabled={checkingPromotion || !canApplyDiscount}
                                             />
                                             <button
