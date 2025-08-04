@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { veiryfyOtpAPI } from "../../service/AuthService";
+import { verifyOTP } from "../../service/AuthService";
 import ErrorNotification from "../../components/ErrorNotification/ErrorNotification";
-import { Modal } from "antd"; 
+import { Modal } from "antd";
+
 
 function VerifyOtpForm({ registerRequest }) {
     const [otp, setOtp] = useState("");
     const [errorMessage, setErrorMesage] = useState("");
     const [isLoading, setLoading] = useState(false);
-    const [isSuccessModalOpen, setSuccessModalOpen] = useState(false); 
+    const [isSuccessModalOpen, setSuccessModalOpen] = useState(false);
 
     const handleChangeOtp = (e) => {
         setErrorMesage("");
@@ -16,6 +17,19 @@ function VerifyOtpForm({ registerRequest }) {
             setOtp(value);
         }
     };
+
+    const hanleVerifyOTP = async (data) => {
+
+        setLoading(true);
+        try {
+            const response = await verifyOTP(data);
+            setSuccessModalOpen(true);
+        } catch (error) {
+            setErrorMesage(error.message);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const handleSubmitOtp = async (e) => {
         e.preventDefault();
@@ -26,13 +40,7 @@ function VerifyOtpForm({ registerRequest }) {
                 registerRequest: registerRequest
             };
 
-            const response = await veiryfyOtpAPI(payload);
-            if (!response.success) {
-                setErrorMesage(response.message);
-            } else {
-                setSuccessModalOpen(true);
-            }
-            setLoading(false);
+           await hanleVerifyOTP(payload);
         } else {
             alert("Vui lòng nhập đủ 6 số OTP");
         }
@@ -51,7 +59,6 @@ function VerifyOtpForm({ registerRequest }) {
                 <p className="text-center text-light">
                     Mã xác thực đã gửi đến email <strong>{ registerRequest.email }</strong>
                 </p>
-
                 <div className="d-flex justify-content-center mb-3">
                     <input
                         type="text"
@@ -73,7 +80,7 @@ function VerifyOtpForm({ registerRequest }) {
                     ) : "Xác minh" }
                 </button>
             </form>
-            
+
             <Modal
                 title="Xác thực thành công"
                 open={ isSuccessModalOpen }
