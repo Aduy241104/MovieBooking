@@ -1,17 +1,19 @@
 import { useContext, useState, useEffect } from "react";
 import Header from "./Header";
-// import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import GoToTop from "../../components/GoToTop/GoToTop";
 // import { AIChatBox } from "../../components/AIChatBox/AIChatBox";
 import Footer from "./Footer/Footer";
 
 function DefaultLayout({ children }) {
-    // const { user, logout } = useContext(AuthContext);
-    // const [isLogin, setLogin] = useState(user);
+    const { user, logout } = useContext(AuthContext);
+    const [isLogin, setLogin] = useState(user);
 
-    // useEffect(() => {
-    //     setLogin(user);
-    // }, [user]);
+    useEffect(() => {
+        setLogin(user);
+    }, [user]);
+
+
 
     return (
         <div className="bg-midnight position-relative">

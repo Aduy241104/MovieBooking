@@ -17,11 +17,10 @@ const ReviewList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes("/admin/review-list")) {
+    if (location.pathname.includes("/employee/review-list") || location.pathname.includes("/admin/review-list")) {
       setBreadcrumbItems([
-        { title: "Trang chủ", href: "/admin" },
-        { title: "Quản lý đánh giá" },
-        { title: "Danh sách đánh giá phim" },
+        { title: "Trang chủ"},
+        { title: "Quản lý bình luận" },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
@@ -30,7 +29,7 @@ const ReviewList = () => {
     async (retries = 3) => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:8081/api/public/movies", {
+        const res = await axios.get("http://localhost:8081/api/movies", {
           params: {
             search: searchText,
             page: page - 1,

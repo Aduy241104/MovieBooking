@@ -11,7 +11,7 @@ export default function AddMovie() {
       setBreadcrumbItems([
         { title: 'Trang chủ' },
         { title: 'Quản lý phim' },
-        { title: 'Phim' },
+        { title: 'Phim', href:"/admin/movies" },
         { title: 'Thêm phim' },
       ]);
     }

@@ -89,7 +89,7 @@ public class AuthTest {
         when(accountMapper.toAccountRespond(account)).thenReturn(accountRespond);
 
         // Act
-        AuthRespond response = authService.auth(request);
+        AuthRespond response = authService.login(request);
 
         // Assert
         assertNotNull(response);
@@ -108,7 +108,7 @@ public class AuthTest {
 
         when(accountRepository.findByEmailAndStatus(email, 1)).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> authService.auth(authenticationRequest));
+        assertThrows(NotFoundException.class, () -> authService.login(authenticationRequest));
 
     }
 
@@ -128,7 +128,7 @@ public class AuthTest {
         when(accountRepository.findByEmailAndStatus(email, 1)).thenReturn(Optional.of(account));
         when(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false);
 
-        assertThrows(UnauthorizedException.class, () -> authService.auth(authenticationRequest));
+        assertThrows(UnauthorizedException.class, () -> authService.login(authenticationRequest));
 
     }
 

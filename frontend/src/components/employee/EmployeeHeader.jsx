@@ -14,10 +14,18 @@ export const EmployeeHeader = (props) => {
     // console.log("AdminHeader rendered", user);
 
     useEffect(() => {
-        if (location.pathname === "/employee") {
-            setTitle("BẢNG ĐIỀU KHIỂN");
-        } else if (location.pathname.includes("users-members")) {
-            setTitle("QUẢN LÝ THÀNH VIÊN");
+        if (location.pathname === "/employee/movies") {
+            setTitle("DANH SÁCH PHIM");
+        } else if (location.pathname.includes("showtime-list")) {
+            setTitle("QUẢN LÝ LỊCH CHIẾU");
+        } else if (location.pathname.includes("faretype-list")) {
+            setTitle("LOẠI GIÁ VÉ");
+        } else if (location.pathname.includes("booking-list")) {
+            setTitle("LỊCH SỬ ĐẶT VÉ");
+        } else if (location.pathname.includes("review-list")) {
+            setTitle("QUẢN LÝ BÌNH LUẬN");
+        } else if (location.pathname.includes("activity-logs")) {
+            setTitle("QUẢN LÝ HOẠT ĐỘNG");
         }
     }, [location.pathname]);
 

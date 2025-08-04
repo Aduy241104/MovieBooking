@@ -74,12 +74,9 @@ function Avatar({ originalImage, gender = "Male" }) {
             }
 
             const responseUploadSystem = await updateAvatarAPI(data);
-            if (!responseUploadSystem.success) {
-                throw new Error(responseUploadSystem.message);
-            }
-
+        
             openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.");
-            localStorage.setItem("user", JSON.stringify(responseUploadSystem.data.result))
+            localStorage.setItem("user", JSON.stringify(responseUploadSystem.result))
         } catch (error) {
             openNotification("error", "Lỗi cập nhật", error.message);
         } finally {

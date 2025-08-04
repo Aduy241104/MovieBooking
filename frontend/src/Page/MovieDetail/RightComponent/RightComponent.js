@@ -14,7 +14,7 @@ const cx = classNames.bind(styles);
 
 function RightComponent(props) {
     const [isOpenTrailer, setOpenTrailer] = useState(false);
-    const { movie} = props; // <<<< NHẬN movie TỪ PROPS/locpng
+    const { movie} = props; 
    
     return (
         <div className='w-100'>

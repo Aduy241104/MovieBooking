@@ -13,6 +13,7 @@ import EditTypeForm from './EditTypeForm';
 import AddTypeForm from './AddTypeForm';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axiosClient from '../../../../config/axios';
+import { useLocation, useOutletContext } from 'react-router-dom';
 
 export default function TypeList() {
   const [types, setTypes] = useState([]);
@@ -22,6 +23,18 @@ export default function TypeList() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editTypeId, setEditTypeId] = useState(null);
+  const { setBreadcrumbItems } = useOutletContext();
+  const location = useLocation();
+
+    // Cập nhật breadcrumb nếu đang ở /admin/room-list
+    useEffect(() => {
+      if (location.pathname === "/admin/movie-type") {
+        setBreadcrumbItems([
+          { title: "Trang chủ" },
+          { title: "Quản lý thể loại phim" },
+        ]);
+      }
+    }, [location.pathname, setBreadcrumbItems]);
 
   const fetchTypes = useCallback(async () => {
     try {

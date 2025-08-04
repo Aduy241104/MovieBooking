@@ -1,7 +1,7 @@
 import AuhenticationLayout from '../../layouts/AuthenticationLayout'
 import { useState } from 'react'
 import VerifyOtpForm from './OtpInput';
-import { getOtpAPI } from '../../service/AuthService';
+import { registerAccountAPI } from '../../service/AuthService';
 import ErrorNotification from '../../components/ErrorNotification/ErrorNotification';
 
 function SignUpPage() {
@@ -32,14 +32,15 @@ function SignUpPage() {
 
     const requestOtpApi = async () => {
         setLoading(true);
-        const response = await getOtpAPI(registerData);
-
-        if (!response.success) {
-            setError(response.message);
-        } else {
+        try {
+            await registerAccountAPI(registerData);
             setStep(prev => prev + 1);
+
+        } catch (error) {
+            setError(error.message)
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     const handleRegister = async (event) => {

@@ -26,7 +26,6 @@ import com.example.demo.repository.RoleRepository;
 import com.example.demo.utils.GoogleTokenVerifier;
 import com.example.demo.utils.SecurityUtils;
 
-
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -66,8 +65,20 @@ public class AuthenticationService {
     @Autowired
     SecurityUtils securityUtils;
 
-    // authentication cho table account
-    public AuthRespond auth(AuthenticationRequest request) {
+    /**
+     * Authenticates a user based on the provided login credentials.
+     *
+     * @param request an {@link AuthenticationRequest} containing the user's email
+     *                (username) and password
+     * @return an {@link AuthRespond} object containing authentication status,
+     *         access token,
+     *         refresh token, and account information
+     * @throws NotFoundException     if no active account is found with the provided
+     *                               email
+     * @throws UnauthorizedException if the password does not match the stored
+     *                               password
+     */
+    public AuthRespond login(AuthenticationRequest request) {
         Account account = accountRepository.findByEmailAndStatus(request.getUsername(), 1)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -89,6 +100,17 @@ public class AuthenticationService {
                 .build();
     }
 
+    /**
+     * Sends an OTP (One-Time Password) to the email provided in the registration
+     * request.
+     * This method is typically called before account creation to verify email
+     * ownership.
+     *
+     * @param registerRequest the {@link RegisterRequest} containing the user's
+     *                        email
+     * @throws EmailAlreadyExistsException if an account with the given email
+     *                                     already exists
+     */
     public void handleSendOtp(RegisterRequest registerRequest) {
         if (accountRepository.existsByEmail(registerRequest.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
@@ -96,6 +118,19 @@ public class AuthenticationService {
         otpService.sendOtp(registerRequest.getEmail());
     }
 
+    /**
+     * Creates a new account after validating the provided OTP.
+     * The method maps the registration request into an {@link Account} entity,
+     * encodes the password, assigns the default "CUSTOMER" role, and saves the
+     * account.
+     *
+     * @param accountWithOtp the {@link AccountWithOtp} object that contains
+     *                       registration data and the OTP
+     * @return the newly created {@link Account} entity
+     * @throws BadRequestException   if the OTP is invalid or has expired
+     * @throws RoleNotFoundException if the default CUSTOMER role cannot be found in
+     *                               the system
+     */
     public Account createAccount(AccountWithOtp accountWithOtp) {
         // Kiểm tra OTP
         boolean isOtpValid = otpService.verifyOtp(accountWithOtp.getRegisterRequest().getEmail(),
@@ -119,12 +154,30 @@ public class AuthenticationService {
         return account;
     }
 
+    /**
+     * Handles the "forgot password" process by verifying the email and sending a
+     * reset password link or OTP.
+     *
+     * @param email the email address of the account requesting password reset
+     * @throws NotFoundException if no account exists with the given email
+     */
     public void handleForgotPassword(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Account does not exists"));
         otpService.sendForgotPasswordLink(account);
     }
 
+    /**
+     * Resets the user's password after validating the provided OTP.
+     * This method updates the password for the account associated with the given
+     * email.
+     *
+     * @param email   the email address of the account
+     * @param otp     the one-time password used to verify the reset request
+     * @param newPass the new password to be set
+     * @throws NotFoundException   if the account is not found
+     * @throws BadRequestException if the OTP is invalid or expired
+     */
     @Transactional
     public void handleResetPassword(String email, String otp, String newPass) {
         boolean isOtpValid = otpService.verifyOtp(email, otp);
@@ -140,6 +193,24 @@ public class AuthenticationService {
         otpService.clearOtp(email);
     }
 
+    /**
+     * Handles user login via Google OAuth using the provided ID token.
+     * <p>
+     * If the account associated with the Google email already exists and is active,
+     * it will be used for login. Otherwise, a new account will be created with
+     * default
+     * CUSTOMER role and marked as a Google social account.
+     *
+     * @param idToken the Google ID token received from the client after Google
+     *                sign-in
+     * @return an {@link AuthRespond} object containing authentication status,
+     *         access token,
+     *         refresh token, and account information
+     * @throws NotFoundException     if the ID token is invalid or if the existing
+     *                               account is not found
+     * @throws RoleNotFoundException if the CUSTOMER role does not exist in the
+     *                               database
+     */
     public AuthRespond handleLoginWithGoogle(String idToken) {
 
         Map<String, Object> payload = googleTokenVerifier.verify(idToken);
@@ -158,10 +229,10 @@ public class AuthenticationService {
         if (checkExists) {
             account = accountRepository.findByEmailAndStatus(email, 1)
                     .orElseThrow(() -> new NotFoundException("User not found"));
-            if (account.getSocialAccountType().equals("LOCAL")) {
-                throw new EmailAlreadyExistsException("Email này đã được đăng ký bằng email và mật khẩu.");
-            }
-
+            // if (account.getSocialAccountType().equals("LOCAL")) {
+            // throw new EmailAlreadyExistsException("Email này đã được đăng ký bằng email
+            // và mật khẩu.");
+            // }
         } else {
             Role defaultRole = roleRepository.findByRoleName(RoleTypes.CUSTOMER.name())
                     .orElseThrow(() -> new RoleNotFoundException("Role Customer does not exist"));
@@ -174,7 +245,6 @@ public class AuthenticationService {
                     .isDeleted(false)
                     .socialAccountType("GOOGLE")
                     .build();
-
             accountRepository.save(account);
         }
 

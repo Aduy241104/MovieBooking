@@ -38,11 +38,11 @@ const changePasswordAPI = async (data) => {
 const requestChangeEmail = async (data) => {
     try {
         const response = await axiosInstance.post("/me/request-change-email", data);
-        return { success: true, data: response.data }
+        return response.data;
 
     } catch (error) {
         if (error.response) {
-            if (error.response.data.status === 409 && error.response.data.error === "") {
+            if (error.response.data.status === 409 && error.response.data.error === "EMAIL_ALREADY_EXISTS") {
                 throw new Error("Email này đã được đăng kí")
             }
         }
@@ -54,42 +54,27 @@ const requestChangeEmail = async (data) => {
 const confirmChangeEmailAPI = async (data) => {
     try {
         const response = await axiosInstance.put("/me/confirm-change-email", data);
-        return { success: true, data: response.data }
+        return response.data
 
     } catch (error) {
+
         if (error.response) {
-            return {
-                success: false,
-                status: error.response.status,
-                message: error.response.data.message || "Có lỗi xảy ra"
-            };
+            throw new Error(error.response.data.message);
         }
-        return {
-            success: false,
-            status: 500,
-            message: "Không thể kết nối đến máy chủ"
-        };
+        throw new Error("Không thể kết nối đến máy chủ");
     }
 }
 
 const updateAvatarAPI = async (data) => {
     try {
         const response = await axiosInstance.put("/me/change-avatar", data);
-        return { success: true, data: response.data };
+        return response.data ;
 
     } catch (error) {
         if (error.response) {
-            return {
-                success: false,
-                status: error.response.status,
-                message: error.response.data.message || "Có lỗi xảy ra"
-            };
+            throw new Error(error.response.data.message);
         }
-        return {
-            success: false,
-            status: 500,
-            message: "Không thể kết nối đến máy chủ"
-        };
+        throw new Error("Không thể kết nối đến máy chủ");
     }
 }
 

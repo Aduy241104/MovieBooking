@@ -16,7 +16,8 @@ const BookingSuccessPage = () => {
     const queryParams = new URLSearchParams(location.search);
     //Get bookingId from query params (when redirecting from backend after VNPAY)
     const bookingIdFromQuery = queryParams.get('bookingId');
-    const bookingId = bookingIdFromQuery;
+    const bookingIdFromState = location.state?.bookingId;  
+    const bookingId = bookingIdFromQuery || bookingIdFromState;
 
     console.log('BookingSuccessPage - Final bookingId to use:', bookingId);
 
@@ -25,12 +26,7 @@ const BookingSuccessPage = () => {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!bookingId) {
-            console.warn('BookingSuccessPage: No bookingId found. Navigating to home.');
-            navigate('/');
-            return;
-        }
-
+    
         setLoading(true);
         setError('');
         const fetchDetails = async () => {
@@ -57,15 +53,6 @@ const BookingSuccessPage = () => {
             return format(parseISO(dateTime), 'HH:mm - EEEE, dd/MM/yyyy', { locale: vi });
         } catch (e) {
             return 'N/A';
-        }
-    };
-
-    const getStatusClass = (status) => {
-        switch (status) {
-            case 'PAID': return 'status-paid';
-            case 'RESERVED': return 'status-reserved';
-            case 'PENDING_PAYMENT': return 'status-pending';
-            default: return 'status-unknown';
         }
     };
 

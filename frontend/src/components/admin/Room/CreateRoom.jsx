@@ -9,7 +9,7 @@ export default function CreateRoom() {
   useEffect(() => {
     if (location.pathname === '/admin/room-list/add-room') {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href:"/admin"  },
+        { title: 'Trang chủ'  },
         { title: 'Phòng chiếu' },
         { title: 'Thêm phòng chiếu' },
       ]);

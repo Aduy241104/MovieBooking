@@ -50,7 +50,7 @@ public class AuthenticationController {
 
     @PostMapping(AuthenticationPath.LOGIN_OAUTH)
     public ApiResponse<AuthRespond> loginMethod(@Valid @RequestBody AuthenticationRequest request) {
-        AuthRespond authRespond = authService.auth(request);
+        AuthRespond authRespond = authService.login(request);
         return ApiResponse.<AuthRespond>builder()
                 .message("success")
                 .result(authRespond)

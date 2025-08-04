@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Input, Spin, Pagination, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { Link, useLocation, useOutletContext } from "react-router-dom";
+import axios from "axios";
 import { fetchBookingCountAPI } from "../../../service/TicketPriceService";
 
 const BookingList = () => {
@@ -14,12 +15,14 @@ const BookingList = () => {
   const location = useLocation();
   const { setBreadcrumbItems } = useOutletContext();
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
-    if (location.pathname.includes('/admin/movie-list')) {
+    if (location.pathname.includes("/employee/booking-list") || location.pathname.includes("/admin/booking-list")) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
-        { title: 'Quản lý phim' },
-        { title: 'Phim' },
+        { title: "Trang chủ"},
+        { title: "Quản lý phim" },
+        { title: "Lịch sử đặt vé" },
       ]);
     }
   }, [location.pathname, setBreadcrumbItems]);
@@ -27,14 +30,25 @@ const BookingList = () => {
   const fetchMovies = async () => {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8081/api/public/movies");
-      const data = await res.json();
+      const res = await axios.get("http://localhost:8081/api/movies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        },
+      });
+
+      const data = res.data;
+
       if (Array.isArray(data)) {
         const moviesWithBookingCount = await Promise.all(
           data.map(async (item) => {
             try {
               const countResponse = await fetchBookingCountAPI(item.id);
-              const bookingCount = countResponse?.result ?? countResponse?.data?.result ?? 0;
+              const bookingCount =
+                countResponse?.result ??
+                countResponse?.data?.result ??
+                0;
+
               return {
                 id: item.id,
                 poster: item.smallImageUrl || "https://via.placeholder.com/60",

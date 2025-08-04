@@ -30,7 +30,7 @@ public class Screening {
 
     @Column(name = "show_date_time")
     private LocalDateTime showDateTime;
-
+ 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 

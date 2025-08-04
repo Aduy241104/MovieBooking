@@ -19,18 +19,29 @@ const FilmDetail = () => {
   const [totalReviews, setTotalReviews] = useState(0);
 
   const fetchMovieById = async (movieId) => {
+    const token = localStorage.getItem("token");
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8081/api/public/movies");
+      const res = await axios.get("http://localhost:8081/api/movies", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
       const movies = res.data || res;
       const foundMovie = movies.find((m) => m.id.toString() === movieId);
       if (foundMovie) {
         setMovie(foundMovie);
         fetchArtist(foundMovie.nameEN);
-        const { averageRating, totalApproved } = await getAverageRatingAndCountByMovieId(foundMovie.id);
+
+        const { averageRating, totalApproved } =
+          await getAverageRatingAndCountByMovieId(foundMovie.id);
         setAverageRating(averageRating);
         setTotalReviews(totalApproved);
-      } else message.warning("Không tìm thấy phim với id này");
+      } else {
+        message.warning("Không tìm thấy phim với id này");
+      }
     } catch (err) {
       message.error("Lỗi tải dữ liệu phim: " + (err.message || "Unknown error"));
     } finally {
@@ -191,7 +202,6 @@ const FilmDetail = () => {
                     </div>
                   ))}
                 </div>
-
               </div>
             </div>
           </div>
