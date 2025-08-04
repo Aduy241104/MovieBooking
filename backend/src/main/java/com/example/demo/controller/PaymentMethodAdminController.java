@@ -49,13 +49,23 @@ public class PaymentMethodAdminController {
     /**
      * Updates the name and description of an existing payment method.
      *
-     * @param id the ID of the payment method to update
+     * @param id            the ID of the payment method to update
      * @param paymentMethod the updated payment method data
      * @return the updated payment method
      */
     @PutMapping("/{id}")
     public PaymentMethod update(@PathVariable Long id, @RequestBody PaymentMethod paymentMethod) {
         return paymentMethodService.update(id, paymentMethod);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PaymentMethod> getById(@PathVariable Long id) {
+        PaymentMethod method = paymentMethodService.findById(id);
+        if (method != null) {
+            return ResponseEntity.ok(method);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

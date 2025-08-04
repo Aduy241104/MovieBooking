@@ -105,6 +105,10 @@ const PaymentTransactionPage = () => {
                         color = "orange";
                         text = "Chờ thanh toán";
                         break;
+                    case "PAYMENT_FAILED":
+                        color = "red";
+                        text = "Thanh toán thất bại";
+                        break;
                     default:
                         color = "gray";
                         text = status;
@@ -149,7 +153,8 @@ const PaymentTransactionPage = () => {
                         onChange={(value) => setStatusFilter(value)}
                         options={[
                             { value: "PAID", label: "Đã thanh toán" },
-                            { value: "PENDING", label: "Chờ thanh toán" }
+                            { value: "PENDING", label: "Chờ thanh toán" },
+                            { value: "PAYMENT_FAILED", label: "Thanh toán thất bại" }
                         ]}
                     />
                 </div>

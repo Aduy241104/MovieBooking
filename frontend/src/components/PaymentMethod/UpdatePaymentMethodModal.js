@@ -11,15 +11,30 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const res = await axios.get(`${BASE_URL}`);
-                const found = res.data.find(m => m.id === methodId);
-                if (found) form.setFieldsValue(found);
+                const token = localStorage.getItem("token"); // hoặc accessToken
+                const res = await axios.get(`${BASE_URL}/${methodId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                console.log("✅ Dữ liệu phương thức:", res.data);
+                form.setFieldsValue({
+                    name: res.data.name,
+                    description: res.data.description,
+                });
             } catch (e) {
+                console.log("❌ Lỗi lấy phương thức:", e);
                 message.error("Không lấy được thông tin phương thức.");
+                form.resetFields();
             }
         };
-        if (methodId) fetchDetail();
-    }, [methodId]);
+
+        if (visible && methodId != null) {
+            fetchDetail();
+        }
+    }, [methodId, visible]);
+
+
 
     const handleUpdate = async () => {
         try {
@@ -32,6 +47,7 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
 
             message.success('Cập nhật thành công!');
             setRefreshFlag(prev => !prev);
+            form.resetFields();
             setVisible(false);
         } catch (err) {
             console.error("Lỗi khi cập nhật:", err);
@@ -55,7 +71,10 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
     return (
         <Modal
             open={visible}
-            onCancel={() => setVisible(false)}
+            onCancel={() => {
+                setVisible(false);
+                form.resetFields();
+            }}
             onOk={handleUpdate}
             okText="Lưu"
             cancelText="Hủy"
