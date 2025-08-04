@@ -8,6 +8,12 @@ const ReviewService = {
         return res.json();
     },
 
+    async getAverageRatingAndCountByMovieId(movieId) {
+        const res = await fetch(`${BASE_URL}/movie/average-rating/${movieId}`);
+        if (!res.ok) throw new Error("Không thể lấy danh sách đánh giá");
+        return res.json();
+    },
+
     async addReview(reviewData) {
         const res = await fetch(`${BASE_URL}/add`, {
             method: "POST",

@@ -2,8 +2,10 @@ import { Table, Tag, Button, Popconfirm, message, Space, Tooltip } from "antd";
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { SquarePen, Lock, LockOpen, Trash2 } from "lucide-react";
 import axios from "axios";
+import { useState } from "react";
 
 export const PaymentMethodTable = ({ data, setRefreshFlag, onEdit }) => {
+    const [datamethod, setDatamethod] = useState(null);
     const handleDelete = async (id) => {
         try {
             const token = localStorage.getItem('token');
@@ -60,7 +62,10 @@ export const PaymentMethodTable = ({ data, setRefreshFlag, onEdit }) => {
                     <Tooltip title="Sửa">
                         <button
                             className="text-blue-600 hover:text-fuchsia-500"
-                            onClick={() => onEdit(record.id)}
+                            onClick={() => {
+                                onEdit(record.id)
+                                setDatamethod(record)
+                            }}
                         >
                             <SquarePen size={16} strokeWidth={1.7} />
                         </button>

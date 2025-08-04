@@ -149,6 +149,7 @@ public class ReviewService {
         return reviewPage.map(reviewMapper::toResponseDTO);
     }
 
+    
     // Get total number of approved reviews
     public long getTotalApprovedReviews() {
         return reviewRepo.countByApproved(true);

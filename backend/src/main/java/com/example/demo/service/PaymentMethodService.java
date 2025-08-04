@@ -107,4 +107,8 @@ public class PaymentMethodService {
     public List<PaymentMethod> getActivePaymentMethods() {
         return paymentMethodRepository.findByActiveTrue();
     }
+
+    public PaymentMethod findById(Long id) {
+    return paymentMethodRepository.findById(id).orElse(null);
+}
 }

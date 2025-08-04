@@ -130,7 +130,7 @@ export const UpdateShowtimeModal = (props) => {
       };
 
       const res = await axiosInstance.put(
-        `/movieSchedule/admin/update-time/${showtimeData.id}`,
+        `/admin/movieSchedule/update-time/${showtimeData.id}`,
         body,
         {
           headers: {
