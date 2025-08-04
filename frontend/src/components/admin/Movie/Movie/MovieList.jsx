@@ -103,7 +103,7 @@ const MovieList = ({userText}) => {
       dataIndex: "poster",
       key: "poster",
       render: (poster, record) => (
-        <Link to={`/admin/film-detail/${record.nameVN}`}>
+        <Link to={`/admin/film-detail/${record.id}`}>
           <img
             src={poster}
             alt={record.nameVN}
