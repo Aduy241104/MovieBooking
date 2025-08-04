@@ -4,13 +4,14 @@ import com.example.demo.DTO.request.FareTypeRequest;
 import com.example.demo.DTO.response.FareTypeResponse;
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.UnauthorizedException;
 import com.example.demo.model.Account;
 import com.example.demo.model.FareType;
-import com.example.demo.model.Screening;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.FareTypeRepository;
 import com.example.demo.utils.SecurityUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,31 +39,33 @@ public class FareTypeService {
     @Autowired
     private NotificationService notificationService;
 
-    // Thêm mới FareType
+// TẠO MỚI
     public FareType handleCreateFareType(FareTypeRequest request) {
         FareType fareType = new FareType();
         BeanUtils.copyProperties(request, fareType);
         fareType.setIsDeleted(false);
 
-        // Log and notify about the new fare type creation
+        // 🛠️ Lưu vào DB trước để sinh ID
+        FareType savedFareType = fareTypeRepository.save(fareType);
+
+        // ✅ Sau khi đã có ID thì mới gọi hàm ghi log & thông báo
         setLogAndNotification(
-                fareType.getId(),
+                savedFareType.getId(),
                 "TẠO MỚI",
-                "Tạo mới loại vé " + fareType.getName() + ", định dạng phim: " + fareType.getMovieFormat(),
+                "Tạo mới loại vé " + savedFareType.getName() + ", định dạng phim: " + savedFareType.getMovieFormat(),
                 "Tạo mới loại vé",
-                " vừa tạo mới loại vé: " + fareType.getName() + ", định dạng phim: " + fareType.getMovieFormat()
+                " vừa tạo mới loại vé: " + savedFareType.getName() + ", định dạng phim: " + savedFareType.getMovieFormat()
         );
 
-        return fareTypeRepository.save(fareType);
+        return savedFareType;
     }
 
-    // Sửa FareType
+
     public FareType handleUpdateFareType(FareTypeRequest request, Long id) {
         FareType currentFareType = fareTypeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy loại giá"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại giá"));
         BeanUtils.copyProperties(request, currentFareType, "id", "isDeleted");
 
-        // Log and notify about the fare type update
         setLogAndNotification(
                 id,
                 "CẬP NHẬT",
@@ -74,20 +77,20 @@ public class FareTypeService {
         return fareTypeRepository.save(currentFareType);
     }
 
-    // Xóa mềm FareType
     @Transactional
     public FareType handleDeleteFareType(Long id) {
         logger.info("Bắt đầu xóa mềm FareType với ID: {}", id);
         FareType currentFareType = fareTypeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy loại giá với ID: " + id));
-        if (currentFareType.getIsDeleted()) {
-            throw new RuntimeException("Loại giá này đã bị xóa");
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại giá với ID: " + id));
+
+        if (Boolean.TRUE.equals(currentFareType.getIsDeleted())) {
+            throw new BadRequestException("Loại giá này đã bị xóa trước đó");
         }
+
         currentFareType.setIsDeleted(true);
         FareType updatedFareType = fareTypeRepository.save(currentFareType);
         logger.info("Xóa mềm thành công FareType với ID: {}, isDeleted: {}", id, updatedFareType.getIsDeleted());
 
-        // Log and notify about the fare type deletion
         setLogAndNotification(
                 id,
                 "XOÁ",
@@ -99,11 +102,9 @@ public class FareTypeService {
         return updatedFareType;
     }
 
-    // Lấy danh sách FareType với phân trang và lọc
     public ResPagination fetchAllFareTypes(Specification<FareType> spec, Pageable pageable) {
         Specification<FareType> finalSpec = Specification.where(spec)
-                .and((root, query, criteriaBuilder) ->
-                        criteriaBuilder.equal(root.get("isDeleted"), false));
+                .and((root, query, cb) -> cb.equal(root.get("isDeleted"), false));
 
         Page<FareType> fareTypes = fareTypeRepository.findAll(finalSpec, pageable);
 
@@ -122,60 +123,57 @@ public class FareTypeService {
                 .build();
     }
 
-    // Tìm FareType theo ID
     public FareType fetchFareTypeById(Long id) {
-        return fareTypeRepository.findById(id).orElse(null);
+        return fareTypeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại giá với ID: " + id));
     }
 
-    // Tìm FareType theo tên
     public FareType fetchFareTypeByName(String name) {
-        return fareTypeRepository.findByNameAndIsDeletedFalse(name);
+        FareType fareType = fareTypeRepository.findByNameAndIsDeletedFalse(name);
+        if (fareType == null) {
+            throw new NotFoundException("Không tìm thấy loại giá tên: " + name);
+        }
+        return fareType;
     }
 
-    // Kiểm tra tồn tại theo tên
     public boolean existsByName(String name) {
         return fareTypeRepository.existsByName(name);
     }
 
-    // Lấy tất cả FareType chưa bị xóa mềm
     public List<FareType> fetchFareTypeByIsDeletedFalse() {
         return fareTypeRepository.findByIsDeletedFalse();
     }
 
-    // Chuyển đổi từ Entity sang Response DTO
     private FareTypeResponse convertToResponse(FareType fareType) {
         FareTypeResponse respond = new FareTypeResponse();
         BeanUtils.copyProperties(fareType, respond);
         return respond;
     }
 
-    /**
-     * Sets log and sends notification for fare type actions.
-     */
     private void setLogAndNotification(Long fareTypeId, String action, String description,
                                        String title, String content) {
-        // Check if the screening exists
         FareType currentFareType = getFareTypeOrThrow(fareTypeId);
-        // Get the current logged-in user
+
         String loginUserId = SecurityUtils.getCurrentUsername();
         if (loginUserId == null || loginUserId.isEmpty()) {
-            throw new AppException("User not logged in!");
+            throw new UnauthorizedException("User chưa đăng nhập");
         }
+
         Account editorAccount = getAccountOrThrow(Long.valueOf(loginUserId));
-        // Log the activity
+
         activityLogService.log(
                 editorAccount.getEmail(),
                 action,
-                "LỊCH CHIẾU",
+                "LOẠI GIÁ",
                 currentFareType.getName(),
                 description
         );
-        // Find all admin accounts to notify
+
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
         if (adminAccounts.isEmpty()) {
-            throw new AppException("No admin accounts found to notify");
+            throw new AppException("Không tìm thấy tài khoản admin để gửi thông báo");
         }
-        // Send notifications to all admin accounts except the editor
+
         for (Account admin : adminAccounts) {
             if (!admin.getAccountId().equals(editorAccount.getAccountId())) {
                 notificationService.notify(
@@ -188,19 +186,13 @@ public class FareTypeService {
         }
     }
 
-    /**
-     * Find fare type by id, or throw AppException("Fare type not found").
-     */
     public FareType getFareTypeOrThrow(Long fareTypeId) {
         return fareTypeRepository.findById(fareTypeId)
-                .orElseThrow(() -> new AppException("Fare type not found"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại giá với ID: " + fareTypeId));
     }
 
-    /**
-     * Find account by id, or throw AppException("Account not found").
-     */
     public Account getAccountOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
-                .orElseThrow(() -> new AppException("Account not found"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản với ID: " + accountId));
     }
 }

@@ -1,4 +1,4 @@
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button} from 'antd';
 import AuhenticationLayout from '../../layouts/AuthenticationLayout';
 import { requestForgotPasswordAPI } from '../../service/AuthService';
 import { openNotification } from '../../Utils/Notification';

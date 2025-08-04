@@ -8,6 +8,7 @@ const BASE_URL = 'http://localhost:8081/api/admin/payment-methods';
 const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFlag }) => {
     const [form] = Form.useForm();
 
+
     useEffect(() => {
         const fetchDetail = async () => {
             try {
@@ -34,6 +35,20 @@ const UpdatePaymentMethodModal = ({ visible, setVisible, methodId, setRefreshFla
         }
     }, [methodId, visible]);
 
+
+
+    // useEffect(() => {
+    //     const fetchDetail = async () => {
+    //         try {
+    //             const res = await axios.get(`${BASE_URL}`);
+    //             const found = res.data.find(m => m.id === methodId);
+    //             if (found) form.setFieldsValue(found);
+    //         } catch (e) {
+    //             message.error("Không lấy được thông tin phương thức.");
+    //         }
+    //     };
+    //     if (methodId) fetchDetail();
+    // }, [methodId]);
 
 
     const handleUpdate = async () => {

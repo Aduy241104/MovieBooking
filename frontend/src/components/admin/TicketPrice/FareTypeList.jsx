@@ -23,9 +23,9 @@ const FareTypeList = () => {
   const { setBreadcrumbItems } = useOutletContext();
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/faretype-list')) {
+    if (location.pathname.includes("/employee/faretype-list") || location.pathname.includes("/admin/faretype-list")) {
       setBreadcrumbItems([
-        { title: 'Trang chủ',href: '/admin' },
+        { title: 'Trang chủ'},
         { title: 'Quản lý vé' },
         { title: 'Loại giá vé' },
 

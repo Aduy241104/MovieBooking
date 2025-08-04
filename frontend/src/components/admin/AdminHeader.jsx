@@ -27,6 +27,8 @@ export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
             setTitle("QUẢN LÝ THỂ LOẠI PHIM");
         } else if (path.includes("movies") || path.includes("movies")) {
             setTitle("QUẢN LÝ PHIM");
+        }else if (path.includes("showtime-list")) {
+            setTitle("QUẢN LÝ LỊCH CHIẾU");
         } else if (path.includes("faretype-list")) {
             setTitle("QUẢN LÝ LOẠI VÉ");
         } else if (path.includes("booking-list")) {

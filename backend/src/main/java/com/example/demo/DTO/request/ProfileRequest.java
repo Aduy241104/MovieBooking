@@ -33,6 +33,5 @@ public class ProfileRequest {
     @Past(message = "Date of birth must be in the past")
     LocalDate dateOfBirth;
 
-    @NotBlank(message = "Avatar is required")
     String avatar;
 }

@@ -71,7 +71,8 @@ import PaymentTransactionPage from './components/PaymentTransaction/PaymentTrans
 const PrivateRoute = ({ children }) => {
   const { user, isAuthLoaded } = useContext(AuthContext);
   if (!isAuthLoaded) return <div>Loading authentication state...</div>;
-  if (!user || user.role !== "ADMIN") {
+  console.log("user = ", user)
+  if (!user || (user.role !== "ADMIN" && user.role !== "EMPLOYEE")) {
     return <Navigate to="/" replace />;
   }
   return children;
@@ -226,22 +227,31 @@ function App() {
           {/* ExportExcel */}
           <Route path="export-reports" element={<ExportReportPage />} />
         </Route>
-
-        {/* Employee routes */}
-        <Route
-          path="/employee"
-          element={
-            <PrivateRoute>
-              <EmployeeLayout />
-            </PrivateRoute>
-          }
-        >
-          <Route index element={<h1>Employee Dashboard</h1>} />
-          {/* Add employee-specific routes here */}
-        </Route>
-      </Routes>
-    </NotificationProvider>
-  );
+   {/* Employee routes */}
+                <Route
+                    path="/employee"
+                    element={
+                        <PrivateRoute>
+                            <EmployeeLayout />
+                        </PrivateRoute>
+                    }
+                >
+                    <Route index element={<MovieList />} />
+                    {/* Movie */}
+                    <Route path="movies" element={<MovieList userText="Phim"/>} />
+                    {/* Showtime */}
+                    <Route path="showtime-list" element={<ShowtimeList />} />
+                    {/* Fare & Booking */}
+                    <Route path="faretype-list" element={<FareTypeList />} />
+                    <Route path="booking-list" element={<BookingList />} />
+                    {/* Review */}
+                    <Route path="review-list" element={<ReviewList />} />
+                    {/* Activity Log */}
+                    <Route path="activity-logs" element={<ActivityLogPage logsText="Lịch sử hoạt động" />} />
+                </Route>
+            </Routes>
+        </NotificationProvider>
+    );
 }
 
 export default App;

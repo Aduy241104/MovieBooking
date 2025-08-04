@@ -91,9 +91,11 @@ public class PromotionService {
 
     public ResPagination fetchAllPromotions(Specification<Promotion> spec, Pageable pageable) {
         // Combine user specification with isDeleted = false condition
-        Specification<Promotion> finalSpec = Specification.where(spec)
+        Specification<Promotion> finalSpec = Specification
+                .where(spec)
                 .and((root, query, criteriaBuilder) ->
-                        criteriaBuilder.equal(root.get("isDeleted"), false));
+                        criteriaBuilder.equal(root.get("isDeleted"), false)
+                );
         // Fetch all promotions with pagination
         Page<Promotion> promotions = promotionRepository.findAll(finalSpec, pageable);
         // Create MetaDTO for pagination
@@ -226,6 +228,14 @@ public class PromotionService {
             throw new NotFoundException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
         }
 
+        return promotion;
+    }
+
+    public Promotion fetchPromotionByCode(String code) {
+        Promotion promotion = promotionRepository.findByCode(code);
+        if (promotion == null) {
+            throw new AppException("Promotion not found");
+        }
         return promotion;
     }
 }
