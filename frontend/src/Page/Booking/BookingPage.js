@@ -2,17 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSeatStatus } from '../../service/ScreeningService';
 import { getActivePaymentMethods } from '../../service/PaymentMethodService';
-import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService'; // Thêm getUserPoints
+import { checkPromotion, createBooking, getUserPoints } from '../../service/BookingService'; 
 import { AuthContext } from '../../context/AuthContext';
 import SeatSelection from './SeatSelection/SeatSelection';
 import OrderSummary from './OrderSummary/OrderSummary';
-// import CustomizeButton from '../../components/CustomeButton/CustomizeButton'; // ĐÃ XÓA
-import DefaultLayout from '../../layouts/DefaultLayout'; // GIẢ SỬ ĐƯỜNG DẪN ĐÚNG
-import styles from './bookingPage.scss'; // ĐÃ ĐỔI TÊN FILE CSS CHO NHẤT QUÁN
+import DefaultLayout from '../../layouts/DefaultLayout'; 
+import styles from './bookingPage.module.scss'; 
 import classNames from 'classnames/bind';
 import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
-
+import { message, Modal } from 'antd';
 const cx = classNames.bind(styles);
 
 const BookingPage = () => {
@@ -21,24 +20,24 @@ const BookingPage = () => {
     const { user } = useContext(AuthContext);
     const { screeningInfo, movieInfo } = location.state || {};
 
-    // States cho dữ liệu tải từ API
+   // States for data loaded from API
     const [seats, setSeats] = useState([]);
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [userPoints, setUserPoints] = useState(0);
 
-    // States cho lựa chọn của người dùng
+    // States for user selection
     const [selectedSeats, setSelectedSeats] = useState([]);
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState('');
     const [promotionCode, setPromotionCode] = useState('');
     const [pointsToUse, setPointsToUse] = useState('');
 
-    // States cho các giá trị tính toán
+    // States for computed values
     const [totalPrice, setTotalPrice] = useState(0);
     const [discountAmount, setDiscountAmount] = useState(0);
     const [pointsDiscount, setPointsDiscount] = useState(0);
     const [finalPrice, setFinalPrice] = useState(0);
 
-    // States cho trạng thái UI
+    // States for UI state
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,10 +47,6 @@ const BookingPage = () => {
     const [pointsInputError, setPointsInputError] = useState('');
     const [appliedPromotion, setAppliedPromotion] = useState(null);
 
-    // --- TOÀN BỘ LOGIC, USEEFFECT, HÀM HANDLE GIỮ NGUYÊN NHƯ CŨ ---
-    // ... (logic của bạn được giữ nguyên ở đây) ...
-
-    // Effect để tải tất cả dữ liệu cần thiết khi trang được mở
     useEffect(() => {
         if (!screeningInfo || !movieInfo || !user) {
             navigate(movieInfo?.id ? `/movie-detail/${movieInfo.id}` : '/');
@@ -62,7 +57,6 @@ const BookingPage = () => {
             setLoading(true);
             setError('');
             try {
-                // Tải song song tất cả API calls
                 const [seatRes, paymentRes, pointsRes] = await Promise.all([
                     getSeatStatus(screeningInfo.screeningId),
                     getActivePaymentMethods(),
@@ -91,9 +85,9 @@ const BookingPage = () => {
     }, [screeningInfo, movieInfo, user, navigate]);
 
 
-    // Effect để tính toán lại giá tiền mỗi khi có sự thay đổi
+    // Effect to recalculate price every time there is a change
     useEffect(() => {
-        // 1. Tính tổng tiền gốc từ ghế đã chọn (originalTotalAmount)
+        // 1. Calculate the original total amount from the selected seat (originalTotalAmount)
         let currentTotal = 0;
         if (screeningInfo && screeningInfo.fareType) {
             const basePrice = parseFloat(screeningInfo.fareType.basePrice || 0);
@@ -115,7 +109,7 @@ const BookingPage = () => {
         }
         setTotalPrice(currentTotal);
 
-        // 2. Tính giảm giá từ khuyến mãi
+        // 2. Calculate discount from promotion
         let currentDiscount = 0;
         if (appliedPromotion && currentTotal > 0 && currentTotal >= parseFloat(appliedPromotion.minOrder)) {
             if (appliedPromotion.discountType === 'PERCENT') {
@@ -134,7 +128,7 @@ const BookingPage = () => {
 
         const finalTotalAfterPromotion = currentTotal - currentDiscount;
 
-        // 3. Tính giảm giá từ điểm
+       // 3. Calculate discount from point 
         let currentPointsDiscount = 0;
         const pointsInputValue = parseInt(pointsToUse) || 0;
         if (pointsInputValue > 0) {
@@ -146,12 +140,12 @@ const BookingPage = () => {
         }
         setPointsDiscount(currentPointsDiscount);
 
-        // 4. Tính giá cuối cùng
+       // 4. Calculate final price
         setFinalPrice(Math.max(0, finalTotalAfterPromotion - currentPointsDiscount));
 
     }, [selectedSeats, appliedPromotion, pointsToUse, screeningInfo]);
 
-    // Các hàm xử lý sự kiện (handle)
+  // Event handler functions
     const handleSeatSelect = (seatFromMap) => {
         setSelectedSeats(prevSeats => {
             const isSelected = prevSeats.find(s => s.seatId === seatFromMap.seatId);
@@ -169,48 +163,51 @@ const BookingPage = () => {
         });
     };
 
-     const handleApplyPromotion = async () => {
-        if (!promotionCode.trim()) {
-            setPromotionError('Vui lòng nhập mã khuyến mãi.');
-            return;
+      const handleApplyPromotion = async () => {
+   
+    // Update UI status to start the process
+    setCheckingPromotion(true);
+    setPromotionError('');
+    setPromotionSuccess('');
+    setAppliedPromotion(null);
+
+    try {
+        // Call API - This is the only interaction with backend
+        const response = await checkPromotion(promotionCode);
+
+        // Handling when API returns successfully (http 200)
+        const promoData = response.data.result;
+
+        // Logic check depends on the current state of the order (Totalprice)
+        if (totalPrice < parseFloat(promoData.minOrder)) {
+            const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
+            const errorMessage = `Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`;
+            
+            setPromotionError(errorMessage); 
+            message.error(errorMessage);     
+            return; 
         }
-        setCheckingPromotion(true);
-        setPromotionError('');
-        setPromotionSuccess('');
-        setAppliedPromotion(null);
 
-        try {
-            const response = await checkPromotion(promotionCode);
+        // If all conditions are satisfied
+        setAppliedPromotion(promoData);
+        setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
+        message.success('Áp dụng mã khuyến mãi thành công!');
 
-            // Kiểm tra xem API có trả về kết quả khuyến mãi không
-            if (response.data && response.data.result) {
-                const promoData = response.data.result;
-
-                // Kiểm tra điều kiện tối thiểu ở frontend để đưa ra phản hồi ngay
-                if (totalPrice < parseFloat(promoData.minOrder)) {
-                    // Tạo thông báo lỗi trực tiếp
-                    const minOrderFormatted = (Number(promoData.minOrder) || 0).toLocaleString('vi-VN');
-                    setPromotionError(`Tổng tiền chưa đạt mức tối thiểu ${minOrderFormatted}đ của khuyến mãi.`);
-                    return; // Dừng lại ở đây
-                }
-
-                // Nếu mọi thứ hợp lệ
-                setAppliedPromotion(promoData);
-                setPromotionSuccess('Áp dụng mã khuyến mãi thành công!');
-
-            } else {
-                // Nếu API trả về result là null hoặc không có, nghĩa là mã không hợp lệ
-                setPromotionError('Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
-            }
-        } catch (err) {
-            // Xử lý các lỗi kết nối hoặc lỗi server 500
-            console.error("Error applying promotion:", err);
-            setPromotionError('Không thể áp dụng mã khuyến mãi lúc này. Vui lòng thử lại.');
-        } finally {
-            setCheckingPromotion(false);
-        }
-    };
-
+    } catch (err) {
+       // 5. Handling when API returns error (http 4xx, 5xx) 
+// All professional errors from the backend (wrong code, expired)
+        console.error("Error applying promotion:", err);
+        
+       // Take the exact error message from Apiresponse that GlobalexceptiHandler created
+        const errorMessage = err.response?.data?.message || 'Không thể kết nối hoặc có lỗi xảy ra.';
+        setPromotionError(errorMessage); 
+        message.error(errorMessage);    
+        
+    } finally {
+        // 6. Update the UI state after the ending process
+        setCheckingPromotion(false);
+    }
+};
     const handlePointsInputChange = (e) => {
         const value = e.target.value;
         setPointsInputError('');
@@ -241,7 +238,6 @@ const BookingPage = () => {
         }
     };
 
-    // --- CÁC HÀM HELPER GIỮ NGUYÊN ---
     const getSubmitButtonText = () => {
         if (isSubmitting) return 'Đang xử lý...';
         if (selectedSeats.length === 0) return 'Thanh Toán';
@@ -261,129 +257,72 @@ const BookingPage = () => {
         setPointsInputError('');
     };
 
-    // Hàm này giúp xóa lỗi khi người dùng bắt đầu nhập lại
+  // Erase the error when the user starts to enter again
     const handlePromotionCodeChange = (e) => {
         setPromotionCode(e.target.value);
         if (promotionError) setPromotionError('');
         if (promotionSuccess) setPromotionSuccess('');
     };
 
-// <<< TẠO HÀM XỬ LÝ LỖI TẬP TRUNG >>>
-    const handleBookingError = (rawMessage) => {
-        const defaultMessage = 'Có lỗi xảy ra, vui lòng thử lại.';
-        if (!rawMessage) {
-            alert(defaultMessage);
+    const handleSubmitBooking = async () => {
+        if (selectedSeats.length === 0) {
+            message.warning('Vui lòng chọn ít nhất một ghế.');
+            return;
+        }
+        if (!selectedPaymentMethodId) {
+            message.warning('Vui lòng chọn phương thức thanh toán.');
             return;
         }
 
-        const parts = rawMessage.split(':');
-        const errorCode = parts[0];
-        const errorValue = parts[1];
+        setIsSubmitting(true);
+        const bookingPayload = {
+            screeningId: screeningInfo.screeningId,
+            seatIds: selectedSeats.map(s => s.seatId),
+            promotionCode: appliedPromotion ? appliedPromotion.code : null,
+            paymentMethodId: parseInt(selectedPaymentMethodId),
+            pointsToUse: parseInt(pointsToUse) || 0,
+        };
 
-        switch (errorCode) {
-            case 'INVALID_SEAT_SELECTION_SINGLE_GAP':
-                alert('Lựa chọn ghế không hợp lệ. Vui lòng không để lại một ghế trống ở giữa.');
-                break;
-            case 'SEAT_ALREADY_BOOKED':
-                alert(`Rất tiếc, ghế ${errorValue} đã có người khác đặt. Trang sẽ tự động tải lại sơ đồ ghế.`);
-                // Tùy chọn: Tải lại sơ đồ ghế để cập nhật
-                // loadSeats(); 
-                break;
-            case 'PROMOTION_MIN_ORDER_NOT_MET':
-                const minOrder = Number(errorValue) || 0;
-                alert(`Tổng tiền chưa đạt mức tối thiểu ${minOrder.toLocaleString('vi-VN')}đ của khuyến mãi.`);
-                break;
-            case 'PROMOTION_INVALID_OR_EXPIRED':
-                alert('Mã khuyến mãi không hợp lệ hoặc đã hết hạn.');
-                break;
+        try {
+            const response = await createBooking(bookingPayload);
+            const bookingResult = response.data.result;
 
-            case 'POINTS_EXCEEDED':
-                alert('Số điểm sử dụng vượt quá số điểm hiện có của bạn.');
-                break;
-            default:
-                // Hiển thị các lỗi khác mà không có mã cụ thể
-                alert(rawMessage);
-                break;
-        }
-    };
-
-    const handleSubmitBooking = async () => {
-    // 1. Kiểm tra đầu vào cơ bản ở frontend
-    if (selectedSeats.length === 0) {
-        alert('Vui lòng chọn ít nhất một ghế.');
-        return;
-    }
-    if (!selectedPaymentMethodId) {
-        alert('Vui lòng chọn phương thức thanh toán.');
-        return;
-    }
-
-    setIsSubmitting(true);
-
-    // 2. Chuẩn bị payload để gửi lên backend
-    const bookingPayload = {
-        screeningId: screeningInfo.screeningId,
-        seatIds: selectedSeats.map(s => s.seatId),
-        promotionCode: appliedPromotion ? appliedPromotion.code : null,
-        paymentMethodId: parseInt(selectedPaymentMethodId),
-        pointsToUse: parseInt(pointsToUse) || 0,
-    };
-
-    try {
-        // 3. Gọi API tạo booking
-        const response = await createBooking(bookingPayload);
-        const bookingResult = response.data.result;
-
-        // 4. Xử lý kết quả thành công
-        if (response.data.status === 201 && bookingResult) {
-            if (bookingResult.paymentUrl) {
-                // Nếu có URL thanh toán, lưu thông tin cần thiết và chuyển hướng
-                localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
-                // Lưu bookingId để có thể hủy nếu người dùng nhấn back
-                localStorage.setItem('pendingBookingId', bookingResult.bookingId.toString());
-                
-                window.location.href = bookingResult.paymentUrl;
+            if (response.data.status === 201 && bookingResult) {
+                if (bookingResult.paymentUrl) {
+                    localStorage.setItem('lastMovieInfoForBooking', JSON.stringify(movieInfo));
+                    window.location.href = bookingResult.paymentUrl;
+                } else {
+                    navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
+                }
             } else {
-                // Trường hợp thanh toán 100% bằng điểm, không có URL
-                navigate('/booking/success', { state: { bookingId: bookingResult.bookingId } });
+                message.error(response.data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
             }
-        } else {
-            // Xử lý các lỗi logic không mong muốn khác từ backend (ít khi xảy ra nếu status là 201)
-            alert(response.data.message || 'Có lỗi xảy ra, vui lòng thử lại.');
-        }
 
-    } catch (err) {
-        // 5. Bắt và xử lý các lỗi Exception từ backend (quan trọng nhất)
-        const rawMessage = err.response?.data?.message || 'UNKNOWN_ERROR';
-        
-        // --- LOGIC XỬ LÝ LỖI ĐẶT TRÙNG ---
-        if (rawMessage.startsWith('PENDING_BOOKING_EXISTS')) {
-            // Hỏi người dùng có muốn đến trang lịch sử để thanh toán không
-            if (window.confirm('Bạn đã có một đặt vé cho suất chiếu này đang chờ thanh toán. Bạn có muốn đi đến trang Lịch sử đặt vé để hoàn tất không?')) {
-                navigate('/profile/booking-history');
+        } catch (err) {
+            const errorResponse = err.response?.data;
+            const rawMessage = errorResponse?.message || 'UNKNOWN_ERROR';
+            if (rawMessage.startsWith('PENDING_BOOKING_EXISTS')) {
+                Modal.confirm({
+                    title: 'Đặt vé đang chờ xử lý',
+                    content: 'Bạn đã có một đặt vé cho suất chiếu này đang chờ thanh toán. Bạn có muốn đến trang Lịch sử đặt vé để hoàn tất không?',
+                    okText: 'Đến trang lịch sử',
+                    cancelText: 'Ở lại',
+                    onOk() {
+                        navigate('/profile/booking-history');
+                    },
+                });
+            } else {
+                message.error(rawMessage);
+                if (rawMessage.toLowerCase().includes('ghế') && rawMessage.toLowerCase().includes('đã có người khác chọn')) {
+                    handleSeatExpire(); // Refetch
+                }
             }
-        } 
-        // --- XỬ LÝ CÁC LỖI KHÁC ---
-        else if (rawMessage === 'INVALID_SEAT_SELECTION_SINGLE_GAP') {
-            alert('Lựa chọn ghế không hợp lệ. Vui lòng không để lại một ghế trống ở giữa.');
-        } else if (rawMessage.startsWith('SEAT_ALREADY_BOOKED')) {
-            const seatName = rawMessage.split(':')[1];
-            alert(`Rất tiếc, ghế ${seatName} đã có người khác đặt. Vui lòng chọn lại.`);
-            // Có thể thêm logic tải lại sơ đồ ghế ở đây
-        } else {
-            // Các lỗi chung khác
-            alert('Đã có lỗi xảy ra trong quá trình đặt vé. Vui lòng thử lại.');
-            console.error("Booking failed with message:", rawMessage);
+        } finally {
+            setIsSubmitting(false);
         }
-
-    } finally {
-        setIsSubmitting(false);
-    }
-};
+    };
 
    const handleSeatExpire = () => {
-        console.log("A seat has expired. Refetching seat status...");
-        // Tải lại chỉ sơ đồ ghế
         getSeatStatus(screeningInfo.screeningId)
             .then(response => {
                 if (response.data && response.data.result) {
@@ -394,7 +333,7 @@ const BookingPage = () => {
     };
 
     const canApplyDiscount = selectedSeats.length > 0;
-    // --- HIỂN THỊ TRẠNG THÁI LOADING/ERROR TRONG LAYOUT ---
+    // Display Loading/Error status in layout 
     if (loading || error) {
         return (
             <DefaultLayout>
@@ -410,7 +349,7 @@ const BookingPage = () => {
         <DefaultLayout>
             <div className={cx('page-background')}>
                 <div className={cx('booking-container')}>
-                    {/* --- CỘT TRÁI - CHỌN GHẾ --- */}
+                    {/* left column-Choose */}
                     <div className={cx('main-content')}>
                         <div className={cx('section', 'movie-info-section')}>
                             <div className={cx('movie-poster')}>
@@ -439,7 +378,7 @@ const BookingPage = () => {
                         </div>
                     </div>
 
-                    {/* --- CỘT PHẢI - THANH TOÁN --- */}
+                    {/* Right column-Payment */}
                     <div className={cx('sidebar')}>
                         <div className={cx('sidebar-content')}>
                             <OrderSummary
@@ -452,22 +391,22 @@ const BookingPage = () => {
                                 finalPrice={finalPrice}
                             />
 
-                            {/* --- KHU VỰC GIẢM GIÁ --- */}
+                           {/* Discount area */}
                             <div className={cx('discount-area', { 'disabled': !canApplyDiscount })}>
-                                {/* --- ĐIỂM THƯỞNG --- */}
+                               {/* Bonus point */}
                                 <div className={cx('discount-section')}>
                                     <div className={cx('section-header')}>
                                         <h5><i className="fas fa-star"></i> Sử dụng điểm</h5>
                                         {pointsToUse && <button onClick={handleCancelPoints} className={cx('btn-cancel')}>Hủy</button>}
                                     </div>
-                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')}</strong></p>
+                                    <p className={cx('points-available')}>Điểm khả dụng: <strong>{userPoints.toLocaleString('vi-VN')} | 1.000 điểm = 1.000 VND</strong></p>
                                     <div className={cx('input-group')}>
                                         <input type="text" className={cx('form-control', { 'is-invalid': pointsInputError })} placeholder="Nhập số điểm" value={pointsToUse} onChange={handlePointsInputChange} disabled={!canApplyDiscount} />
                                     </div>
                                     {pointsInputError && <div className={cx('invalid-feedback')}>{pointsInputError}</div>}
                                 </div>
 
-                                {/* --- MÃ KHUYẾN MÃI --- */}
+                               {/* Promotion code */}
                                 <div className={cx('discount-section')}>
                                     <div className={cx('section-header')}>
                                         <h5><i className="fas fa-tags"></i> Mã khuyến mãi</h5>
@@ -480,7 +419,7 @@ const BookingPage = () => {
                                                 className={cx('form-control')}
                                                 placeholder="Nhập mã"
                                                 value={promotionCode}
-                                                onChange={handlePromotionCodeChange} // Sử dụng hàm mới
+                                                onChange={handlePromotionCodeChange} 
                                                 disabled={checkingPromotion || !canApplyDiscount}
                                             />
                                             <button
@@ -500,7 +439,7 @@ const BookingPage = () => {
                                 </div>
                             </div>
 
-                            {/* --- THANH TOÁN --- */}
+                            {/* PAY */}
                             <div className={cx('payment-section')}>
                                 <h5><i className="fas fa-credit-card"></i> Phương thức thanh toán</h5>
                                 {paymentMethods.map(method => (
@@ -511,7 +450,7 @@ const BookingPage = () => {
                                 ))}
                             </div>
 
-                            {/* NÚT SUBMIT ĐÃ ĐƯỢC THAY THẾ */}
+                            {/* SUBMIT BUTTON */}
                             <button
                                 onClick={handleSubmitBooking}
                                 disabled={isSubmitting || selectedSeats.length === 0 || !selectedPaymentMethodId}

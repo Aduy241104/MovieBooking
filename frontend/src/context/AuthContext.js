@@ -15,15 +15,15 @@ function AuthProvider({ children }) {
         localStorage.setItem("user", JSON.stringify(userData));
         localStorage.setItem("token", token);
         localStorage.setItem("refreshToken", refreshToken);
-    }
+    };
 
     const logout = () => {
         setUser(null);
         setToken(null);
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        localStorage.removeItem("refreshToken")
-    }
+        localStorage.removeItem("refreshToken");
+    };
 
     useEffect(() => {
         const savedToken = localStorage.getItem("token");
@@ -36,15 +36,11 @@ function AuthProvider({ children }) {
             logout();
         }
         setIsAuthLoaded(true);
-    }, [])
+    }, []);
 
     useAutoRefreshToken(token, setToken, logout);
 
-    return (
-        <AuthContext.Provider value={ { user, token, login, logout, isAuthLoaded } }>
-            { children }
-        </AuthContext.Provider>
-    )
+    return <AuthContext.Provider value={{ user, token, login, logout, isAuthLoaded }}>{children}</AuthContext.Provider>;
 }
 
-export default AuthProvider 
+export default AuthProvider;

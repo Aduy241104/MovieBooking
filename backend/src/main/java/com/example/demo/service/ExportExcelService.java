@@ -28,7 +28,7 @@ public class ExportExcelService {
         ) {
             Sheet sheet = workbook.createSheet(sheetName);
 
-            // --- Tạo Header ---
+            // --- Create Header ---
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
             headerFont.setColor(IndexedColors.BLUE.getIndex());
@@ -45,14 +45,14 @@ public class ExportExcelService {
                 cell.setCellStyle(headerCellStyle);
             }
 
-            // --- Đổ dữ liệu vào các hàng ---
+            // --- Fill data into rows ---
             int rowIdx = 1;
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy");
 
             for (Booking booking : bookings) {
                 Row row = sheet.createRow(rowIdx++);
 
-                // Ghép nối tên các ghế
+                // Concatenate the chair names
                 String seats = booking.getBookedSeats().stream()
                         .map(bs -> bs.getSeat().getSeatRow() + bs.getSeat().getSeatCol())
                         .collect(Collectors.joining(", "));
@@ -71,7 +71,7 @@ public class ExportExcelService {
                 row.createCell(11).setCellValue(booking.getBookingTime().format(formatter));
             }
 
-            // Tự động điều chỉnh độ rộng cột
+            // Auto adjust column width
             for(int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }

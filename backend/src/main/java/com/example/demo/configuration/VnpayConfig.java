@@ -108,9 +108,8 @@ public class VnpayConfig {
                 sb.append('=');
                 try {
                     // IMPORTANT: The values must be URL encoded when creating the string to hash (when validating the return URL)
-// because VNPAY hashes the values that have been URL encoded on the URL they send back.
-// The values in `fields` (Map<String, String> vnpayParams) have been automatically URL DECODE by the server.
-// So we have to ENCODE them again to match the way VNPAY creates the hash.
+                    // because VNPAY hashes the values that have been URL encoded on the URL they send back.
+                    // The values in `fields` (Map<String, String> vnpayParams) have been automatically URL DECODE by the server.
                     sb.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (UnsupportedEncodingException e) {
                     throw new AssertionError("UTF-8 is not supported", e);

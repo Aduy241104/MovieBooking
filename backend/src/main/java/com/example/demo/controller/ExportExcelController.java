@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
-import org.springframework.format.annotation.DateTimeFormat; // Thêm import này
+import org.springframework.format.annotation.DateTimeFormat;
 
 
 @RestController
@@ -28,29 +28,29 @@ public class ExportExcelController {
     private final BookingRepository bookingRepository;
     private final ExportExcelService exportExcelService;
 
-    // <<< THAY THẾ API CŨ BẰNG API MỚI NÀY >>>
+
     @GetMapping("/export/excel")
     public ResponseEntity<InputStreamResource> exportBookingsToExcel(
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) throws IOException {
 
-        // Xác định khoảng thời gian từ đầu ngày bắt đầu đến cuối ngày kết thúc
+        // Specifies the time period from the start of the start date to the end of the end date
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
 
-        // Lấy danh sách booking thành công trong khoảng thời gian đã chọn
+        // Get a list of successful bookings within the selected time period
         List<Booking> bookings = bookingRepository.findByBookingStatusInAndBookingTimeBetweenOrderByBookingTimeAsc(
                 Arrays.asList("PAID", "RESERVED"),
                 startDateTime,
                 endDateTime
         );
 
-        // Tạo file Excel trong bộ nhớ
+        // Create Excel file in memory
         String sheetName = "Bookings_" + startDate.toString() + "_to_" + endDate.toString();
         ByteArrayInputStream in = exportExcelService.bookingsToExcel(bookings, sheetName);
 
-        // Thiết lập headers
+        // Headers
         HttpHeaders headers = new HttpHeaders();
         String fileName = "bookings_" + startDate.toString() + "_to_" + endDate.toString() + ".xlsx";
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);

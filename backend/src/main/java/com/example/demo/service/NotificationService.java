@@ -22,6 +22,9 @@ public class NotificationService {
     @Lazy
     private AccountService accountService;
 
+    /**
+     * Notify function to send notify
+     */
     public void notify(Account account, String title, String content, String type) {
         Notification notification = Notification.builder()
                 .account(account)
@@ -39,7 +42,9 @@ public class NotificationService {
         messagingTemplate.convertAndSend(topic, notification);
     }
 
-    // Gửi thông báo cho nhiều user
+    /**
+     * Send notification to Users (many)
+     */
     @Transactional
     public void sendNotificationToUsers(List<Long> accountIds, String title, String content, String type) {
         for (Long accountId : accountIds) {
@@ -50,7 +55,9 @@ public class NotificationService {
         }
     }
 
-    // Gửi thông báo cho tất cả user
+    /**
+     * Send notification to All User
+     */
     @Transactional
     public void sendNotificationToAllUsers(String title, String content, String type) {
         List<Account> allAccounts = accountService.getAllAccount();
@@ -59,10 +66,16 @@ public class NotificationService {
         }
     }
 
+    /**
+     * Get all notification of user
+     */
     public List<Notification> getUserNotifications(Account account) {
         return notificationRepository.findByAccountOrderByCreatedAtDesc(account);
     }
 
+    /**
+     * Get notifications by time filter
+     */
     public List<Notification> getUserNotificationsByTime(Account account, LocalDateTime from, LocalDateTime to) {
         if (from == null && to == null) {
             return getUserNotifications(account);

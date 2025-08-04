@@ -2,21 +2,19 @@ import { format, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 /**
- * Hàm này tạo ra một chuỗi HTML cho một vé xem phim có thiết kế đẹp,
- * phù hợp cho việc in màu hoặc lưu dưới dạng PDF.
- * @param {object} bookingDetails - Đối tượng chứa chi tiết booking.
- * @param {string} qrCodeHtml - Chuỗi HTML của thẻ <svg> chứa QR code.
- * @returns {string} - Chuỗi HTML hoàn chỉnh.
+ * @param {object} bookingDetails -Object containing booking details.
+ * @param {string} qrCodeHtml - The HTML string of the <svg> tag contains the QR code.
+ * @returns {string} - Complete HTML String.
  */
 export const createPrintableTicketHtml = (bookingDetails, qrCodeHtml) => {
     if (!bookingDetails) return "";
 
-    // Định dạng lại dữ liệu
+   // Reformat the data
     const formattedShowTime = format(parseISO(bookingDetails.screening.showDateTime), "HH:mm, EEEE, dd/MM/yyyy", { locale: vi });
     const formattedSeats = bookingDetails.bookedSeats.map(s => s.seatRow + s.seatCol).join(", ");
     const totalAmount = bookingDetails.totalAmount.toLocaleString("vi-VN");
 
-    // Sử dụng Template Literals để tạo chuỗi HTML
+    // Use Template Literals to create HTML strings
     return `
         <!DOCTYPE html>
         <html lang="vi">

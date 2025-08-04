@@ -1,5 +1,5 @@
 import React from 'react';
-import CountdownTimer from '../../../components/Booking/CountdownTimer'; // Điều chỉnh đường dẫn đến CountdownTimer của bạn
+import CountdownTimer from '../../../components/Booking/CountdownTimer';
 
 const SeatTooltip = ({ seat, isSelected, getSeatDisplayPrice, onExpire }) => {
     if (seat.status === 'Booked') return 'Ghế đã được đặt';

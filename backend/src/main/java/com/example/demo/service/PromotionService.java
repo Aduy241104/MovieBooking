@@ -2,12 +2,12 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.response.ResPagination;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Account;
 import com.example.demo.model.Promotion;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.PromotionRepository;
 import com.example.demo.utils.SecurityUtils;
-import org.apache.el.stream.Optional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 
 @Service
@@ -93,9 +91,11 @@ public class PromotionService {
 
     public ResPagination fetchAllPromotions(Specification<Promotion> spec, Pageable pageable) {
         // Combine user specification with isDeleted = false condition
-        Specification<Promotion> finalSpec = Specification.where(spec)
+        Specification<Promotion> finalSpec = Specification
+                .where(spec)
                 .and((root, query, criteriaBuilder) ->
-                        criteriaBuilder.equal(root.get("isDeleted"), false));
+                        criteriaBuilder.equal(root.get("isDeleted"), false)
+                );
         // Fetch all promotions with pagination
         Page<Promotion> promotions = promotionRepository.findAll(finalSpec, pageable);
         // Create MetaDTO for pagination
@@ -115,14 +115,6 @@ public class PromotionService {
         return promotionRepository.countByActive(true);
     }
 
-    public Promotion fetchPromotionByCode(String code) {
-        // Check if the promotion code exists
-        boolean isPromotionExist = promotionRepository.existsByCode(code);
-        if (!isPromotionExist) {
-            throw new AppException("Promotion code not found");
-        }
-        return promotionRepository.findByCode(code);
-    }
 
     private void setLogAndNotification(Long promotionId, String action, String description,
                                        String title, String content) {
@@ -216,5 +208,34 @@ public class PromotionService {
     public Account getAccountOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new AppException("Account not found"));
+    }
+
+    //Use for booking------------------------
+    /**
+     * @param code Promotional code needs to be checked.
+     * @return Promotion object if valid.
+     * @throws NotFoundException If the code does not exist, is expired, or is not active.
+     */
+    public Promotion findAndValidatePromotion(String code) {
+        Promotion promotion = promotionRepository.findByCode(code);
+
+        if (promotion == null ||
+                !promotion.getActive() ||
+                promotion.getIsDeleted() ||
+                LocalDateTime.now().isBefore(promotion.getStartTime()) ||
+                LocalDateTime.now().isAfter(promotion.getEndTime())) {
+
+            throw new NotFoundException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
+        }
+
+        return promotion;
+    }
+
+    public Promotion fetchPromotionByCode(String code) {
+        Promotion promotion = promotionRepository.findByCode(code);
+        if (promotion == null) {
+            throw new AppException("Promotion not found");
+        }
+        return promotion;
     }
 }

@@ -4,7 +4,11 @@ import CustomizeButton from '../../../components/CustomeButton';
 import TrailerModal from '../TrailerModal/TrailerModal';
 import styles from './mss.module.scss'
 import classNames from 'classnames/bind'
-import BookingSchedule from '../../Booking/BookingSchedule/BookingSchedule'; 
+
+import ReviewBox from '../../../components/ReviewComponents/reviewcomponents';
+
+import BookingSchedule from '../../Booking/BookingSchedule/BookingSchedule'; //locpng
+
 
 const cx = classNames.bind(styles);
 
@@ -51,6 +55,11 @@ function RightComponent(props) {
                     ) : (
                         <p>Đang tải thông tin phim...</p> 
                     )}
+
+                </div>
+
+                <div className='mt-3'>
+                   <ReviewBox/>
 
                 </div>
             </div>

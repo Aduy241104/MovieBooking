@@ -48,14 +48,14 @@ public class BookingService {
     private final AccountRepository accountRepository;
     private final ScreeningRepository screeningRepository;
     private final SeatRepository seatRepository;
-    private final PromotionRepository promotionRepository;
     private final PaymentMethodRepository paymentMethodRepository;
     private final BookedSeatRepository bookedSeatRepository;
-    private final VnpayConfig vnpayConfig; // Inject VNPAY config
+    private final VnpayConfig vnpayConfig;
     private final EmailService emailService;
+    private final PromotionService promotionService;
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
-    public static final int BOOKING_EXPIRATION_MINUTES = 15;
+    public static final int BOOKING_EXPIRATION_MINUTES = 5;
     public Long getTotalRevenueByStatus(String status) {
         return bookingRepository.getTotalRevenueByStatus(status)
                 .orElseThrow(() -> new AppException("No revenue data found for status: " + status));
@@ -132,7 +132,7 @@ public class BookingService {
         do {
             String randomPart = UUID.randomUUID().toString().substring(30).toUpperCase();
             code = "CINE-" + randomPart;
-        } while (bookingRepository.existsByBookingCode(code)); // Lặp lại nếu mã đã tồn tại
+        } while (bookingRepository.existsByBookingCode(code)); // Repeat if code already exists
         return code;
     }
 
@@ -146,7 +146,7 @@ public class BookingService {
             }
         }
 
-        // 1. INPUT CHECK
+        // 1. Input check
         Account account = accountRepository.findWithLockingByAccountId(accountId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy tài khoản."));
         Screening screening = screeningRepository.findById(request.getScreeningId())
@@ -179,21 +179,26 @@ public class BookingService {
         validateSeatSelection(screening, selectedSeats);
         // 2. CALCULATE TOTAL PRINCIPAL
         BigDecimal originalTotalAmount = calculateOriginalTotalAmount(screening, selectedSeats);
+        // 3. APPLY PROMOTION
+
         Promotion promotion = null;
         BigDecimal discountAmount = BigDecimal.ZERO;
         String promotionCodeApplied = null;
         String discountTypeApplied = null;
-        // 3. APPLY PROMOTION
+
         if (request.getPromotionCode() != null && !request.getPromotionCode().isEmpty()) {
-            promotion = promotionRepository.findByCode(request.getPromotionCode());
-            if (promotion == null || !promotion.getActive() || promotion.getIsDeleted() || LocalDateTime.now().isBefore(promotion.getStartTime()) || LocalDateTime.now().isAfter(promotion.getEndTime())) {
-                throw new InvalidPromotionException("Mã khuyến mãi không hợp lệ hoặc đã hết hạn.");
-            }
+            // Call PromotionService to find and validate the promotion code
+            promotion = promotionService.findAndValidatePromotion(request.getPromotionCode());
+
+            // If the code is valid, continue checking the order conditions
             if (originalTotalAmount.compareTo(promotion.getMinOrder()) < 0) {
                 throw new InvalidPromotionException("Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã này.");
             }
+
+            // If all conditions are ok, proceed to calculate discount
             promotionCodeApplied = promotion.getCode();
             discountTypeApplied = promotion.getDiscountType();
+
             if ("PERCENT".equalsIgnoreCase(promotion.getDiscountType())) {
                 discountAmount = originalTotalAmount
                         .multiply(promotion.getDiscountLevel().divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP));
@@ -203,11 +208,13 @@ public class BookingService {
             } else if ("AMOUNT".equalsIgnoreCase(promotion.getDiscountType())) {
                 discountAmount = promotion.getDiscountLevel();
             }
+
             if (discountAmount.compareTo(originalTotalAmount) > 0) {
                 discountAmount = originalTotalAmount;
             }
         }
         BigDecimal finalTotalAmountAfterPromotion = originalTotalAmount.subtract(discountAmount);
+
 
         // 4. USE POIN
         BigDecimal pointsDiscountAmount = BigDecimal.ZERO;
@@ -453,7 +460,6 @@ public class BookingService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String vnp_CreateDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
-
         cld.add(Calendar.MINUTE, 15);
         String vnp_ExpireDate = formatter.format(cld.getTime());
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
@@ -527,7 +533,15 @@ public class BookingService {
             BigDecimal originalAmount) {
         if (booking == null)
             return null;
-
+        int pointsEarned = 0;
+        // Only calculate bonus points for successfully paid bookings
+        if ("PAID".equals(booking.getBookingStatus()) && booking.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
+            pointsEarned = booking.getTotalAmount().multiply(POINTS_EARNING_RATE).intValue();
+        }
+        LocalDateTime expiresAt = null;
+        if ("PENDING_PAYMENT".equals(booking.getBookingStatus())) {
+            expiresAt = booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES);
+        }
         BookingDetailResponseDTO.AccountInfoDTO accountInfo = null;
         if (booking.getAccount() != null) {
             accountInfo = BookingDetailResponseDTO.AccountInfoDTO.builder()
@@ -596,12 +610,14 @@ public class BookingService {
                 .discountApplied(booking.getDiscountApplied())
                 .pointsUsed(booking.getPointsUsed())
                 .pointsDiscount(booking.getPointsDiscount())
+                .pointsEarned(pointsEarned)
                 .bookingTime(booking.getBookingTime())
                 .totalAmount(booking.getTotalAmount())
                 .originalAmount(originalAmount)
                 .bookingStatus(booking.getBookingStatus())
                 .bookedSeats(bookedSeatInfoList)
                 .paymentUrl(paymentUrl)
+                .expiresAt(expiresAt)
                 .build();
     }
 
@@ -636,12 +652,12 @@ public class BookingService {
             String qrContent = "Booking Code: " + booking.getBookingCode();
             byte[] qrCodeBytes = generateQrCodeImage(qrContent, 200, 200);
 
-            String qrCodeImageCid = "qrCodeImage"; // Content-ID này phải khớp với cid: trong HTML
+            String qrCodeImageCid = "qrCodeImage"; // This Content-ID must match the cid: in the HTML
             context.setVariable("qrCodeImageCid", qrCodeImageCid);
             emailService.sendHtmlEmailWithInlineImage(
                     booking.getAccount().getEmail(),
                     "Xác nhận đặt vé thành công - Mã vé: " + booking.getBookingCode(),
-                    "booking-confirmation", // Tên file template (không có .html)
+                    "booking-confirmation",
                     context,
                     qrCodeImageCid,
                     qrCodeBytes,
@@ -717,10 +733,10 @@ public class BookingService {
                 httpServletRequest);
     }
 
-    @Scheduled(cron = "0 */5 * * * *") //5 minute
+    @Scheduled(fixedRate = 60000) //60,000 milliseconds = 1 minute
     @Transactional
     public void cancelExpiredPendingBookings() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(BOOKING_EXPIRATION_MINUTES);
         logger.info("Running scheduled task to cancel expired bookings older than {}", expirationTime);
 
         List<Booking> expiredBookings = bookingRepository.findAllByBookingStatusAndBookingTimeBefore("PENDING_PAYMENT",

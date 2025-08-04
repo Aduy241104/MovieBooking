@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for exposing active payment methods to the public.
+ * Allows unauthenticated users to view available payment options.
+ */
 @RestController
 @RequestMapping("/api/public/payment-methods") // Để public để ai cũng xem được các phương thức
 @CrossOrigin
@@ -19,6 +23,12 @@ import java.util.List;
 public class PaymentMethodController {
     private final PaymentMethodService paymentMethodService;
 
+    /**
+     * Retrieves a list of currently active payment methods.
+     *
+     * @return an {@link ApiResponse} containing the list of active payment methods
+     *         along with status and message
+     */
     @GetMapping
     public ApiResponse<List<PaymentMethod>> getActivePaymentMethods() {
         return ApiResponse.<List<PaymentMethod>>builder()

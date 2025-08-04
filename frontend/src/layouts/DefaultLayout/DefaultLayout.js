@@ -10,9 +10,6 @@ function DefaultLayout({ children }) {
     const [isLogin, setLogin] = useState(user);
 
     useEffect(() => {
-
-        console.log("UESEEE:  ", user);
-        
         setLogin(user);
     }, [user]);
 
@@ -20,7 +17,7 @@ function DefaultLayout({ children }) {
 
     return (
         <div className="bg-midnight position-relative">
-            <Header user={isLogin} logout={logout} />
+            <Header />
             {children}
             <GoToTop />
             {/* <AIChatBox /> */}

@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.DTO.response.ApiResponse;
 
 import com.example.demo.model.Role;
+import com.example.demo.path.RolePath;
 import com.example.demo.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping("/roles")
+    @PostMapping(RolePath.CREATE_ROLE)
     public ApiResponse<Role> createRole(@RequestBody Role role) {
         if(this.roleService.findRoleByName(role.getRoleName()) != null) {
             throw new RuntimeException("Role already exists");
@@ -30,7 +31,7 @@ public class RoleController {
                 .build();
     }
 
-    @PutMapping("/roles")
+    @PutMapping(RolePath.UPDATE_ROLE)
     public ApiResponse<Role> updateRole(@RequestBody Role role) {
         if(this.roleService.findRoleById(role.getRoleId()) == null) {
             throw new RuntimeException("Role does not exist");
@@ -42,7 +43,7 @@ public class RoleController {
                 .build();
     }
 
-    @GetMapping("/roles")
+    @GetMapping(RolePath.GET_ALL_ROLES)
     public ApiResponse<List<Role>> getAllRoles() {
         return ApiResponse.<List<Role>>builder()
                 .status(HttpStatus.OK.value())
