@@ -56,15 +56,6 @@ const BookingSuccessPage = () => {
         }
     };
 
-    const getStatusClass = (status) => {
-        switch (status) {
-            case 'PAID': return 'status-paid';
-            case 'RESERVED': return 'status-reserved';
-            case 'PENDING_PAYMENT': return 'status-pending';
-            default: return 'status-unknown';
-        }
-    };
-
     if (loading) {
         return <div className={cx('page-container', 'centered-message')}>Đang tải thông tin đặt vé...</div>;
     }
