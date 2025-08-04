@@ -24,7 +24,7 @@ function MovieSchedule() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await getMovieByDateAPI();
+                const response = await getMovieByDateAPI(selectedDate);
                 setMovieList(response.result);
             } catch (error) {
                 setError("Khong thể tải dữ liệu")
