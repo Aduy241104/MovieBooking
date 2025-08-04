@@ -110,9 +110,7 @@ export const NotificationProvider = ({ children }) => {
     const deleteNotificationsByFilter = async (filterParams) => {
         try {
             await deleteNotificationsByFilterAPI(filterParams);
-            // Sau khi xóa ở backend, ta fetch lại danh sách để đảm bảo đồng bộ
-            // Hoặc có thể tự lọc state ở client nếu logic không quá phức tạp
-            await fetchNotifications(); // Cách đơn giản và an toàn nhất
+            await fetchNotifications();
             message.success("Đã xóa các thông báo đã chọn");
         } catch (error) {
             message.error("Xóa thông báo thất bại");
