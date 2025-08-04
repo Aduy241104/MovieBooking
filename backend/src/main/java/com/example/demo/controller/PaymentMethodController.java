@@ -17,7 +17,7 @@ import java.util.List;
  * Allows unauthenticated users to view available payment options.
  */
 @RestController
-@RequestMapping("/api/public/payment-methods") // Để public để ai cũng xem được các phương thức
+@RequestMapping("/api/public/payment-methods")
 @CrossOrigin
 @RequiredArgsConstructor
 public class PaymentMethodController {
