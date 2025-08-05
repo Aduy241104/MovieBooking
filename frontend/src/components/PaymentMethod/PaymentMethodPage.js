@@ -23,6 +23,7 @@ export const PaymentMethodPage = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
+    const [datamethod, setDatamethod] = useState(null);
 
     useEffect(() => {
         setBreadcrumbItems([

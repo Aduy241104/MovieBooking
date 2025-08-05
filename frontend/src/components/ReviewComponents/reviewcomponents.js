@@ -32,7 +32,10 @@ const ReviewBox = () => {
     const pageSize = 7;
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
+    const [averageRating, setAverageRating] = useState(null);
+    const [ratingCount, setRatingCount] = useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deletingReviewId, setDeletingReviewId] = useState(null);
 
 
 
@@ -71,6 +74,26 @@ const ReviewBox = () => {
                 setHasMore(false);
             });
     }, [movieId, page, refreshTrigger]);
+
+    useEffect(() => {
+        const fetchAverage = async () => {
+            try {
+                const res = await ReviewService.getAverageRatingAndCountByMovieId(movieId);
+                if (res && res.result !== undefined) {
+                    setAverageRating(res.result); // res.result là Double
+                    // Nếu sau này trả thêm số lượng: setRatingCount(res.count)
+                } else {
+                    setAverageRating(0);
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy điểm đánh giá trung bình:", error);
+                setAverageRating(0);
+            }
+        };
+
+        fetchAverage();
+    }, [movieId, refreshTrigger]); // refresh khi user gửi hoặc xóa
+
 
 
 
@@ -138,7 +161,7 @@ const ReviewBox = () => {
 
                 console.log("Review đã thêm:", createdReview);
 
-                setReviews([]); // 🧹 Reset review trước
+                setReviews([]); //  Reset review trước
                 setPage(-1);    // Ép đổi trạng thái để useEffect chạy lại
                 setTimeout(() => {
                     setPage(0); // Quay về trang đầu
@@ -217,18 +240,18 @@ const ReviewBox = () => {
             .finally(() => setSubmitting(false));
     };
 
-    const loadReviews = async () => {
-        try {
-            const data = await ReviewService.getReviewsByMovieId(movieId);
-            if (Array.isArray(data) && data.length > 0) {
-                setReviews(data[0].reviews || []);
-            } else {
-                setReviews([]);
-            }
-        } catch (err) {
-            console.error("Error loading reviews:", err);
-        }
-    };
+    // const loadReviews = async () => {
+    //     try {
+    //         const data = await ReviewService.getReviewsByMovieId(movieId);
+    //         if (Array.isArray(data) && data.length > 0) {
+    //             setReviews(data[0].reviews || []);
+    //         } else {
+    //             setReviews([]);
+    //         }
+    //     } catch (err) {
+    //         console.error("Error loading reviews:", err);
+    //     }
+    // };
 
 
 
@@ -237,36 +260,35 @@ const ReviewBox = () => {
 
     // Hàm xử lý xóa review (đã chỉnh lại)
     const handleDelete = async (reviewId) => {
-        if (window.confirm('Bạn có chắc muốn xóa đánh giá này?')) {
-            try {
-                setSubmitting(true);
-                const response = await fetch(`http://localhost:8081/api/public/reviews/${reviewId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+        try {
+            setSubmitting(true);
+            const response = await fetch(`http://localhost:8081/api/public/reviews/${reviewId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-                const data = await response.json(); // luôn parse JSON để lấy message
+            const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Xóa đánh giá thất bại');
-                }
-
-                message.success(data.message || "Đánh giá đã được xóa");
-
-                // Làm mới danh sách đánh giá
-                setPage(0);
-                setHasMore(true);
-                setRefreshTrigger(prev => prev + 1);
-            } catch (error) {
-                console.error('Error deleting review:', error);
-                message.error(error.message || 'Có lỗi xảy ra khi xóa đánh giá');
-            } finally {
-                setSubmitting(false);
+            if (!response.ok) {
+                throw new Error(data.message || 'Xóa đánh giá thất bại');
             }
+
+            message.success(data.message || "Đánh giá đã được xóa");
+
+            // Làm mới danh sách
+            setPage(0);
+            setHasMore(true);
+            setRefreshTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error('Error deleting review:', error);
+            message.error(error.message || 'Có lỗi xảy ra khi xóa đánh giá');
+        } finally {
+            setSubmitting(false);
+            setIsDeleteModalOpen(false);
+            setDeletingReviewId(null);
         }
     };
+
 
 
     // --- Hiển thị sao đánh giá ---
@@ -293,7 +315,14 @@ const ReviewBox = () => {
     // --- JSX render ---
     return (
         <div className={styles.wrapper}>
-            <h3 className={styles.title}>Đánh giá phim</h3>
+            <h3 className={styles.title}>
+                Đánh giá phim
+                {averageRating !== null && (
+                    <span style={{ marginLeft: "12px", color: "#FFD700", fontSize: "20px" }}>
+                        {averageRating.toFixed(1)} / 10
+                    </span>
+                )}
+            </h3>
 
             <form className={styles.form} onSubmit={handleSubmit}>
                 <label className={styles.ratingLabel}
@@ -427,7 +456,11 @@ const ReviewBox = () => {
                                                         </button>
                                                         <button
                                                             className={`${styles.menuItem} ${styles.danger}`}
-                                                            onClick={() => handleDelete(r.id)}
+                                                            onClick={() => {
+                                                                setDeletingReviewId(r.id);
+                                                                setIsDeleteModalOpen(true);
+                                                                setMenuOpenId(null);
+                                                            }}
                                                             disabled={submitting}
                                                         >
                                                             Xóa
@@ -507,6 +540,39 @@ const ReviewBox = () => {
                             </div>
                         </form>
                     </Modal>
+
+                    <Modal
+                        open={isDeleteModalOpen}
+                        onCancel={() => {
+                            setIsDeleteModalOpen(false);
+                            setDeletingReviewId(null);
+                        }}
+                        footer={null}
+                        title="Xác nhận xóa đánh giá"
+                        centered
+                    >
+                        <p>Bạn có chắc muốn xóa đánh giá này không?</p>
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                            <button
+                                className={styles.cancelButton}
+                                onClick={() => handleDelete(deletingReviewId)}
+                                disabled={submitting}
+                            >
+                                {submitting ? "Đang xóa..." : "Xóa"}
+                            </button>
+
+                            <button
+                                className={styles.button}
+                                onClick={() => {
+                                    setIsDeleteModalOpen(false);
+                                    setDeletingReviewId(null);
+                                }}
+                            >
+                                Hủy
+                            </button>
+                        </div>
+                    </Modal>
+
 
                 </div>
             )}
