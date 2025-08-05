@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Service
 public class PromotionService {
     @Autowired
@@ -89,13 +88,19 @@ public class PromotionService {
         return promotionRepository.save(currentPromotion);
     }
 
+    /**
+     * Fetch all promotions with pagination and filtering.
+     *
+     * @param spec     Specification for filtering promotions.
+     * @param pageable Pageable object for pagination.
+     * @return ResPagination containing the list of promotions and pagination
+     *         metadata.
+     */
     public ResPagination fetchAllPromotions(Specification<Promotion> spec, Pageable pageable) {
         // Combine user specification with isDeleted = false condition
         Specification<Promotion> finalSpec = Specification
                 .where(spec)
-                .and((root, query, criteriaBuilder) ->
-                        criteriaBuilder.equal(root.get("isDeleted"), false)
-                );
+                .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false));
         // Fetch all promotions with pagination
         Page<Promotion> promotions = promotionRepository.findAll(finalSpec, pageable);
         // Create MetaDTO for pagination
@@ -111,18 +116,27 @@ public class PromotionService {
                 .build();
     }
 
+    /**
+     * Get total number of active promotions.
+     *
+     * @return Total number of active promotions.
+     */
     public Long getTotalActivePromotions() {
         return promotionRepository.countByActive(true);
     }
 
-
+    /**
+     * Set log and notification for promotion actions.
+     *
+     * @return void
+     */
     private void setLogAndNotification(Long promotionId, String action, String description,
-                                       String title, String content) {
+            String title, String content) {
         // Check if the promotion exists
         Promotion currentPromotion = getPromotionOrThrow(promotionId);
         // Get the current logged-in user
         String loginUserId = SecurityUtils.getCurrentUsername();
-        if(loginUserId == null || loginUserId.isEmpty()) {
+        if (loginUserId == null || loginUserId.isEmpty()) {
             throw new AppException("User not logged in!");
         }
         Account editorAccount = getAccountOrThrow(Long.valueOf(loginUserId));
@@ -132,11 +146,10 @@ public class PromotionService {
                 action,
                 "KHUYẾN MÃI",
                 currentPromotion.getCode(),
-                description
-        );
+                description);
         // Find all admin accounts to notify
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
-        if(adminAccounts.isEmpty()) {
+        if (adminAccounts.isEmpty()) {
             throw new AppException("No admin accounts found to notify");
         }
         // Send notifications to all admin accounts except the editor
@@ -146,14 +159,16 @@ public class PromotionService {
                         admin,
                         title,
                         editorAccount.getFullName() + content + currentPromotion.getCode(),
-                        "SYSTEM"
-                );
+                        "SYSTEM");
             }
         }
     }
 
     /**
-     * Find promotion by id, or throw AppException("Promotion not found").
+     * Get promotion by ID or throw AppException("Promotion not found").
+     *
+     * @param promotionId ID of the promotion.
+     * @return Promotion object if found.
      */
     public Promotion getPromotionOrThrow(Long promotionId) {
         return promotionRepository.findById(promotionId)
@@ -161,8 +176,9 @@ public class PromotionService {
     }
 
     /**
-     * Check if promotion code is already in use by another promotion.
-     * or throw AppException("Promotion code already exists").
+     * Check if promotion code exists.
+     *
+     * @param promotionCode Promotion code to check.
      */
     public void isPromotionExist(String promotionCode) {
         boolean exists = promotionRepository.existsByCode(promotionCode);
@@ -172,8 +188,12 @@ public class PromotionService {
     }
 
     /**
-     * Check if promotion code is already in use except for the current promotion.
-     * or throw AppException("Promotion code already in use").
+     * Check if promotion code is not in use.
+     * If currentPromotionId is null, it means adding a new promotion.
+     * If currentPromotionId is not null, it means updating an existing promotion.
+     *
+     * @param promotionCode      Promotion code to check.
+     * @param currentPromotionId Current promotion ID (null for new promotions).
      */
     public void assertPromotionCodeNotInUse(String promotionCode, Long currentPromotionId) {
         boolean exists;
@@ -181,7 +201,8 @@ public class PromotionService {
             // Add new promotion: check if promotion code exists
             exists = promotionRepository.existsByCode(promotionCode);
         } else {
-            // Update promotion: check if promotion code exists but not for the current promotion
+            // Update promotion: check if promotion code exists but not for the current
+            // promotion
             exists = promotionRepository.existsByCodeAndIdNot(promotionCode, currentPromotionId);
         }
         if (exists) {
@@ -190,31 +211,37 @@ public class PromotionService {
     }
 
     /**
-     * Format discount level to a string with appropriate suffix.
-     * If the level is between 1 and 99, it appends a percentage sign (%).
-     * Otherwise, it appends "đ" for VND currency.
+     * Format discount value based on the discount type.
+     * If discount level is between 1 and 99, append '%' else append 'đ'.
+     *
+     * @param level Discount level.
+     * @return Formatted discount string.
      */
     private static String formatDiscount(BigDecimal level) {
         String suffix = (level.compareTo(BigDecimal.ONE) >= 0 &&
                 level.compareTo(BigDecimal.valueOf(99)) <= 0)
-                ? "%"
-                : "đ";
+                        ? "%"
+                        : "đ";
         return level.stripTrailingZeros().toPlainString() + suffix;
     }
 
     /**
-     * Find account by id, or throw AppException("Account not found").
+     * Get account by ID or throw AppException("Account not found").
+     *
+     * @param accountId ID of the account.
+     * @return Account object if found.
      */
     public Account getAccountOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
                 .orElseThrow(() -> new AppException("Account not found"));
     }
 
-    //Use for booking------------------------
+    // Use for booking------------------------
     /**
      * @param code Promotional code needs to be checked.
      * @return Promotion object if valid.
-     * @throws NotFoundException If the code does not exist, is expired, or is not active.
+     * @throws NotFoundException If the code does not exist, is expired, or is not
+     *                           active.
      */
     public Promotion findAndValidatePromotion(String code) {
         Promotion promotion = promotionRepository.findByCode(code);

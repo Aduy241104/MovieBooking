@@ -4,7 +4,7 @@ import { Table, Input, Select, message } from "antd";
 import { useOutletContext } from "react-router-dom";
 import { debounce } from "lodash";
 import axios from "axios";
-import PaymentTransactionService, { getAllTransactions } from '../../service/PaymentTransactionService';
+import PaymentTransactionService, { getAllTransactions } from "../../service/PaymentTransactionService";
 
 const PaymentTransactionPage = () => {
     const { setBreadcrumbItems } = useOutletContext();
@@ -19,8 +19,8 @@ const PaymentTransactionPage = () => {
     useEffect(() => {
         setBreadcrumbItems([
             { title: "Trang chủ", href: "/admin" },
-            { title: "Quản lí thanh toán" },
-            { title: "Giao dịch" }
+            { title: "Quản lý thanh toán" },
+            { title: "Giao dịch" },
         ]);
     }, []);
 
@@ -30,11 +30,14 @@ const PaymentTransactionPage = () => {
                 const tokenStr = localStorage.getItem("token");
                 const token = tokenStr?.startsWith('"') ? JSON.parse(tokenStr) : tokenStr;
 
-                const res = await axios.get(`http://localhost:8081/api/admin/payment-transactions?page=${currentPage}&size=10`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
+                const res = await axios.get(
+                    `http://localhost:8081/api/admin/payment-transactions?page=${currentPage}&size=10`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
                     }
-                });
+                );
 
                 setTransactions(res.data.content || []);
                 setTotalPages(res.data.totalPages); // nếu cần
@@ -48,7 +51,6 @@ const PaymentTransactionPage = () => {
 
         fetchTransactions();
     }, [currentPage]);
-
 
     const handleSearch = debounce((value) => {
         setSearch(value);
@@ -70,23 +72,23 @@ const PaymentTransactionPage = () => {
         {
             title: "Mã giao dịch",
             dataIndex: "bookingId",
-            key: "bookingId"
+            key: "bookingId",
         },
         {
             title: "Khách hàng",
             dataIndex: "accountName",
-            key: "accountName"
+            key: "accountName",
         },
         {
             title: "Phương thức",
             dataIndex: "paymentMethod",
-            key: "paymentMethod"
+            key: "paymentMethod",
         },
         {
             title: "Tổng tiền",
             dataIndex: "totalAmount",
             key: "totalAmount",
-            render: (amount) => `${amount?.toLocaleString()} VND`
+            render: (amount) => `${amount?.toLocaleString()} VND`,
         },
         {
             title: "Trạng thái",
@@ -115,14 +117,14 @@ const PaymentTransactionPage = () => {
                 }
 
                 return <span style={{ color, fontWeight: "bold" }}>{text}</span>;
-            }
+            },
         },
         {
             title: "Thời gian",
             dataIndex: "bookingTime",
             key: "bookingTime",
-            render: (time) => new Date(time).toLocaleString("vi-VN")
-        }
+            render: (time) => new Date(time).toLocaleString("vi-VN"),
+        },
     ];
 
     return (
@@ -131,7 +133,7 @@ const PaymentTransactionPage = () => {
                 padding: 24,
                 background: "#fff",
                 borderRadius: 8,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             }}
         >
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
@@ -168,7 +170,7 @@ const PaymentTransactionPage = () => {
                 pagination={{
                     current: currentPage, // Vì backend page = 0, còn Table bắt đầu từ 1
                     pageSize: 10,
-                    total: totalPages * 10,   // tổng số dòng
+                    total: totalPages * 10, // tổng số dòng
                     onChange: (page) => setCurrentPage(page - 1),
                 }}
             />
