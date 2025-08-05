@@ -27,7 +27,7 @@ export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
             setTitle("QUẢN LÝ THỂ LOẠI PHIM");
         } else if (path.includes("movies") || path.includes("movies")) {
             setTitle("QUẢN LÝ PHIM");
-        }else if (path.includes("showtime-list")) {
+        } else if (path.includes("showtime-list")) {
             setTitle("QUẢN LÝ LỊCH CHIẾU");
         } else if (path.includes("faretype-list")) {
             setTitle("QUẢN LÝ LOẠI VÉ");
@@ -37,6 +37,10 @@ export const AdminHeader = ({ collapsed, toggleCollapsed }) => {
             setTitle("QUẢN LÝ BÌNH LUẬN");
         } else if (path.includes("activity-logs")) {
             setTitle("LỊCH SỬ HOẠT ĐỘNG");
+        } else if (path.includes("payment-transactions")) {
+            setTitle("QUẢN LÝ GIAO DỊCH");
+        } else if (path.includes("paymentmethod")) {
+            setTitle("QUẢN LÝ PHƯƠNG THỨC THANH TOÁN");
         } else if (path.includes("export-reports")) {
             setTitle("XUẤT FILE");
         } else {

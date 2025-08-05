@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +28,9 @@ public class DashboardService {
 
     /**
      * Get revenue statistics by movie type.
+     *
+     * @return MovieTypeRevenueResponse containing the revenue statistics by movie
+     * type.
      */
     public MovieTypeRevenueResponse getMovieTypeRevenue() {
         List<MovieTypeRevenueResponse.MovieTypeRevenue> stats = movieTypeRepository.getMoviesByTypeRevenue();
@@ -40,6 +41,8 @@ public class DashboardService {
 
     /**
      * Get all dashboard summary data.
+     *
+     * @return DashboardSummaryResponse containing the summary data.
      */
     public DashboardSummaryResponse getDashboardSummary() {
         String roleName = "CUSTOMER";
@@ -79,7 +82,8 @@ public class DashboardService {
                 .moviesByType(movieTypeRevenueResponse.getData()) // Use List DTO directly
                 .userRegistrations(userRegistrationsResponse.stream()
                         .map(i -> DashboardSummaryResponse.UserRegistrationChartData.builder()
-                                .date(i.getDate().format(DateTimeFormatter.ofPattern("MM/yyyy")))
+                                .date(i.getDate().format(
+                                        DateTimeFormatter.ofPattern("MM/yyyy")))
                                 .newUsers(i.getNewUsers())
                                 .totalUsers(i.getTotalUsers())
                                 .build())
@@ -105,7 +109,6 @@ public class DashboardService {
                 .charts(charts)
                 .tables(tables)
                 .build();
-
         return DashboardSummaryResponse.builder()
                 .data(dataSummary)
                 .build();

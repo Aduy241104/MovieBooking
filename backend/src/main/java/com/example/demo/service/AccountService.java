@@ -42,10 +42,16 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
+    /**
+     * Fetch all accounts with pagination and filtering.
+     * 
+     * @param spec     Specification for filtering accounts
+     * @param pageable Pageable object for pagination
+     * @return ResPagination containing paginated account data
+     */
     public ResPagination fetchAllAccountPagination(Specification<Account> spec, Pageable pageable) {
         Specification<Account> finalSpec = Specification.where(spec)
-                .and((root, query, criteriaBuilder)
-                        -> criteriaBuilder.equal(root.get("isDeleted"), false));
+                .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("isDeleted"), false));
 
         Page<Account> accountPage = accountRepository.findAll(finalSpec, pageable);
         ResPagination.MetaDTO metaDTO = ResPagination.MetaDTO.builder()
@@ -152,6 +158,13 @@ public class AccountService {
         return accountRepository.save(currentAccount);
     }
 
+    /**
+     * Handle avatar upload for an account.
+     * 
+     * @param accountId  ID of the account
+     * @param avatarFile MultipartFile containing the avatar image
+     * @return Updated Account with new avatar
+     */
     public Account handleUploadAvatar(Long accountId, MultipartFile avatarFile) {
         Account currentAccount = getAccountOrThrow(accountId);
         if (avatarFile == null || avatarFile.isEmpty()) {
@@ -182,6 +195,12 @@ public class AccountService {
         }
     }
 
+    /**
+     * Get total number of accounts by role name.
+     * 
+     * @param roleName Name of the role
+     * @return Total count of accounts with the specified role
+     */
     public long getTotalAccountByRole(String roleName) {
         boolean isRoleExist = roleRepository.existsByRoleName(roleName);
         if (!isRoleExist) {
@@ -190,6 +209,13 @@ public class AccountService {
         return accountRepository.countByRole_RoleName(roleName);
     }
 
+    /**
+     * Get user registrations statistics for the last 'monthCount' months.
+     * 
+     * @param monthCount Number of months to look back
+     * @return List of UserRegistrationsResponse containing monthly registration
+     *         data
+     */
     public List<UserRegistrationsResponse> getUserRegistrationsDTO(int monthCount) {
         LocalDateTime now = LocalDateTime.now();
         LocalDate fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate();
@@ -218,10 +244,16 @@ public class AccountService {
     }
 
     /**
-     * Sets log and sends notification for account actions.
+     * Set log and notification for account actions.
+     * 
+     * @param accountId   ID of the account
+     * @param action      Action performed (CREATE, UPDATE, DELETE)
+     * @param description Description of the action
+     * @param title       Title for the notification
+     * @param content     Content for the notification
      */
     private void setLogAndNotification(Long accountId, String action, String description,
-                                       String title, String content) {
+            String title, String content) {
         // Check user applied
         Account currentAccount = getAccountOrThrow(accountId);
         // Get the current logged-in user
@@ -249,7 +281,7 @@ public class AccountService {
                 description);
         // Notify admins
         List<Account> adminAccounts = accountRepository.findByRole_RoleName("ADMIN");
-        if(adminAccounts.isEmpty()) {
+        if (adminAccounts.isEmpty()) {
             throw new AppException("No admin accounts found");
         }
         for (Account admin : adminAccounts) {
@@ -258,14 +290,16 @@ public class AccountService {
                         admin,
                         title,
                         editorAccount.getFullName() + content + currentAccount.getEmail(),
-                        "SYSTEM"
-                );
+                        "SYSTEM");
             }
         }
     }
 
     /**
-     * Find account by id, or throw AppException("Account not found").
+     * Get account by ID or throw AppException("Account not found").
+     * 
+     * @param accountId ID of the account
+     * @return Account object if found
      */
     public Account getAccountOrThrow(Long accountId) {
         return accountRepository.findById(accountId)
@@ -273,8 +307,10 @@ public class AccountService {
     }
 
     /**
-     * Check if email is already in use by another account
-     * or throw AppException("Account already exists").
+     * Check if an account with the given email already exists.
+     * 
+     * @param email Email to check
+     * @throws AppException if account with email already exists
      */
     public void isAccountExist(String email) {
         boolean exists = accountRepository.existsByEmail(email);
@@ -284,8 +320,11 @@ public class AccountService {
     }
 
     /**
-     * Check if phoneNumber is already in use by another account
-     * or throw AppException("Phone already in use").
+     * Check if a phone number is already in use by another account.
+     * 
+     * @param phoneNumber      Phone number to check
+     * @param currentAccountId ID of the current account (if updating)
+     * @throws AppException if phone number is already in use
      */
     public void assertPhoneNotInUse(String phoneNumber, Long currentAccountId) {
         boolean exists;

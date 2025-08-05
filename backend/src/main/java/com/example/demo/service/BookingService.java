@@ -56,11 +56,24 @@ public class BookingService {
     private static final Logger logger = LoggerFactory.getLogger(BookingService.class);
     private static final BigDecimal POINTS_EARNING_RATE = new BigDecimal("0.04"); // 4%
     public static final int BOOKING_EXPIRATION_MINUTES = 5;
+
+    /**
+     * Get total revenue by booking status.
+     *
+     * @param status the booking status
+     * @return the total revenue
+     */
     public Long getTotalRevenueByStatus(String status) {
         return bookingRepository.getTotalRevenueByStatus(status)
                 .orElseThrow(() -> new AppException("No revenue data found for status: " + status));
     }
 
+    /**
+     * Get daily ticket revenue for the past X days.
+     *
+     * @param dailyCount the number of days to retrieve revenue for
+     * @return a list of daily ticket revenue responses
+     */
     public List<DailyTicketRevenueResponse> getDailyTicketRevenue(int dailyCount) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fromDate = now.minusDays(dailyCount).toLocalDate().atStartOfDay();
@@ -81,6 +94,12 @@ public class BookingService {
         return result;
     }
 
+    /**
+     * Get weekly ticket revenue for the past X weeks.
+     *
+     * @param weekCount the number of weeks to retrieve revenue for
+     * @return a list of weekly ticket revenue responses
+     */
     public List<DailyTicketRevenueResponse> getWeeklyTicketRevenue(int weekCount) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fromDate = now.minusWeeks(weekCount).with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
@@ -101,6 +120,12 @@ public class BookingService {
         return result;
     }
 
+    /**
+     * Get monthly ticket revenue for the past X months.
+     *
+     * @param monthCount the number of months to retrieve revenue for
+     * @return a list of monthly ticket revenue responses
+     */
     public List<DailyTicketRevenueResponse> getMonthlyTicketRevenue(int monthCount) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime fromDate = now.minusMonths(monthCount).withDayOfMonth(1).toLocalDate().atStartOfDay();
@@ -121,11 +146,17 @@ public class BookingService {
         return result;
     }
 
+    /**
+     * Get recently booked tickets.
+     *
+     * @param limit the maximum number of tickets to retrieve
+     * @return a list of recently booked ticket responses
+     */
     public List<BookingTicketRecentlyResponse> getRecentlyBookedTickets(int limit) {
         return bookingRepository.getBookingTicketRecently(limit);
     }
 
-    //-------------------booking
+    // -------------------booking
 
     private String generateUniqueBookingCode() {
         String code;
@@ -137,12 +168,17 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingDetailResponseDTO createBooking(BookingRequestDTO request, Long accountId, HttpServletRequest httpServletRequest) {
-        Optional<Booking> existingPendingBooking = bookingRepository.findByAccountAccountIdAndScreeningIdAndBookingStatus(accountId, request.getScreeningId(), "PENDING_PAYMENT");
+    public BookingDetailResponseDTO createBooking(BookingRequestDTO request, Long accountId,
+            HttpServletRequest httpServletRequest) {
+        Optional<Booking> existingPendingBooking = bookingRepository
+                .findByAccountAccountIdAndScreeningIdAndBookingStatus(accountId, request.getScreeningId(),
+                        "PENDING_PAYMENT");
         if (existingPendingBooking.isPresent()) {
             Booking booking = existingPendingBooking.get();
             if (booking.getBookingTime().plusMinutes(BOOKING_EXPIRATION_MINUTES).isAfter(LocalDateTime.now())) {
-                throw new PendingBookingExistsException("Bạn đã có một đơn đặt vé đang chờ thanh toán cho suất chiếu này. Vui lòng hoàn tất hoặc hủy đơn hàng cũ.", booking.getId() );
+                throw new PendingBookingExistsException(
+                        "Bạn đã có một đơn đặt vé đang chờ thanh toán cho suất chiếu này. Vui lòng hoàn tất hoặc hủy đơn hàng cũ.",
+                        booking.getId());
             }
         }
 
@@ -167,13 +203,15 @@ public class BookingService {
         Set<Long> alreadyBookedSeatIds = seatRepository.findBookedSeatIdsByScreeningId(screening.getId());
         for (Seat seat : selectedSeats) {
             if (alreadyBookedSeatIds.contains(seat.getSeatId())) {
-                throw new SeatAlreadyBookedException("Ghế " + seat.getSeatRow() + seat.getSeatCol() + " đã được đặt hoặc đang được giữ.");
+                throw new SeatAlreadyBookedException(
+                        "Ghế " + seat.getSeatRow() + seat.getSeatCol() + " đã được đặt hoặc đang được giữ.");
             }
             if (!seat.getCinemaRoom().getCinemaRoomId().equals(screening.getCinemaRoom().getCinemaRoomId())) {
                 throw new BookingValidationException("Dữ liệu ghế không hợp lệ. Vui lòng thử lại.");
             }
             if ("Unavailable".equalsIgnoreCase(seat.getSeatStatus())) {
-                throw new BookingValidationException("Ghế " + seat.getSeatRow() + seat.getSeatCol() + " không khả dụng để đặt.");
+                throw new BookingValidationException(
+                        "Ghế " + seat.getSeatRow() + seat.getSeatCol() + " không khả dụng để đặt.");
             }
         }
         validateSeatSelection(screening, selectedSeats);
@@ -214,7 +252,6 @@ public class BookingService {
             }
         }
         BigDecimal finalTotalAmountAfterPromotion = originalTotalAmount.subtract(discountAmount);
-
 
         // 4. USE POIN
         BigDecimal pointsDiscountAmount = BigDecimal.ZERO;
@@ -262,7 +299,8 @@ public class BookingService {
                 booking.setBookingStatus("PAID");
             }
         } else {
-            throw new BookingValidationException("Phương thức thanh toán không được hỗ trợ: " + paymentMethod.getName());
+            throw new BookingValidationException(
+                    "Phương thức thanh toán không được hỗ trợ: " + paymentMethod.getName());
         }
 
         Booking savedBooking = bookingRepository.save(booking);
@@ -316,7 +354,8 @@ public class BookingService {
                 addPointsToAccount(booking);
                 bookingRepository.save(booking);
                 sendBookingConfirmationEmail(booking);
-                // No need to save booking again because addPointsToAccount has saved the account,
+                // No need to save booking again because addPointsToAccount has saved the
+                // account,
             } else {
                 booking.setBookingStatus("PAYMENT_FAILED");
                 refundPoints(booking);
@@ -338,7 +377,6 @@ public class BookingService {
                     + movieIdParam;
         }
     }
-
 
     private BigDecimal calculateOriginalTotalAmount(Screening screening, List<Seat> selectedSeats) {
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -513,7 +551,8 @@ public class BookingService {
 
     public BookingDetailResponseDTO getBookingDetailsForUser(Integer bookingId, Long accountId) {
         Booking booking = bookingRepository.findByIdAndAccountAccountId(bookingId, accountId)
-                .orElseThrow(() -> new NotFoundException("Không tìm thấy đơn đặt vé này hoặc bạn không có quyền truy cập."));
+                .orElseThrow(
+                        () -> new NotFoundException("Không tìm thấy đơn đặt vé này hoặc bạn không có quyền truy cập."));
         return convertToBookingDetailResponseDTO(booking, null, calculateOriginalAmount(booking));
     }
 
@@ -678,7 +717,7 @@ public class BookingService {
         return pngOutputStream.toByteArray();
     }
 
-    //Check
+    // Check
     private void validateSeatSelection(Screening screening, List<Seat> selectedSeats) {
         Map<String, List<Seat>> allSeatsByRow = seatRepository.findByCinemaRoom(screening.getCinemaRoom()).stream()
                 .sorted(Comparator.comparing(Seat::getSeatRow).thenComparing(s -> Integer.parseInt(s.getSeatCol())))
@@ -689,15 +728,20 @@ public class BookingService {
             for (int i = 0; i < rowSeats.size(); i++) {
                 Seat currentSeat = rowSeats.get(i);
                 if (!occupiedSeatIds.contains(currentSeat.getSeatId())) {
-                    if (currentSeat.getSeatType() != null && "couple".equalsIgnoreCase(currentSeat.getSeatType().getSeatTypeName())) {
+                    if (currentSeat.getSeatType() != null
+                            && "couple".equalsIgnoreCase(currentSeat.getSeatType().getSeatTypeName())) {
                         continue;
                     }
-                    boolean isLeftNeighborOccupied = (i == 0) || occupiedSeatIds.contains(rowSeats.get(i - 1).getSeatId());
-                    boolean isRightNeighborOccupied = (i == rowSeats.size() - 1) || occupiedSeatIds.contains(rowSeats.get(i + 1).getSeatId());
+                    boolean isLeftNeighborOccupied = (i == 0)
+                            || occupiedSeatIds.contains(rowSeats.get(i - 1).getSeatId());
+                    boolean isRightNeighborOccupied = (i == rowSeats.size() - 1)
+                            || occupiedSeatIds.contains(rowSeats.get(i + 1).getSeatId());
 
                     if (isLeftNeighborOccupied && isRightNeighborOccupied) {
-                        logger.warn("Invalid seat selection: creates a single empty seat gap at {}{}", currentSeat.getSeatRow(), currentSeat.getSeatCol());
-                        throw new BookingValidationException("Không thể để lại một ghế trống duy nhất. Vui lòng chọn ghế liền kề.");
+                        logger.warn("Invalid seat selection: creates a single empty seat gap at {}{}",
+                                currentSeat.getSeatRow(), currentSeat.getSeatCol());
+                        throw new BookingValidationException(
+                                "Không thể để lại một ghế trống duy nhất. Vui lòng chọn ghế liền kề.");
                     }
                 }
             }
@@ -733,7 +777,7 @@ public class BookingService {
                 httpServletRequest);
     }
 
-    @Scheduled(fixedRate = 60000) //60,000 milliseconds = 1 minute
+    @Scheduled(fixedRate = 60000) // 60,000 milliseconds = 1 minute
     @Transactional
     public void cancelExpiredPendingBookings() {
         LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(BOOKING_EXPIRATION_MINUTES);
@@ -755,12 +799,14 @@ public class BookingService {
             logger.warn("Expired booking with code: {}", booking.getBookingCode());
         }
     }
+
     public List<BookingDetailResponseDTO> getAllBookingsByMovieId(Long movieId) {
         List<Booking> bookings = bookingRepository.findAllByMovieId(movieId);
         return bookings.stream()
                 .map(b -> convertToBookingDetailResponseDTO(b, null, calculateOriginalAmount(b)))
                 .collect(Collectors.toList());
     }
+
     public Long getTotalBookingsByMovieId(Long movieId) {
         return bookingRepository.countBookingsByMovieId(movieId);
     }

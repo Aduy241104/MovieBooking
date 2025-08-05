@@ -1,14 +1,14 @@
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined } from "@ant-design/icons";
 import { Button, Input, Select } from "antd";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { TicketPlus } from 'lucide-react';
-import { debounce } from 'lodash';
-import { PaymentMethodTable } from '../PaymentMethod/PaymentMethodTable';
-import PaymentMethodService, { fetchAllPaymentMethodAPI } from '../../service/PaymentMethodService';
-import CreatePaymentMethodModal from '../PaymentMethod/CreatePaymentMethodModal';
+import { TicketPlus } from "lucide-react";
+import { debounce } from "lodash";
+import { PaymentMethodTable } from "../PaymentMethod/PaymentMethodTable";
+import { fetchAllPaymentMethodAPI } from "../../service/PaymentMethodService";
+import CreatePaymentMethodModal from "../PaymentMethod/CreatePaymentMethodModal";
 
-import UpdatePaymentMethodModal from '../PaymentMethod/UpdatePaymentMethodModal';
+import UpdatePaymentMethodModal from "../PaymentMethod/UpdatePaymentMethodModal";
 // import {Modal, Form, Input, Switch} from 'antd';
 
 export const PaymentMethodPage = () => {
@@ -22,15 +22,13 @@ export const PaymentMethodPage = () => {
     const [refreshFlag, setRefreshFlag] = useState(false);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-    const [currentId, setCurrentId] = useState(null);
     const [selectedId, setSelectedId] = useState(null);
-
 
     useEffect(() => {
         setBreadcrumbItems([
-            { title: 'Trang chủ', href: '/admin' },
-            { title: "Quản lí thanh toán" },
-            { title: 'Phương thức thanh toán' }
+            { title: "Trang chủ", href: "/admin" },
+            { title: "Quản lý thanh toán" },
+            { title: "Phương thức thanh toán" },
         ]);
     }, []);
 
@@ -61,27 +59,30 @@ export const PaymentMethodPage = () => {
     }, 300);
 
     return (
-        <div style={{
-            padding: 24,
-            background: '#fff',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        }}>
-            <div className='flex justify-between mb-4'>
+        <div
+            style={{
+                padding: 24,
+                background: "#fff",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            }}
+        >
+            <div className="flex justify-between mb-4">
                 <div style={{ display: "flex", gap: "2rem" }}>
-                    <Input style={{ width: "30vw" }}
-                        size='large'
+                    <Input
+                        style={{ width: "30vw" }}
+                        size="large"
                         addonBefore={<SearchOutlined />}
                         placeholder="Tìm kiếm phương thức..."
                         allowClear
                         onChange={(e) => handleSearch(e.target.value)}
                     />
                     <Select
-                        size='large'
+                        size="large"
                         style={{ width: "10vw" }}
                         options={[
-                            { value: true, label: 'Đang hoạt động' },
-                            { value: false, label: 'Vô hiệu hóa' }
+                            { value: true, label: "Đang hoạt động" },
+                            { value: false, label: "Vô hiệu hóa" },
                         ]}
                         placeholder="Trạng thái"
                         allowClear
@@ -93,24 +94,18 @@ export const PaymentMethodPage = () => {
                     <span>Thêm phương thức</span>
                 </Button>
 
-
-
                 <CreatePaymentMethodModal
                     isCreateModalOpen={isCreateModalOpen}
                     setIsCreateModalOpen={setIsCreateModalOpen}
                     setRefreshFlag={setRefreshFlag}
                 />
 
-
                 <UpdatePaymentMethodModal
-                    visible={isUpdateModalOpen}            
-                    setVisible={setIsUpdateModalOpen}      
-                    methodId={selectedId}                  
+                    visible={isUpdateModalOpen}
+                    setVisible={setIsUpdateModalOpen}
+                    methodId={selectedId}
                     setRefreshFlag={setRefreshFlag}
                 />
-
-
-
             </div>
 
             <PaymentMethodTable
@@ -121,7 +116,6 @@ export const PaymentMethodPage = () => {
                     setIsUpdateModalOpen(true);
                 }}
             />
-
         </div>
     );
 };
