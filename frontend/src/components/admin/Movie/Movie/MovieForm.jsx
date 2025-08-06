@@ -33,15 +33,15 @@ export default function MovieForm({ movieId, onSuccess }) {
   const token = localStorage.getItem("token");
 
   const getFullImageUrl = (path) => {
-  if (!path) return null;
+    if (!path) return null;
 
-  const isFullUrl = path.startsWith("http");
-  if (isFullUrl) {
-    return path;
-  }
+    const isFullUrl = path.startsWith("http");
+    if (isFullUrl) {
+      return path;
+    }
 
-  return `http://localhost:8081${path}`;
-};
+    return `http://localhost:8081${path}`;
+  };
   useEffect(() => {
     // Load movie types
     axios
@@ -148,34 +148,34 @@ export default function MovieForm({ movieId, onSuccess }) {
   return (
     <Form
       layout="vertical"
-      form={form}
-      onFinish={handleSubmit}
-      style={{
+      form={ form }
+      onFinish={ handleSubmit }
+      style={ {
         background: "#fff",
         borderRadius: 12,
         padding: 24,
         margin: 16,
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      }}
+      } }
     >
-      <h3 className="text-primary fw-bold" style={{ marginBottom: 24 }}>
-        {isEdit ? "Cập nhật phim" : "Thêm phim mới"}
+      <h3 className="text-primary fw-bold" style={ { marginBottom: 24 } }>
+        { isEdit ? "Cập nhật phim" : "Thêm phim mới" }
       </h3>
 
-      <Row gutter={16}>
-        <Col xs={24} md={12}>
-          <Form.Item label="Tên phim (VN)" name="nameVN" rules={[{ required: true }]}>
+      <Row gutter={ 16 }>
+        <Col xs={ 24 } md={ 12 }>
+          <Form.Item label="Tên phim (VN)" name="nameVN" rules={ [{ required: true }] }>
             <Input />
           </Form.Item>
 
-          <Form.Item label="Tên phim (EN)" name="nameEN" rules={[{ required: true }]}>
+          <Form.Item label="Tên phim (EN)" name="nameEN" rules={ [{ required: true }] }>
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Thời lượng (phút)"
             name="duration"
-            rules={[
+            rules={ [
               { required: true },
               {
                 validator: (_, value) =>
@@ -183,7 +183,7 @@ export default function MovieForm({ movieId, onSuccess }) {
                     ? Promise.resolve()
                     : Promise.reject("Thời lượng phải lớn hơn 0"),
               },
-            ]}
+            ] }
           >
             <Input type="number" />
           </Form.Item>
@@ -191,7 +191,7 @@ export default function MovieForm({ movieId, onSuccess }) {
           <Form.Item
             label="Giới hạn tuổi"
             name="ageLimit"
-            rules={[
+            rules={ [
               { required: true },
               {
                 validator: (_, value) =>
@@ -199,117 +199,129 @@ export default function MovieForm({ movieId, onSuccess }) {
                     ? Promise.resolve()
                     : Promise.reject("Giới hạn tuổi phải từ 0 đến 18"),
               },
-            ]}
+            ] }
           >
-            <Input type="number" min={0} max={18} />
+            <Input type="number" min={ 0 } max={ 18 } />
           </Form.Item>
 
           <Form.Item
             label="Ngày bắt đầu chiếu"
             name="fromDate"
-            rules={[{ required: true }]}
+            rules={ [{ required: true, message: "Vui lòng chọn ngày bắt đầu" }] }
           >
-            <DatePicker style={{ width: "100%" }} />
+            <DatePicker style={ { width: "100%" } } />
           </Form.Item>
 
           <Form.Item
             label="Ngày kết thúc chiếu"
             name="toDate"
-            rules={[{ required: true }]}
+            dependencies={ ["fromDate"] }
+            rules={ [
+              { required: true, message: "Vui lòng chọn ngày kết thúc" },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  const fromDate = getFieldValue("fromDate");
+                  if (!value || !fromDate || value.isAfter(fromDate)) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error("Ngày kết thúc phải sau ngày bắt đầu"));
+                },
+              }),
+            ] }
           >
-            <DatePicker style={{ width: "100%" }} />
+            <DatePicker style={ { width: "100%" } } />
           </Form.Item>
         </Col>
 
-        <Col xs={24} md={12}>
-          <Form.Item label="Đạo diễn" name="director" rules={[{ required: true }]}>
+        <Col xs={ 24 } md={ 12 }>
+          <Form.Item label="Đạo diễn" name="director" rules={ [{ required: true }] }>
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Hãng sản xuất"
             name="movieProductionCompany"
-            rules={[{ required: true }]}
+            rules={ [{ required: true }] }
           >
             <Input />
           </Form.Item>
 
           <Form.Item label="Poster (ảnh nhỏ)" required>
             <Upload
-              beforeUpload={(file) => {
+              beforeUpload={ (file) => {
                 setSmallImageFile(file);
                 setPreviewSmallImage(URL.createObjectURL(file));
                 return false;
-              }}
-              showUploadList={false}
+              } }
+              showUploadList={ false }
             >
-              <Button icon={<UploadOutlined />} block>
+              <Button icon={ <UploadOutlined /> } block>
                 Chọn ảnh
               </Button>
             </Upload>
-            {previewSmallImage && (
+            { previewSmallImage && (
               <img
-                src={previewSmallImage}
+                src={ previewSmallImage }
                 alt="Poster"
-                style={{ marginTop: 10, width: "100%" }}
+                style={ { marginTop: 10, width: "100%" } }
               />
-            )}
+            ) }
           </Form.Item>
 
           <Form.Item label="Banner (ảnh lớn)" required>
             <Upload
-              beforeUpload={(file) => {
+              beforeUpload={ (file) => {
                 setLargeImageFile(file);
                 setPreviewLargeImage(URL.createObjectURL(file));
                 return false;
-              }}
-              showUploadList={false}
+              } }
+              showUploadList={ false }
             >
-              <Button icon={<UploadOutlined />} block>
+              <Button icon={ <UploadOutlined /> } block>
                 Chọn ảnh
               </Button>
             </Upload>
-            {previewLargeImage && (
+            { previewLargeImage && (
               <img
-                src={previewLargeImage}
+                src={ previewLargeImage }
                 alt="Banner"
-                style={{ marginTop: 10, width: "100%" }}
+                style={ { marginTop: 10, width: "100%" } }
               />
-            )}
+            ) }
           </Form.Item>
 
-          <Form.Item label="Trailer Link" name="trailerLink" rules={[{ required: true }]}>
+          <Form.Item label="Trailer Link" name="trailerLink" rules={ [{ required: true }] }>
             <Input placeholder="https://youtube.com/..." />
           </Form.Item>
         </Col>
       </Row>
 
-      <Form.Item label="Nội dung phim" name="content" rules={[{ required: true }]}>
-        <Input.TextArea rows={4} />
+      <Form.Item label="Nội dung phim" name="content" rules={ [{ required: true }] }>
+        <Input.TextArea rows={ 4 } />
       </Form.Item>
 
       <Form.Item
         label="Thể loại"
         name="typeIds"
-        rules={[{ required: true, message: "Chọn ít nhất một thể loại!" }]}
+        rules={ [{ required: true, message: "Chọn ít nhất một thể loại!" }] }
       >
         <Select
           mode="multiple"
           allowClear
           placeholder="Chọn thể loại phim"
-          options={types.map((t) => ({ value: t.id, label: t.name }))}
+          options={ types.map((t) => ({ value: t.id, label: t.name })) }
         />
       </Form.Item>
 
       <Form.Item>
-        <Row gutter={12}>
-          <Col xs={24} sm={12}>
-            <Button type="primary" htmlType="submit" icon={<PlusOutlined />} block>
-              {isEdit ? "Cập nhật" : "Thêm phim"}
+        <Row gutter={ 12 }>
+          <Col xs={ 24 } sm={ 12 }>
+            <Button type="primary" htmlType="submit" icon={ <PlusOutlined /> } block>
+              { isEdit ? "Cập nhật" : "Thêm phim" }
             </Button>
           </Col>
-          <Col xs={24} sm={12}>
-            <Button icon={<CloseOutlined />} onClick={() => navigate("/admin/movies")} block>
+          <Col xs={ 24 } sm={ 12 }>
+            <Button icon={ <CloseOutlined /> } onClick={ () => navigate("/admin/movies") } block>
               Hủy
             </Button>
           </Col>
