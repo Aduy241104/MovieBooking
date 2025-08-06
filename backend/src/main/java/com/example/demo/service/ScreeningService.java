@@ -198,7 +198,7 @@ public class ScreeningService {
     //  Thêm lịch chiếu mới
     public Screening addScreening(ScreeningRequest request) {
         Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phim"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + request.getMovieId()));
 
         LocalDateTime startTime = request.getShowDateTime();
         LocalDateTime endTime = startTime.plusMinutes(movie.getDuration());
@@ -206,38 +206,45 @@ public class ScreeningService {
         List<Screening> overlapping = screeningRepository.findOverlappingScreenings(
                 request.getCinemaRoomId(), startTime, endTime);
         if (!overlapping.isEmpty()) {
-            throw new IllegalArgumentException("Lịch chiếu bị trùng với lịch chiếu hiện có trong cùng phòng chiếu");
+            throw new AppException("Lịch chiếu bị trùng với lịch chiếu hiện có trong cùng phòng chiếu");
         }
+
+        CinemaRoom cinemaRoom = cinemaRoomRepository.findById(request.getCinemaRoomId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng chiếu với ID: " + request.getCinemaRoomId()));
+
+        FareType fareType = fareTypeRepository.findById(request.getFareTypeId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại vé với ID: " + request.getFareTypeId()));
 
         Screening screening = new Screening();
         screening.setMovie(movie);
-        screening.setCinemaRoom(cinemaRoomRepository.findById(request.getCinemaRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng chiếu")));
-        screening.setFareType(fareTypeRepository.findById(request.getFareTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy loại vé")));
+        screening.setCinemaRoom(cinemaRoom);
+        screening.setFareType(fareType);
         screening.setShowDateTime(startTime);
         screening.setIsDeleted(false);
 
-        // Log and notify about the new screening creation
+        screening = screeningRepository.save(screening);
+
         setLogAndNotification(
                 screening.getId(),
                 "TẠO MỚI",
                 "Tạo mới lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
-                        + screening.getCinemaRoom().getCinemaRoomName(),
+                        + cinemaRoom.getCinemaRoomName(),
                 "Tạo mới lịch chiếu",
                 " vừa tạo mới lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
-                        + screening.getCinemaRoom().getCinemaRoomName()
+                        + cinemaRoom.getCinemaRoomName()
         );
-        return screeningRepository.save(screening);
+
+        return screening;
     }
+
 
     //  Cập nhật lịch chiếu
     public Screening updateScreening(Long id, ScreeningRequest request) {
         Screening screening = screeningRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy lịch chiếu"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy lịch chiếu với ID: " + id));
 
         Movie movie = movieRepository.findById(request.getMovieId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phim"));
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phim với ID: " + request.getMovieId()));
 
         LocalDateTime startTime = request.getShowDateTime();
         LocalDateTime endTime = startTime.plusMinutes(movie.getDuration());
@@ -246,29 +253,33 @@ public class ScreeningService {
                 request.getCinemaRoomId(), startTime, endTime);
         overlapping.removeIf(s -> s.getId().equals(id));
         if (!overlapping.isEmpty()) {
-            throw new IllegalArgumentException("Lịch chiếu cập nhật bị trùng với lịch chiếu hiện có trong cùng phòng chiếu");
+            throw new AppException("Lịch chiếu cập nhật bị trùng với lịch chiếu hiện có trong cùng phòng chiếu");
         }
 
+        CinemaRoom cinemaRoom = cinemaRoomRepository.findById(request.getCinemaRoomId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy phòng chiếu với ID: " + request.getCinemaRoomId()));
+
+        FareType fareType = fareTypeRepository.findById(request.getFareTypeId())
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy loại vé với ID: " + request.getFareTypeId()));
+
         screening.setMovie(movie);
-        screening.setCinemaRoom(cinemaRoomRepository.findById(request.getCinemaRoomId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng chiếu")));
-        screening.setFareType(fareTypeRepository.findById(request.getFareTypeId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy loại vé")));
+        screening.setCinemaRoom(cinemaRoom);
+        screening.setFareType(fareType);
         screening.setShowDateTime(startTime);
 
-        // Log and notify about the updated screening
         setLogAndNotification(
                 screening.getId(),
                 "CẬP NHẬT",
                 "Cập nhật lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
-                        + screening.getCinemaRoom().getCinemaRoomName(),
-                "Tạo mới lịch chiếu",
+                        + cinemaRoom.getCinemaRoomName(),
+                "Cập nhật lịch chiếu",
                 " vừa cập nhật lịch chiếu cho phim: " + movie.getNameVN() + " tại phòng chiếu: "
-                + screening.getCinemaRoom().getCinemaRoomName()
+                        + cinemaRoom.getCinemaRoomName()
         );
 
         return screeningRepository.save(screening);
     }
+
 
     //  Xoá mềm lịch chiếu
     public void softDeleteScreening(Long id) {

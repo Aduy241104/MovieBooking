@@ -12,7 +12,7 @@ export default function EditMovie() {
       setBreadcrumbItems([
         { title: 'Trang chủ' },
         { title: 'Quản lý phim' },
-        { title: 'Phim' },
+        { title: 'Phim', href:"/admin/movies" },
         { title: 'Sửa phim' },
       ]);
     }

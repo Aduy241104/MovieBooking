@@ -1,12 +1,10 @@
 package com.example.demo.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import com.example.demo.DTO.response.dashboard.UserRegistrationsResponse;
-import com.example.demo.model.Role;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -35,6 +33,13 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
 
     List<Account> findByRole_RoleName(String roleName);
 
+    /**
+     * Get user registrations by month.
+     *
+     * @param fromDate Start date for filtering.
+     * @param toDate   End date for filtering.
+     * @return List of user registrations by month.
+     */
     @Query("""
                 SELECT new com.example.demo.DTO.response.dashboard.UserRegistrationsResponse(
                     DATE_TRUNC('month', a.registerDate),
@@ -51,16 +56,20 @@ public interface AccountRepository extends JpaRepository<Account, Long>, JpaSpec
     List<UserRegistrationsResponse> getUserRegistrationsByMonth(@Param("fromDate") LocalDate fromDate,
             @Param("toDate") LocalDate toDate);
 
-    // Count users by role and register date before a specific date
+    /**
+     * Count users by role and register date before a specific date.
+     *
+     * @param roleId     ID of the role.
+     * @param beforeDate Date before which to count users.
+     * @return Count of users matching the criteria.
+     */
     Long countByRoleRoleIdAndRegisterDateBefore(Long roleId, LocalDate beforeDate);
 
     /**
-     * Tìm tài khoản theo ID và khóa dòng đó lại để ghi (sử dụng cho việc cập nhật
-     * điểm).
-     * Điều này ngăn chặn các giao dịch khác sửa đổi tài khoản cùng một lúc.
+     * Find an account by its ID with pessimistic locking.
      *
-     * @param accountId ID của tài khoản.
-     * @return Optional chứa tài khoản nếu tìm thấy.
+     * @param accountId ID of the account.
+     * @return Optional containing the account if found, otherwise empty.
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Account> findWithLockingByAccountId(Long accountId);

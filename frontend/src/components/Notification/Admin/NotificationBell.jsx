@@ -87,7 +87,8 @@ export default function NotificationBell() {
 
     // Lọc trong modal theo preset
     const filterModalNotifications = () => {
-        let filtered = [...notifications];
+        const safeNotifications = Array.isArray(notifications) ? notifications : [];
+        let filtered = [...safeNotifications];
         const now = dayjs();
         if (modalTimePreset !== "all") {
             filtered = filtered.filter((n) => {

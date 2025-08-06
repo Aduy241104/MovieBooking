@@ -23,7 +23,12 @@ public class NotificationService {
     private AccountService accountService;
 
     /**
-     * Notify function to send notify
+     * Notify a single user with a notification.
+     *
+     * @param account The account to notify.
+     * @param title   The title of the notification.
+     * @param content The content of the notification.
+     * @param type    The type of the notification.
      */
     public void notify(Account account, String title, String content, String type) {
         Notification notification = Notification.builder()
@@ -43,7 +48,12 @@ public class NotificationService {
     }
 
     /**
-     * Send notification to Users (many)
+     * Send notification to multiple users.
+     *
+     * @param accountIds List of account IDs to notify.
+     * @param title      The title of the notification.
+     * @param content    The content of the notification.
+     * @param type       The type of the notification.
      */
     @Transactional
     public void sendNotificationToUsers(List<Long> accountIds, String title, String content, String type) {
@@ -56,7 +66,11 @@ public class NotificationService {
     }
 
     /**
-     * Send notification to All User
+     * Send notification to all users.
+     *
+     * @param title   The title of the notification.
+     * @param content The content of the notification.
+     * @param type    The type of the notification.
      */
     @Transactional
     public void sendNotificationToAllUsers(String title, String content, String type) {
@@ -67,14 +81,22 @@ public class NotificationService {
     }
 
     /**
-     * Get all notification of user
+     * Get notifications for a specific user.
+     *
+     * @param account The account to get notifications for.
+     * @return List of notifications for the user.
      */
     public List<Notification> getUserNotifications(Account account) {
         return notificationRepository.findByAccountOrderByCreatedAtDesc(account);
     }
 
     /**
-     * Get notifications by time filter
+     * Get notifications for a user within a specific time range.
+     *
+     * @param account The account to get notifications for.
+     * @param from    Start time of the range (inclusive).
+     * @param to      End time of the range (inclusive).
+     * @return List of notifications for the user within the specified time range.
      */
     public List<Notification> getUserNotificationsByTime(Account account, LocalDateTime from, LocalDateTime to) {
         if (from == null && to == null) {
@@ -89,6 +111,11 @@ public class NotificationService {
         return notificationRepository.findByAccountAndCreatedAtBeforeOrderByCreatedAtDesc(account, to);
     }
 
+    /**
+     * Mark a notification as read.
+     *
+     * @param notificationId The ID of the notification to mark as read.
+     */
     public void markAsRead(Long notificationId) {
         notificationRepository.findById(notificationId).ifPresent(n -> {
             n.setIsRead(true);
@@ -96,10 +123,22 @@ public class NotificationService {
         });
     }
 
+    /**
+     * Delete a notification by its ID.
+     *
+     * @param id The ID of the notification to delete.
+     */
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);
     }
 
+    /**
+     * Delete notifications for a user within a specific time range.
+     *
+     * @param account The account to delete notifications for.
+     * @param from    Start time of the range (inclusive).
+     * @param to      End time of the range (inclusive).
+     */
     @Transactional
     public void deleteNotificationsByTime(Account account, LocalDateTime from, LocalDateTime to) {
         Long accountId = account.getAccountId();

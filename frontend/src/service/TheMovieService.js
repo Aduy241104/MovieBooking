@@ -58,7 +58,7 @@ export const getMovieDetailAPI = async (id) => {
 
 export const getMovieByDateAPI = async (data) => {
     try {
-        const response = await axiosInstance.get(`/public/movieSchedule/by-date?date=2025-06-12`);
+        const response = await axiosInstance.get(`/public/movieSchedule/by-date?date=${data}`);
         // console.log(response);
         return response.data;
     } catch (error) {

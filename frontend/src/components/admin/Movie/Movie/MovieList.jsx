@@ -5,7 +5,7 @@ import { SquarePen, Trash2 } from "lucide-react";
 import { Link, useLocation, useOutletContext, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const MovieList = () => {
+const MovieList = ({userText}) => {
   const [movies, setMovies] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState(1);
@@ -15,14 +15,15 @@ const MovieList = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { setBreadcrumbItems } = useOutletContext();
-
+  
+  //khai báo truyền token
   const token = localStorage.getItem('token')
   console.log(">>> Token: " + token)
 
   useEffect(() => {
-    if (location.pathname.includes('/admin/movies')) {
+    if (location.pathname.includes('/employee/movies') || location.pathname.includes('/admin/movies')) {
       setBreadcrumbItems([
-        { title: 'Trang chủ', href: '/admin' },
+        { title: 'Trang chủ' },
         { title: 'Quản lý phim' },
         { title: 'Phim' },
       ]);
@@ -33,6 +34,7 @@ const MovieList = () => {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:8081/api/movies", {
+        //lấy và truyền token
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -70,6 +72,7 @@ const MovieList = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:8081/api/movies/${id}`, {
+        //truyền token theo id phim
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -100,7 +103,7 @@ const MovieList = () => {
       dataIndex: "poster",
       key: "poster",
       render: (poster, record) => (
-        <Link to={`/admin/film-detail/${record.nameVN}`}>
+        <Link to={`/admin/film-detail/${record.id}`}>
           <img
             src={poster}
             alt={record.nameVN}

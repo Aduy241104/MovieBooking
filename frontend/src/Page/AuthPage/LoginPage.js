@@ -33,7 +33,7 @@ function LoginPage() {
         setLoading(true);
         try {
             const res = await loginOAuth(loginData);
-            console.log(res);
+            console.log("=>+>>",res);
             if (res.result.account && res.result.token) {
                 if (res.result.account.role === "ADMIN") {
                     login(res.result.account, res.result.token, res.result.refresToken);
@@ -42,9 +42,12 @@ function LoginPage() {
                 } else if (res.result.account.role === "EMPLOYEE") {
                     login(res.result.account, res.result.token, res.result.refresToken);
                     navigate("/employee");
+                    console.log("igigig")
+                    return;
                 } else {
                     login(res.result.account, res.result.token, res.result.refresToken);
                     navigate("/");
+                    return;
                 }
             } else {
                 setShowLoginFail("Đăng nhập không thành công, vui lòng thử lại.");

@@ -59,6 +59,16 @@ const PaymentMethodService = {
         return res.json();
     },
 
+    // Lấy chi tiết phương thức thanh toán theo ID
+    async fetchById(id) {
+        const res = await fetch(`${BASE_URL}/${id}`, {
+            method: 'GET',
+            headers: getAuthHeader()
+        });
+        if (!res.ok) throw new Error("Không thể lấy chi tiết phương thức thanh toán");
+        return res.json();
+    },
+
     // Thêm mới phương thức thanh toán
     async add(data) {
         const res = await fetch(`${BASE_URL}`, {
@@ -72,42 +82,42 @@ const PaymentMethodService = {
         return res.json();
     },
 
-    // Cập nhật phương thức thanh toán theo ID
-    async update(id, data) {
-        const token = localStorage.getItem('token');
-        return axios.put(`${BASE_URL}/${id}`, data, {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(token && { Authorization: `Bearer ${token}` }),
-            }
-        });
-    }
+        // Cập nhật phương thức thanh toán theo ID
+        async update(id, data) {
+    const token = localStorage.getItem('token');
+    return axios.put(`${BASE_URL}/${id}`, data, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+        }
+    });
+}
     ,
 
 
     // Bật/tắt trạng thái hoạt động
     async toggleActive(id) {
-        const res = await fetch(`${BASE_URL}/${id}/toggle`, {
-            method: 'PUT'
-        });
-        if (!res.ok) throw new Error("Thay đổi trạng thái thất bại");
-        return res.json();
-    },
+    const res = await fetch(`${BASE_URL}/${id}/toggle`, {
+        method: 'PUT'
+    });
+    if (!res.ok) throw new Error("Thay đổi trạng thái thất bại");
+    return res.json();
+},
 
     // Xóa phương thức thanh toán
-    async delete(id) {
-        const res = await fetch(`${BASE_URL}/${id}`, {
-            method: 'DELETE'
-        });
-        if (!res.ok) throw new Error("Xóa phương thức thất bại");
-        return res;
-    }
+    async delete (id) {
+    const res = await fetch(`${BASE_URL}/${id}`, {
+        method: 'DELETE'
+    });
+    if (!res.ok) throw new Error("Xóa phương thức thất bại");
+    return res;
+}
 };
 
 export default PaymentMethodService;
 
 
 export const getActivePaymentMethods = () => {
-     return instance.get(BASE_URL);
+    return instance.get(BASE_URL);
 };
 

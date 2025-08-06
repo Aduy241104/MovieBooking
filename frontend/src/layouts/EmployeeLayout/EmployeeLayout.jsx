@@ -19,8 +19,8 @@ export const EmployeeLayout = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (location.pathname === "/employee") {
-            setBreadcrumbItems([{ title: "Trang chủ" }, { title: "Bảng điều khiển" }]);
+        if (location.pathname === "/employee/movies") {
+            setBreadcrumbItems([{ title: "Trang chủ" }, { title: "Danh sách phim" }]);
         }
     }, [location.pathname]);
 
@@ -31,7 +31,7 @@ export const EmployeeLayout = () => {
     return (
         <>
             <Layout style={{ minHeight: "100vh" }}>
-                <EmployeeSidebar collapsed={collapsed} width={256} theme={"light"} />
+                <EmployeeSidebar collapsed={collapsed} width={256} theme={"dark"} />
 
                 <Layout>
                     <EmployeeHeader collapsed={collapsed} toggleCollapsed={toggleCollapsed} />
