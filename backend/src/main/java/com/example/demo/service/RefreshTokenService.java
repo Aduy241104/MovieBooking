@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.exception.UnauthorizedException;
+import com.example.demo.exception.BadRequestException;
 import com.example.demo.model.Account;
 import com.example.demo.model.RefreshToken;
 import com.example.demo.repository.AccountRepository;
@@ -25,6 +27,10 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken createRefresToken(Account account) {
+
+        if (account == null) {
+            throw new BadRequestException("Invalid");
+        }
 
         refreshTokenRepository.deleteByAccount(account);
 

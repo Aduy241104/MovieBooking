@@ -24,6 +24,7 @@ public class ProfileRequest {
     @NotBlank(message = "Gender is required") 
     String gender;
 
+    @NotBlank(message = "phone number is required")
     @Pattern(regexp = "^0\\d{9}$", message = "Invalid phone number format")
     String phoneNumber;
 

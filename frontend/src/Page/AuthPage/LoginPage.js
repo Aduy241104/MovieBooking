@@ -69,9 +69,9 @@ function LoginPage() {
 
     return (
         <AuhenticationLayout>
-            <form className="needs-validation" noValidate onSubmit={handleSubmit}>
+            <form className="needs-validation" noValidate onSubmit={ handleSubmit }>
                 <h2 className="text-left pb-4 pt-2">Đăng nhập</h2>
-                <ErrorNotification>{showLoginFail}</ErrorNotification>
+                <ErrorNotification>{ showLoginFail }</ErrorNotification>
                 <div className="mb-5 form-input">
                     <input
                         placeholder="Email"
@@ -79,8 +79,8 @@ function LoginPage() {
                         name="username"
                         className="border border-0 lz bg-transparent w-100"
                         required
-                        value={loginData.email}
-                        onChange={handleChangeLoginData}
+                        value={ loginData.email }
+                        onChange={ handleChangeLoginData }
                     />
                     <div className="w-100 border border-bottom-1 border-light"></div>
                     <div className="invalid-feedback">Vui lòng nhập email hợp lệ.</div>
@@ -92,9 +92,9 @@ function LoginPage() {
                         name="password"
                         className="border border-0 text-light lz bg-transparent w-100"
                         required
-                        minLength={6}
-                        value={loginData.password}
-                        onChange={handleChangeLoginData}
+                        minLength={ 6 }
+                        value={ loginData.password }
+                        onChange={ handleChangeLoginData }
                     />
                     <div className="w-100 border border-bottom-1 border-light"></div>
                     <div className="invalid-feedback">Vui lòng nhập password</div>
@@ -102,30 +102,30 @@ function LoginPage() {
                 <div className="d-flex justify-content-between register">
                     <p>
                         Bạn chưa có tài khoản?
-                        <strong className="text-danger cursor-pointer" onClick={() => navigate("/register")}>
+                        <strong className="text-danger cursor-pointer" onClick={ () => navigate("/register") }>
                             Đăng ký
                         </strong>
                     </p>
-                    <Link to={"/forgot-password"} className="mb-1 d-block">
+                    <Link to={ "/forgot-password" } className="mb-1 d-block">
                         Quên mật khẩu
                     </Link>
                 </div>
                 <button type="submit" className="btn btn-warning btn-gardient w-100 mt-4 rounded-4 text-black">
-                    {isLoading ? (
+                    { isLoading ? (
                         <div
                             className="spinner-border text-light"
                             role="status"
-                            style={{ height: "25px", width: "25px" }}
+                            style={ { height: "25px", width: "25px" } }
                         >
                             <span className="visually-hidden">Loading...</span>
                         </div>
                     ) : (
                         "Đăng nhập"
-                    )}
+                    ) }
                 </button>
             </form>
-            <button className="w-100 mt-3 rounded-4" style={{ overflow: "hidden" }}>
-                <GoogleBtn />
+            <button className="w-100 mt-3 rounded-4" style={ { overflow: "hidden" } }>
+                <GoogleBtn handleError={ setShowLoginFail } />
             </button>
         </AuhenticationLayout>
     );

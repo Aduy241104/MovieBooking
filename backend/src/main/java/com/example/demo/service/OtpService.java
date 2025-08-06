@@ -36,7 +36,7 @@ public class OtpService {
         return String.valueOf(new Random().nextInt(900000) + 100000); // 6 số
     }
 
-    // send otp cho bang moi
+    // send otp 
     public void sendOtp(String email) {
         String otp = generateOtp();
         LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(5);

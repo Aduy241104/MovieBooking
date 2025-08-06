@@ -25,11 +25,9 @@ public class GoogleTokenVerifier {
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
             }
-
         } catch (Exception e) {
             return null;
         }
-
         return null;
     }
 }

@@ -39,11 +39,11 @@ function Avatar({ originalImage, gender = "Male" }) {
                 avatar: data.url
             }
             const response = await updateAvatarAPI(dataAPI);
-            if (!response.success) {
-                throw new Error(response.message);
-            }
+            // if (!response.success) {
+            //     throw new Error(response.message);
+            // }
             openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.");
-            localStorage.setItem("user", JSON.stringify(response.data.result))
+            localStorage.setItem("user", JSON.stringify(response.result))
         } catch (error) {
             openNotification("error", "Lỗi cập nhật", error.message);
         } finally {
@@ -55,7 +55,6 @@ function Avatar({ originalImage, gender = "Male" }) {
     const handleUpdateFromLocal = (info) => {
         const file = info.file.originFileObj || info.file; // fallback nếu không có originFileObj
         if (!file) {
-            console.error("Không có file hợp lệ");
             return;
         }
         const previewUrl = URL.createObjectURL(file);
@@ -74,7 +73,7 @@ function Avatar({ originalImage, gender = "Male" }) {
             }
 
             const responseUploadSystem = await updateAvatarAPI(data);
-        
+
             openNotification("success", "Cập nhật thành công", "Thông tin tài khoản đã được cập nhật.");
             localStorage.setItem("user", JSON.stringify(responseUploadSystem.result))
         } catch (error) {

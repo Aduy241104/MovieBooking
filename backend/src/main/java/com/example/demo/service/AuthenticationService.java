@@ -88,14 +88,15 @@ public class AuthenticationService {
         if (!match) {
             throw new UnauthorizedException("Invalid Password.");
         }
-        var token = securityUtils.generateToken(account);
-        RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
 
+        var accessToken = securityUtils.generateToken(account);
+        RefreshToken refreshToken = refreshTokenService.createRefresToken(account);
         AccountRespond accountRespond = accountMapper.toAccountRespond(account);
+        
         return AuthRespond.builder()
                 .authenticated(true)
                 .account(accountRespond)
-                .token(token)
+                .token(accessToken)
                 .refresToken(refreshToken.getToken())
                 .build();
     }

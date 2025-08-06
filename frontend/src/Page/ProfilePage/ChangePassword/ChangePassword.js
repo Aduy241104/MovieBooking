@@ -29,13 +29,12 @@ function ChangePassword() {
             localStorage.setItem("refreshToken", response.data.result.refreshToken);
             console.log(response);
             form.resetFields();
-
         } catch (error) {
             openNotification("error", error.message)
+        } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className='text-light mt-4 w-50 pe-3 change-pass-section'>

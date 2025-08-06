@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const GOOGLE_CLIENT_ID = "1085883031350-7ihbulo2h3oure1c75sv8rc939b89rl4.apps.googleusercontent.com";
-function GoogleBtn() {
+function GoogleBtn({ handleError }) {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
 
@@ -14,10 +14,20 @@ function GoogleBtn() {
 
         try {
             const response = await handleLoginGoogleApi(idToken);
-            console.log("acc data: ", response);
+
+            if (!response.success) {
+                handleError("không thể đăng nhập, vui lòng thử lại sau");
+                return;
+            }
 
             login(response.data.result.account, response.data.result.token, response.data.result.refresToken);
-            navigate('/');
+
+
+            if (response.data.result.account.role === "ADMIN") {
+                navigate("/admin");
+            } else {
+                navigate('/');
+            }
         } catch (error) {
             console.log(error)
         }
